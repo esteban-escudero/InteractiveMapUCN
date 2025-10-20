@@ -1,0 +1,167 @@
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+}
+
+.Panel { 
+  width: 300px;
+  background-color: #1179e0;
+  padding: 20px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.Mapa { 
+  flex: 1;
+  background-color: #f0f0f0;
+  position: relative;
+  min-height: 100vh;
+}
+
+.map-container {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  font-family: inherit;
+  background-color: #f0f0f0;
+}
+
+.dropdowns-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex-grow: 1;
+}
+
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  background-color: #34495e;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.dropdown.active {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.dropdown-toggle {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 15px 20px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.dropdown-toggle:hover {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
+
+.dropdown-menu {
+  background-color: #2c3e50;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.dropdown.active .dropdown-menu {
+  max-height: 300px;
+}
+
+.dropdown-menu li {
+  margin: 0;
+  border-top: 1px solid #3a506b;
+}
+
+.dropdown-menu button {
+  background: none;
+  border: none;
+  color: #ecf0f1;
+  padding: 12px 20px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dropdown-menu button:hover {
+  background-color: #3498db;
+  color: white;
+  padding-left: 25px;
+}
+
+.dropdown-menu button:before {
+  content: "•";
+  color: #3498db;
+  font-size: 18px;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 15px 20px;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  margin-top: auto;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.logout-btn:active {
+  transform: translateY(0);
+}
+
+.loading-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 16px;
+}
