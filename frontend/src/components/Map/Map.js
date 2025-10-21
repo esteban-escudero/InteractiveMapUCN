@@ -84,8 +84,6 @@ function Map() {
         const popupContent = `
           <div style="min-width: 200px;">
             <h4>🏛️ ${building.nombre}</h4>
-            <p><strong>Área:</strong> ${building.area} m²</p>
-            <p><strong>Orientación:</strong> ${building.orientacion}°</p>
             <p><strong>Descripción:</strong> ${building.descripcion}</p>
             <hr>
             <small style="color: #27ae60;">✅ Almacenado en Base de Datos</small>

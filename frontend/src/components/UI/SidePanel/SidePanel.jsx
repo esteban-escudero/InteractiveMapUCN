@@ -68,25 +68,6 @@ const SidePanel = ({
   return (
     <div className="Panel">
       <div className="dropdowns-container">
-        <div className={`dropdown ${activeMenu === 'Sincronizar' ? 'active' : ''}`}>
-          <button 
-            className="dropdown-toggle"
-            onClick={() => toggleMenu('Sincronizar')}
-          >
-            Sincronización {activeMenu === 'Sincronizar' ? '▲' : '▼'}
-          </button>
-          {activeMenu === 'Sincronizar' && (
-            <ul className="dropdown-menu">
-              <li>
-                <button onClick={handleSyncClick} disabled={buildingsLoading || geoServerFeaturesCount === 0}>
-                  {buildingsLoading ? '⏳ Sincronizando...' : `🔄 Sincronizar (${geoServerFeaturesCount} nuevos)`}
-                </button>
-              </li>
-              <li><button>📊 Ver Reporte</button></li>
-            </ul>
-          )}
-        </div>
-
         <div className={`dropdown ${activeMenu === 'Edificios' ? 'active' : ''}`}>
           <button 
             className="dropdown-toggle"
@@ -102,8 +83,21 @@ const SidePanel = ({
             </ul>
           )}
         </div>
-
-        {/* ... otros menús existentes */}
+        <div className={`dropdown ${activeMenu === 'Rutas' ? 'active' : ''}`}>
+          <button 
+            className="dropdown-toggle"
+            onClick={() => toggleMenu('Rutas')}
+          >
+            Rutas {activeMenu === 'Rutas' ? '▲' : '▼'}
+          </button>
+          {activeMenu === 'Rutas' && (
+            <ul className="dropdown-menu">
+              <li><button>➕ Agregar Ruta</button></li>
+              <li><button>✏️ Editar Ruta</button></li>
+              <li><button>🗑️ Eliminar Ruta</button></li>
+            </ul>
+          )}
+        </div>
       </div>
       
       {/* Estado del Backend */}
