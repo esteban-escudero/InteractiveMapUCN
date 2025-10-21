@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 
-const SidePanel = ({ status, featuresCount, onLogout }) => {
+const SidePanel = ({ 
+  status, 
+  featuresCount, 
+  onLogout, 
+  onSyncData,
+  buildingsLoading,
+  backendStatus,
+  geoServerStatus,
+  geoServerFeaturesCount
+}) => {
   const [activeMenu, setActiveMenu] = useState(null);
 
   const toggleMenu = (menuName) => {
@@ -10,6 +19,12 @@ const SidePanel = ({ status, featuresCount, onLogout }) => {
   const handleLogout = () => {
     console.log('Cerrando sesión...');
     if (onLogout) onLogout();
+  };
+
+  const handleSyncClick = () => {
+    if (onSyncData) {
+      onSyncData();
+    }
   };
 
   const getStatusStyle = () => {
@@ -23,6 +38,10 @@ const SidePanel = ({ status, featuresCount, onLogout }) => {
       marginBottom: '10px'
     };
 
+    if (backendStatus === 'error') {
+      return { ...baseStyle, backgroundColor: '#e74c3c' };
+    }
+
     switch (status) {
       case 'success': return { ...baseStyle, backgroundColor: '#2ecc71' };
       case 'empty': return { ...baseStyle, backgroundColor: '#f39c12' };
@@ -32,11 +51,15 @@ const SidePanel = ({ status, featuresCount, onLogout }) => {
   };
 
   const getStatusText = () => {
+    if (backendStatus === 'error') {
+      return '❌ Error conectando al backend';
+    }
+
     switch (status) {
       case 'checking': return '🔍 Conectando...';
       case 'loading': return '⏳ Cargando edificios...';
       case 'success': return `✅ ${featuresCount} edificios cargados`;
-      case 'empty': return '⚠️ Capa sin datos';
+      case 'empty': return '⚠️ Base de datos vacía';
       case 'error': return '❌ Error de conexión';
       default: return 'Estado desconocido';
     }
@@ -45,6 +68,25 @@ const SidePanel = ({ status, featuresCount, onLogout }) => {
   return (
     <div className="Panel">
       <div className="dropdowns-container">
+        <div className={`dropdown ${activeMenu === 'Sincronizar' ? 'active' : ''}`}>
+          <button 
+            className="dropdown-toggle"
+            onClick={() => toggleMenu('Sincronizar')}
+          >
+            Sincronización {activeMenu === 'Sincronizar' ? '▲' : '▼'}
+          </button>
+          {activeMenu === 'Sincronizar' && (
+            <ul className="dropdown-menu">
+              <li>
+                <button onClick={handleSyncClick} disabled={buildingsLoading || geoServerFeaturesCount === 0}>
+                  {buildingsLoading ? '⏳ Sincronizando...' : `🔄 Sincronizar (${geoServerFeaturesCount} nuevos)`}
+                </button>
+              </li>
+              <li><button>📊 Ver Reporte</button></li>
+            </ul>
+          )}
+        </div>
+
         <div className={`dropdown ${activeMenu === 'Edificios' ? 'active' : ''}`}>
           <button 
             className="dropdown-toggle"
@@ -54,63 +96,50 @@ const SidePanel = ({ status, featuresCount, onLogout }) => {
           </button>
           {activeMenu === 'Edificios' && (
             <ul className="dropdown-menu">
-              <li><button>Ingresar Edificio</button></li>
-              <li><button>Editar Información Edificio</button></li>
-              <li><button>Eliminar Edificio</button></li>
+              <li><button>➕ Agregar Edificio</button></li>
+              <li><button>✏️ Editar Información</button></li>
+              <li><button>🗑️ Eliminar Edificio</button></li>
             </ul>
           )}
         </div>
 
-        <div className={`dropdown ${activeMenu === 'Rutas' ? 'active' : ''}`}>
-          <button 
-            className="dropdown-toggle"
-            onClick={() => toggleMenu('Rutas')}
-          >
-            Rutas {activeMenu === 'Rutas' ? '▲' : '▼'}
-          </button>
-          {activeMenu === 'Rutas' && (
-            <ul className="dropdown-menu">
-              <li><button>Ingresar Rutas</button></li>
-              <li><button>Editar Información Rutas</button></li>
-              <li><button>Eliminar Rutas</button></li>
-            </ul>
-          )}
-        </div>
-
-        <div className={`dropdown ${activeMenu === 'Salas' ? 'active' : ''}`}>
-          <button 
-            className="dropdown-toggle"
-            onClick={() => toggleMenu('Salas')}
-          >
-            Salas {activeMenu === 'Salas' ? '▲' : '▼'}
-          </button>
-          {activeMenu === 'Salas' && (
-            <ul className="dropdown-menu">
-              <li><button>Ingresar Salas</button></li>
-              <li><button>Editar Información Salas</button></li>
-              <li><button>Eliminar Salas</button></li>
-            </ul>
-          )}
-        </div>
+        {/* ... otros menús existentes */}
       </div>
       
+      {/* Estado del Backend */}
       <div style={getStatusStyle()}>
         {getStatusText()}
       </div>
 
+      {/* Información de conexión */}
       <div style={{
         padding: '8px',
-        backgroundColor: '#2c3e50',
+        backgroundColor: backendStatus === 'connected' ? '#2c3e50' : '#e74c3c',
         borderRadius: '5px',
         fontSize: '10px',
         color: '#ecf0f1',
         marginBottom: '10px'
       }}>
-        <strong>Capa actual:</strong><br/>
-        InteractiveMap:edificio<br/>
-        <strong>Features:</strong> {featuresCount}
+        <strong>🔗 Estado del Backend:</strong><br/>
+        <small>{backendStatus === 'connected' ? '✅ Conectado' : '❌ Desconectado'}</small><br/>
+        <small>Edificios en DB: {featuresCount}</small>
       </div>
 
+      {/* Estado de GeoServer */}
+      <div style={{
+        padding: '8px',
+        backgroundColor: '#8e44ad',
+        borderRadius: '5px',
+        fontSize: '10px',
+        color: '#ecf0f1',
+        marginBottom: '10px'
+      }}>
+        <strong>🌐 GeoServer:</strong><br/>
+        <small>Estado: {geoServerStatus}</small><br/>
+        <small>Features: {geoServerFeaturesCount}</small>
+      </div>
+
+      {/* Información del campus */}
       <div style={{
         padding: '8px',
         backgroundColor: '#8e44ad',

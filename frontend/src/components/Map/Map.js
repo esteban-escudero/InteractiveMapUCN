@@ -4,8 +4,9 @@ import 'leaflet/dist/leaflet.css';
 import './Map.css';
 
 import { useMap } from '../../hooks/useMap';
+import { useBuildings } from '../../hooks/useBuildings';
 import { useGeoServer } from '../../hooks/useGeoServer';
-import SidePanel from '../UI/SidePanel';
+import  SidePanel  from '../UI/SidePanel';
 import { UCN_COQUIMBO_BOUNDS } from '../../constants/mapConfig';
 
 // Configuración de íconos de Leaflet
@@ -16,11 +17,96 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Ícono personalizado para edificios de la base de datos
+const createDatabaseIcon = () => {
+  return L.divIcon({
+    html: `<div style="background-color: #27ae60; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+    iconSize: [18, 18],
+    className: 'database-building-icon'
+  });
+};
+
 function Map() {
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
-  const { status, features, loadWFSData } = useGeoServer();
   const [mapInitialized, setMapInitialized] = useState(false);
+  
+  // Usar el hook de edificios que se conecta al backend
+  const { 
+    buildings, 
+    loading: buildingsLoading, 
+    error: buildingsError, 
+    backendStatus,
+    syncWithGeoServer 
+  } = useBuildings();
+  
+  // Hook de GeoServer para datos externos
+  const { status: geoServerStatus, features: geoServerFeatures, loadWFSData } = useGeoServer();
 
+  const [buildingLayers, setBuildingLayers] = useState([]);
+
+  // Procesar edificios de la base de datos y mostrarlos en el mapa
+  useEffect(() => {
+    if (!mapInstance || buildings.length === 0) return;
+
+    // Limpiar capas anteriores
+    buildingLayers.forEach(layer => {
+      mapInstance.removeLayer(layer);
+    });
+
+    const newLayers = [];
+
+    buildings.forEach(building => {
+      if (!building.ubicacion) return;
+
+      try {
+        let layer;
+        
+        // Crear capa según el tipo de geometría
+        if (building.ubicacion.type === 'Point') {
+          const coords = building.ubicacion.coordinates;
+          layer = L.marker([coords[1], coords[0]], { 
+            icon: createDatabaseIcon() 
+          });
+        } else if (building.ubicacion.type === 'Polygon') {
+          const coordinates = building.ubicacion.coordinates[0].map(coord => [coord[1], coord[0]]);
+          layer = L.polygon(coordinates, {
+            color: '#27ae60',
+            weight: 3,
+            fillColor: '#27ae60',
+            fillOpacity: 0.3
+          });
+        } else {
+          console.warn('Tipo de geometría no soportado:', building.ubicacion.type);
+          return;
+        }
+
+        // Agregar popup con información del edificio
+        const popupContent = `
+          <div style="min-width: 200px;">
+            <h4>🏛️ ${building.nombre}</h4>
+            <p><strong>Área:</strong> ${building.area} m²</p>
+            <p><strong>Orientación:</strong> ${building.orientacion}°</p>
+            <p><strong>Descripción:</strong> ${building.descripcion}</p>
+            <hr>
+            <small style="color: #27ae60;">✅ Almacenado en Base de Datos</small>
+          </div>
+        `;
+        
+        layer.bindPopup(popupContent);
+        layer.addTo(mapInstance);
+        newLayers.push(layer);
+
+      } catch (error) {
+        console.error(`Error procesando edificio ${building.nombre}:`, error);
+      }
+    });
+
+    setBuildingLayers(newLayers);
+    console.log(`🗺️ ${newLayers.length} edificios mostrados en el mapa`);
+
+  }, [mapInstance, buildings]);
+
+  // Inicializar mapa
   useEffect(() => {
     if (!mapInitialized && mapRef.current) {
       console.log('🚀 Inicializando aplicación...');
@@ -29,32 +115,85 @@ function Map() {
     }
   }, [mapInitialized, mapRef, initializeMap]);
 
+  // Cargar datos de GeoServer cuando el mapa esté listo
   useEffect(() => {
-    if (isMapReady && mapInstance && status === 'checking') {
-      console.log('📡 Cargando datos WFS...');
+    if (isMapReady && mapInstance && geoServerStatus === 'checking') {
+      console.log('📡 Cargando datos WFS de GeoServer...');
       setTimeout(() => {
         loadWFSData(mapInstance, 'edificio');
       }, 500);
     }
-  }, [isMapReady, mapInstance, status, loadWFSData]);
+  }, [isMapReady, mapInstance, geoServerStatus, loadWFSData]);
 
   const handleLogout = () => {
     console.log('Cerrando sesión...');
     alert('Cerrando sesión...');
   };
 
+  const handleSyncData = async () => {
+    if (geoServerFeatures.length > 0) {
+      try {
+        await syncWithGeoServer(geoServerFeatures);
+        alert(`✅ ${geoServerFeatures.length} edificios sincronizados con la base de datos`);
+      } catch (error) {
+        alert('❌ Error sincronizando datos con la base de datos');
+      }
+    } else {
+      alert('ℹ️ No hay datos de GeoServer para sincronizar');
+    }
+  };
+
   return (
     <div className="container">
       <SidePanel 
-        status={status} 
-        featuresCount={features.length} 
+        status={backendStatus === 'connected' ? 'success' : 'error'}
+        featuresCount={buildings.length}
         onLogout={handleLogout}
+        onSyncData={handleSyncData}
+        buildingsLoading={buildingsLoading}
+        backendStatus={backendStatus}
+        geoServerStatus={geoServerStatus}
+        geoServerFeaturesCount={geoServerFeatures.length}
       />
+      
       <div className="Mapa">
         <div ref={mapRef} className="map-container"></div>
+        
         {!isMapReady && (
           <div className="loading-message">
             🗺️ Cargando mapa...
+          </div>
+        )}
+
+        {buildingsLoading && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#3498db',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            zIndex: 1000
+          }}>
+            ⏳ Cargando edificios desde la base de datos...
+          </div>
+        )}
+
+        {buildingsError && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#e74c3c',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            zIndex: 1000
+          }}>
+            ❌ Error: {buildingsError}
           </div>
         )}
       </div>
