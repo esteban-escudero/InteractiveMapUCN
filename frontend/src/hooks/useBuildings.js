@@ -1,3 +1,4 @@
+// hooks/useBuildings.js
 import { useState, useEffect, useCallback } from 'react';
 import { buildingService } from '../services/buildingService';
 
@@ -8,13 +9,18 @@ export const useBuildings = () => {
   const [backendStatus, setBackendStatus] = useState('checking');
 
   const loadBuildings = useCallback(async () => {
+    if (backendStatus === 'error') {
+      console.log('⚠️ Backend no disponible, omitiendo carga de edificios');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const buildingsData = await buildingService.getAllBuildings();
-      setBuildings(buildingsData);
+      setBuildings(buildingsData.data || buildingsData);
       setBackendStatus('connected');
-      console.log(`🏢 ${buildingsData.length} edificios cargados desde el backend`);
+      console.log(`🏢 ${buildingsData.length || buildingsData.data?.length} edificios cargados desde el backend`);
     } catch (err) {
       setError(err.message);
       setBackendStatus('error');
@@ -22,16 +28,18 @@ export const useBuildings = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [backendStatus]);
 
   const checkBackendHealth = useCallback(async () => {
     try {
+      console.log('🔍 Verificando salud del backend...');
       await buildingService.checkHealth();
       setBackendStatus('connected');
+      console.log('✅ Backend conectado');
       return true;
     } catch (error) {
+      console.warn('❌ Backend no disponible:', error.message);
       setBackendStatus('error');
-      console.error('Backend no disponible:', error);
       return false;
     }
   }, []);
@@ -45,6 +53,10 @@ export const useBuildings = () => {
   }, [loadBuildings, checkBackendHealth]);
 
   const syncWithGeoServer = useCallback(async (geoServerFeatures) => {
+    if (backendStatus === 'error') {
+      throw new Error('Backend no disponible para sincronización');
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -60,7 +72,28 @@ export const useBuildings = () => {
     } finally {
       setLoading(false);
     }
-  }, [loadBuildings]);
+  }, [loadBuildings, backendStatus]);
+
+  const deleteBuilding = useCallback(async (id) => {
+    try {
+      setLoading(true);
+      const result = await buildingService.deleteBuilding(id);
+      
+      setBuildings(prev => prev.filter(building => {
+        const buildingId = building.id || building._id || building.id_edificio;
+        return buildingId !== id;
+      }));
+      
+      console.log('✅ Edificio eliminado del estado local:', id);
+      return result;
+      
+    } catch (error) {
+      setError(error.message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return {
     buildings,
@@ -69,6 +102,6 @@ export const useBuildings = () => {
     backendStatus,
     loadBuildings,
     syncWithGeoServer,
-    checkBackendHealth
+    deleteBuilding
   };
 };

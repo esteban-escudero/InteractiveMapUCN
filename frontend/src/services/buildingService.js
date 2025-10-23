@@ -22,13 +22,22 @@ export const buildingService = {
     }
   },
 
-  // ✅ ESTO DEBERÍA FUNCIONAR AHORA
   async updateBuilding(id, buildingData) {
     try {
       const response = await api.put(`/buildings/${id}`, buildingData);
       return response.data;
     } catch (error) {
       console.error('Error actualizando edificio:', error);
+      throw error;
+    }
+  },
+
+  async deleteBuilding(id) {
+    try {
+      const response = await api.delete(`/buildings/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error eliminando edificio:', error);
       throw error;
     }
   },

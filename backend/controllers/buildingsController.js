@@ -58,7 +58,6 @@ const buildingsController = {
     }
   },
 
-  // ✅ AGREGAR ESTA FUNCIÓN FALTANTE
   async updateBuilding(req, res) {
     try {
       const { id } = req.params;
@@ -100,6 +99,39 @@ const buildingsController = {
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor al actualizar el edificio: ' + error.message
+      });
+    }
+  },
+
+  async deleteBuilding(req, res) {
+    try {
+      const { id } = req.params;
+      
+      console.log(`🗑️ Solicitando ELIMINACIÓN PERMANENTE de edificio ID: ${id}`);
+      
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: 'ID del edificio es requerido'
+        });
+      }
+      
+      const result = await buildingModel.delete(id);
+      
+      res.json({
+        success: true,
+        message: result.message,
+        data: {
+          id: result.id,
+          nombre: result.nombre
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error eliminando edificio:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor al eliminar el edificio: ' + error.message
       });
     }
   },

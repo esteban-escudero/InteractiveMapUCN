@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './SidePanel.css'; // Asegúrate de tener este archivo
+import './SidePanel.css';
 
 const SidePanel = ({ 
   status, 
@@ -11,7 +11,7 @@ const SidePanel = ({
   geoServerStatus,
   geoServerFeaturesCount,
   onAddBuilding,
-  onEditBuildings, // ✅ Asegurar que esta prop esté definida
+  onEditBuildings,
   markersCount,
   onClearMarkers
 }) => {
@@ -32,7 +32,6 @@ const SidePanel = ({
     }
   };
 
-  // ✅ Función para agregar edificio
   const handleAddBuilding = () => {
     console.log('🟢 SidePanel: Agregar Edificio clickeado');
     if (onAddBuilding) {
@@ -42,7 +41,6 @@ const SidePanel = ({
     }
   };
 
-  // ✅ NUEVA: Función para editar edificios
   const handleEditBuildings = () => {
     console.log('📝 SidePanel: Editar Edificios clickeado');
     if (onEditBuildings) {
@@ -50,6 +48,17 @@ const SidePanel = ({
     } else {
       console.error('❌ onEditBuildings no está definido');
       alert('La función de edición no está disponible');
+    }
+  };
+
+  // ✅ CORREGIDO: Función para eliminar edificios
+  const handleDeleteBuildings = () => {
+    console.log('🗑️ SidePanel: Eliminar Edificios clickeado');
+    if (onEditBuildings) {
+      onEditBuildings(); // ✅ Misma función que "Editar Información"
+    } else {
+      console.error('❌ onEditBuildings no está definido');
+      alert('La función de eliminación no está disponible');
     }
   };
 
@@ -109,13 +118,15 @@ const SidePanel = ({
                 </button>
               </li>
               <li>
-                {/* ✅ CORREGIDO: Usar handleEditBuildings */}
                 <button onClick={handleEditBuildings}>
                   ✏️ Editar Información
                 </button>
               </li>
               <li>
-                <button>🗑️ Eliminar Edificio</button>
+                {/* ✅ CORREGIDO: Ahora tiene función asignada */}
+                <button onClick={handleDeleteBuildings}>
+                  🗑️ Eliminar Edificio
+                </button>
               </li>
             </ul>
           )}
