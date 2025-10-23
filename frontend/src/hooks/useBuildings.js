@@ -1,4 +1,3 @@
-// hooks/useBuildings.js
 import { useState, useEffect, useCallback } from 'react';
 import { buildingService } from '../services/buildingService';
 
@@ -18,7 +17,7 @@ export const useBuildings = () => {
     setError(null);
     try {
       const buildingsData = await buildingService.getAllBuildings();
-      setBuildings(buildingsData.data || buildingsData);
+      setBuildings(buildingsData.data || buildingsData); // ✅ ACTUALIZA ESTADO
       setBackendStatus('connected');
       console.log(`🏢 ${buildingsData.length || buildingsData.data?.length} edificios cargados desde el backend`);
     } catch (err) {
@@ -64,7 +63,7 @@ export const useBuildings = () => {
         features: geoServerFeatures,
         syncDate: new Date().toISOString()
       });
-      await loadBuildings();
+      await loadBuildings(); // ✅ RECARGA después de sincronizar
       return result;
     } catch (err) {
       setError(err.message);
@@ -74,17 +73,19 @@ export const useBuildings = () => {
     }
   }, [loadBuildings, backendStatus]);
 
+  // ✅ FUNCIÓN CLAVE: Eliminar edificio y actualizar estado
   const deleteBuilding = useCallback(async (id) => {
     try {
       setLoading(true);
       const result = await buildingService.deleteBuilding(id);
       
+      // ✅ ACTUALIZAR ESTADO LOCAL - Esto dispara la actualización del mapa
       setBuildings(prev => prev.filter(building => {
         const buildingId = building.id || building._id || building.id_edificio;
         return buildingId !== id;
       }));
       
-      console.log('✅ Edificio eliminado del estado local:', id);
+      console.log('✅ Edificio eliminado del estado local, disparando actualización del mapa');
       return result;
       
     } catch (error) {

@@ -5,14 +5,6 @@ export const useGeoServer = () => {
   const [status, setStatus] = useState('checking');
   const [features, setFeatures] = useState([]);
 
-  const createCustomIcon = () => {
-    return L.divIcon({
-      html: `<div style="background-color: #3388ff; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-      iconSize: [16, 16],
-      className: 'custom-div-icon'
-    });
-  };
-
   const loadWFSData = async (map, layerName = 'edificio') => {
     if (!map || !map.getCenter) {
       console.error('Mapa no está listo');

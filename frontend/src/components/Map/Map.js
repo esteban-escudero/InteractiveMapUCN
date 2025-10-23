@@ -36,6 +36,7 @@ function Map() {
   const [showBuildingForm, setShowBuildingForm] = useState(false);
   const [showBuildingList, setShowBuildingList] = useState(false);
   const [editingBuilding, setEditingBuilding] = useState(null);
+  const [mapUpdateCount, setMapUpdateCount] = useState(0); // ✅ Para debugging
   
   const { 
     buildings, 
@@ -50,7 +51,7 @@ function Map() {
   const { status: geoServerStatus, features: geoServerFeatures, loadWFSData } = useGeoServer();
   const [buildingLayers, setBuildingLayers] = useState([]);
 
-  // Función para guardar/actualizar edificio
+  // ✅ FUNCIÓN MEJORADA: Para guardar/actualizar edificio
   const handleSaveBuilding = async (buildingData) => {
     try {
       if (editingBuilding) {
@@ -60,18 +61,19 @@ function Map() {
         await buildingService.updateBuilding(buildingId, buildingData);
         alert('✅ Edificio actualizado exitosamente');
         
-        // ✅ FORZAR RECARGA COMPLETA
-        console.log('🔄 Forzando recarga de edificios...');
-        await loadBuildings();
-        
       } else {
         await buildingService.createBuilding(buildingData);
         alert('✅ Edificio guardado exitosamente');
-        await loadBuildings();
       }
+      
+      // ✅ FORZAR ACTUALIZACIÓN INMEDIATA DEL MAPA
+      console.log('🔄 Recargando edificios para actualizar mapa...');
+      await loadBuildings(); // Esto actualizará el estado 'buildings'
       
       setEditingBuilding(null);
       setShowBuildingForm(false);
+      
+      console.log('✅ Operación completada, mapa debería actualizarse');
       
     } catch (error) {
       console.error('Error al guardar edificio:', error);
@@ -112,45 +114,17 @@ function Map() {
     setShowBuildingList(false);
   };
 
-  // ✅ Función para manejar eliminación PERMANENTE
+  // ✅ FUNCIÓN MEJORADA: Para manejar eliminación PERMANENTE
   const handleDeleteBuilding = async (building) => {
     try {
       const buildingId = building.id || building._id || building.id_edificio;
-      console.log('🗑️ Eliminando edificio ID:', buildingId);
+      const buildingName = building.nombre;
+      console.log('🗑️ Eliminando edificio:', buildingName, 'ID:', buildingId);
       
       await deleteBuilding(buildingId);
       
-      // ✅ También eliminar la capa del mapa si existe
-      if (mapInstance) {
-        const layersToRemove = [];
-        buildingLayers.forEach((layer, index) => {
-          // Buscar la capa que corresponde al edificio eliminado
-          const layerCoords = layer.getLatLng ? layer.getLatLng() : layer.getBounds().getCenter();
-          const buildingCoords = building.ubicacion?.coordinates;
-          
-          if (buildingCoords && layerCoords) {
-            const layerLat = layerCoords.lat;
-            const layerLng = layerCoords.lng;
-            const buildingLat = buildingCoords[1];
-            const buildingLng = buildingCoords[0];
-            
-            // Comparar coordenadas para encontrar la capa correcta
-            if (Math.abs(layerLat - buildingLat) < 0.0001 && Math.abs(layerLng - buildingLng) < 0.0001) {
-              mapInstance.removeLayer(layer);
-              layersToRemove.push(index);
-            }
-          }
-        });
-        
-        // Actualizar el estado de las capas
-        if (layersToRemove.length > 0) {
-          const newLayers = buildingLayers.filter((_, index) => 
-            !layersToRemove.includes(index)
-          );
-          setBuildingLayers(newLayers);
-          console.log('🗺️ Capa eliminada del mapa');
-        }
-      }
+      // ✅ EL MAPA SE ACTUALIZARÁ AUTOMÁTICAMENTE porque 'buildings' cambió
+      console.log('✅ Edificio eliminado, mapa se actualizará automáticamente');
       
     } catch (error) {
       console.error('Error eliminando edificio:', error);
@@ -158,11 +132,16 @@ function Map() {
     }
   };
 
-  // Procesar edificios de la base de datos y mostrarlos en el mapa
+  // ✅ EFECTO PRINCIPAL MEJORADO: Procesar edificios y actualizar mapa
   useEffect(() => {
-    if (!mapInstance || buildings.length === 0) return;
+    if (!mapInstance) {
+      console.log('⏳ Mapa no listo, esperando inicialización...');
+      return;
+    }
 
-    // Limpiar capas anteriores
+    console.log(`🔄 [Actualización #${mapUpdateCount}] Procesando ${buildings.length} edificios`);
+    
+    // Limpiar TODAS las capas anteriores
     buildingLayers.forEach(layer => {
       mapInstance.removeLayer(layer);
     });
@@ -170,7 +149,10 @@ function Map() {
     const newLayers = [];
 
     buildings.forEach(building => {
-      if (!building.ubicacion) return;
+      if (!building.ubicacion) {
+        console.warn('⚠️ Edificio sin ubicación:', building.nombre);
+        return;
+      }
 
       try {
         let layer;
@@ -215,15 +197,31 @@ function Map() {
         layer.addTo(mapInstance);
         newLayers.push(layer);
 
+        console.log('📍 Capa agregada para:', building.nombre);
+
       } catch (error) {
-        console.error(`Error procesando edificio ${building.nombre}:`, error);
+        console.error(`❌ Error procesando edificio ${building.nombre}:`, error);
       }
     });
 
     setBuildingLayers(newLayers);
-    console.log(`🗺️ ${newLayers.length} edificios mostrados en el mapa`);
+    setMapUpdateCount(prev => prev + 1);
+    
+    console.log(`✅ [Actualización #${mapUpdateCount}] Mapa actualizado: ${newLayers.length} edificios mostrados`);
 
-  }, [mapInstance, buildings]);
+  }, [mapInstance, buildings]); // ✅ Se ejecuta cuando cambian los edificios O el mapa
+
+  // ✅ DEBUG: Verificar cambios en edificios
+  useEffect(() => {
+    console.log('🏢 Estado de edificios actualizado:', {
+      count: buildings.length,
+      buildings: buildings.map(b => ({
+        id: b.id || b._id || b.id_edificio,
+        nombre: b.nombre,
+        tieneUbicacion: !!b.ubicacion
+      }))
+    });
+  }, [buildings]);
 
   // Inicializar mapa
   useEffect(() => {
@@ -254,6 +252,10 @@ function Map() {
       try {
         await syncWithGeoServer(geoServerFeatures);
         alert(`✅ ${geoServerFeatures.length} edificios sincronizados con la base de datos`);
+        
+        // ✅ ACTUALIZAR MAPA después de sincronización
+        await loadBuildings();
+        
       } catch (error) {
         alert('❌ Error sincronizando datos con la base de datos');
       }
@@ -277,7 +279,7 @@ function Map() {
         onEditBuildings={handleEditBuildings}
       />
 
-      {/* Formulario de edificio - ÚNICA INSTANCIA */}
+      {/* Formulario de edificio */}
       <BuildingForm 
         onSave={handleSaveBuilding}
         onCancel={handleCancelEdit}
@@ -286,7 +288,7 @@ function Map() {
         isEditing={!!editingBuilding}
       />
       
-      {/* Lista de edificios para editar */}
+      {/* Lista de edificios para editar/eliminar */}
       {showBuildingList && (
         <BuildingList 
           buildings={buildings}
@@ -336,6 +338,21 @@ function Map() {
             ❌ Error: {buildingsError}
           </div>
         )}
+
+        {/* ✅ Indicador de actualización del mapa */}
+        <div style={{
+          position: 'absolute',
+          bottom: '10px',
+          right: '10px',
+          background: 'rgba(52, 152, 219, 0.8)',
+          color: 'white',
+          padding: '5px 10px',
+          borderRadius: '5px',
+          fontSize: '12px',
+          zIndex: 1000
+        }}>
+          🗺️ Capas: {buildingLayers.length}
+        </div>
       </div>
     </div>
   );
