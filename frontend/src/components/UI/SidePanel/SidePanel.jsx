@@ -8,7 +8,10 @@ const SidePanel = ({
   buildingsLoading,
   backendStatus,
   geoServerStatus,
-  geoServerFeaturesCount
+  geoServerFeaturesCount,
+  onAddBuilding, // ✅ Esta prop existe
+  markersCount,
+  onClearMarkers
 }) => {
   const [activeMenu, setActiveMenu] = useState(null);
 
@@ -24,6 +27,16 @@ const SidePanel = ({
   const handleSyncClick = () => {
     if (onSyncData) {
       onSyncData();
+    }
+  };
+
+  // ✅ Agregar función para manejar agregar edificio
+  const handleAddBuilding = () => {
+    console.log('🟢 SidePanel: Agregar Edificio clickeado');
+    if (onAddBuilding) {
+      onAddBuilding();
+    } else {
+      console.error('❌ onAddBuilding no está definido');
     }
   };
 
@@ -77,7 +90,8 @@ const SidePanel = ({
           </button>
           {activeMenu === 'Edificios' && (
             <ul className="dropdown-menu">
-              <li><button>➕ Agregar Edificio</button></li>
+              {/* ✅ CORREGIDO: Agregar onClick al botón */}
+              <li><button onClick={handleAddBuilding}>➕ Agregar Edificio</button></li>
               <li><button>✏️ Editar Información</button></li>
               <li><button>🗑️ Eliminar Edificio</button></li>
             </ul>

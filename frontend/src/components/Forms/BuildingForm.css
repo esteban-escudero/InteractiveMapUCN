@@ -1,0 +1,26 @@
+/* Grupo de coordenadas lado a lado */
+.coordinates-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* Ayuda para coordenadas */
+.coordinates-help {
+  background: #e8f4fd;
+  border: 1px solid #3498db;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: #2c3e50;
+}
+
+.coordinates-help p {
+  margin: 0;
+}
+
+/* Asegurar que los inputs de coordenadas se vean bien */
+.coordinates-group .form-group {
+  margin-bottom: 0;
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
@@ -6,8 +6,30 @@ import './Map.css';
 import { useMap } from '../../hooks/useMap';
 import { useBuildings } from '../../hooks/useBuildings';
 import { useGeoServer } from '../../hooks/useGeoServer';
-import  SidePanel  from '../UI/SidePanel';
+import SidePanel from '../UI/SidePanel';
+import BuildingForm from '../Forms/BuildingForm';
 import { UCN_COQUIMBO_BOUNDS } from '../../constants/mapConfig';
+
+// ✅ Agregar buildingService
+const buildingService = {
+  createBuilding: async (buildingData) => {
+    try {
+      const response = await fetch('http://localhost:3001/api/buildings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(buildingData),
+      });
+      
+      if (!response.ok) throw new Error(`Error ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('Error creando edificio:', error);
+      throw error;
+    }
+  }
+};
 
 // Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -30,19 +52,45 @@ function Map() {
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
   
+  // ✅ Asegurar que showBuildingForm esté definido
+  const [showBuildingForm, setShowBuildingForm] = useState(false);
+  
   // Usar el hook de edificios que se conecta al backend
   const { 
     buildings, 
     loading: buildingsLoading, 
     error: buildingsError, 
     backendStatus,
-    syncWithGeoServer 
+    syncWithGeoServer,
+    loadBuildings 
   } = useBuildings();
   
   // Hook de GeoServer para datos externos
   const { status: geoServerStatus, features: geoServerFeatures, loadWFSData } = useGeoServer();
 
   const [buildingLayers, setBuildingLayers] = useState([]);
+
+  // Función para guardar el nuevo edificio
+  const handleSaveBuilding = async (buildingData) => {
+    try {
+      await buildingService.createBuilding(buildingData);
+      alert('✅ Edificio guardado exitosamente');
+      
+      // Recargar la lista de edificios
+      if (loadBuildings) {
+        await loadBuildings();
+      }
+      
+    } catch (error) {
+      console.error('Error al guardar edificio:', error);
+      throw error;
+    }
+  };
+
+  const handleAddBuilding = () => {
+    console.log('🟢 Abriendo formulario de edificio');
+    setShowBuildingForm(true);
+  };
 
   // Procesar edificios de la base de datos y mostrarlos en el mapa
   useEffect(() => {
@@ -152,8 +200,16 @@ function Map() {
         backendStatus={backendStatus}
         geoServerStatus={geoServerStatus}
         geoServerFeaturesCount={geoServerFeatures.length}
+        onAddBuilding={handleAddBuilding}
       />
       
+      {/* ✅ BuildingForm con showBuildingForm definido */}
+      <BuildingForm 
+        onSave={handleSaveBuilding}
+        onCancel={() => setShowBuildingForm(false)}
+        isVisible={showBuildingForm}
+      />
+
       <div className="Mapa">
         <div ref={mapRef} className="map-container"></div>
         

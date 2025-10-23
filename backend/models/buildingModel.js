@@ -40,6 +40,63 @@ const buildingModel = {
       console.error('❌ Stack trace:', error.stack);
       return [];
     }
+  },
+
+  async create(buildingData) {
+    try {
+      console.log('🏗️ Creando nuevo edificio en la base de datos:', buildingData);
+      
+      // ✅ QUERY CORREGIDA - Omitir id_edificio para que use SERIAL automáticamente
+      const query = `
+        INSERT INTO edificio (
+          nombre, 
+          descripcion, 
+          ubicacion, 
+          activo
+        ) VALUES ($1, $2, ST_SetSRID(ST_GeomFromGeoJSON($3), 4326), $4)
+        RETURNING 
+          id_edificio as id,
+          nombre,
+          descripcion,
+          activo,
+          ST_AsGeoJSON(ubicacion) as ubicacion_geojson
+      `;
+      
+      const values = [
+        buildingData.nombre,
+        buildingData.descripcion || '',
+        JSON.stringify(buildingData.ubicacion),
+        buildingData.activo !== false
+      ];
+      
+      console.log('📝 Query de inserción:', query);
+      console.log('📊 Valores:', values);
+      
+      const result = await pool.query(query, values);
+      
+      if (result.rows.length === 0) {
+        throw new Error('No se pudo crear el edificio');
+      }
+      
+      const newBuilding = result.rows[0];
+      
+      console.log('✅ Edificio creado exitosamente:', newBuilding);
+      
+      // Parsear GeoJSON
+      return {
+        id: newBuilding.id,
+        nombre: newBuilding.nombre,
+        descripcion: newBuilding.descripcion,
+        activo: newBuilding.activo,
+        ubicacion: newBuilding.ubicacion_geojson ? JSON.parse(newBuilding.ubicacion_geojson) : null
+      };
+      
+    } catch (error) {
+      console.error('❌ Error en buildingModel.create:', error.message);
+      console.error('❌ Stack trace completo:', error.stack);
+      console.error('❌ Código de error PostgreSQL:', error.code);
+      throw error;
+    }
   }
 };
 
