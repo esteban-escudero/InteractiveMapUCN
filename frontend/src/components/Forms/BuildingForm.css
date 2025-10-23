@@ -1,26 +1,229 @@
-/* Grupo de coordenadas lado a lado */
-.coordinates-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
+.building-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
 }
 
-/* Ayuda para coordenadas */
-.coordinates-help {
-  background: #e8f4fd;
-  border: 1px solid #3498db;
-  border-radius: 6px;
-  padding: 12px;
+.building-form-container {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
-  font-size: 12px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.form-header h3 {
+  margin: 0;
   color: #2c3e50;
 }
 
-.coordinates-help p {
-  margin: 0;
+.step-indicator {
+  background: #3498db;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
 }
 
-/* Asegurar que los inputs de coordenadas se vean bien */
-.coordinates-group .form-group {
-  margin-bottom: 0;
+.form-step {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.coordinate-section {
+  border: 2px dashed #bdc3c7;
+  padding: 20px;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.capture-instructions {
+  text-align: center;
+}
+
+.capture-instructions p {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.capturing-active {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+  color: #856404;
+}
+
+.coordinates-display {
+  text-align: center;
+}
+
+.coordinate-details {
+  background: white;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+  border: 1px solid #e0e0e0;
+}
+
+.coordinate-details p {
+  margin: 5px 0;
+  font-family: monospace;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-group input {
+  width: auto;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cancel-btn, .back-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.next-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.capture-btn, .change-coords-btn {
+  background: #e67e22;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: 600;
+}
+
+.capture-overlay-active {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(231, 76, 60, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10001;
+}
+
+.capture-message {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.capture-message h3 {
+  color: #e74c3c;
+  margin-bottom: 15px;
+}
+
+.cancel-capture-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+  font-weight: 600;
 }

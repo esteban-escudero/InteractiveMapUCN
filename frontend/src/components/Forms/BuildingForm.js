@@ -57,7 +57,6 @@ const BuildingForm = ({
       return;
     }
 
-    // ✅ CORREGIDO: Eliminar 'poligono' - solo enviar 'ubicacion'
     const buildingData = {
       nombre: formData.nombre.trim(),
       descripcion: formData.descripcion.trim(),
@@ -66,7 +65,6 @@ const BuildingForm = ({
         type: 'Point',
         coordinates: [lng, lat] // GeoJSON usa [longitud, latitud]
       }
-      // ❌ ELIMINADO: poligono - no existe en la base de datos
     };
 
     try {
@@ -82,7 +80,8 @@ const BuildingForm = ({
 
   return (
     <div className="building-form-overlay">
-      <div className="building-form-container">
+    <div className="building-form-container">
+      <div className="form-content"> {/* ✅ Nueva envoltura */}
         <div className="form-header">
           <h3>🏗️ Agregar Nuevo Edificio</h3>
         </div>
@@ -141,10 +140,6 @@ const BuildingForm = ({
             </div>
           </div>
 
-          <div className="coordinates-help">
-            <p><strong>💡 Consejo:</strong> Puedes obtener las coordenadas haciendo click derecho en Google Maps y seleccionando "¿Qué hay aquí?"</p>
-          </div>
-
           <div className="form-group checkbox-group">
             <label>
               <input
@@ -171,6 +166,7 @@ const BuildingForm = ({
           </div>
         </form>
       </div>
+    </div>
     </div>
   );
 };
