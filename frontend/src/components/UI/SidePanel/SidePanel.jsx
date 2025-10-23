@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './SidePanel.css'; // Asegúrate de tener este archivo
 
 const SidePanel = ({ 
   status, 
@@ -9,7 +10,8 @@ const SidePanel = ({
   backendStatus,
   geoServerStatus,
   geoServerFeaturesCount,
-  onAddBuilding, // ✅ Esta prop existe
+  onAddBuilding,
+  onEditBuildings, // ✅ Asegurar que esta prop esté definida
   markersCount,
   onClearMarkers
 }) => {
@@ -30,13 +32,24 @@ const SidePanel = ({
     }
   };
 
-  // ✅ Agregar función para manejar agregar edificio
+  // ✅ Función para agregar edificio
   const handleAddBuilding = () => {
     console.log('🟢 SidePanel: Agregar Edificio clickeado');
     if (onAddBuilding) {
       onAddBuilding();
     } else {
       console.error('❌ onAddBuilding no está definido');
+    }
+  };
+
+  // ✅ NUEVA: Función para editar edificios
+  const handleEditBuildings = () => {
+    console.log('📝 SidePanel: Editar Edificios clickeado');
+    if (onEditBuildings) {
+      onEditBuildings();
+    } else {
+      console.error('❌ onEditBuildings no está definido');
+      alert('La función de edición no está disponible');
     }
   };
 
@@ -90,13 +103,24 @@ const SidePanel = ({
           </button>
           {activeMenu === 'Edificios' && (
             <ul className="dropdown-menu">
-              {/* ✅ CORREGIDO: Agregar onClick al botón */}
-              <li><button onClick={handleAddBuilding}>➕ Agregar Edificio</button></li>
-              <li><button>✏️ Editar Información</button></li>
-              <li><button>🗑️ Eliminar Edificio</button></li>
+              <li>
+                <button onClick={handleAddBuilding}>
+                  ➕ Agregar Edificio
+                </button>
+              </li>
+              <li>
+                {/* ✅ CORREGIDO: Usar handleEditBuildings */}
+                <button onClick={handleEditBuildings}>
+                  ✏️ Editar Información
+                </button>
+              </li>
+              <li>
+                <button>🗑️ Eliminar Edificio</button>
+              </li>
             </ul>
           )}
         </div>
+        
         <div className={`dropdown ${activeMenu === 'Rutas' ? 'active' : ''}`}>
           <button 
             className="dropdown-toggle"

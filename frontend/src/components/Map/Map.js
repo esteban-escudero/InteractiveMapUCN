@@ -8,28 +8,9 @@ import { useBuildings } from '../../hooks/useBuildings';
 import { useGeoServer } from '../../hooks/useGeoServer';
 import SidePanel from '../UI/SidePanel';
 import BuildingForm from '../Forms/BuildingForm';
+import BuildingList from '../UI/BuildingList/BuildingList';
 import { UCN_COQUIMBO_BOUNDS } from '../../constants/mapConfig';
-
-// ✅ Agregar buildingService
-const buildingService = {
-  createBuilding: async (buildingData) => {
-    try {
-      const response = await fetch('http://localhost:3001/api/buildings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(buildingData),
-      });
-      
-      if (!response.ok) throw new Error(`Error ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      console.error('Error creando edificio:', error);
-      throw error;
-    }
-  }
-};
+import { buildingService } from '../../services/buildingService';
 
 // Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -52,10 +33,10 @@ function Map() {
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
   
-  // ✅ Asegurar que showBuildingForm esté definido
   const [showBuildingForm, setShowBuildingForm] = useState(false);
+  const [showBuildingList, setShowBuildingList] = useState(false);
+  const [editingBuilding, setEditingBuilding] = useState(null);
   
-  // Usar el hook de edificios que se conecta al backend
   const { 
     buildings, 
     loading: buildingsLoading, 
@@ -65,31 +46,69 @@ function Map() {
     loadBuildings 
   } = useBuildings();
   
-  // Hook de GeoServer para datos externos
   const { status: geoServerStatus, features: geoServerFeatures, loadWFSData } = useGeoServer();
-
   const [buildingLayers, setBuildingLayers] = useState([]);
 
-  // Función para guardar el nuevo edificio
-  const handleSaveBuilding = async (buildingData) => {
-    try {
+  // Función para guardar/actualizar edificio
+ const handleSaveBuilding = async (buildingData) => {
+  try {
+    if (editingBuilding) {
+      const buildingId = editingBuilding.id || editingBuilding._id || editingBuilding.id_edificio;
+      console.log('🆔 Actualizando edificio ID:', buildingId);
+      
+      await buildingService.updateBuilding(buildingId, buildingData);
+      alert('✅ Edificio actualizado exitosamente');
+      
+      // ✅ FORZAR RECARGA COMPLETA
+      console.log('🔄 Forzando recarga de edificios...');
+      await loadBuildings(); // Esta función ya debería recargar desde el backend
+      
+    } else {
       await buildingService.createBuilding(buildingData);
       alert('✅ Edificio guardado exitosamente');
-      
-      // Recargar la lista de edificios
-      if (loadBuildings) {
-        await loadBuildings();
-      }
-      
-    } catch (error) {
-      console.error('Error al guardar edificio:', error);
-      throw error;
+      await loadBuildings();
     }
+    
+    setEditingBuilding(null);
+    setShowBuildingForm(false);
+    
+  } catch (error) {
+    console.error('Error al guardar edificio:', error);
+    throw error;
+  }
+};
+
+  // Función para abrir formulario de nuevo edificio
+  const handleAddBuilding = () => {
+    console.log('🟢 Abriendo formulario para nuevo edificio');
+    setEditingBuilding(null);
+    setShowBuildingForm(true);
   };
 
-  const handleAddBuilding = () => {
-    console.log('🟢 Abriendo formulario de edificio');
+  // Función para abrir lista de edificios
+  const handleEditBuildings = () => {
+    console.log('📝 Abriendo lista de edificios para edición');
+    setShowBuildingList(true);
+  };
+
+  // Función para editar un edificio específico
+  const handleEditBuilding = (building) => {
+    console.log('✏️ Editando edificio:', building.nombre);
+    setEditingBuilding(building);
+    setShowBuildingList(false);
     setShowBuildingForm(true);
+  };
+
+  // Función para cancelar edición
+  const handleCancelEdit = () => {
+    console.log('❌ Cancelando edición');
+    setEditingBuilding(null);
+    setShowBuildingForm(false);
+  };
+
+  // Función para cerrar lista de edificios
+  const handleCloseBuildingList = () => {
+    setShowBuildingList(false);
   };
 
   // Procesar edificios de la base de datos y mostrarlos en el mapa
@@ -201,14 +220,26 @@ function Map() {
         geoServerStatus={geoServerStatus}
         geoServerFeaturesCount={geoServerFeatures.length}
         onAddBuilding={handleAddBuilding}
+        onEditBuildings={handleEditBuildings}
       />
-      
-      {/* ✅ BuildingForm con showBuildingForm definido */}
+
+      {/* Formulario de edificio - ÚNICA INSTANCIA */}
       <BuildingForm 
         onSave={handleSaveBuilding}
-        onCancel={() => setShowBuildingForm(false)}
+        onCancel={handleCancelEdit}
         isVisible={showBuildingForm}
+        building={editingBuilding}
+        isEditing={!!editingBuilding}
       />
+      
+      {/* Lista de edificios para editar */}
+      {showBuildingList && (
+        <BuildingList 
+          buildings={buildings}
+          onEditBuilding={handleEditBuilding}
+          onClose={handleCloseBuildingList}
+        />
+      )}
 
       <div className="Mapa">
         <div ref={mapRef} className="map-container"></div>

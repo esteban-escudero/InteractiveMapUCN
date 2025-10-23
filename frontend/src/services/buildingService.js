@@ -1,3 +1,4 @@
+// services/buildingService.js
 import { api } from './api';
 
 export const buildingService = {
@@ -17,6 +18,17 @@ export const buildingService = {
       return response.data;
     } catch (error) {
       console.error('Error creando edificio:', error);
+      throw error;
+    }
+  },
+
+  // ✅ ESTO DEBERÍA FUNCIONAR AHORA
+  async updateBuilding(id, buildingData) {
+    try {
+      const response = await api.put(`/buildings/${id}`, buildingData);
+      return response.data;
+    } catch (error) {
+      console.error('Error actualizando edificio:', error);
       throw error;
     }
   },

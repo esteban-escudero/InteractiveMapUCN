@@ -1,3 +1,4 @@
+// backend/models/buildingModel.js
 const pool = require('../config/database');
 
 const buildingModel = {
@@ -42,11 +43,72 @@ const buildingModel = {
     }
   },
 
+  // ✅ CORREGIDA: Función update para la tabla edificio
+  async update(id, buildingData) {
+    try {
+      console.log('✏️ Actualizando edificio ID:', id, 'Datos:', buildingData);
+      
+      const { nombre, descripcion, ubicacion, activo } = buildingData;
+      
+      // ✅ QUERY CORREGIDA - Usar edificio y id_edificio
+      const query = `
+        UPDATE edificio 
+        SET 
+          nombre = $1, 
+          descripcion = $2, 
+          ubicacion = ST_SetSRID(ST_GeomFromGeoJSON($3), 4326), 
+          activo = $4
+        WHERE id_edificio = $5 
+        RETURNING 
+          id_edificio as id,
+          nombre,
+          descripcion,
+          activo,
+          ST_AsGeoJSON(ubicacion) as ubicacion_geojson
+      `;
+      
+      const values = [
+        nombre,
+        descripcion || '',
+        JSON.stringify(ubicacion),
+        activo !== false,
+        id
+      ];
+      
+      console.log('📝 Query de actualización:', query);
+      console.log('📊 Valores:', values);
+      
+      const result = await pool.query(query, values);
+      
+      if (result.rows.length === 0) {
+        throw new Error(`No se encontró el edificio con ID: ${id}`);
+      }
+      
+      const updatedBuilding = result.rows[0];
+      
+      console.log('✅ Edificio actualizado exitosamente:', updatedBuilding);
+      
+      // Parsear GeoJSON
+      return {
+        id: updatedBuilding.id,
+        nombre: updatedBuilding.nombre,
+        descripcion: updatedBuilding.descripcion,
+        activo: updatedBuilding.activo,
+        ubicacion: updatedBuilding.ubicacion_geojson ? JSON.parse(updatedBuilding.ubicacion_geojson) : null
+      };
+      
+    } catch (error) {
+      console.error('❌ Error en buildingModel.update:', error.message);
+      console.error('❌ Stack trace completo:', error.stack);
+      console.error('❌ Código de error PostgreSQL:', error.code);
+      throw error;
+    }
+  },
+
   async create(buildingData) {
     try {
       console.log('🏗️ Creando nuevo edificio en la base de datos:', buildingData);
       
-      // ✅ QUERY CORREGIDA - Omitir id_edificio para que use SERIAL automáticamente
       const query = `
         INSERT INTO edificio (
           nombre, 
