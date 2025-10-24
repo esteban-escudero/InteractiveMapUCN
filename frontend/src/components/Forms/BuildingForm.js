@@ -6,8 +6,10 @@ const BuildingForm = ({
   onSave, 
   onCancel, 
   isVisible = false,
-  building = null,        // NUEVO: edificio a editar
-  isEditing = false       // NUEVO: modo edición
+  building = null,       
+  isEditing = false,
+  capturedCoordinates = null,
+  onClearCoordinates = () => {}   
 }) => {
   const [formData, setFormData] = useState({
     nombre: '',
@@ -30,18 +32,18 @@ const BuildingForm = ({
           longitud: coords[0] || '', // longitud
           activo: building.activo !== undefined ? building.activo : true
         });
-      } else {
-        // Modo creación: limpiar form
+        } else {
+        // Modo creación: limpiar form O usar coordenadas capturadas
         setFormData({ 
           nombre: '', 
           descripcion: '', 
-          latitud: '', 
-          longitud: '', 
+          latitud: capturedCoordinates ? capturedCoordinates.lat.toString() : '', 
+          longitud: capturedCoordinates ? capturedCoordinates.lng.toString() : '', 
           activo: true 
         });
       }
     }
-  }, [isVisible, isEditing, building]);
+  }, [isVisible, isEditing, building, capturedCoordinates]); // ✅ Agregar capturedCoordinates
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;

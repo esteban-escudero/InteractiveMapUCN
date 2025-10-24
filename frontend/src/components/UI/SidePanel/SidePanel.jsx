@@ -12,6 +12,8 @@ const SidePanel = ({
   geoServerFeaturesCount,
   onAddBuilding,
   onEditBuildings,
+  onToggleCoordinateDetection,
+  coordinateDetectionActive = false,
   markersCount,
   onClearMarkers
 }) => {
@@ -51,7 +53,7 @@ const SidePanel = ({
     }
   };
 
-  // ✅ CORREGIDO: Función para eliminar edificios
+  // ✅Función para eliminar edificios
   const handleDeleteBuildings = () => {
     console.log('🗑️ SidePanel: Eliminar Edificios clickeado');
     if (onEditBuildings) {
@@ -59,6 +61,16 @@ const SidePanel = ({
     } else {
       console.error('❌ onEditBuildings no está definido');
       alert('La función de eliminación no está disponible');
+    }
+  };
+
+  // ✅Manejar toggle de detección de coordenadas
+  const handleToggleCoordinateDetection = () => {
+    console.log('📍 Botón detección de coordenadas clickeado');
+    if (onToggleCoordinateDetection) {
+      onToggleCoordinateDetection();
+    } else {
+      console.error('❌ onToggleCoordinateDetection no está definido');
     }
   };
 
@@ -148,54 +160,22 @@ const SidePanel = ({
           )}
         </div>
       </div>
-      
-      {/* Estado del Backend */}
-      <div style={getStatusStyle()}>
-        {getStatusText()}
+
+      {/* ✅ NUEVO BOTÓN: Detección de coordenadas */}
+      <div className="coordinate-detection-section">
+        <button 
+          className={`coordinate-detection-btn ${coordinateDetectionActive ? 'active' : ''}`}
+          onClick={handleToggleCoordinateDetection}
+        >
+          {coordinateDetectionActive ? '📍 Capturando...' : '📍 Capturar Coordenadas'}
+        </button>
+        {coordinateDetectionActive && (
+          <small style={{color: '#e74c3c', display: 'block', textAlign: 'center', marginTop: '5px'}}>
+            Haz clic en el mapa
+          </small>
+        )}
       </div>
 
-      {/* Información de conexión */}
-      <div style={{
-        padding: '8px',
-        backgroundColor: backendStatus === 'connected' ? '#2c3e50' : '#e74c3c',
-        borderRadius: '5px',
-        fontSize: '10px',
-        color: '#ecf0f1',
-        marginBottom: '10px'
-      }}>
-        <strong>🔗 Estado del Backend:</strong><br/>
-        <small>{backendStatus === 'connected' ? '✅ Conectado' : '❌ Desconectado'}</small><br/>
-        <small>Edificios en DB: {featuresCount}</small>
-      </div>
-
-      {/* Estado de GeoServer */}
-      <div style={{
-        padding: '8px',
-        backgroundColor: '#8e44ad',
-        borderRadius: '5px',
-        fontSize: '10px',
-        color: '#ecf0f1',
-        marginBottom: '10px'
-      }}>
-        <strong>🌐 GeoServer:</strong><br/>
-        <small>Estado: {geoServerStatus}</small><br/>
-        <small>Features: {geoServerFeaturesCount}</small>
-      </div>
-
-      {/* Información del campus */}
-      <div style={{
-        padding: '8px',
-        backgroundColor: '#8e44ad',
-        borderRadius: '5px',
-        fontSize: '10px',
-        color: '#ecf0f1',
-        marginBottom: '10px'
-      }}>
-        <strong>📍 UCN Coquimbo</strong><br/>
-        <small>Zoom: 17-19</small><br/>
-        <small>Límites activos</small>
-      </div>
-      
       <button className="logout-btn" onClick={handleLogout}>
         Cerrar Sesión
       </button>
