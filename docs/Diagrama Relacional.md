@@ -1,3 +1,4 @@
+```Mermaid
 erDiagram
     ADMINISTRADOR {
         bigint id_admin PK "SERIAL"
@@ -11,12 +12,10 @@ erDiagram
     EDIFICIO {
         bigint id_edificio PK "SERIAL"
         varchar nombre "VARCHAR(100) NOT NULL"
-        decimal area "DECIMAL(10,2)"
-        integer orientacion_grados "INT"
         text descripcion "TEXT"
-        boolean activo "DEFAULT TRUE"
+        varchar tipo "VARCHAR(50) NOT NULL"
         geometry ubicacion "GEOMETRY(Point,4326)"
-        geometry poligono "GEOMETRY(Polygon,4326)"
+        timestamp fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
     }
 
     SALA {
@@ -62,8 +61,8 @@ erDiagram
         geometry bbox "GEOMETRY(Polygon,4326)"
     }
 
-    EDIFICIO ||--o{ SALA : "Un edificio contiene muchas salas"
-    EDIFICIO ||--o{ PLANO : "Un edificio tiene muchos planos"
-    RUTA ||--o{ PUNTO_RUTA : "Una ruta está compuesta por muchos puntos"
-    PUNTO_RUTA }o--|| EDIFICIO : "Un punto puede estar ubicado en un edificio"
-    PUNTO_RUTA }o--|| SALA : "Un punto puede referenciar una sala"
+    EDIFICIO ||--o{ SALA : "contiene"
+    EDIFICIO ||--o{ PLANO : "tiene"
+    RUTA ||--o{ PUNTO_RUTA : "compuesta_por"
+    PUNTO_RUTA }o--|| EDIFICIO : "ubicado_en"
+    PUNTO_RUTA }o--|| SALA : "referencia"
