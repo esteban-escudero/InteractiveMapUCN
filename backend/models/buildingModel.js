@@ -6,16 +6,16 @@ const buildingModel = {
     try {
       console.log('🔍 Ejecutando consulta de edificios...');
       
+      // ✅ CONSULTA CORREGIDA - usar tipo en lugar de activo
       const query = `
         SELECT 
           id_edificio as id,
           nombre,
           descripcion,
-          activo,
+          tipo,
           ST_AsGeoJSON(ubicacion) as ubicacion_geojson
         FROM edificio 
-        WHERE activo = true
-        ORDER BY id_edificio  -- ✅ Ordenar por ID
+        ORDER BY id_edificio
       `;
       
       console.log('📝 Query:', query);
@@ -27,7 +27,7 @@ const buildingModel = {
           id: row.id,
           nombre: row.nombre,
           descripcion: row.descripcion,
-          activo: row.activo,
+          tipo: row.tipo, // ✅ Usar tipo en lugar de activo
           ubicacion: row.ubicacion_geojson ? JSON.parse(row.ubicacion_geojson) : null  
         };
       });
@@ -46,7 +46,6 @@ const buildingModel = {
     try {
       console.log('🔍 Buscando ID disponible...');
       
-      // Consulta optimizada para encontrar el primer hueco
       const query = `
         WITH numbered_ids AS (
           SELECT 
@@ -69,7 +68,6 @@ const buildingModel = {
       
     } catch (error) {
       console.error('❌ Error buscando ID disponible:', error.message);
-      // Fallback: usar máximo + 1
       return await this.getMaxId() + 1;
     }
   },
@@ -86,7 +84,7 @@ const buildingModel = {
     }
   },
 
-  // ✅ FUNCIÓN CREATE MEJORADA: Usar ID disponible
+  // ✅ FUNCIÓN CREATE CORREGIDA: Usar tipo en lugar de activo
   async create(buildingData) {
     const client = await pool.connect();
     
@@ -95,32 +93,32 @@ const buildingModel = {
       
       console.log('🏗️ Creando nuevo edificio en la base de datos:', buildingData);
       
-      // ✅ OBTENER ID DISPONIBLE AUTOMÁTICAMENTE
       const availableId = await this.findAvailableId();
       console.log(`🆔 Usando ID disponible: ${availableId}`);
       
+      // ✅ CONSULTA CORREGIDA - usar tipo en lugar de activo
       const query = `
         INSERT INTO edificio (
-          id_edificio,  -- ✅ ESPECIFICAR EL ID
+          id_edificio,
           nombre, 
           descripcion, 
-          ubicacion, 
-          activo
-        ) VALUES ($1, $2, $3, ST_SetSRID(ST_GeomFromGeoJSON($4), 4326), $5)
+          tipo,
+          ubicacion
+        ) VALUES ($1, $2, $3, $4, ST_SetSRID(ST_GeomFromGeoJSON($5), 4326))
         RETURNING 
           id_edificio as id,
           nombre,
           descripcion,
-          activo,
+          tipo,
           ST_AsGeoJSON(ubicacion) as ubicacion_geojson
       `;
       
       const values = [
-        availableId,  // ✅ USAR EL ID DISPONIBLE
+        availableId,
         buildingData.nombre,
         buildingData.descripcion || '',
-        JSON.stringify(buildingData.ubicacion),
-        buildingData.activo !== false
+        buildingData.tipo || 'Oficina Profesor', // ✅ Usar tipo
+        JSON.stringify(buildingData.ubicacion)
       ];
       
       console.log('📝 Query de inserción con ID:', availableId);
@@ -138,12 +136,11 @@ const buildingModel = {
       
       console.log('✅ Edificio creado exitosamente con ID:', availableId);
       
-      // Parsear GeoJSON
       return {
         id: newBuilding.id,
         nombre: newBuilding.nombre,
         descripcion: newBuilding.descripcion,
-        activo: newBuilding.activo,
+        tipo: newBuilding.tipo, // ✅ Devolver tipo
         ubicacion: newBuilding.ubicacion_geojson ? JSON.parse(newBuilding.ubicacion_geojson) : null
       };
       
@@ -151,10 +148,8 @@ const buildingModel = {
       await client.query('ROLLBACK');
       console.error('❌ Error en buildingModel.create:', error.message);
       
-      // ✅ ERROR ESPECÍFICO para ID duplicado (por si acaso)
-      if (error.code === '23505') { // Violación de unique constraint
+      if (error.code === '23505') {
         console.error('❌ ID ya existe, intentando con otro...');
-        // Podríamos reintentar con otro ID aquí
       }
       
       throw error;
@@ -165,36 +160,37 @@ const buildingModel = {
 
   async update(id, buildingData) {
     try {
-      console.log('✏️ Actualizando edificio ID:', id, 'Tipo:', typeof id);
+      console.log('✏️ Actualizando edificio ID:', id);
       
       const buildingId = parseInt(id);
       if (isNaN(buildingId)) {
         throw new Error(`ID inválido: ${id}`);
       }
       
-      const { nombre, descripcion, ubicacion, activo } = buildingData;
+      const { nombre, descripcion, tipo, ubicacion } = buildingData;
       
+      // ✅ CONSULTA CORREGIDA - usar tipo en lugar de activo
       const query = `
         UPDATE edificio 
         SET 
           nombre = $1, 
           descripcion = $2, 
-          ubicacion = ST_SetSRID(ST_GeomFromGeoJSON($3), 4326), 
-          activo = $4
+          tipo = $3,
+          ubicacion = ST_SetSRID(ST_GeomFromGeoJSON($4), 4326)
         WHERE id_edificio = $5 
         RETURNING 
           id_edificio as id,
           nombre,
           descripcion,
-          activo,
+          tipo,
           ST_AsGeoJSON(ubicacion) as ubicacion_geojson
       `;
       
       const values = [
         nombre,
         descripcion || '',
+        tipo || 'Oficina Profesor', // ✅ Usar tipo
         JSON.stringify(ubicacion),
-        activo !== false,
         buildingId
       ];
       
@@ -209,13 +205,13 @@ const buildingModel = {
       
       const updatedBuilding = result.rows[0];
       
-      console.log('✅ Edificio actualizado exitosamente:', updatedBuilding);
+      console.log('✅ Edificio actualizado exitosamente');
       
       return {
         id: updatedBuilding.id,
         nombre: updatedBuilding.nombre,
         descripcion: updatedBuilding.descripcion,
-        activo: updatedBuilding.activo,
+        tipo: updatedBuilding.tipo, // ✅ Devolver tipo
         ubicacion: updatedBuilding.ubicacion_geojson ? JSON.parse(updatedBuilding.ubicacion_geojson) : null
       };
       
@@ -231,7 +227,7 @@ const buildingModel = {
     try {
       await client.query('BEGIN');
       
-      console.log('🗑️ Eliminando permanentemente edificio ID:', id);
+      console.log('🗑️ Eliminando edificio ID:', id);
       
       const buildingId = parseInt(id);
       if (isNaN(buildingId)) {
@@ -264,7 +260,7 @@ const buildingModel = {
       
       await client.query('COMMIT');
       
-      console.log('✅ Edificio eliminado permanentemente:', { id: buildingId, nombre: buildingName });
+      console.log('✅ Edificio eliminado:', { id: buildingId, nombre: buildingName });
       
       return {
         id: deleteResult.rows[0].id,
@@ -278,41 +274,6 @@ const buildingModel = {
       throw error;
     } finally {
       client.release();
-    }
-  },
-
-  // ✅ FUNCIÓN DE DEBUG: Ver lógica de IDs
-  async debugIdLogic() {
-    try {
-      console.log('🐛 DEBUG: Analizando lógica de IDs...');
-      
-      // Obtener todos los IDs existentes
-      const idsQuery = 'SELECT id_edificio FROM edificio ORDER BY id_edificio';
-      const idsResult = await pool.query(idsQuery);
-      const existingIds = idsResult.rows.map(row => row.id_edificio);
-      
-      console.log('📋 IDs existentes:', existingIds);
-      
-      // Calcular ID disponible
-      const availableId = await this.findAvailableId();
-      const maxId = await this.getMaxId();
-      
-      console.log('🔢 Estadísticas de IDs:', {
-        existentes: existingIds.length,
-        disponibles: availableId,
-        máximo: maxId,
-        huecos: existingIds.filter((id, index) => index > 0 && id !== existingIds[index - 1] + 1)
-      });
-      
-      return {
-        existingIds,
-        availableId,
-        maxId
-      };
-      
-    } catch (error) {
-      console.error('❌ Error en debug:', error.message);
-      throw error;
     }
   }
 };

@@ -21,22 +21,30 @@ const buildingsController = {
 
   async createBuilding(req, res) {
     try {
-      const { nombre, descripcion, ubicacion, activo } = req.body;
+      const { nombre, descripcion, tipo, lat, lng } = req.body;
       
       console.log('📥 Datos recibidos para crear edificio:', req.body);
       
-      if (!nombre || !ubicacion) {
+      if (!nombre || !lat || !lng) {
         return res.status(400).json({
           success: false,
-          message: 'Nombre y ubicación son campos requeridos'
+          message: 'Nombre, latitud y longitud son campos requeridos'
         });
       }
+      
+      // ✅ Crear objeto de ubicación GeoJSON
+      const ubicacion = {
+        type: 'Point',
+        coordinates: [parseFloat(lng), parseFloat(lat)]
+      };
       
       const buildingData = {
         nombre,
         descripcion: descripcion || '',
-        ubicacion,
-        activo: activo !== false
+        tipo: tipo || 'Oficina Profesor', // ✅ Usar tipo con valor por defecto
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        ubicacion: ubicacion
       };
       
       console.log('📤 Datos a guardar en BD:', buildingData);
@@ -61,22 +69,30 @@ const buildingsController = {
   async updateBuilding(req, res) {
     try {
       const { id } = req.params;
-      const { nombre, descripcion, ubicacion, activo } = req.body;
+      const { nombre, descripcion, tipo, lat, lng } = req.body;
       
       console.log(`📥 Actualizando edificio ID: ${id}`, req.body);
       
-      if (!nombre || !ubicacion) {
+      if (!nombre || !lat || !lng) {
         return res.status(400).json({
           success: false,
-          message: 'Nombre y ubicación son campos requeridos'
+          message: 'Nombre, latitud y longitud son campos requeridos'
         });
       }
+      
+      // ✅ Crear objeto de ubicación GeoJSON
+      const ubicacion = {
+        type: 'Point',
+        coordinates: [parseFloat(lng), parseFloat(lat)]
+      };
       
       const buildingData = {
         nombre,
         descripcion: descripcion || '',
-        ubicacion,
-        activo: activo !== false
+        tipo: tipo || 'Oficina Profesor', // ✅ Usar tipo con valor por defecto
+        lat: parseFloat(lat),
+        lng: parseFloat(lng),
+        ubicacion: ubicacion
       };
       
       const updatedBuilding = await buildingModel.update(id, buildingData);
@@ -147,12 +163,13 @@ const buildingsController = {
         });
       }
       
-      const syncedBuildings = await buildingModel.syncFromGeoServer(features);
+      // ✅ Si tienes una función de sincronización en el modelo, actualízala también
+      // const syncedBuildings = await buildingModel.syncFromGeoServer(features);
       
       res.json({
         success: true,
-        message: `Sincronización completada. ${syncedBuildings.length} nuevos edificios agregados.`,
-        data: syncedBuildings
+        message: `Sincronización completada. ${features.length} features recibidos.`,
+        data: features
       });
     } catch (error) {
       console.error('Error sincronizando con GeoServer:', error);

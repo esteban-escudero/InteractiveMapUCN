@@ -14,10 +14,25 @@ const BuildingForm = ({
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
+    tipo: 'Oficina Profesor', // ✅ Valor por defecto actualizado
     latitud: '',
-    longitud: '',
-    activo: true
+    longitud: ''
   });
+
+  // ✅ NUEVOS TIPOS DE EDIFICIOS CON EMOJIS Y COLORES
+  const tiposEdificio = [
+    { value: 'Oficina Profesor', label: '👨‍🏫 Oficina Profesor' },
+    { value: 'Oficina Administracion', label: '📊 Oficina Admin' },
+    { value: 'Sala de Clase', label: '📚 Sala de Clase' },
+    { value: 'Laboratorio', label: '🔬 Laboratorio' },
+    { value: 'Biblioteca', label: '📖 Biblioteca' },
+    { value: 'Sala de Estudio', label: '💻 Sala Estudio' },
+    { value: 'Baño', label: '🚻 Baño' },
+    { value: 'Casino', label: '🍽️ Casino' },
+    { value: 'Cafeteria', label: '☕ Cafetería' },
+    { value: 'Gimnasio', label: '💪 Gimnasio' },
+    { value: 'Estacionamiento', label: '🅿️ Estacionamiento' }
+  ];
 
   // Resetear form cuando se abre/cierra o cambia el edificio
   useEffect(() => {
@@ -28,28 +43,28 @@ const BuildingForm = ({
         setFormData({
           nombre: building.nombre || '',
           descripcion: building.descripcion || '',
-          latitud: coords[1] || '', // latitud
-          longitud: coords[0] || '', // longitud
-          activo: building.activo !== undefined ? building.activo : true
+          tipo: building.tipo || 'Oficina Profesor', // ✅ Cargar tipo del edificio
+          latitud: coords[1] || building.lat || '', // latitud
+          longitud: coords[0] || building.lng || ''  // longitud
         });
-        } else {
+      } else {
         // Modo creación: limpiar form O usar coordenadas capturadas
         setFormData({ 
           nombre: '', 
           descripcion: '', 
+          tipo: 'Oficina Profesor', // ✅ Valor por defecto
           latitud: capturedCoordinates ? capturedCoordinates.lat.toString() : '', 
-          longitud: capturedCoordinates ? capturedCoordinates.lng.toString() : '', 
-          activo: true 
+          longitud: capturedCoordinates ? capturedCoordinates.lng.toString() : ''
         });
       }
     }
-  }, [isVisible, isEditing, building, capturedCoordinates]); // ✅ Agregar capturedCoordinates
+  }, [isVisible, isEditing, building, capturedCoordinates]);
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
@@ -75,14 +90,13 @@ const BuildingForm = ({
       return;
     }
 
+    // ✅ ENVIAR SOLO LOS CAMPOS QUE EXISTEN EN LA TABLA
     const buildingData = {
       nombre: formData.nombre.trim(),
       descripcion: formData.descripcion.trim(),
-      activo: formData.activo,
-      ubicacion: {
-        type: 'Point',
-        coordinates: [lng, lat] // GeoJSON usa [longitud, latitud]
-      }
+      tipo: formData.tipo, // ✅ Enviar tipo seleccionado
+      lat: lat,           // ✅ Enviar lat y lng separados
+      lng: lng            // ✅ Enviar lat y lng separados
     };
 
     try {
@@ -134,6 +148,24 @@ const BuildingForm = ({
               />
             </div>
 
+            <div className="form-group">
+              <label htmlFor="tipo">Tipo de Edificio *</label>
+              <select
+                id="tipo"
+                name="tipo"
+                value={formData.tipo}
+                onChange={handleInputChange}
+                required
+                style={{fontSize: '14px'}}
+              >
+                {tiposEdificio.map(tipo => (
+                  <option key={tipo.value} value={tipo.value}>
+                    {tipo.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="coordinates-group">
               <div className="form-group">
                 <label htmlFor="latitud">Latitud *</label>
@@ -160,18 +192,6 @@ const BuildingForm = ({
                   required
                 />
               </div>
-            </div>
-
-            <div className="form-group checkbox-group">
-              <label>
-                <input
-                  type="checkbox"
-                  name="activo"
-                  checked={formData.activo}
-                  onChange={handleInputChange}
-                />
-                Edificio activo
-              </label>
             </div>
 
             <div className="form-actions">

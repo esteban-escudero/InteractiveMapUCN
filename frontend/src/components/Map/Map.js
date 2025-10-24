@@ -74,20 +74,20 @@ function Map() {
     } else {
       console.log('📍 Modo captura DESACTIVADO');
 
-      /// Limpiar marcador temporal
-    if (tempMarker && mapInstance) {
-      mapInstance.removeLayer(tempMarker);
-      setTempMarker(null);
+      // Limpiar marcador temporal
+      if (tempMarker && mapInstance) {
+        mapInstance.removeLayer(tempMarker);
+        setTempMarker(null);
+      }
+      
+      // Restaurar cursor normal
+      if (mapInstance) {
+        mapInstance.getContainer().style.cursor = '';
+      }
+      
+      setCapturedCoords(null);
     }
-    
-    // Restaurar cursor normal
-    if (mapInstance) {
-      mapInstance.getContainer().style.cursor = '';
-    }
-    
-    setCapturedCoords(null);
-  }
-}, [coordinateDetection, mapInstance, tempMarker]);
+  }, [coordinateDetection, mapInstance, tempMarker]);
 
   // ✅ Capturar clic en el mapa
   useEffect(() => {
@@ -175,7 +175,7 @@ function Map() {
     }
   };
 
-  // ✅ Renderizar edificios en el mapa
+  // ✅ Renderizar edificios en el mapa - VERSIÓN CORREGIDA
   useEffect(() => {
     if (!mapInstance) return;
 
@@ -194,12 +194,13 @@ function Map() {
         layer = L.polygon(coords, { color: '#27ae60', weight: 3, fillOpacity: 0.3 });
       }
 
+      // ✅ POPUP CORREGIDO - Mostrar tipo en lugar de estado activo
       const popup = `
         <div style="min-width:200px;">
           <h4>🏛️ ${b.nombre}</h4>
           <p><strong>Descripción:</strong> ${b.descripcion}</p>
+          <p><strong>Tipo:</strong> ${b.tipo || 'No especificado'}</p>
           <p><strong>ID:</strong> ${b.id || b._id || b.id_edificio}</p>
-          <p><strong>Estado:</strong> ${b.activo ? '🟢 Activo' : '🔴 Inactivo'}</p>
           <hr><small style="color:#27ae60;">✅ En Base de Datos</small>
         </div>`;
       layer.bindPopup(popup).addTo(mapInstance);
@@ -275,79 +276,79 @@ function Map() {
         />
       )}
 
-       {/* ✅ SOLO el indicador pequeño en la esquina (opcional) */}
-    {coordinateDetection && (
+      {/* ✅ SOLO el indicador pequeño en la esquina (opcional) */}
+      {coordinateDetection && (
+        <div style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+                background: 'rgba(231, 76, 60, 0.9)',
+      color: 'white',
+      padding: '8px 12px',
+      borderRadius: '6px',
+      fontSize: '12px',
+      fontWeight: 'bold',
+      zIndex: 1000,
+      boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+    }}>
+      🎯 Modo Captura
+    </div>
+  )}
+
+  <div className="Mapa">
+    <div ref={mapRef} className="map-container"></div>
+
+    {!isMapReady && (
+      <div className="loading-message">🗺️ Cargando mapa...</div>
+    )}
+
+    {buildingsLoading && (
       <div style={{
         position: 'absolute',
         top: '10px',
-        right: '10px',
-        background: 'rgba(231, 76, 60, 0.9)',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: '#3498db',
         color: 'white',
-        padding: '8px 12px',
-        borderRadius: '6px',
-        fontSize: '12px',
-        fontWeight: 'bold',
-        zIndex: 1000,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        padding: '10px 20px',
+        borderRadius: '5px',
+        zIndex: 1000
       }}>
-        🎯 Modo Captura
+        ⏳ Cargando edificios...
       </div>
     )}
 
-      <div className="Mapa">
-        <div ref={mapRef} className="map-container"></div>
-
-        {!isMapReady && (
-          <div className="loading-message">🗺️ Cargando mapa...</div>
-        )}
-
-        {buildingsLoading && (
-          <div style={{
-            position: 'absolute',
-            top: '10px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: '#3498db',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '5px',
-            zIndex: 1000
-          }}>
-            ⏳ Cargando edificios...
-          </div>
-        )}
-
-        {buildingsError && (
-          <div style={{
-            position: 'absolute',
-            top: '10px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: '#e74c3c',
-            color: 'white',
-            padding: '10px 20px',
-            borderRadius: '5px',
-            zIndex: 1000
-          }}>
-            ❌ Error: {buildingsError}
-          </div>
-        )}
-
-        <div style={{
-          position: 'absolute',
-          bottom: '10px',
-          right: '10px',
-          background: 'rgba(52,152,219,0.8)',
-          color: 'white',
-          padding: '5px 10px',
-          borderRadius: '5px',
-          fontSize: '12px',
-          zIndex: 1000
-        }}>
-          🗺️ Capas: {buildingLayers.length} {/*PENDEINTE*/}
-        </div>
+    {buildingsError && (
+      <div style={{
+        position: 'absolute',
+        top: '10px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: '#e74c3c',
+        color: 'white',
+        padding: '10px 20px',
+        borderRadius: '5px',
+        zIndex: 1000
+      }}>
+        ❌ Error: {buildingsError}
       </div>
+    )}
+
+    <div style={{
+      position: 'absolute',
+      bottom: '10px',
+      right: '10px',
+      background: 'rgba(52,152,219,0.8)',
+      color: 'white',
+      padding: '5px 10px',
+      borderRadius: '5px',
+      fontSize: '12px',
+      zIndex: 1000
+    }}>
+      🏢 Edificios: {buildingLayers.length}
     </div>
+  </div>
+</div>
   );
 }
 
