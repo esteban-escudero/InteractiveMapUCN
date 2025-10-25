@@ -9,8 +9,10 @@ import { useGeoServer } from '../../hooks/useGeoServer';
 import SidePanel from '../UI/SidePanel';
 import BuildingForm from '../Forms/BuildingForm';
 import BuildingList from '../UI/BuildingList/BuildingList';
+import RoomManagement from '../UI/RoomManagement/RoomManagement';
 import { UCN_COQUIMBO_BOUNDS } from '../../constants/mapConfig';
 import { buildingService } from '../../services/buildingService';
+import { roomService } from '../../services/roomService';
 
 // 🔧 Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -23,7 +25,7 @@ L.Icon.Default.mergeOptions({
 // 🏗️ Ícono para edificios guardados en la base de datos
 const createDatabaseIcon = () =>
   L.divIcon({
-    html: `<div style="background-color: #27ae60; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+    html: `<div style="background-color: #ae279eff; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
     iconSize: [18, 18],
     className: 'database-building-icon'
   });
@@ -42,6 +44,7 @@ function Map() {
 
   const [showBuildingForm, setShowBuildingForm] = useState(false);
   const [showBuildingList, setShowBuildingList] = useState(false);
+  const [showRoomManagement, setShowRoomManagement] = useState(false); // ✅ NUEVO ESTADO
   const [editingBuilding, setEditingBuilding] = useState(null);
   const [mapUpdateCount, setMapUpdateCount] = useState(0);
 
@@ -155,6 +158,19 @@ function Map() {
     }
   };
 
+  // ✅ NUEVA: Guardar salas
+  const handleSaveRooms = async (roomsData) => {
+    try {
+      console.log('💾 Guardando salas:', roomsData);
+      await roomService.createRooms(roomsData);
+      alert(`✅ ${roomsData.length} salas guardadas exitosamente`);
+      setShowRoomManagement(false);
+    } catch (error) {
+      console.error('❌ Error al guardar salas:', error);
+      throw error;
+    }
+  };
+
   const handleAddBuilding = () => {
     setEditingBuilding(null);
     setShowBuildingForm(true);
@@ -164,6 +180,16 @@ function Map() {
   const handleEditBuilding = (b) => { setEditingBuilding(b); setShowBuildingForm(true); setShowBuildingList(false); };
   const handleCancelEdit = () => { setEditingBuilding(null); setShowBuildingForm(false); };
   const handleCloseBuildingList = () => setShowBuildingList(false);
+
+  // ✅ NUEVA: Manejar gestión de salas
+  const handleManageRooms = () => {
+    console.log('🚪 Abriendo gestión de salas');
+    if (buildings.length === 0) {
+      alert('❌ No hay edificios disponibles. Primero agrega al menos un edificio.');
+      return;
+    }
+    setShowRoomManagement(true);
+  };
 
   const handleDeleteBuilding = async (b) => {
     try {
@@ -175,7 +201,7 @@ function Map() {
     }
   };
 
-  // ✅ Renderizar edificios en el mapa - VERSIÓN CORREGIDA
+  // ✅ Renderizar edificios en el mapa
   useEffect(() => {
     if (!mapInstance) return;
 
@@ -194,7 +220,6 @@ function Map() {
         layer = L.polygon(coords, { color: '#27ae60', weight: 3, fillOpacity: 0.3 });
       }
 
-      // ✅ POPUP CORREGIDO - Mostrar tipo en lugar de estado activo
       const popup = `
         <div style="min-width:200px;">
           <h4>🏛️ ${b.nombre}</h4>
@@ -254,9 +279,10 @@ function Map() {
         onEditBuildings={handleEditBuildings}
         onToggleCoordinateDetection={toggleCoordinateDetection}
         coordinateDetectionActive={coordinateDetection}
+        onManageRooms={handleManageRooms} // ✅ NUEVO PROP
       />
 
-      {/* Formulario de edificio - Pasar coordenadas capturadas */}
+      {/* Formulario de edificio */}
       <BuildingForm 
         onSave={handleSaveBuilding}
         onCancel={handleCancelEdit}
@@ -267,6 +293,7 @@ function Map() {
         onClearCoordinates={() => setCapturedCoords(null)}
       />
 
+      {/* Lista de edificios */}
       {showBuildingList && (
         <BuildingList
           buildings={buildings}
@@ -276,79 +303,88 @@ function Map() {
         />
       )}
 
-      {/* ✅ SOLO el indicador pequeño en la esquina (opcional) */}
+      {/* ✅ NUEVO: Gestión de salas */}
+      {showRoomManagement && (
+        <RoomManagement
+          buildings={buildings}
+          onSaveRooms={handleSaveRooms}
+          onClose={() => setShowRoomManagement(false)}
+        />
+      )}
+
+      {/* Indicador de modo captura */}
       {coordinateDetection && (
         <div style={{
           position: 'absolute',
           top: '10px',
           right: '10px',
-                background: 'rgba(231, 76, 60, 0.9)',
-      color: 'white',
-      padding: '8px 12px',
-      borderRadius: '6px',
-      fontSize: '12px',
-      fontWeight: 'bold',
-      zIndex: 1000,
-      boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-    }}>
-      🎯 Modo Captura
-    </div>
-  )}
+          background: 'rgba(231, 76, 60, 0.9)',
+          color: 'white',
+          padding: '8px 12px',
+          borderRadius: '6px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          zIndex: 1000,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+        }}>
+          🎯 Modo Captura
+        </div>
+      )}
 
-  <div className="Mapa">
-    <div ref={mapRef} className="map-container"></div>
+      <div className="Mapa">
+        <div ref={mapRef} className="map-container"></div>
 
-    {!isMapReady && (
-      <div className="loading-message">🗺️ Cargando mapa...</div>
-    )}
+        {!isMapReady && (
+          <div className="loading-message">🗺️ Cargando mapa...</div>
+        )}
+        
+        {buildingsLoading && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#3498db',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            zIndex: 1000
+          }}>
+            ⏳ Cargando edificios...
+          </div>
+        )}
 
-    {buildingsLoading && (
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: '#3498db',
-        color: 'white',
-        padding: '10px 20px',
-        borderRadius: '5px',
-        zIndex: 1000
-      }}>
-        ⏳ Cargando edificios...
+        {buildingsError && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#e74c3c',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '5px',
+            zIndex: 1000
+          }}>
+            ❌ Error: {buildingsError}
+          </div>
+        )}
+
+        <div style={{
+          position: 'absolute',
+          bottom: '10px',
+          right: '10px',
+          background: 'rgba(52,152,219,0.8)',
+          color: 'white',
+          padding: '5px 10px',
+          borderRadius: '5px',
+          fontSize: '12px',
+          zIndex: 1000
+        }}>
+          🏢 Edificios: {buildingLayers.length}
+        </div>
       </div>
-    )}
-
-    {buildingsError && (
-      <div style={{
-        position: 'absolute',
-        top: '10px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        background: '#e74c3c',
-        color: 'white',
-        padding: '10px 20px',
-        borderRadius: '5px',
-        zIndex: 1000
-      }}>
-        ❌ Error: {buildingsError}
-      </div>
-    )}
-
-    <div style={{
-      position: 'absolute',
-      bottom: '10px',
-      right: '10px',
-      background: 'rgba(52,152,219,0.8)',
-      color: 'white',
-      padding: '5px 10px',
-      borderRadius: '5px',
-      fontSize: '12px',
-      zIndex: 1000
-    }}>
-      🏢 Edificios: {buildingLayers.length}
     </div>
-  </div>
-</div>
   );
 }
 

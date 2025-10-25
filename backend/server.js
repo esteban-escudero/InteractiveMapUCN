@@ -2,11 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-
-// ✅ ESTA LÍNEA DEBE ESTAR - importa la conexión a la BD
 require('./config/database'); 
 
 const buildingsRoutes = require('./routes/buildings');
+const roomsRoutes = require('./routes/rooms'); // ✅ MOVER AQUÍ
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -19,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/buildings', buildingsRoutes);
+app.use('/api/rooms', roomsRoutes); // ✅ MOVER AQUÍ - ANTES del errorHandler
 
 // Health check
 app.get('/api/health', (req, res) => {

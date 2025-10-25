@@ -14,9 +14,9 @@ const SidePanel = ({
   onEditBuildings,
   onToggleCoordinateDetection,
   coordinateDetectionActive = false,
-  markersCount,
-  onClearMarkers
+  onManageRooms  // ✅ NUEVO PROP PARA SALAS
 }) => {
+
   const [activeMenu, setActiveMenu] = useState(null);
 
   const toggleMenu = (menuName) => {
@@ -74,6 +74,17 @@ const SidePanel = ({
     }
   };
 
+  // ✅NUEVA: Manejar gestión de salas
+  const handleManageRooms = () => {
+    console.log('🚪 SidePanel: Gestionar Salas clickeado');
+    if (onManageRooms) {
+      onManageRooms();
+    } else {
+      console.error('❌ onManageRooms no está definido');
+      alert('La función de gestión de salas no está disponible');
+    }
+  };
+
   const getStatusStyle = () => {
     const baseStyle = {
       padding: '10px',
@@ -120,7 +131,7 @@ const SidePanel = ({
             className="dropdown-toggle"
             onClick={() => toggleMenu('Edificios')}
           >
-            Edificios {activeMenu === 'Edificios' ? '▲' : '▼'}
+            🏢 Edificios {activeMenu === 'Edificios' ? '▲' : '▼'}
           </button>
           {activeMenu === 'Edificios' && (
             <ul className="dropdown-menu">
@@ -135,7 +146,6 @@ const SidePanel = ({
                 </button>
               </li>
               <li>
-                {/* ✅ CORREGIDO: Ahora tiene función asignada */}
                 <button onClick={handleDeleteBuildings}>
                   🗑️ Eliminar Edificio
                 </button>
@@ -144,24 +154,42 @@ const SidePanel = ({
           )}
         </div>
         
+        {/* ✅ NUEVO DROPDOWN PARA SALAS */}
+        <div className={`dropdown ${activeMenu === 'Salas' ? 'active' : ''}`}>
+          <button 
+            className="dropdown-toggle"
+            onClick={() => toggleMenu('Salas')}
+          >
+            🚪 Salas {activeMenu === 'Salas' ? '▲' : '▼'}
+          </button>
+          {activeMenu === 'Salas' && (
+            <ul className="dropdown-menu">
+              <li><button onClick={handleManageRooms}>➕ Agregar Salas</button></li>
+              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>👀 Ver Salas</button></li>
+              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>✏️ Editar Salas</button></li>
+              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>🗑️ Eliminar Salas</button></li>
+            </ul>
+          )}
+        </div>
+
         <div className={`dropdown ${activeMenu === 'Rutas' ? 'active' : ''}`}>
           <button 
             className="dropdown-toggle"
             onClick={() => toggleMenu('Rutas')}
           >
-            Rutas {activeMenu === 'Rutas' ? '▲' : '▼'}
+            🗺️ Rutas {activeMenu === 'Rutas' ? '▲' : '▼'}
           </button>
           {activeMenu === 'Rutas' && (
             <ul className="dropdown-menu">
-              <li><button>➕ Agregar Ruta</button></li>
-              <li><button>✏️ Editar Ruta</button></li>
-              <li><button>🗑️ Eliminar Ruta</button></li>
+              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>➕ Agregar Ruta</button></li>
+              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>✏️ Editar Ruta</button></li>
+              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>🗑️ Eliminar Ruta</button></li>
             </ul>
           )}
         </div>
       </div>
 
-      {/* ✅ NUEVO BOTÓN: Detección de coordenadas */}
+      {/* ✅ BOTÓN: Detección de coordenadas */}
       <div className="coordinate-detection-section">
         <button 
           className={`coordinate-detection-btn ${coordinateDetectionActive ? 'active' : ''}`}
