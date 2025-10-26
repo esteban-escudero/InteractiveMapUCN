@@ -32,7 +32,7 @@ const buildingsController = {
         });
       }
       
-      // ✅ Crear objeto de ubicación GeoJSON
+      //Crear objeto de ubicación GeoJSON
       const ubicacion = {
         type: 'Point',
         coordinates: [parseFloat(lng), parseFloat(lat)]
@@ -41,13 +41,13 @@ const buildingsController = {
       const buildingData = {
         nombre,
         descripcion: descripcion || '',
-        tipo: tipo || 'Oficina Profesor', // ✅ Usar tipo con valor por defecto
+        tipo: tipo || 'Oficina Profesor', //Usar tipo con valor por defecto
         lat: parseFloat(lat),
         lng: parseFloat(lng),
         ubicacion: ubicacion
       };
       
-      console.log('📤 Datos a guardar en BD:', buildingData);
+      console.log('Datos a guardar en BD:', buildingData);
       
       const newBuilding = await buildingModel.create(buildingData);
       
@@ -71,7 +71,7 @@ const buildingsController = {
       const { id } = req.params;
       const { nombre, descripcion, tipo, lat, lng } = req.body;
       
-      console.log(`📥 Actualizando edificio ID: ${id}`, req.body);
+      console.log(`Actualizando edificio ID: ${id}`, req.body);
       
       if (!nombre || !lat || !lng) {
         return res.status(400).json({
@@ -80,7 +80,7 @@ const buildingsController = {
         });
       }
       
-      // ✅ Crear objeto de ubicación GeoJSON
+      //Crear objeto de ubicación GeoJSON
       const ubicacion = {
         type: 'Point',
         coordinates: [parseFloat(lng), parseFloat(lat)]
@@ -89,7 +89,7 @@ const buildingsController = {
       const buildingData = {
         nombre,
         descripcion: descripcion || '',
-        tipo: tipo || 'Oficina Profesor', // ✅ Usar tipo con valor por defecto
+        tipo: tipo || 'Oficina Profesor', // Usar tipo con valor por defecto
         lat: parseFloat(lat),
         lng: parseFloat(lng),
         ubicacion: ubicacion

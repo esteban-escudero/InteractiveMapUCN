@@ -5,7 +5,6 @@ const roomModel = {
     try {
       console.log('🔍 Buscando ID disponible para sala...');
       
-      // Consulta MEJORADA que incluye el caso del ID 1
       const query = `
         WITH sequence_gaps AS (
           SELECT 
@@ -36,25 +35,12 @@ const roomModel = {
       
     } catch (error) {
       console.error('❌ Error buscando ID disponible:', error.message);
-      // Fallback simple
       const maxResult = await pool.query('SELECT COALESCE(MAX(id_sala), 0) as max_id FROM sala');
       return parseInt(maxResult.rows[0].max_id) + 1;
     }
   },
 
-  // ✅ FUNCIÓN AUXILIAR: Obtener máximo ID
-  async getMaxId() {
-    try {
-      const query = 'SELECT COALESCE(MAX(id_sala), 0) as max_id FROM sala';
-      const result = await pool.query(query);
-      return parseInt(result.rows[0].max_id);
-    } catch (error) {
-      console.error('❌ Error obteniendo máximo ID:', error.message);
-      return 0;
-    }
-  },
-
-  // ✅ SOLO UNA FUNCIÓN createRooms (elimina la duplicada)
+  // ✅ MODELO ACTUALIZADO con nombre 'ubicacion' y tipo geometry
   async createRooms(roomsData) {
     const client = await pool.connect();
     
@@ -66,38 +52,42 @@ const roomModel = {
       const createdRooms = [];
 
       for (const roomData of roomsData) {
-        // ✅ OBTENER ID DISPONIBLE
         const availableId = await this.findAvailableId();
         console.log(`🆔 Usando ID disponible: ${availableId}`);
 
         const query = `
           INSERT INTO sala (
-            id_sala,  -- ✅ ESPECIFICAR EL ID DISPONIBLE
+            id_sala,
             id_edificio,
             nombre_sala, 
             piso, 
             tipo_sala,
-            accesible_silla_ruedas
-          ) VALUES ($1, $2, $3, $4, $5, $6)
+            accesible_silla_ruedas,
+            ubicacion  -- ✅ NUEVO NOMBRE: ubicacion (tipo geometry)
+          ) VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326))
           RETURNING 
             id_sala as id,
             id_edificio,
             nombre_sala,
             piso,
             tipo_sala,
-            accesible_silla_ruedas
+            accesible_silla_ruedas,
+            ST_X(ubicacion) as longitud,  -- ✅ Usar ST_X con geometry
+            ST_Y(ubicacion) as latitud    -- ✅ Usar ST_Y con geometry
         `;
         
         const values = [
-          availableId,  // ✅ USAR EL ID DISPONIBLE
+          availableId,
           roomData.id_edificio,
           roomData.nombre_sala,
           roomData.piso,
           roomData.tipo_sala,
-          roomData.accesible_silla_ruedas || false
+          roomData.accesible_silla_ruedas || false,
+          roomData.longitud,  // ✅ Longitud primero en ST_MakePoint
+          roomData.latitud    // ✅ Latitud después
         ];
         
-        console.log('📝 Insertando sala con ID:', availableId);
+        console.log('📝 Insertando sala con ID:', availableId, 'y ubicación:', roomData.longitud, roomData.latitud);
         
         const result = await client.query(query, values);
         createdRooms.push(result.rows[0]);
@@ -126,7 +116,9 @@ const roomModel = {
           nombre_sala,
           piso,
           tipo_sala,
-          accesible_silla_ruedas
+          accesible_silla_ruedas,
+          ST_X(ubicacion) as longitud,  -- ✅ Nuevo nombre: ubicacion
+          ST_Y(ubicacion) as latitud
         FROM sala 
         WHERE id_edificio = $1
         ORDER BY piso, nombre_sala
@@ -148,9 +140,13 @@ const roomModel = {
           nombre_sala = $1, 
           piso = $2, 
           tipo_sala = $3,
-          accesible_silla_ruedas = $4
-        WHERE id_sala = $5 
-        RETURNING *
+          accesible_silla_ruedas = $4,
+          ubicacion = ST_SetSRID(ST_MakePoint($5, $6), 4326)  -- ✅ Nuevo nombre
+        WHERE id_sala = $7 
+        RETURNING 
+          *,
+          ST_X(ubicacion) as longitud,
+          ST_Y(ubicacion) as latitud
       `;
       
       const values = [
@@ -158,6 +154,8 @@ const roomModel = {
         roomData.piso,
         roomData.tipo_sala,
         roomData.accesible_silla_ruedas,
+        roomData.longitud,
+        roomData.latitud,
         roomId
       ];
       
@@ -165,6 +163,38 @@ const roomModel = {
       return result.rows[0];
     } catch (error) {
       console.error('❌ Error en roomModel.update:', error.message);
+      throw error;
+    }
+  },
+
+  // ✅ FUNCIONES ESPACIALES AVANZADAS (ahora que tenemos geometry)
+  async findNearbyRooms(lng, lat, radiusMeters) {
+    try {
+      const query = `
+        SELECT 
+          id_sala as id,
+          nombre_sala,
+          piso,
+          tipo_sala,
+          ST_X(ubicacion) as longitud,
+          ST_Y(ubicacion) as latitud,
+          ST_Distance(
+            ubicacion, 
+            ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography
+          ) as distancia_metros
+        FROM sala
+        WHERE ST_DWithin(
+          ubicacion::geography,
+          ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+          $3
+        )
+        ORDER BY distancia_metros
+      `;
+      
+      const result = await pool.query(query, [lng, lat, radiusMeters]);
+      return result.rows;
+    } catch (error) {
+      console.error('❌ Error en roomModel.findNearbyRooms:', error.message);
       throw error;
     }
   },

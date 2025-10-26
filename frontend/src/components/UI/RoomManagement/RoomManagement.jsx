@@ -3,6 +3,7 @@ import './RoomManagement.css';
 
 const RoomManagement = ({ buildings, onSaveRooms, onClose }) => {
     const [selectedBuilding, setSelectedBuilding] = useState('');
+    const [selectedBuildingData, setSelectedBuildingData] = useState(null);
     const [rooms, setRooms] = useState([{
         nombre_sala: '',
         piso: 1,
@@ -25,6 +26,17 @@ const RoomManagement = ({ buildings, onSaveRooms, onClose }) => {
         'Baño',
         'Otro'
     ];
+
+    // Cuando se selecciona un edificio, obtener sus datos completos
+    useEffect(() => {
+        if (selectedBuilding) {
+            const building = buildings.find(b => b.id.toString() === selectedBuilding);
+            setSelectedBuildingData(building);
+            console.log('🏢 Edificio seleccionado:', building);
+        } else {
+            setSelectedBuildingData(null);
+        }
+    }, [selectedBuilding, buildings]);
 
     // Agregar nueva sala al formulario
     const addRoom = () => {
@@ -52,9 +64,20 @@ const RoomManagement = ({ buildings, onSaveRooms, onClose }) => {
         setRooms(updatedRooms);
     };
 
+    // Obtener coordenadas del edificio
+    const getBuildingCoordinates = (building) => {
+        if (!building) return { longitud: null, latitud: null };
+        
+        // Diferentes posibles nombres de campos donde pueden estar las coordenadas
+        return {
+            longitud: building.longitud || building.lng || building.x || -58.381592, // fallback
+            latitud: building.latitud || building.lat || building.y || -34.603722    // fallback
+        };
+    };
+
     // Guardar todas las salas
     const handleSave = async () => {
-        if (!selectedBuilding) {
+        if (!selectedBuilding || !selectedBuildingData) {
             alert('Selecciona un edificio primero');
             return;
         }
@@ -66,11 +89,26 @@ const RoomManagement = ({ buildings, onSaveRooms, onClose }) => {
             return;
         }
 
+        // Obtener coordenadas del edificio
+        const coords = getBuildingCoordinates(selectedBuildingData);
+        
+        // Validar que tenemos coordenadas
+        if (!coords.longitud || !coords.latitud) {
+            alert('El edificio seleccionado no tiene coordenadas definidas');
+            return;
+        }
+
+        console.log('📍 Usando coordenadas del edificio:', coords);
+
         const roomsToSave = rooms.map(room => ({
             ...room,
             id_edificio: parseInt(selectedBuilding),
-            piso: parseInt(room.piso) || 1
+            piso: parseInt(room.piso) || 1,
+            longitud: coords.longitud,  // ✅ AGREGAR COORDENADAS
+            latitud: coords.latitud     // ✅ AGREGAR COORDENADAS
         }));
+
+        console.log('📤 Enviando salas con coordenadas:', roomsToSave);
 
         try {
             await onSaveRooms(roomsToSave);
@@ -100,10 +138,21 @@ const RoomManagement = ({ buildings, onSaveRooms, onClose }) => {
                         <option value="">Selecciona un edificio</option>
                         {buildings.map(building => (
                             <option key={building.id} value={building.id}>
-                                {building.nombre}
+                                {building.nombre} 
+                                {building.longitud && building.latitud ? ' 📍' : ' ❌'}
                             </option>
                         ))}
                     </select>
+                    
+                    {/* Mostrar información del edificio seleccionado */}
+                    {selectedBuildingData && (
+                        <div className="building-info">
+                            <small>
+                                📍 Coordenadas: {getBuildingCoordinates(selectedBuildingData).longitud?.toFixed(6)}, 
+                                {getBuildingCoordinates(selectedBuildingData).latitud?.toFixed(6)}
+                            </small>
+                        </div>
+                    )}
                 </div>
 
                 {/* Lista de Salas */}

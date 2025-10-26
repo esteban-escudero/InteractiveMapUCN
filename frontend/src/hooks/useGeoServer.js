@@ -1,6 +1,35 @@
 import { useState } from 'react';
 import L from 'leaflet';
 
+// ✅ DEFINIR LA FUNCIÓN createCustomIcon
+const createCustomIcon = (feature) => {
+  // Determinar el tipo de ícono basado en las propiedades
+  const tipo = feature?.properties?.tipo || 'edificio';
+  const nombre = feature?.properties?.nombre || '';
+  
+  let iconHtml = '🏛️'; // Por defecto edificio
+  let className = 'custom-edificio-icon';
+  
+  if (tipo.toLowerCase().includes('sala') || nombre.toLowerCase().includes('sala')) {
+    iconHtml = '🏢';
+    className = 'custom-sala-icon';
+  } else if (tipo.toLowerCase().includes('laboratorio')) {
+    iconHtml = '🔬';
+    className = 'custom-lab-icon';
+  } else if (tipo.toLowerCase().includes('aula')) {
+    iconHtml = '📚';
+    className = 'custom-aula-icon';
+  }
+  
+  return L.divIcon({
+    className: className,
+    html: iconHtml,
+    iconSize: [25, 25],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12]
+  });
+};
+
 export const useGeoServer = () => {
   const [status, setStatus] = useState('checking');
   const [features, setFeatures] = useState([]);
@@ -63,7 +92,7 @@ export const useGeoServer = () => {
 
       const determineStyle = (feature) => {
         if (feature.geometry.type === 'Point') {
-          return { icon: createCustomIcon() };
+          return { icon: createCustomIcon(feature) };
         } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
           return {
             color: '#ff7800',
@@ -90,7 +119,7 @@ export const useGeoServer = () => {
 
       const geoJsonLayer = L.geoJSON(features, {
         pointToLayer: function(feature, latlng) {
-          return L.marker(latlng, { icon: createCustomIcon() });
+          return L.marker(latlng, { icon: createCustomIcon(feature) });
         },
         style: determineStyle,
         onEachFeature: onEachFeature

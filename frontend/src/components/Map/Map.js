@@ -22,7 +22,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// 🏗️ Ícono para edificios guardados en la base de datos
+
 const createDatabaseIcon = () =>
   L.divIcon({
     html: `<div style="background-color: #ae279eff; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
@@ -30,7 +30,7 @@ const createDatabaseIcon = () =>
     className: 'database-building-icon'
   });
 
-// 📍 Ícono para coordenadas temporales
+
 const createTempIcon = () =>
   L.divIcon({
     html: `<div style="background-color: #e74c3c; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(231,76,60,0.5);"></div>`,
@@ -44,11 +44,10 @@ function Map() {
 
   const [showBuildingForm, setShowBuildingForm] = useState(false);
   const [showBuildingList, setShowBuildingList] = useState(false);
-  const [showRoomManagement, setShowRoomManagement] = useState(false); // ✅ NUEVO ESTADO
+  const [showRoomManagement, setShowRoomManagement] = useState(false);
   const [editingBuilding, setEditingBuilding] = useState(null);
   const [mapUpdateCount, setMapUpdateCount] = useState(0);
 
-  // 📍 Estados del modo captura de coordenadas
   const [coordinateDetection, setCoordinateDetection] = useState(false);
   const [tempMarker, setTempMarker] = useState(null);
   const [capturedCoords, setCapturedCoords] = useState(null);
@@ -66,7 +65,6 @@ function Map() {
   const { status: geoServerStatus, features: geoServerFeatures, loadWFSData } = useGeoServer();
   const [buildingLayers, setBuildingLayers] = useState([]);
 
-  // ✅ Alternar modo captura de coordenadas
   const toggleCoordinateDetection = useCallback(() => {
     const newState = !coordinateDetection;
     setCoordinateDetection(newState);
@@ -154,19 +152,18 @@ function Map() {
       setShowBuildingForm(false);
       setCapturedCoords(null);
     } catch (error) {
-      console.error('❌ Error al guardar edificio:', error);
+      console.error('Error al guardar edificio:', error);
     }
   };
 
-  // ✅ NUEVA: Guardar salas
   const handleSaveRooms = async (roomsData) => {
     try {
-      console.log('💾 Guardando salas:', roomsData);
+      console.log('Guardando salas:', roomsData);
       await roomService.createRooms(roomsData);
       alert(`✅ ${roomsData.length} salas guardadas exitosamente`);
       setShowRoomManagement(false);
     } catch (error) {
-      console.error('❌ Error al guardar salas:', error);
+      console.error('Error al guardar salas:', error);
       throw error;
     }
   };
@@ -183,9 +180,9 @@ function Map() {
 
   // ✅ NUEVA: Manejar gestión de salas
   const handleManageRooms = () => {
-    console.log('🚪 Abriendo gestión de salas');
+    console.log('Abriendo gestión de salas');
     if (buildings.length === 0) {
-      alert('❌ No hay edificios disponibles. Primero agrega al menos un edificio.');
+      alert('No hay edificios disponibles. Primero agrega al menos un edificio.');
       return;
     }
     setShowRoomManagement(true);
@@ -195,13 +192,12 @@ function Map() {
     try {
       const id = b.id || b._id || b.id_edificio;
       await deleteBuilding(id);
-      console.log('✅ Edificio eliminado');
+      console.log('Edificio eliminado');
     } catch (err) {
       console.error('Error al eliminar edificio:', err);
     }
   };
 
-  // ✅ Renderizar edificios en el mapa
   useEffect(() => {
     if (!mapInstance) return;
 
@@ -222,11 +218,11 @@ function Map() {
 
       const popup = `
         <div style="min-width:200px;">
-          <h4>🏛️ ${b.nombre}</h4>
+          <h4>${b.nombre}</h4>
           <p><strong>Descripción:</strong> ${b.descripcion}</p>
           <p><strong>Tipo:</strong> ${b.tipo || 'No especificado'}</p>
           <p><strong>ID:</strong> ${b.id || b._id || b.id_edificio}</p>
-          <hr><small style="color:#27ae60;">✅ En Base de Datos</small>
+          <hr><small style="color:#27ae60;">En Base de Datos</small>
         </div>`;
       layer.bindPopup(popup).addTo(mapInstance);
       newLayers.push(layer);
@@ -256,12 +252,12 @@ function Map() {
     if (geoServerFeatures.length > 0) {
       try {
         await syncWithGeoServer(geoServerFeatures);
-        alert(`✅ ${geoServerFeatures.length} edificios sincronizados`);
+        alert(`${geoServerFeatures.length} edificios sincronizados`);
         await loadBuildings();
       } catch {
-        alert('❌ Error sincronizando datos');
+        alert('Error sincronizando datos');
       }
-    } else alert('ℹ️ No hay datos de GeoServer para sincronizar');
+    } else alert('No hay datos de GeoServer para sincronizar');
   };
 
   return (
@@ -279,10 +275,9 @@ function Map() {
         onEditBuildings={handleEditBuildings}
         onToggleCoordinateDetection={toggleCoordinateDetection}
         coordinateDetectionActive={coordinateDetection}
-        onManageRooms={handleManageRooms} // ✅ NUEVO PROP
+        onManageRooms={handleManageRooms}
       />
 
-      {/* Formulario de edificio */}
       <BuildingForm 
         onSave={handleSaveBuilding}
         onCancel={handleCancelEdit}
@@ -293,7 +288,6 @@ function Map() {
         onClearCoordinates={() => setCapturedCoords(null)}
       />
 
-      {/* Lista de edificios */}
       {showBuildingList && (
         <BuildingList
           buildings={buildings}
@@ -303,7 +297,6 @@ function Map() {
         />
       )}
 
-      {/* ✅ NUEVO: Gestión de salas */}
       {showRoomManagement && (
         <RoomManagement
           buildings={buildings}
@@ -312,7 +305,6 @@ function Map() {
         />
       )}
 
-      {/* Indicador de modo captura */}
       {coordinateDetection && (
         <div style={{
           position: 'absolute',
@@ -350,7 +342,7 @@ function Map() {
             borderRadius: '5px',
             zIndex: 1000
           }}>
-            ⏳ Cargando edificios...
+            Cargando edificios...
           </div>
         )}
 
@@ -366,7 +358,7 @@ function Map() {
             borderRadius: '5px',
             zIndex: 1000
           }}>
-            ❌ Error: {buildingsError}
+            Error: {buildingsError}
           </div>
         )}
 
@@ -381,7 +373,7 @@ function Map() {
           fontSize: '12px',
           zIndex: 1000
         }}>
-          🏢 Edificios: {buildingLayers.length}
+          Edificios: {buildingLayers.length}
         </div>
       </div>
     </div>

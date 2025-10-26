@@ -5,7 +5,7 @@ const roomsController = {
     try {
       const roomsData = req.body;
       
-      console.log('📥 Datos recibidos para crear salas:', roomsData);
+      console.log('Datos recibidos para crear salas:', roomsData);
       
       if (!Array.isArray(roomsData) || roomsData.length === 0) {
         return res.status(400).json({
@@ -14,12 +14,28 @@ const roomsController = {
         });
       }
 
-      // Validar datos básicos
       for (const room of roomsData) {
+        // Validar campos básicos
         if (!room.id_edificio || !room.nombre_sala || !room.piso || !room.tipo_sala) {
           return res.status(400).json({
             success: false,
             message: 'Todos los campos son requeridos: id_edificio, nombre_sala, piso, tipo_sala'
+          });
+        }
+        
+        
+        if (room.longitud === undefined || room.latitud === undefined) {
+          return res.status(400).json({
+            success: false,
+            message: 'Las coordenadas (longitud y latitud) son requeridas'
+          });
+        }
+        
+        // ✅ **VALIDAR QUE LAS COORDENADAS SEAN NÚMEROS VÁLIDOS**
+        if (isNaN(parseFloat(room.longitud)) || isNaN(parseFloat(room.latitud))) {
+          return res.status(400).json({
+            success: false,
+            message: 'Las coordenadas deben ser números válidos'
           });
         }
       }
@@ -78,6 +94,21 @@ const roomsController = {
         return res.status(400).json({
           success: false,
           message: 'ID de la sala es requerido'
+        });
+      }
+
+      // ✅ **AGREGAR VALIDACIÓN DE COORDENADAS PARA UPDATE TAMBIÉN**
+      if (roomData.longitud === undefined || roomData.latitud === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: 'Las coordenadas (longitud y latitud) son requeridas'
+        });
+      }
+      
+      if (isNaN(parseFloat(roomData.longitud)) || isNaN(parseFloat(roomData.latitud))) {
+        return res.status(400).json({
+          success: false,
+          message: 'Las coordenadas deben ser números válidos'
         });
       }
       
