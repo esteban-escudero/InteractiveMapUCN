@@ -14,7 +14,10 @@ const SidePanel = ({
   onEditBuildings,
   onToggleCoordinateDetection,
   coordinateDetectionActive = false,
-  onManageRooms  // ✅ NUEVO PROP PARA SALAS
+  onManageRooms,
+  // ✅ NUEVAS PROPS PARA GESTIÓN DE SALAS
+  onEditRoom,
+  onCreateRooms
 }) => {
 
   const [activeMenu, setActiveMenu] = useState(null);
@@ -74,7 +77,7 @@ const SidePanel = ({
     }
   };
 
-  // ✅NUEVA: Manejar gestión de salas
+  // ✅NUEVA: Manejar gestión de salas - CREAR NUEVAS
   const handleManageRooms = () => {
     console.log('🚪 SidePanel: Gestionar Salas clickeado');
     if (onManageRooms) {
@@ -82,6 +85,30 @@ const SidePanel = ({
     } else {
       console.error('❌ onManageRooms no está definido');
       alert('La función de gestión de salas no está disponible');
+    }
+  };
+
+  // ✅NUEVA: Manejar edición de salas existentes
+  const handleEditRooms = () => {
+    console.log('✏️ SidePanel: Editar Salas clickeado');
+    if (onEditBuildings) {
+      // Abrir BuildingList para editar salas desde allí
+      onEditBuildings();
+    } else {
+      console.error('❌ onEditBuildings no está definido');
+      alert('Abre la gestión de edificios para editar salas');
+    }
+  };
+
+  // ✅NUEVA: Manejar creación de salas para edificio específico
+  const handleCreateRoomsForBuilding = () => {
+    console.log('➕ SidePanel: Crear Salas para Edificio clickeado');
+    if (onEditBuildings) {
+      // Abrir BuildingList para seleccionar edificio
+      onEditBuildings();
+    } else {
+      console.error('❌ onEditBuildings no está definido');
+      alert('Abre la gestión de edificios para crear salas');
     }
   };
 
@@ -116,7 +143,6 @@ const SidePanel = ({
     switch (status) {
       case 'checking': return '🔍 Conectando...';
       case 'loading': return '⏳ Cargando edificios...';
-      case 'success': return `✅ ${featuresCount} edificios cargados`;
       case 'empty': return '⚠️ Base de datos vacía';
       case 'error': return '❌ Error de conexión';
       default: return 'Estado desconocido';
@@ -142,19 +168,14 @@ const SidePanel = ({
               </li>
               <li>
                 <button onClick={handleEditBuildings}>
-                  ✏️ Editar Información
-                </button>
-              </li>
-              <li>
-                <button onClick={handleDeleteBuildings}>
-                  🗑️ Eliminar Edificio
+                  ✏️ Gestionar Edificios
                 </button>
               </li>
             </ul>
           )}
         </div>
         
-        {/* ✅ NUEVO DROPDOWN PARA SALAS */}
+        {/* ✅ DROPDOWN PARA SALAS ACTUALIZADO */}
         <div className={`dropdown ${activeMenu === 'Salas' ? 'active' : ''}`}>
           <button 
             className="dropdown-toggle"
@@ -164,10 +185,16 @@ const SidePanel = ({
           </button>
           {activeMenu === 'Salas' && (
             <ul className="dropdown-menu">
-              <li><button onClick={handleManageRooms}>➕ Agregar Salas</button></li>
-              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>👀 Ver Salas</button></li>
-              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>✏️ Editar Salas</button></li>
-              <li><button onClick={() => alert('Funcionalidad en desarrollo')}>🗑️ Eliminar Salas</button></li>
+              <li>
+                <button onClick={handleManageRooms}>
+                  ➕ Crear Nuevas Salas
+                </button>
+              </li>
+              <li>
+                <button onClick={handleEditRooms}>
+                  ✏️ Gestionar Salas Existentes
+                </button>
+              </li>
             </ul>
           )}
         </div>
@@ -203,6 +230,8 @@ const SidePanel = ({
           </small>
         )}
       </div>
+
+      
 
       <button className="logout-btn" onClick={handleLogout}>
         Cerrar Sesión

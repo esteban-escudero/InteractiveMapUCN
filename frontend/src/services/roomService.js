@@ -25,7 +25,9 @@ export const roomService = {
 
   async updateRoom(roomId, roomData) {
     try {
+      console.log('✏️ Actualizando sala:', roomId, roomData);
       const response = await api.put(`/rooms/${roomId}`, roomData);
+      console.log('✅ Sala actualizada:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error actualizando sala:', error);
@@ -35,10 +37,12 @@ export const roomService = {
 
   async deleteRoom(roomId) {
     try {
+      console.log('🗑️ Enviando solicitud para eliminar sala ID:', roomId);
       const response = await api.delete(`/rooms/${roomId}`);
+      console.log('✅ Sala eliminada del backend:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error eliminando sala:', error);
+      console.error('❌ Error eliminando sala:', error);
       throw error;
     }
   }

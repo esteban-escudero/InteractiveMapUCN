@@ -4,9 +4,75 @@ const pool = require('../config/database');
 const buildingModel = {
   async getAll() {
     try {
-      console.log('🔍 Ejecutando consulta de edificios...');
+      console.log('🔍 Ejecutando consulta de edificios CON SALAS...');
       
-      // ✅ CONSULTA CORREGIDA - usar tipo en lugar de activo
+      // ✅ CONSULTA MEJORADA - INCLUIR SALAS
+      const query = `
+        SELECT 
+          e.id_edificio as id,
+          e.nombre,
+          e.descripcion,
+          e.tipo,
+          ST_AsGeoJSON(e.ubicacion) as ubicacion_geojson,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', s.id_sala,
+                'nombre_sala', s.nombre_sala,
+                'piso', s.piso,
+                'tipo_sala', s.tipo_sala,
+                'accesible_silla_ruedas', s.accesible_silla_ruedas,
+                'id_edificio', s.id_edificio
+              ) ORDER BY s.piso, s.nombre_sala
+            ) FILTER (WHERE s.id_sala IS NOT NULL),
+            '[]'
+          ) as salas
+        FROM edificio e
+        LEFT JOIN sala s ON e.id_edificio = s.id_edificio
+        GROUP BY e.id_edificio, e.nombre, e.descripcion, e.tipo, e.ubicacion
+        ORDER BY e.id_edificio
+      `;
+      
+      console.log('📝 Query con JOIN de salas ejecutada');
+      const result = await pool.query(query);
+      console.log(`📊 ${result.rows.length} edificios encontrados con sus salas`);
+      
+      const buildings = result.rows.map(row => {
+        const building = {
+          id: row.id,
+          nombre: row.nombre,
+          descripcion: row.descripcion,
+          tipo: row.tipo,
+          ubicacion: row.ubicacion_geojson ? JSON.parse(row.ubicacion_geojson) : null,
+          salas: row.salas || [] // ✅ INCLUIR SALAS
+        };
+        
+        // Debug: mostrar cuántas salas tiene cada edificio
+        console.log(`🏢 "${building.nombre}": ${building.salas.length} salas`);
+        if (building.salas.length > 0) {
+          building.salas.forEach(sala => {
+            console.log(`   🚪 ${sala.nombre_sala} (Piso ${sala.piso})`);
+          });
+        }
+        
+        return building;
+      });
+      
+      console.log(`✅ ${buildings.length} edificios procesados CON SALAS`);
+      return buildings;
+      
+    } catch (error) {
+      console.error('❌ Error EN buildingModel.getAll:', error.message);
+      
+      // ✅ FALLBACK: Si falla el JOIN, devolver edificios sin salas
+      console.log('🔄 Intentando consulta sin JOIN de salas...');
+      return await this.getAllWithoutRooms();
+    }
+  },
+
+  // ✅ CONSULTA FALLBACK: Solo edificios sin salas
+  async getAllWithoutRooms() {
+    try {
       const query = `
         SELECT 
           id_edificio as id,
@@ -18,25 +84,22 @@ const buildingModel = {
         ORDER BY id_edificio
       `;
       
-      console.log('📝 Query:', query);
       const result = await pool.query(query);
-      console.log('📊 Resultado RAW:', result.rows);
       
-      const buildings = result.rows.map(row => {
-        return {
-          id: row.id,
-          nombre: row.nombre,
-          descripcion: row.descripcion,
-          tipo: row.tipo, // ✅ Usar tipo en lugar de activo
-          ubicacion: row.ubicacion_geojson ? JSON.parse(row.ubicacion_geojson) : null  
-        };
-      });
+      const buildings = result.rows.map(row => ({
+        id: row.id,
+        nombre: row.nombre,
+        descripcion: row.descripcion,
+        tipo: row.tipo,
+        ubicacion: row.ubicacion_geojson ? JSON.parse(row.ubicacion_geojson) : null,
+        salas: [] // ✅ Array vacío como fallback
+      }));
       
-      console.log(`🏢 ${buildings.length} edificios procesados`);
+      console.log(`⚠️ ${buildings.length} edificios cargados SIN SALAS (fallback)`);
       return buildings;
       
     } catch (error) {
-      console.error('❌ Error EN buildingModel.getAll:', error.message);
+      console.error('❌ Error en fallback:', error.message);
       return [];
     }
   },
@@ -96,7 +159,6 @@ const buildingModel = {
       const availableId = await this.findAvailableId();
       console.log(`🆔 Usando ID disponible: ${availableId}`);
       
-      // ✅ CONSULTA CORREGIDA - usar tipo en lugar de activo
       const query = `
         INSERT INTO edificio (
           id_edificio,
@@ -117,12 +179,11 @@ const buildingModel = {
         availableId,
         buildingData.nombre,
         buildingData.descripcion || '',
-        buildingData.tipo || 'Oficina Profesor', // ✅ Usar tipo
+        buildingData.tipo || 'Oficina Profesor',
         JSON.stringify(buildingData.ubicacion)
       ];
       
       console.log('📝 Query de inserción con ID:', availableId);
-      console.log('📊 Valores:', values);
       
       const result = await client.query(query, values);
       
@@ -140,8 +201,9 @@ const buildingModel = {
         id: newBuilding.id,
         nombre: newBuilding.nombre,
         descripcion: newBuilding.descripcion,
-        tipo: newBuilding.tipo, // ✅ Devolver tipo
-        ubicacion: newBuilding.ubicacion_geojson ? JSON.parse(newBuilding.ubicacion_geojson) : null
+        tipo: newBuilding.tipo,
+        ubicacion: newBuilding.ubicacion_geojson ? JSON.parse(newBuilding.ubicacion_geojson) : null,
+        salas: [] // ✅ Nuevo edificio sin salas
       };
       
     } catch (error) {
@@ -169,7 +231,6 @@ const buildingModel = {
       
       const { nombre, descripcion, tipo, ubicacion } = buildingData;
       
-      // ✅ CONSULTA CORREGIDA - usar tipo en lugar de activo
       const query = `
         UPDATE edificio 
         SET 
@@ -189,13 +250,12 @@ const buildingModel = {
       const values = [
         nombre,
         descripcion || '',
-        tipo || 'Oficina Profesor', // ✅ Usar tipo
+        tipo || 'Oficina Profesor',
         JSON.stringify(ubicacion),
         buildingId
       ];
       
-      console.log('📝 Query de actualización:', query);
-      console.log('📊 Valores:', values);
+      console.log('📝 Query de actualización ejecutada');
       
       const result = await pool.query(query, values);
       
@@ -211,8 +271,9 @@ const buildingModel = {
         id: updatedBuilding.id,
         nombre: updatedBuilding.nombre,
         descripcion: updatedBuilding.descripcion,
-        tipo: updatedBuilding.tipo, // ✅ Devolver tipo
-        ubicacion: updatedBuilding.ubicacion_geojson ? JSON.parse(updatedBuilding.ubicacion_geojson) : null
+        tipo: updatedBuilding.tipo,
+        ubicacion: updatedBuilding.ubicacion_geojson ? JSON.parse(updatedBuilding.ubicacion_geojson) : null,
+        salas: [] // ✅ En update no incluimos salas por simplicidad
       };
       
     } catch (error) {

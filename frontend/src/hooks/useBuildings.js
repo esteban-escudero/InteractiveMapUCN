@@ -1,9 +1,10 @@
+// hooks/useBuildings.js
 import { useState, useEffect, useCallback } from 'react';
 import { buildingService } from '../services/buildingService';
 
 export const useBuildings = () => {
   const [buildings, setBuildings] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [backendStatus, setBackendStatus] = useState('checking');
 
@@ -16,14 +17,27 @@ export const useBuildings = () => {
     setLoading(true);
     setError(null);
     try {
-      const buildingsData = await buildingService.getAllBuildings();
-      setBuildings(buildingsData.data || buildingsData); // ✅ ACTUALIZA ESTADO
+      console.log('🔄 Cargando edificios desde el backend...');
+      const response = await buildingService.getAllBuildings();
+      
+      const buildingsData = response.data || [];
+      setBuildings(buildingsData);
       setBackendStatus('connected');
-      console.log(`🏢 ${buildingsData.length || buildingsData.data?.length} edificios cargados desde el backend`);
+      
+      // ✅ DEBUG FINAL: Verificar en el hook
+      console.log(`🏢 HOOK: ${buildingsData.length} edificios cargados`);
+      let totalSalas = 0;
+      buildingsData.forEach(building => {
+        const salasCount = building.salas ? building.salas.length : 0;
+        totalSalas += salasCount;
+        console.log(`   📍 "${building.nombre}": ${salasCount} salas`);
+      });
+      console.log(`📊 HOOK TOTAL: ${totalSalas} salas en total`);
+      
     } catch (err) {
+      console.error('❌ Error cargando edificios:', err);
       setError(err.message);
       setBackendStatus('error');
-      console.error('Error cargando edificios:', err);
     } finally {
       setLoading(false);
     }
@@ -73,19 +87,18 @@ export const useBuildings = () => {
     }
   }, [loadBuildings, backendStatus]);
 
-  // ✅ FUNCIÓN CLAVE: Eliminar edificio y actualizar estado
   const deleteBuilding = useCallback(async (id) => {
     try {
       setLoading(true);
       const result = await buildingService.deleteBuilding(id);
       
-      // ✅ ACTUALIZAR ESTADO LOCAL - Esto dispara la actualización del mapa
+      // ✅ ACTUALIZAR ESTADO LOCAL
       setBuildings(prev => prev.filter(building => {
         const buildingId = building.id || building._id || building.id_edificio;
         return buildingId !== id;
       }));
       
-      console.log('✅ Edificio eliminado del estado local, disparando actualización del mapa');
+      console.log('✅ Edificio eliminado del estado local');
       return result;
       
     } catch (error) {

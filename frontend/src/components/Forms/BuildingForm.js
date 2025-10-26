@@ -14,7 +14,7 @@ const BuildingForm = ({
   const [formData, setFormData] = useState({
     nombre: '',
     descripcion: '',
-    tipo: 'Oficina Profesor', // ✅ Valor por defecto actualizado
+    tipo: 'Oficina Profesor',
     latitud: '',
     longitud: ''
   });
@@ -43,16 +43,15 @@ const BuildingForm = ({
         setFormData({
           nombre: building.nombre || '',
           descripcion: building.descripcion || '',
-          tipo: building.tipo || 'Oficina Profesor', // ✅ Cargar tipo del edificio
-          latitud: coords[1] || building.lat || '', // latitud
-          longitud: coords[0] || building.lng || ''  // longitud
+          tipo: building.tipo || 'Oficina Profesor',
+          latitud: coords[1] || building.lat || '',
+          longitud: coords[0] || building.lng || ''
         });
       } else {
-        // Modo creación: limpiar form O usar coordenadas capturadas
         setFormData({ 
           nombre: '', 
           descripcion: '', 
-          tipo: 'Oficina Profesor', // ✅ Valor por defecto
+          tipo: 'Oficina Profesor',
           latitud: capturedCoordinates ? capturedCoordinates.lat.toString() : '', 
           longitud: capturedCoordinates ? capturedCoordinates.lng.toString() : ''
         });
@@ -90,13 +89,12 @@ const BuildingForm = ({
       return;
     }
 
-    // ✅ ENVIAR SOLO LOS CAMPOS QUE EXISTEN EN LA TABLA
     const buildingData = {
       nombre: formData.nombre.trim(),
       descripcion: formData.descripcion.trim(),
-      tipo: formData.tipo, // ✅ Enviar tipo seleccionado
-      lat: lat,           // ✅ Enviar lat y lng separados
-      lng: lng            // ✅ Enviar lat y lng separados
+      tipo: formData.tipo,
+      lat: lat,
+      lng: lng 
     };
 
     try {
