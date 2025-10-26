@@ -280,6 +280,7 @@ function Map() {
         layer = L.polygon(coords, { color: '#27ae60', weight: 3, fillOpacity: 0.3 });
       }
 
+      //Punto
       const popup = `
         <div style="min-width:200px;">
           <h4>${b.nombre}</h4>
