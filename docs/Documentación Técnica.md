@@ -2,142 +2,632 @@
 
 ## **ARQUITECTURA DEL SISTEMA**
 
-### **1. VISIÓN GENERAL DE LA ARQUITECTURA**
+### **1. VISIÓN GENERAL**
 
-El sistema del Mapa Interactivo UCN sigue una arquitectura de tres capas bien definida que separa claramente las responsabilidades entre el frontend, backend y la base de datos. Esta separación permite un mantenimiento más sencillo, escalabilidad y la capacidad de desarrollar cada componente de manera independiente.
+El **Mapa Interactivo UCN** es una aplicación web full-stack diseñada para gestionar y visualizar información geoespacial del campus universitario. La arquitectura sigue el patrón **MVC (Modelo-Vista-Controlador)** con separación clara entre frontend, backend y base de datos.
 
-**Capa de Presentación (Frontend):**
-Desarrollada completamente en React.js, esta capa se encarga de toda la interacción con el usuario final. Utiliza Leaflet como biblioteca de mapas principal, proporcionando una experiencia de mapa interactivo y responsiva. Los componentes React están estructurados de manera modular, permitiendo reutilización y facilitando las pruebas.
+```mermaid
+graph TB
+    subgraph "Frontend - React.js"
+        A[Componentes React]
+        B[Hooks Personalizados]
+        C[Servicios API]
+    end
+    
+    subgraph "Backend - Node.js/Express"
+        D[Controladores]
+        E[Modelos]
+        F[Routes]
+    end
+    
+    subgraph "Base de Datos"
+        G[PostgreSQL]
+        H[PostGIS]
+    end
+    
+    subgraph "Servicios Externos"
+        I[GeoServer WFS]
+        J[Leaflet Maps]
+    end
+    
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+    E --> G
+    G --> H
+    C --> I
+    A --> J
+```
 
-**Capa de Aplicación (Backend):**
-Implementada en Node.js con el framework Express, esta capa actúa como intermediario entre el frontend y la base de datos. Expone una API RESTful que permite operaciones CRUD sobre los datos geoespaciales. El backend también maneja la lógica de negocio, validaciones y la integración con servicios externos como GeoServer.
+### **2. TECNOLOGÍAS IMPLEMENTADAS**
 
-**Capa de Datos (Base de Datos):**
-Utiliza PostgreSQL con la extensión PostGIS, especializada en el manejo de datos geoespaciales. Esta configuración permite almacenar, consultar y analizar datos geográficos de manera eficiente, soportando tipos de geometría como puntos, líneas y polígonos en el sistema de coordenadas WGS84.
+#### **Frontend**
+- **React 18** - Biblioteca de interfaz de usuario
+- **Leaflet** - Mapas interactivos
+- **CSS3** - Estilos y diseño responsive
+- **JavaScript ES6+** - Lógica de aplicación
 
-### **2. INFRAESTRUCTURA DE COMUNICACIONES**
+#### **Backend**
+- **Node.js** - Runtime de JavaScript
+- **Express.js** - Framework web
+- **PostgreSQL** - Base de datos relacional
+- **PostGIS** - Extensión geoespacial
+- **pg** - Cliente PostgreSQL para Node.js
 
-**Comunicación Frontend-Backend:**
-La comunicación entre el frontend React y el backend Express se realiza mediante peticiones HTTP/REST utilizando JSON como formato de intercambio de datos. El frontend utiliza la biblioteca Axios para manejar las peticiones asíncronas, proporcionando interceptores para el manejo global de errores y timeouts.
+#### **Servicios Externos**
+- **GeoServer** - Servicio WFS para datos geoespaciales
+- **OpenStreetMap** - Tiles de mapas base
 
-El backend está configurado con CORS (Cross-Origin Resource Sharing) para permitir peticiones desde el dominio del frontend. Cada endpoint de la API sigue las convenciones REST estándar, devolviendo códigos de estado HTTP apropiados y respuestas consistentes en formato JSON.
+### **3. ESTRUCTURA DE DIRECTORIOS**
 
-**Conexión a Base de Datos:**
-El backend establece conexión con PostgreSQL mediante un pool de conexiones administrado por el driver `pg` de Node.js. Este pool mantiene un conjunto de conexiones reutilizables, mejorando el rendimiento al evitar la sobrecarga de establecer nuevas conexiones para cada petición.
+```
+interactive-map-ucn/
+├── frontend/                 # Aplicación React
+│   ├── src/
+│   │   ├── components/      # Componentes React
+│   │   │   ├── Map/        # Componente principal del mapa
+│   │   │   ├── Forms/      # Formularios
+│   │   │   └── UI/         # Componentes de interfaz
+│   │   ├── hooks/          # Custom hooks
+│   │   ├── services/       # Clientes API
+│   │   ├── constants/      # Configuración
+│   │   └── utils/          # Utilidades
+│   └── public/             # Archivos estáticos
+└── backend/                # API Express
+    ├── controllers/        # Lógica de negocio
+    ├── models/            # Acceso a datos
+    ├── routes/            # Endpoints API
+    ├── config/            # Configuración
+    └── middleware/        # Middlewares
+```
 
-La configuración de la base de datos se maneja mediante variables de entorno, permitiendo diferentes configuraciones para desarrollo, testing y producción. Las consultas utilizan parámetros preparados para prevenir ataques de inyección SQL y mejorar la seguridad.
+### **4. COMPONENTES PRINCIPALES DEL FRONTEND**
 
-**Integración con GeoServer:**
-El sistema se integra con GeoServer mediante el protocolo WFS (Web Feature Service) para obtener datos geoespaciales en formato GeoJSON. Esta integración permite sincronizar datos entre sistemas y mantener actualizada la información de edificios y otras entidades geoespaciales.
+#### **Map Component (`Map.js`)**
+**Responsabilidad**: Componente central que coordina toda la funcionalidad del mapa.
 
-### **3. COMPONENTES PRINCIPALES DEL FRONTEND**
+```javascript
+// Funcionalidades principales
+- Inicialización y gestión del mapa Leaflet
+- Coordinación de hooks personalizados
+- Renderizado de edificios y elementos geoespaciales
+- Manejo de interacciones del usuario
+- Gestión de estados de UI (formularios, listas, modales)
+```
 
-**Sistema de Componentes React:**
-La aplicación frontend está estructurada en componentes React funcionales que utilizan hooks para el manejo de estado y efectos secundarios. La arquitectura de componentes sigue el principio de responsabilidad única, donde cada componente tiene una función específica y bien definida.
+#### **Custom Hooks**
 
-**Map Component:**
-Es el componente central y más complejo de la aplicación. Se encarga de inicializar y gestionar el mapa Leaflet, manejar interacciones del usuario, y coordinar la visualización de todos los elementos geoespaciales. Utiliza el hook useMap para abstraer la lógica específica del mapa.
+**`useMap.js`** - Gestión del estado del mapa
+```javascript
+const useMap = () => {
+  const [mapInstance, setMapInstance] = useState(null);
+  const [isMapReady, setIsMapReady] = useState(false);
+  
+  // Inicialización del mapa Leaflet
+  const initializeMap = (bounds) => {
+    const map = L.map(mapRef.current, {
+      center: calcularCentro(bounds),
+      zoom: MAP_ZOOM_LIMITS.default,
+      minZoom: MAP_ZOOM_LIMITS.min,
+      maxZoom: MAP_ZOOM_LIMITS.max
+    });
+    
+    // Configurar límites y controles
+    map.setMaxBounds(bounds);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    
+    setMapInstance(map);
+    setIsMapReady(true);
+  };
+  
+  return { mapRef, initializeMap, mapInstance, isMapReady };
+};
+```
 
-**SidePanel Component:**
-Proporciona una interfaz de control lateral que muestra el estado del sistema, estadísticas y botones de acción. Este componente muestra información en tiempo real sobre el número de edificios cargados, el estado de conexión con el backend y GeoServer, y proporciona acceso rápido a las funcionalidades principales.
+**`useBuildings.js`** - Gestión de estado de edificios
+```javascript
+const useBuildings = () => {
+  const [buildings, setBuildings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [backendStatus, setBackendStatus] = useState('checking');
+  
+  // Carga inicial de edificios
+  const loadBuildings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await buildingService.getAllBuildings();
+      setBuildings(response.data);
+      setBackendStatus('connected');
+    } catch (err) {
+      setError(err.message);
+      setBackendStatus('error');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
+  return { buildings, loading, error, backendStatus, loadBuildings };
+};
+```
 
-**BuildingForm Component:**
-Componente modal que gestiona la entrada de datos para la creación y edición de edificios. Incluye validaciones de formulario, manejo de estados de carga, y una interfaz de usuario intuitiva para la selección de tipos de edificio.
+**`useGeoServer.js`** - Integración con GeoServer
+```javascript
+const useGeoServer = () => {
+  const [features, setFeatures] = useState([]);
+  const [status, setStatus] = useState('checking');
+  
+  const loadWFSData = async (map, layerName) => {
+    setStatus('loading');
+    try {
+      const wfsUrl = `http://localhost:8080/geoserver/ows?service=WFS&typeName=${layerName}`;
+      const response = await fetch(wfsUrl);
+      const data = await response.json();
+      
+      setFeatures(data.features);
+      setStatus('success');
+      processGeoJSONData(map, data.features);
+    } catch (error) {
+      setStatus('error');
+    }
+  };
+  
+  return { status, features, loadWFSData };
+};
+```
 
-### **4. SISTEMA DE HOOKS PERSONALIZADOS**
+#### **Servicios API**
 
-**useMap Hook:**
-Este hook encapsula toda la lógica relacionada con la inicialización y gestión del mapa Leaflet. Maneja el ciclo de vida del mapa, incluyendo su creación, configuración de capas base, establecimiento de límites de navegación, y limpieza de recursos cuando el componente se desmonta.
+**`buildingService.js`** - Cliente para API de edificios
+```javascript
+export const buildingService = {
+  async getAllBuildings() {
+    const response = await api.get('/buildings');
+    return {
+      ...response,
+      data: response.data.map(building => ({
+        ...building,
+        salas: building.salas || [] // ✅ Garantizar array de salas
+      }))
+    };
+  },
+  
+  async createBuilding(buildingData) {
+    return await api.post('/buildings', buildingData);
+  },
+  
+  async updateBuilding(id, buildingData) {
+    return await api.put(`/buildings/${id}`, buildingData);
+  },
+  
+  async deleteBuilding(id) {
+    return await api.delete(`/buildings/${id}`);
+  }
+};
+```
 
-**useBuildings Hook:**
-Gestiona el estado global de los edificios en la aplicación. Se encarga de cargar los datos iniciales desde el backend, manejar operaciones CRUD, y mantener la sincronización entre el estado local y la base de datos. Implementa estados de carga, error y éxito para proporcionar feedback al usuario.
+**`roomService.js`** - Cliente para API de salas
+```javascript
+export const roomService = {
+  async createRooms(roomsData) {
+    return await api.post('/rooms', roomsData);
+  },
+  
+  async updateRoom(roomId, roomData) {
+    return await api.put(`/rooms/${roomId}`, roomData);
+  },
+  
+  async deleteRoom(roomId) {
+    return await api.delete(`/rooms/${roomId}`);
+  }
+};
+```
 
-**useGeoServer Hook:**
-Especializado en la comunicación con GeoServer, este hook maneja la recuperación de datos WFS, el procesamiento de respuestas GeoJSON, y la transformación de features en el formato esperado por la aplicación. Incluye manejo de errores para fallos de conexión y timeouts.
+### **5. ARQUITECTURA DEL BACKEND**
 
-### **5. ARQUITECTURA DE LA BASE DE DATOS**
+#### **Modelos de Datos**
 
-**Diseño del Esquema:**
-La base de datos está diseñada específicamente para manejar datos geoespaciales educativos. El esquema principal gira alrededor de la tabla 'edificio', que almacena la información fundamental de cada estructura en el campus, incluyendo su ubicación geográfica, tipo, y metadatos descriptivos.
+**`buildingModel.js`** - Acceso a datos de edificios
+```javascript
+const buildingModel = {
+  async getAll() {
+    const query = `
+      SELECT 
+        e.id_edificio as id,
+        e.nombre,
+        e.descripcion,
+        e.tipo,
+        ST_AsGeoJSON(e.ubicacion) as ubicacion_geojson,
+        COALESCE(
+          json_agg(salas) FILTER (WHERE salas.id_sala IS NOT NULL),
+          '[]'
+        ) as salas
+      FROM edificio e
+      LEFT JOIN sala s ON e.id_edificio = s.id_edificio
+      GROUP BY e.id_edificio
+    `;
+    
+    const result = await pool.query(query);
+    return result.rows.map(row => ({
+      id: row.id,
+      nombre: row.nombre,
+      descripcion: row.descripcion,
+      tipo: row.tipo,
+      ubicacion: JSON.parse(row.ubicacion_geojson),
+      salas: row.salas
+    }));
+  }
+};
+```
 
-**Tabla Edificio:**
-Contiene los campos esenciales para representar cada edificio: identificador único, nombre, descripción textual, tipo categórico, geometría de punto para la ubicación, y timestamp de creación. La geometría se almacena utilizando el tipo GEOMETRY de PostGIS con SRID 4326.
+**`roomModel.js`** - Acceso a datos de salas
+```javascript
+const roomModel = {
+  async createRooms(roomsData) {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      
+      const createdRooms = [];
+      for (const roomData of roomsData) {
+        const query = `
+          INSERT INTO sala (
+            id_sala, id_edificio, nombre_sala, piso, 
+            tipo_sala, accesible_silla_ruedas, ubicacion
+          ) VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326))
+          RETURNING *
+        `;
+        
+        const result = await client.query(query, [
+          roomData.id_sala, roomData.id_edificio, roomData.nombre_sala,
+          roomData.piso, roomData.tipo_sala, roomData.accesible_silla_ruedas,
+          roomData.longitud, roomData.latitud
+        ]);
+        
+        createdRooms.push(result.rows[0]);
+      }
+      
+      await client.query('COMMIT');
+      return createdRooms;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+};
+```
 
-**Extensión PostGIS:**
-La utilización de PostGIS permite realizar consultas espaciales complejas directamente en la base de datos. Esto incluye cálculos de distancia, operaciones de intersección, transformaciones de coordenadas, y consultas basadas en relaciones espaciales.
+#### **Controladores**
 
-### **6. API REST DEL BACKEND**
+**`buildingsController.js`** - Lógica de negocio para edificios
+```javascript
+const buildingsController = {
+  async getAllBuildings(req, res) {
+    try {
+      const buildings = await buildingModel.getAll();
+      res.json({
+        success: true,
+        data: buildings,
+        count: buildings.length
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error obteniendo edificios: ' + error.message
+      });
+    }
+  },
+  
+  async createBuilding(req, res) {
+    try {
+      const { nombre, descripcion, tipo, lat, lng } = req.body;
+      
+      // Validaciones
+      if (!nombre || !lat || !lng) {
+        return res.status(400).json({
+          success: false,
+          message: 'Nombre, latitud y longitud son requeridos'
+        });
+      }
+      
+      const buildingData = {
+        nombre,
+        descripcion: descripcion || '',
+        tipo: tipo || 'Oficina Profesor',
+        ubicacion: {
+          type: 'Point',
+          coordinates: [parseFloat(lng), parseFloat(lat)]
+        }
+      };
+      
+      const newBuilding = await buildingModel.create(buildingData);
+      res.status(201).json({
+        success: true,
+        message: 'Edificio creado exitosamente',
+        data: newBuilding
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error creando edificio: ' + error.message
+      });
+    }
+  }
+};
+```
 
-**Estructura de Endpoints:**
-La API sigue las mejores prácticas REST, con endpoints bien definidos para cada recurso. Los endpoints principales incluyen operaciones para listar, crear, actualizar y eliminar edificios, así como endpoints auxiliares para salud del sistema y sincronización.
+### **6. BASE DE DATOS Y ESQUEMA**
 
-**Controladores:**
-Los controladores en el backend implementan la lógica de aplicación para cada endpoint. Se encargan de validar los datos de entrada, orquestar las operaciones con los modelos, formatear las respuestas, y manejar los errores de manera consistente.
+#### **Esquema Principal**
 
-**Modelos:**
-Los modelos abstraen el acceso a la base de datos, proporcionando métodos para realizar operaciones CRUD y consultas específicas. Utilizan el pool de conexiones para ejecutar consultas SQL parametrizadas y transforman los resultados en objetos JavaScript.
+```sql
+-- Tabla de edificios
+CREATE TABLE edificio (
+    id_edificio SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT,
+    tipo VARCHAR(50) NOT NULL,
+    ubicacion GEOMETRY(Point, 4326),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-### **7. SISTEMA DE TIPOS Y CATEGORÍAS**
+-- Tabla de salas
+CREATE TABLE sala (
+    id_sala SERIAL PRIMARY KEY,
+    id_edificio INTEGER REFERENCES edificio(id_edificio),
+    nombre_sala VARCHAR(100) NOT NULL,
+    piso INTEGER NOT NULL,
+    tipo_sala VARCHAR(50) NOT NULL,
+    accesible_silla_ruedas BOOLEAN DEFAULT FALSE,
+    ubicacion GEOMETRY(Point, 4326),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-**Taxonomía de Edificios:**
-El sistema implementa una taxonomía bien definida de tipos de edificios que refleja la diversidad de espacios en un campus universitario. Cada tipo tiene propiedades visuales específicas, incluyendo color de marcador y iconografía, que facilitan la identificación rápida en el mapa.
+#### **Índices Espaciales**
+```sql
+CREATE INDEX idx_edificio_ubicacion ON edificio USING GIST(ubicacion);
+CREATE INDEX idx_sala_ubicacion ON sala USING GIST(ubicacion);
+CREATE INDEX idx_sala_edificio ON sala(id_edificio);
+```
 
-**Gestión de Categorías:**
-Las categorías están hardcodeadas en el frontend pero diseñadas para ser extensibles. Cada categoría incluye metadatos para representación visual y agrupación lógica. El sistema permite filtrar y buscar edificios basándose en estas categorías.
+### **7. FLUJOS DE DATOS PRINCIPALES**
 
-### **8. MANEJO DE ESTADO Y FLUJO DE DATOS**
+#### **Carga Inicial de la Aplicación**
 
-**Estado de la Aplicación:**
-El estado se gestiona mediante el sistema de estados de React, con un enfoque en la elevación de estado cuando múltiples componentes necesitan acceder a los mismos datos. Los hooks personalizados proporcionan una abstracción para manejar estados complejos y efectos secundarios.
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant A as App Component
+    participant M as useMap Hook
+    participant B as useBuildings Hook
+    participant G as useGeoServer Hook
+    participant BE as Backend API
+    participant DB as PostgreSQL
 
-**Flujo de Datos Unidireccional:**
-La aplicación sigue el patrón de flujo de datos unidireccional característico de React. Los datos fluyen desde los componentes padres hacia los hijos a través de props, y los cambios de estado se manejan mediante funciones callback.
+    U->>A: Accede a la aplicación
+    A->>M: Inicializar mapa
+    M-->>A: Mapa listo
+    A->>B: Cargar edificios
+    B->>BE: GET /api/buildings
+    BE->>DB: SELECT con JOIN salas
+    DB-->>BE: Datos edificios + salas
+    BE-->>B: JSON response
+    B-->>A: Estado actualizado
+    A->>G: Cargar datos GeoServer
+    G->>G: WFS GetFeature
+    G-->>A: Features procesados
+    A->>A: Renderizar mapa completo
+```
 
-**Sincronización en Tiempo Real:**
-Cuando se realizan operaciones que modifican datos, el sistema asegura que todos los componentes interesados se actualicen inmediatamente. Esto incluye la actualización del mapa, listas de edificios, y contadores en el SidePanel.
+#### **Creación de un Nuevo Edificio**
 
-### **9. SISTEMA DE ERRORES Y LOGGING**
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant F as BuildingForm
+    participant A as Map Component
+    participant S as BuildingService
+    participant BE as Backend API
+    participant DB as PostgreSQL
 
-**Manejo de Errores en Frontend:**
-El frontend implementa un sistema comprehensivo de manejo de errores que captura excepciones, errores de red, y respuestas HTTP no exitosas. Los errores se presentan al usuario de manera amigable mientras se registran detalles técnicos en la consola.
+    U->>F: Completa formulario
+    F->>A: Enviar datos edificio
+    A->>S: buildingService.createBuilding()
+    S->>BE: POST /api/buildings
+    BE->>DB: INSERT edificio
+    DB-->>BE: ID nuevo edificio
+    BE-->>S: Respuesta éxito
+    S-->>A: Edificio creado
+    A->>A: Recargar lista edificios
+    A->>A: Actualizar markers mapa
+    A-->>U: Mostrar confirmación
+```
 
-**Logging Estructurado en Backend:**
-El backend utiliza logging estructurado con diferentes niveles de severidad. Los logs incluyen información contextual como timestamps, IDs de transacción, y detalles específicos de cada operación, facilitando el debugging y monitoreo.
+### **8. CONFIGURACIÓN Y CONSTANTES**
 
-**Manejo de Estados de Carga:**
-La aplicación proporciona feedback visual durante las operaciones asíncronas mediante estados de carga, esqueletos de carga, y indicadores de progreso. Esto mejora la experiencia de usuario al establecer expectativas claras sobre el tiempo de respuesta.
+#### **Configuración del Mapa (`mapConfig.js`)**
+```javascript
+export const UCN_COQUIMBO_BOUNDS = [
+  [-29.96800, -71.35650], // Suroeste
+  [-29.96200, -71.34850]  // Noreste
+];
+
+export const MAP_ZOOM_LIMITS = {
+  min: 17,
+  max: 19,
+  default: 18
+};
+
+export const GEO_SERVER_CONFIG = {
+  baseUrl: 'http://localhost:8080/geoserver',
+  workspace: 'InteractiveMap',
+  layerName: 'edificio'
+};
+```
+
+#### **Tipos de Edificios**
+```javascript
+export const BUILDING_TYPES = [
+  { value: 'Oficina Profesor', label: '👨‍🏫 Oficina Profesor' },
+  { value: 'Oficina Administracion', label: '📊 Oficina Admin' },
+  { value: 'Sala de Clase', label: '📚 Sala de Clase' },
+  { value: 'Laboratorio', label: '🔬 Laboratorio' },
+  { value: 'Biblioteca', label: '📖 Biblioteca' },
+  { value: 'Sala de Estudio', label: '💻 Sala Estudio' },
+  { value: 'Baño', label: '🚻 Baño' },
+  { value: 'Casino', label: '🍽️ Casino' },
+  { value: 'Cafeteria', label: '☕ Cafetería' },
+  { value: 'Gimnasio', label: '💪 Gimnasio' },
+  { value: 'Estacionamiento', label: '🅿️ Estacionamiento' }
+];
+```
+
+### **9. MANEJO DE ESTADOS Y ERRORES**
+
+#### **Estados Globales de la Aplicación**
+```javascript
+// Estado principal en Map.js
+const [globalState, setGlobalState] = useState({
+  // Estados de UI
+  showBuildingForm: false,
+  showBuildingList: false,
+  showRoomManagement: false,
+  coordinateDetection: false,
+  
+  // Datos temporales
+  editingBuilding: null,
+  tempMarker: null,
+  capturedCoords: null,
+  selectedBuildingForRooms: null,
+  
+  // Estados de operación
+  formSubmitting: false,
+  syncInProgress: false
+});
+```
+
+#### **Manejo de Errores Centralizado**
+```javascript
+// En errorHandler.js (backend)
+const errorHandler = (err, req, res, next) => {
+  console.error('Error no manejado:', err);
+  
+  res.status(500).json({
+    success: false,
+    message: 'Error interno del servidor',
+    error: process.env.NODE_ENV === 'development' ? err.message : {}
+  });
+};
+
+// En frontend (interceptor de API)
+api.interceptors.response.use(
+  response => response,
+  error => {
+    console.error('Error de API:', error);
+    // Mostrar notificación al usuario
+    showErrorNotification(error.message);
+    return Promise.reject(error);
+  }
+);
+```
 
 ### **10. SEGURIDAD Y VALIDACIONES**
 
-**Validación de Datos:**
-Tanto el frontend como el backend implementan validaciones de datos. El frontend realiza validaciones iniciales para proporcionar feedback inmediato, mientras que el backend realiza validaciones exhaustivas para garantizar la integridad de los datos.
+#### **Validaciones de Backend**
+```javascript
+// Validación de coordenadas en roomsController.js
+if (room.longitud === undefined || room.latitud === undefined) {
+  return res.status(400).json({
+    success: false,
+    message: 'Las coordenadas (longitud y latitud) son requeridas'
+  });
+}
 
-**Seguridad en Consultas:**
-Todas las consultas a la base de datos utilizan parámetros preparados para prevenir inyección SQL. Las conexiones utilizan SSL cuando está disponible, y las credenciales se manejan mediante variables de entorno.
+if (isNaN(parseFloat(room.longitud)) || isNaN(parseFloat(room.latitud))) {
+  return res.status(400).json({
+    success: false,
+    message: 'Las coordenadas deben ser números válidos'
+  });
+}
+```
 
-**Protección de Recursos:**
-El backend configura cabeceras de seguridad HTTP apropiadas, incluyendo políticas CORS específicas, protección contra clickjacking, y cabeceras de tipo de contenido estrictas.
+#### **Configuración de Seguridad**
+```javascript
+// CORS configuration
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
+
+// Security headers
+app.use(helmet());
+app.use(express.json({ limit: '10mb' }));
+```
 
 ### **11. RENDIMIENTO Y OPTIMIZACIONES**
 
-**Optimizaciones de Frontend:**
-La aplicación implementa varias técnicas de optimización, incluyendo lazy loading de componentes, memoización de componentes React, y optimización de rerenders. El mapa Leaflet se configura con opciones de rendimiento apropiadas para el uso esperado.
+#### **Optimizaciones de Frontend**
+```javascript
+// Memoización de componentes
+const BuildingList = React.memo(({ buildings, onEditBuilding }) => {
+  // Componente optimizado
+});
 
-**Optimizaciones de Backend:**
-El backend utiliza compresión de respuestas, caching de cabeceras, y pooling de conexiones a base de datos. Las consultas frecuentes pueden ser optimizadas con índices apropiados en la base de datos.
+// Callbacks estables con useCallback
+const handleSaveBuilding = useCallback(async (buildingData) => {
+  // Lógica de guardado
+}, [loadBuildings]);
 
-**Manejo de Recursos:**
-La aplicación implementa una gestión cuidadosa de recursos, incluyendo la limpieza de event listeners, cancelación de peticiones pendientes, y liberación de recursos del mapa cuando los componentes se desmontan.
+// Consultas eficientes con useMemo
+const buildingStats = useMemo(() => ({
+  total: buildings.length,
+  withRooms: buildings.filter(b => b.salas.length > 0).length
+}), [buildings]);
+```
 
-### **12. INTEGRACIÓN CONTINUA Y DESPLIEGUE**
+#### **Optimizaciones de Base de Datos**
+```sql
+-- Índices para consultas frecuentes
+CREATE INDEX CONCURRENTLY idx_edificio_tipo ON edificio(tipo);
+CREATE INDEX CONCURRENTLY idx_sala_edificio_piso ON sala(id_edificio, piso);
 
-**Variables de Entorno:**
-La aplicación utiliza variables de entorno para toda la configuración sensible, permitiendo diferentes configuraciones por ambiente sin modificar el código fuente.
+-- Consultas optimizadas con EXPLAIN ANALYZE
+EXPLAIN ANALYZE SELECT * FROM edificio WHERE ST_DWithin(ubicacion, ST_MakePoint(-71.34, -29.96)::geography, 1000);
+```
 
-**Scripts de Construcción:**
-El frontend utiliza Create React App con scripts optimizados para producción, incluyendo minificación, tree shaking, y división de código. El backend utiliza scripts personalizados para transpilación y empaquetado.
+### **12. DESPLIEGUE Y VARIABLES DE ENTORNO**
 
-**Consideraciones de Despliegue:**
-La aplicación está diseñada para ser desplegada en ambientes containerizados, con consideraciones para escalado horizontal, balanceo de carga, y monitoreo de salud.
+#### **Variables de Entorno**
+```env
+# Backend
+DB_HOST=localhost
+DB_PORT=5433
+DB_NAME=interactive_map
+DB_USER=postgres
+DB_PASSWORD=password
+NODE_ENV=development
+PORT=3001
 
-Esta arquitectura proporciona una base sólida para el Mapa Interactivo UCN, permitiendo funcionalidades ricas, buen rendimiento, y facilitando el mantenimiento y extensión futura del sistema.
+# Frontend
+REACT_APP_API_URL=http://localhost:3001/api
+REACT_APP_GEOSERVER_URL=http://localhost:8080/geoserver
+```
+
+#### **Scripts de Despliegue**
+```json
+{
+  "scripts": {
+    "dev:frontend": "cd frontend && npm start",
+    "dev:backend": "cd backend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "start:production": "cd backend && npm start"
+  }
+}
+```
+
+Esta arquitectura proporciona una base sólida, escalable y mantenible para el Mapa Interactivo UCN, permitiendo un desarrollo eficiente y la incorporación de nuevas funcionalidades de manera organizada.

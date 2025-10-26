@@ -14,6 +14,8 @@ erDiagram
         varchar nombre "VARCHAR(100) NOT NULL"
         text descripcion "TEXT"
         varchar tipo "VARCHAR(50) NOT NULL"
+        decimal lat "DECIMAL(10,8)"
+        decimal lng "DECIMAL(11,8)"
         geometry ubicacion "GEOMETRY(Point,4326)"
         timestamp fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
     }
@@ -23,10 +25,10 @@ erDiagram
         bigint id_edificio FK "REFERENCES EDIFICIO(id_edificio)"
         varchar nombre_sala "VARCHAR(100) NOT NULL"
         integer piso "INT NOT NULL"
-        varchar tipo_sala "VARCHAR(20)"
+        varchar tipo_sala "VARCHAR(50) NOT NULL"
         boolean accesible_silla_ruedas "DEFAULT FALSE"
-        geometry coordenadas_geo "GEOMETRY(Point,4326)"
-        geometry poligono_sala "GEOMETRY(Polygon,4326)"
+        geometry ubicacion "GEOMETRY(Point,4326)"
+        timestamp fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
     }
 
     RUTA {
@@ -37,6 +39,7 @@ erDiagram
         integer tiempo_estimado_minutos "INT"
         boolean activa "DEFAULT TRUE"
         geometry geometria_ruta "GEOMETRY(LineString,4326)"
+        timestamp fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
     }
 
     PUNTO_RUTA {
@@ -46,8 +49,9 @@ erDiagram
         bigint id_sala FK "REFERENCES SALA(id_sala)"
         integer orden "INT NOT NULL"
         varchar tipo_punto "VARCHAR(20)"
-        geometry coordenadas_geo "GEOMETRY(Point,4326)"
+        geometry coordenadas "GEOMETRY(Point,4326)"
         varchar descripcion "VARCHAR(255)"
+        timestamp fecha_creacion "DEFAULT CURRENT_TIMESTAMP"
     }
 
     PLANO {
