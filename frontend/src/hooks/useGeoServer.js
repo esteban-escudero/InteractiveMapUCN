@@ -75,7 +75,23 @@ export const useGeoServer = () => {
       if (!map || !map.addLayer) {
         console.error('Mapa no disponible para agregar capas');
         return;
-      }   
+      }
+      
+      /*
+      //
+      const onEachFeature = (feature, layer) => {
+        if (feature.properties) {
+          let popupContent = `<div style='min-width: 200px;'><h4>🏛️ ${feature.properties.nombre || 'Edificio'}</h4>`;
+          for (let prop in feature.properties) {
+            if (feature.properties.hasOwnProperty(prop) && feature.properties[prop] !== null) {
+              popupContent += `<b>${prop}:</b> ${feature.properties[prop]}<br>`;
+            }
+          }
+          popupContent += "</div>";
+          layer.bindPopup(popupContent);
+        }
+      };
+      */
 
       const determineStyle = (feature) => {
         if (feature.geometry.type === 'Point') {

@@ -24,29 +24,16 @@ L.Icon.Default.mergeOptions({
 
 const createDatabaseIcon = () =>
   L.divIcon({
-    html: `<div style="
-      background-color: #6a27aeff; 
-      width: 16px; 
-      height: 16px; 
-      border-radius: 50%; 
-      border: 3px solid white; 
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    "></div>`,
-    iconSize: [22, 22],
-    iconAnchor: [11, 11],
+    html: `<div style="background-color: #ae279eff;
+                width: 14px; height: 14px;
+               border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+    iconSize: [18, 18],
     className: 'database-building-icon'
   });
 
 const createTempIcon = () =>
   L.divIcon({
-    html: `<div style="
-      background-color: #e74c3c; 
-      width: 16px; 
-      height: 16px; 
-      border-radius: 50%; 
-      border: 3px solid white; 
-      box-shadow: 0 2px 6px rgba(231,76,60,0.5);
-    "></div>`,
+    html: `<div style="background-color: #e74c3c; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(231,76,60,0.5);"></div>`,
     iconSize: [22, 22],
     className: 'temp-coordinate-icon'
   });
@@ -280,7 +267,6 @@ function Map() {
         layer = L.polygon(coords, { color: '#27ae60', weight: 3, fillOpacity: 0.3 });
       }
 
-      //Punto
       const popup = `
         <div style="min-width:200px;">
           <h4>${b.nombre}</h4>
