@@ -11,14 +11,14 @@ import { useMap } from "../../hooks/useMap";
 import { useRooms } from "../../hooks/useRooms";
 
 import BuildingForm from "../Forms/BuildingForm";
-import BuildingList from "../UI/BuildingList/BuildingList";
-import RoomManagement from "../UI/RoomManagement/RoomManagement";
-import SidePanel from "../UI/SidePanel";
+import BuildingList from "../ui/BuildingList/BuildingList";
+import RoomManagement from "../ui/RoomManagement/RoomManagement";
 import { BuildingLayers } from "./BuildingLayers";
 import { CoordinateCapture } from "./CoordinateCapture";
 import { MapControls } from "./MapControls";
 
 import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig";
+import SidePanel from "../ui/SidePanel/SidePanel";
 
 // 🔧 Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
