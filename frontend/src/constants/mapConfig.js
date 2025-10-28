@@ -1,6 +1,6 @@
 export const UCN_COQUIMBO_BOUNDS = [
- [-29.96800, -71.35650], // más hacia el mar
-  [-29.96200, -71.34850]  // más hacia el mar
+ [-29.96800, -71.35650],
+ [-29.96200, -71.34850]  
 ];
 
 
