@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import L from "leaflet";
+import { useEffect, useState } from "react";
 
 const createDatabaseIcon = () =>
   L.divIcon({

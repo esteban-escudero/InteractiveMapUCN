@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Componente de menú mejorado con diseño tipo card
  * Responsabilidad: Renderizar un menú con cards visuales intuitivas
@@ -35,7 +33,7 @@ export const MenuDropdown = ({ menu, isActive, onToggle, handlers }) => {
         <span className="menu-arrow">{isActive ? "▲" : "▼"}</span>
       </button>
 
-      <div className={`menu-items-container ${isActive ? 'show' : ''}`}>
+      <div className={`menu-items-container ${isActive ? "show" : ""}`}>
         <div className="menu-items-grid" id={`menu-${menu.id}`}>
           {menu.items.map((item) => (
             <button

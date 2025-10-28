@@ -16,9 +16,9 @@ import RoomManagement from "../ui/RoomManagement/RoomManagement";
 import { BuildingLayers } from "./BuildingLayers";
 import { CoordinateCapture } from "./CoordinateCapture";
 import { MapControls } from "./MapControls";
+import SidePanel from "../ui/SidePanel/SidePanel";
 
 import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig";
-import SidePanel from "../ui/SidePanel/SidePanel";
 
 // 🔧 Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;

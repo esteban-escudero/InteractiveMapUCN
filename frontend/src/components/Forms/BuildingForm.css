@@ -50,8 +50,14 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .form-group {
@@ -144,7 +150,8 @@
   border-top: 1px solid #e0e0e0;
 }
 
-.cancel-btn, .back-btn {
+.cancel-btn,
+.back-btn {
   background: #95a5a6;
   color: white;
   border: none;
@@ -179,7 +186,8 @@
   cursor: not-allowed;
 }
 
-.capture-btn, .change-coords-btn {
+.capture-btn,
+.change-coords-btn {
   background: #e67e22;
   color: white;
   border: none;

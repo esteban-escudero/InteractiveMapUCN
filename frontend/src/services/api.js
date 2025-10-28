@@ -1,42 +1,46 @@
 // src/services/api.js
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = "http://localhost:3001/api";
 
 export const api = {
   async get(endpoint) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`);
-    if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!response.ok)
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
     return response.json();
   },
 
   async post(endpoint, data) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!response.ok)
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
     return response.json();
   },
 
   async put(endpoint, data) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!response.ok)
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
     return response.json();
   },
 
   async delete(endpoint) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!response.ok)
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
     return response.json();
-  }
+  },
 };

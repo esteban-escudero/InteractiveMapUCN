@@ -1,13 +1,11 @@
-import React from "react";
 import L from "leaflet";
 import {
-  UCN_COQUIMBO_BOUNDS,
   MAP_ZOOM_LIMITS,
+  UCN_COQUIMBO_BOUNDS,
 } from "../../constants/mapConfig";
 
 /**
  * Componente para controles adicionales del mapa
- * Responsabilidad: Botones de control (reset view, contador de edificios, etc)
  */
 export const MapControls = ({ mapInstance, buildingsCount }) => {
   const handleResetView = () => {
