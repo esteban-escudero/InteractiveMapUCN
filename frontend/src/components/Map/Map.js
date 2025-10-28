@@ -7,6 +7,7 @@ import { useBuildingManagement } from "../../hooks/useBuildingManagement";
 import { useBuildings } from "../../hooks/useBuildings";
 import { useCoordinateDetection } from "../../hooks/useCoordinateDetection";
 import { useGeoServer } from "../../hooks/useGeoServer";
+import { useGPSTracking } from "../../hooks/useGPSTracking";
 import { useMap } from "../../hooks/useMap";
 import { useRooms } from "../../hooks/useRooms";
 
@@ -16,6 +17,7 @@ import RoomManagement from "../UI/RoomManagement/RoomManagement";
 import SidePanel from "../UI/SidePanel";
 import { BuildingLayers } from "./BuildingLayers";
 import { CoordinateCapture } from "./CoordinateCapture";
+import { GPSTracker } from "./GPSTracker";
 import { MapControls } from "./MapControls";
 
 import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig";
@@ -67,7 +69,8 @@ function Map() {
   // 📍 Modo de captura de coordenadas
   const coordCapture = useCoordinateDetection();
 
-  // 🔄 Handler cuando se capturan coordenadas
+  const gpsTracking = useGPSTracking();
+
   const handleCoordinatesCaptured = (coords) => {
     buildingMgmt.handleCoordinatesCaptured(coords);
     coordCapture.deactivate();
@@ -194,6 +197,12 @@ function Map() {
 
         {/* 🏢 CAPAS DE EDIFICIOS */}
         <BuildingLayers mapInstance={mapInstance} buildings={buildings} />
+
+        <GPSTracker
+          mapInstance={mapInstance}
+          isActive={gpsTracking.isActive}
+          onToggle={gpsTracking.toggle}
+        />
 
         {/* ⏳ INDICADOR DE CARGA */}
         {!isMapReady && (
