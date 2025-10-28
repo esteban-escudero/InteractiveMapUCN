@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
-console.log('🔧 Configurando conexión PostgreSQL:');
+console.log('Configurando conexión PostgreSQL:');
 console.log('  Host:', process.env.DB_HOST);
 console.log('  Puerto:', process.env.DB_PORT);
 console.log('  Base de datos:', process.env.DB_NAME);
@@ -16,7 +16,7 @@ const pool = new Pool({
 });
 
 pool.on('connect', () => {
-  console.log('✅ Conectado a PostgreSQL en puerto', process.env.DB_PORT || 5433);
+  console.log('Conectado a PostgreSQL en puerto', process.env.DB_PORT || 5433);
 });
 
 pool.on('error', (err) => {

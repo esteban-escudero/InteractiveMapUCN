@@ -9,8 +9,8 @@ function BuildingList({
   onClose, 
   onEditRoom, 
   onCreateRooms,
-  onDeleteRoom, // ✅ AGREGAR ESTA PROP FALTANTE
-  onReload // ✅ AGREGAR ESTA PROP PARA RECARGAR
+  onDeleteRoom,
+  onReload
 }) {
   const [deletingId, setDeletingId] = useState(null);
   const [expandedBuilding, setExpandedBuilding] = useState(null);

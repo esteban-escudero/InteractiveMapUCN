@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const buildingsController = require('../controllers/buildingsController');
 
-// ✅ RUTAS CORRECTAS
+// RUTAS CORRECTAS
 router.get('/', buildingsController.getAllBuildings);
 router.post('/', buildingsController.createBuilding);
 router.put('/:id', buildingsController.updateBuilding);

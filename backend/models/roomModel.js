@@ -40,7 +40,6 @@ const roomModel = {
     }
   },
 
-  // ✅ MODELO ACTUALIZADO con nombre 'ubicacion' y tipo geometry
   async createRooms(roomsData) {
     const client = await pool.connect();
     
@@ -83,8 +82,8 @@ const roomModel = {
           roomData.piso,
           roomData.tipo_sala,
           roomData.accesible_silla_ruedas || false,
-          roomData.longitud,  // ✅ Longitud primero en ST_MakePoint
-          roomData.latitud    // ✅ Latitud después
+          roomData.longitud,
+          roomData.latitud
         ];
         
         console.log('📝 Insertando sala con ID:', availableId, 'y ubicación:', roomData.longitud, roomData.latitud);
@@ -117,7 +116,7 @@ const roomModel = {
           piso,
           tipo_sala,
           accesible_silla_ruedas,
-          ST_X(ubicacion) as longitud,  -- ✅ Nuevo nombre: ubicacion
+          ST_X(ubicacion) as longitud,
           ST_Y(ubicacion) as latitud
         FROM sala 
         WHERE id_edificio = $1
@@ -141,7 +140,7 @@ const roomModel = {
           piso = $2, 
           tipo_sala = $3,
           accesible_silla_ruedas = $4,
-          ubicacion = ST_SetSRID(ST_MakePoint($5, $6), 4326)  -- ✅ Nuevo nombre
+          ubicacion = ST_SetSRID(ST_MakePoint($5, $6), 4326)
         WHERE id_sala = $7 
         RETURNING 
           *,
@@ -167,7 +166,7 @@ const roomModel = {
     }
   },
 
-  // ✅ FUNCIONES ESPACIALES AVANZADAS (ahora que tenemos geometry)
+  // FUNCIONES ESPACIALES AVANZADAS (ahora que tenemos geometry)
   async findNearbyRooms(lng, lat, radiusMeters) {
     try {
       const query = `

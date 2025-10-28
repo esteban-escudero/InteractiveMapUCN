@@ -30,10 +30,10 @@ export const useMap = () => {
 
       const map = L.map(mapRef.current, {
         center: [centerLat, centerLng],
-        zoom: MAP_ZOOM_LIMITS.default, // ✅ Usar configuración
-        minZoom: MAP_ZOOM_LIMITS.min,  // ✅ Usar configuración
-        maxZoom: MAP_ZOOM_LIMITS.max,  // ✅ Usar configuración
-        zoomControl: true,
+        zoom: MAP_ZOOM_LIMITS.default, 
+        minZoom: MAP_ZOOM_LIMITS.min,  
+        maxZoom: MAP_ZOOM_LIMITS.max, 
+        zoomControl: false,
         attributionControl: true
       });
 

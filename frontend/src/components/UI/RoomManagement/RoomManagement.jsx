@@ -124,14 +124,14 @@ const RoomManagement = ({ buildings, onSaveRooms, onUpdateRoom, onDeleteRoom, on
             latitud: coords.latitud
         }));
 
-        console.log('📤 Enviando salas con coordenadas:', roomsToSave);
+        console.log('Enviando salas con coordenadas:', roomsToSave);
 
         try {
             await onSaveRooms(roomsToSave);
-            alert(`✅ ${rooms.length} salas creadas exitosamente`);
+            alert(`${rooms.length} salas creadas exitosamente`);
             onClose();
         } catch (error) {
-            alert('❌ Error al guardar las salas: ' + error.message);
+            alert('Error al guardar las salas: ' + error.message);
         }
     };
 
@@ -205,13 +205,13 @@ const RoomManagement = ({ buildings, onSaveRooms, onUpdateRoom, onDeleteRoom, on
                         value={selectedBuilding} 
                         onChange={(e) => setSelectedBuilding(e.target.value)}
                         required
-                        disabled={isEditing} // No cambiar edificio en edición
+                        disabled={isEditing}
                     >
                         <option value="">Selecciona un edificio</option>
                         {buildings.map(building => (
                             <option key={building.id} value={building.id}>
                                 {building.nombre} 
-                                {building.longitud && building.latitud ? ' 📍' : ' ❌'}
+                                {building.longitud && building.latitud}
                             </option>
                         ))}
                     </select>

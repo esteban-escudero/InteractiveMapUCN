@@ -69,7 +69,7 @@ function Map() {
   const { status: geoServerStatus, features: geoServerFeatures, loadWFSData } = useGeoServer();
   const [buildingLayers, setBuildingLayers] = useState([]);
 
-  // ✅ FUNCIONES PARA SALAS
+  // FUNCIONES PARA SALAS
   const handleOpenCreateRooms = () => {
     setRoomManagementMode('create');
     setSelectedRooms([]);
@@ -311,7 +311,7 @@ function Map() {
 
   return (
     <div className="container">
-      {/* ✅ SIDEPANEL CON TODAS LAS PROPS NECESARIAS */}
+      {/* SIDEPANEL CON TODAS LAS PROPS NECESARIAS */}
       <SidePanel
         status={backendStatus === 'connected' ? 'success' : 'error'}
         featuresCount={buildings.length}
@@ -329,7 +329,8 @@ function Map() {
         onEditRoom={handleOpenEditRoom}
         onCreateRooms={handleCreateRoomsForBuilding}
       />
-
+      
+      {/* BUILDINGFORM PARA CREAR/EDITAR EDIFICIOS */}  
       <BuildingForm 
         onSave={handleSaveBuilding}
         onCancel={handleCancelEdit}
@@ -340,7 +341,7 @@ function Map() {
         onClearCoordinates={() => setCapturedCoords(null)}
       />
 
-      {/* ✅ BUILDINGLIST CON GESTIÓN DE SALAS */}
+      {/* BUILDINGLIST CON GESTIÓN DE SALAS */}
       {showBuildingList && (
         <BuildingList
           buildings={buildings}
@@ -354,7 +355,7 @@ function Map() {
         />
       )}
 
-      {/* ✅ ROOMMANAGEMENT */}
+      {/* ROOMMANAGEMENT */}
       {showRoomManagement && (
         <RoomManagement
           buildings={buildings}
@@ -366,6 +367,7 @@ function Map() {
         />
       )}
 
+      {/* MODO CAPTURA */}
       {coordinateDetection && (
         <div style={{
           position: 'absolute',

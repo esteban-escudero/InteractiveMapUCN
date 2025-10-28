@@ -1,4 +1,3 @@
-// backend/models/buildingModel.js
 const pool = require('../config/database');
 
 const buildingModel = {
@@ -6,8 +5,7 @@ const buildingModel = {
     try {
       console.log('🔍 Ejecutando consulta de edificios CON SALAS...');
       
-      // ✅ CONSULTA MEJORADA - INCLUIR SALAS
-      const query = `
+        const query = `
         SELECT 
           e.id_edificio as id,
           e.nombre,
@@ -63,14 +61,11 @@ const buildingModel = {
       
     } catch (error) {
       console.error('❌ Error EN buildingModel.getAll:', error.message);
-      
-      // ✅ FALLBACK: Si falla el JOIN, devolver edificios sin salas
       console.log('🔄 Intentando consulta sin JOIN de salas...');
       return await this.getAllWithoutRooms();
     }
   },
 
-  // ✅ CONSULTA FALLBACK: Solo edificios sin salas
   async getAllWithoutRooms() {
     try {
       const query = `
@@ -92,7 +87,7 @@ const buildingModel = {
         descripcion: row.descripcion,
         tipo: row.tipo,
         ubicacion: row.ubicacion_geojson ? JSON.parse(row.ubicacion_geojson) : null,
-        salas: [] // ✅ Array vacío como fallback
+        salas: []
       }));
       
       console.log(`⚠️ ${buildings.length} edificios cargados SIN SALAS (fallback)`);
@@ -104,7 +99,6 @@ const buildingModel = {
     }
   },
 
-  // ✅ FUNCIÓN MEJORADA: Encontrar primer ID disponible
   async findAvailableId() {
     try {
       console.log('🔍 Buscando ID disponible...');
@@ -135,7 +129,7 @@ const buildingModel = {
     }
   },
 
-  // ✅ FUNCIÓN AUXILIAR: Obtener máximo ID
+  // Obtener máximo ID
   async getMaxId() {
     try {
       const query = 'SELECT COALESCE(MAX(id_edificio), 0) as max_id FROM edificio';
@@ -147,7 +141,6 @@ const buildingModel = {
     }
   },
 
-  // ✅ FUNCIÓN CREATE CORREGIDA: Usar tipo en lugar de activo
   async create(buildingData) {
     const client = await pool.connect();
     
@@ -203,7 +196,7 @@ const buildingModel = {
         descripcion: newBuilding.descripcion,
         tipo: newBuilding.tipo,
         ubicacion: newBuilding.ubicacion_geojson ? JSON.parse(newBuilding.ubicacion_geojson) : null,
-        salas: [] // ✅ Nuevo edificio sin salas
+        salas: []
       };
       
     } catch (error) {

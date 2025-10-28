@@ -7,7 +7,7 @@ const buildingsController = {
       console.log('📥 Solicitud para obtener todos los edificios CON SALAS...');
       const buildings = await buildingModel.getAll();
       
-      // ✅ DEBUG: Verificar que las salas vienen en la respuesta
+      // Verificar que las salas vienen en la respuesta
       let totalSalas = 0;
       buildings.forEach(building => {
         const salasCount = building.salas ? building.salas.length : 0;

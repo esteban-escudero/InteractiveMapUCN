@@ -20,7 +20,6 @@ export const api = {
     return response.json();
   },
 
-  // ✅ AGREGAR ESTE MÉTODO PUT
   async put(endpoint, data) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
@@ -33,7 +32,6 @@ export const api = {
     return response.json();
   },
 
-  // Opcional: agregar delete también
   async delete(endpoint) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'DELETE',

@@ -19,7 +19,6 @@ const BuildingForm = ({
     longitud: ''
   });
 
-  // ✅ NUEVOS TIPOS DE EDIFICIOS CON EMOJIS Y COLORES
   const tiposEdificio = [
     { value: 'Oficina Profesor', label: '👨‍🏫 Oficina Profesor' },
     { value: 'Oficina Administracion', label: '📊 Oficina Admin' },
