@@ -1,55 +1,67 @@
-import { useRef, useEffect, useState } from 'react';
-import L from 'leaflet';
-import { MAP_ZOOM_LIMITS } from '../constants/mapConfig'; // ✅ Importar la configuración
+import { useRef, useEffect, useState, useCallback } from "react";
+import L from "leaflet";
+import { MAP_ZOOM_LIMITS } from "../constants/mapConfig";
 
 export const useMap = () => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [isMapReady, setIsMapReady] = useState(false);
 
-  const initializeMap = (bounds) => {
+  const initializeMap = useCallback((bounds) => {
     if (!mapRef.current) {
-      console.error('Contenedor del mapa no encontrado');
+      console.error("❌ Contenedor del mapa no encontrado");
       return null;
     }
 
     if (mapInstanceRef.current) {
+      console.log("⚠️ Mapa ya inicializado, retornando instancia existente");
       return mapInstanceRef.current;
     }
 
     try {
-      // ✅ CALCULAR CORRECTAMENTE el centro
+      console.log("🗺️ Inicializando mapa con bounds:", bounds);
+
+      // 🎯 Calcular centro para inicialización
       const centerLat = (bounds[0][0] + bounds[1][0]) / 2;
       const centerLng = (bounds[0][1] + bounds[1][1]) / 2;
 
-      console.log('🗺️ Inicializando mapa:', {
-        center: [centerLat, centerLng],
-        bounds: bounds,
-        zoom: MAP_ZOOM_LIMITS.default
-      });
-
+      // 🎯 Crear mapa con centro y zoom inicial
       const map = L.map(mapRef.current, {
         center: [centerLat, centerLng],
-        zoom: MAP_ZOOM_LIMITS.default, 
-        minZoom: MAP_ZOOM_LIMITS.min,  
-        maxZoom: MAP_ZOOM_LIMITS.max, 
-        zoomControl: false,
-        attributionControl: true
+        zoom: MAP_ZOOM_LIMITS.default,
+        minZoom: MAP_ZOOM_LIMITS.min,
+        maxZoom: MAP_ZOOM_LIMITS.max,
+        zoomControl: true, // Activar controles de zoom
+        attributionControl: true,
+        maxBoundsViscosity: 0.8, // Permite desplazamiento suave en los bordes
+        zoomSnap: 0.5, // Permite zooms intermedios más suaves
+        zoomDelta: 0.5,
+        wheelPxPerZoomLevel: 80, // Control más suave del zoom con rueda
       });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors',
-        minZoom: MAP_ZOOM_LIMITS.min, // ✅ Usar configuración
-        maxZoom: MAP_ZOOM_LIMITS.max  // ✅ Usar configuración
+      // 🗺️ Agregar capa de tiles
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+        minZoom: MAP_ZOOM_LIMITS.min,
+        maxZoom: MAP_ZOOM_LIMITS.max,
       }).addTo(map);
 
-      // ✅ ESTABLECER LÍMITES
-      map.setMaxBounds(bounds);
-      console.log('📍 Límites establecidos:', bounds);
+      // ✅ Establecer límites flexibles (permite salir un poco pero vuelve)
+      const boundsLatLng = L.latLngBounds(bounds);
+      map.setMaxBounds(boundsLatLng);
 
-      // ✅ EVENTOS PARA MANTENER DENTRO DE LOS LÍMITES
-      map.on('zoomend', function() {
+      console.log("✅ Vista inicial establecida:", {
+        bounds: boundsLatLng,
+        center: map.getCenter(),
+        zoom: map.getZoom(),
+      });
+
+      // 📊 Eventos de monitoreo
+      map.on("zoomend", () => {
         const currentZoom = map.getZoom();
+        console.log("🔍 Zoom actual:", currentZoom);
+
+        // Prevenir zoom fuera de límites
         if (currentZoom < MAP_ZOOM_LIMITS.min) {
           map.setZoom(MAP_ZOOM_LIMITS.min);
         } else if (currentZoom > MAP_ZOOM_LIMITS.max) {
@@ -57,36 +69,43 @@ export const useMap = () => {
         }
       });
 
-      map.on('drag', function() {
-        map.panInsideBounds(bounds, { animate: false });
+      map.on("moveend", () => {
+        const center = map.getCenter();
+        console.log("📍 Centro actual:", center);
       });
 
-      // ✅ EVENTO PARA DEBUG
-      map.on('load', function() {
-        console.log('✅ Mapa cargado completamente');
-        console.log('📊 Estado final:', {
-          center: map.getCenter(),
-          zoom: map.getZoom(),
-          bounds: map.getBounds()
-        });
+      // ✅ Evento LOAD para ajustar vista cuando el mapa esté completamente listo
+      map.whenReady(() => {
+        console.log("✅ Mapa listo (whenReady)");
+        // 🎯 Usar fitBounds solo cuando el mapa esté completamente inicializado
+        setTimeout(() => {
+          try {
+            map.invalidateSize();
+            const boundsLatLng = L.latLngBounds(bounds);
+            map.fitBounds(boundsLatLng, {
+              padding: [50, 50],
+              maxZoom: MAP_ZOOM_LIMITS.default,
+              animate: true,
+            });
+            console.log("🔄 Vista ajustada con fitBounds");
+          } catch (error) {
+            console.warn(
+              "⚠️ No se pudo ajustar con fitBounds, manteniendo vista inicial:",
+              error
+            );
+          }
+        }, 100);
       });
 
       mapInstanceRef.current = map;
       setIsMapReady(true);
 
-      // ✅ FORZAR REDIMENSIONADO
-      setTimeout(() => {
-        map.invalidateSize();
-        console.log('🔄 Mapa redimensionado');
-      }, 300);
-
       return map;
-
     } catch (error) {
-      console.error('❌ Error inicializando mapa:', error);
+      console.error("❌ Error inicializando mapa:", error);
       return null;
     }
-  };
+  }, []); // useCallback sin dependencias porque mapRef es ref
 
   useEffect(() => {
     return () => {
@@ -98,10 +117,10 @@ export const useMap = () => {
     };
   }, []);
 
-  return { 
-    mapRef, 
-    initializeMap, 
+  return {
+    mapRef,
+    initializeMap,
     mapInstance: mapInstanceRef.current,
-    isMapReady 
+    isMapReady,
   };
 };
