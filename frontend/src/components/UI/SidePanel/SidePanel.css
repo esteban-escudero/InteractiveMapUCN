@@ -11,6 +11,11 @@
   left: 0;
   top: 0;
   z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.Panel:hover {
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.4);
 }
 
 .dropdowns-container {
@@ -42,6 +47,11 @@
   border-color: rgba(255, 255, 255, 0.3);
 }
 
+.dropdown.active .dropdown-toggle {
+  background: rgba(52, 152, 219, 0.3);
+  border-color: rgba(52, 152, 219, 0.5);
+}
+
 .dropdown-menu {
   list-style: none;
   margin: 5px 0 0 0;
@@ -69,24 +79,117 @@
   cursor: pointer;
   color: #2c3e50;
   font-size: 13px;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .dropdown-menu button:hover {
   background: #3498db;
   color: white;
+  transform: translateX(5px);
 }
 
-.dropdown-menu button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Sección de detección de coordenadas */
+.coordinate-detection-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.dropdown-menu button:disabled:hover {
-  background: none;
-  color: #2c3e50;
+.coordinate-detection-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 12px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
+.coordinate-detection-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #2471a3);
+  transform: translateY(-1px);
+}
+
+.coordinate-detection-btn.active {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  animation: pulse 2s infinite;
+}
+
+.coordinate-hint {
+  color: #e74c3c;
+  display: block;
+  text-align: center;
+  margin-top: 5px;
+  font-size: 11px;
+}
+
+/* Sección de sincronización */
+.sync-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sync-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  color: white;
+  border: none;
+  padding: 12px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
+}
+
+.sync-btn:hover {
+  background: linear-gradient(135deg, #8e44ad, #7d3c98);
+  transform: translateY(-1px);
+}
+
+.sync-info {
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Sección de estado */
+.status-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.features-count {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 10px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.loading-indicator {
+  text-align: center;
+  font-size: 11px;
+  color: #f39c12;
+  margin-top: 8px;
+  animation: pulse 2s infinite;
+}
+
+/* Botón de cerrar sesión */
 .logout-btn {
   width: 100%;
   background: linear-gradient(135deg, #e74c3c, #c0392b);
@@ -126,55 +229,37 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* Agrega esto al final de tu SidePanel.css */
-
-.coordinate-detection-section {
-  margin-bottom: 20px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.coordinate-detection-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
-  border: none;
-  padding: 12px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.coordinate-detection-btn:hover {
-  background: linear-gradient(135deg, #2980b9, #2471a3);
-  transform: translateY(-1px);
-}
-
-.coordinate-detection-btn.active {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  animation: pulse 2s infinite;
-}
-
-.coordinate-detection-btn.active:hover {
-  background: linear-gradient(135deg, #c0392b, #a93226);
-}
-
+/* Animaciones */
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
 }
 
-/* Estilo para el ícono temporal en el mapa */
-.temp-coordinate-icon {
-  animation: bounce 0.5s alternate infinite;
-}
+/* Responsive */
+@media (max-height: 700px) {
+  .Panel {
+    padding: 15px;
+  }
 
-@keyframes bounce {
-  from { transform: translateY(0px); }
-  to { transform: translateY(-5px); }
+  .dropdown-toggle {
+    padding: 10px 12px;
+  }
+
+  .dropdown-menu button {
+    padding: 10px 12px;
+  }
+
+  .coordinate-detection-section,
+  .sync-section,
+  .status-section {
+    padding: 12px;
+    margin-bottom: 15px;
+  }
 }

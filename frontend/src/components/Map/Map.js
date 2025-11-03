@@ -82,7 +82,6 @@ function Map() {
     if (!mapInitialized && mapRef.current && !mapInstance) {
       console.log("🔄 Inicializando mapa por primera vez...");
 
-      // Delay para asegurar que el DOM esté listo
       const timer = setTimeout(() => {
         try {
           initializeMap(UCN_COQUIMBO_BOUNDS);
@@ -90,7 +89,6 @@ function Map() {
           console.log("✅ Mapa inicializado exitosamente");
         } catch (error) {
           console.error("❌ Error inicializando mapa:", error);
-          // Reintentar después de 1 segundo
           setTimeout(() => {
             if (mapRef.current) {
               initializeMap(UCN_COQUIMBO_BOUNDS);
@@ -104,12 +102,13 @@ function Map() {
     }
   }, [mapInitialized, mapRef, initializeMap, mapInstance]);
 
-  // FUNCIONES PARA SALAS
+  // FUNCIONES PARA SALAS - AHORA DENTRO DE EDIFICIOS
   const handleOpenCreateRooms = () => {
     setRoomManagementMode("create");
     setSelectedRooms([]);
     setSelectedBuildingForRooms(null);
     setShowRoomManagement(true);
+    setShowBuildingList(false);
     console.log("➕ Abriendo creación de salas");
   };
 
@@ -117,6 +116,7 @@ function Map() {
     setRoomManagementMode("edit");
     setSelectedRooms([room]);
     setShowRoomManagement(true);
+    setShowBuildingList(false);
     console.log("✏️ Abriendo edición de sala:", room);
   };
 
@@ -219,7 +219,6 @@ function Map() {
       setCapturedCoords({ lat, lng });
     };
 
-    // ✅ Función global para usar coordenadas
     window.useCapturedCoords = (lat, lng) => {
       console.log("🔄 Coordenadas usadas:", { lat, lng });
       setCapturedCoords({ lat, lng });
@@ -269,7 +268,11 @@ function Map() {
     setShowBuildingForm(true);
   };
 
-  const handleEditBuildings = () => setShowBuildingList(true);
+  // ✅ FUNCIÓN UNIFICADA PARA GESTIÓN DE EDIFICIOS
+  const handleManageBuildings = () => {
+    setShowBuildingList(true);
+    setShowRoomManagement(false);
+  };
 
   const handleEditBuilding = (b) => {
     setEditingBuilding(b);
@@ -284,8 +287,6 @@ function Map() {
   };
 
   const handleCloseBuildingList = () => setShowBuildingList(false);
-
-  const handleManageRooms = () => handleOpenCreateRooms();
 
   const handleDeleteBuilding = async (b) => {
     if (
@@ -370,7 +371,6 @@ function Map() {
   const handleLogout = () => {
     if (window.confirm("¿Estás seguro de que quieres cerrar sesión?")) {
       alert("Sesión cerrada");
-      // Aquí iría la lógica real de logout
     }
   };
 
@@ -391,7 +391,7 @@ function Map() {
 
   return (
     <div className="container">
-      {/* SIDEPANEL */}
+      {/* SIDEPANEL SIMPLIFICADO */}
       <SidePanel
         status={backendStatus === "connected" ? "success" : "error"}
         featuresCount={buildings.length}
@@ -402,12 +402,10 @@ function Map() {
         geoServerStatus={geoServerStatus}
         geoServerFeaturesCount={geoServerFeatures.length}
         onAddBuilding={handleAddBuilding}
-        onEditBuildings={handleEditBuildings}
+        onManageBuildings={handleManageBuildings} // ✅ Botón unificado
         onToggleCoordinateDetection={toggleCoordinateDetection}
         coordinateDetectionActive={coordinateDetection}
-        onManageRooms={handleManageRooms}
-        onEditRoom={handleOpenEditRoom}
-        onCreateRooms={handleCreateRoomsForBuilding}
+        // ❌ ELIMINADOS: onManageRooms, onEditRoom, onCreateRooms
       />
 
       {/* BUILDINGFORM */}
@@ -421,7 +419,7 @@ function Map() {
         onClearCoordinates={() => setCapturedCoords(null)}
       />
 
-      {/* BUILDINGLIST */}
+      {/* BUILDINGLIST CON GESTIÓN DE SALAS INTEGRADA */}
       {showBuildingList && (
         <BuildingList
           buildings={buildings}
@@ -430,6 +428,7 @@ function Map() {
           onClose={handleCloseBuildingList}
           onEditRoom={handleOpenEditRoom}
           onCreateRooms={handleCreateRoomsForBuilding}
+          onAddRooms={handleOpenCreateRooms} // ✅ Nueva función para agregar salas
           onDeleteRoom={handleDeleteRoom}
           onReload={loadBuildings}
         />
