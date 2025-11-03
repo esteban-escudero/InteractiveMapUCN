@@ -1,0 +1,63 @@
+.route-popup {
+  min-width: 250px;
+}
+
+.route-popup h4 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 5px;
+}
+
+.route-info {
+  margin-bottom: 15px;
+}
+
+.route-info p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.route-info strong {
+  color: #34495e;
+}
+
+.select-route-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+}
+
+.select-route-btn:hover {
+  background: #219a52;
+}
+
+.route-point-popup {
+  min-width: 200px;
+}
+
+.route-point-popup h5 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+}
+
+.route-point-popup p {
+  margin: 3px 0;
+  font-size: 13px;
+}
+
+/* Estilos para las líneas de ruta */
+.route-line {
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+
+.route-line:hover {
+  opacity: 1 !important;
+  filter: brightness(1.2);
+}

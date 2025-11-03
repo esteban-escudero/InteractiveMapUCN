@@ -13,6 +13,9 @@ const SidePanel = ({
   onManageBuildings,
   onToggleCoordinateDetection,
   coordinateDetectionActive = false,
+  onAddRoute,
+  onManageRoutes,
+  routesCount = 0,
 }) => {
   const [activeMenu, setActiveMenu] = useState(null);
 
@@ -42,6 +45,16 @@ const SidePanel = ({
   const handleToggleCoordinateDetection = () => {
     console.log("📍 Botón detección de coordenadas clickeado");
     if (onToggleCoordinateDetection) onToggleCoordinateDetection();
+  };
+
+  const handleAddRoute = () => {
+    console.log("🛣️ SidePanel: Agregar Ruta clickeado");
+    if (onAddRoute) onAddRoute();
+  };
+
+  const handleManageRoutes = () => {
+    console.log("🗺️ SidePanel: Gestionar Rutas clickeado");
+    if (onManageRoutes) onManageRoutes();
   };
 
   const getStatusStyle = () => {
@@ -125,13 +138,11 @@ const SidePanel = ({
           {activeMenu === "Rutas" && (
             <ul className="dropdown-menu">
               <li>
-                <button onClick={() => alert("Funcionalidad en desarrollo")}>
-                  ➕ Agregar Ruta
-                </button>
+                <button onClick={handleAddRoute}>➕ Agregar Ruta</button>
               </li>
               <li>
-                <button onClick={() => alert("Funcionalidad en desarrollo")}>
-                  ✏️ Editar Ruta
+                <button onClick={handleManageRoutes}>
+                  📝 Gestionar Rutas ({routesCount})
                 </button>
               </li>
             </ul>

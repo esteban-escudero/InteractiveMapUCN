@@ -1,0 +1,226 @@
+.route-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.route-form-container {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.route-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  background: #f8f9fa;
+}
+
+.route-form-header h3 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #7f8c8d;
+}
+
+.close-btn:hover {
+  color: #e74c3c;
+}
+
+.route-form {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.route-calculation-section {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 20px 0;
+  border-left: 4px solid #3498db;
+}
+
+.route-calculation-section h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+}
+
+.building-selection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.calculate-btn {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+}
+
+.calculate-btn:hover:not(:disabled) {
+  background: #219a52;
+}
+
+.calculate-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.route-details {
+  background: #e8f4fd;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 20px 0;
+  border-left: 4px solid #2980b9;
+}
+
+.route-details h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+}
+
+.route-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.route-points {
+  margin-top: 15px;
+}
+
+.route-points h5 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+}
+
+.route-point {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: white;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  border-left: 3px solid #3498db;
+}
+
+.point-order {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #e74c3c;
+}
+
+.point-desc {
+  flex: 1;
+  color: #2c3e50;
+}
+
+.point-type {
+  font-size: 12px;
+  color: #7f8c8d;
+  text-transform: capitalize;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.cancel-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #7f8c8d;
+}
+
+.save-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.save-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .building-selection,
+  .route-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .route-form-container {
+    width: 95%;
+    margin: 10px;
+  }
+}

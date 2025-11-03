@@ -14,6 +14,12 @@ import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig";
 import { buildingService } from "../../services/buildingService";
 import { roomService } from "../../services/roomService";
 
+// IMPORTACIONES AGREGADAS
+import useRoutes from "../../hooks/useRoutes";
+import RouteForm from "../Forms/RouteForm";
+import RouteLayer from "./RouteLayer";
+import RouteList from "../UI/RouteList/RouteList";
+
 // 🔧 Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -60,6 +66,13 @@ function Map() {
   const [selectedBuildingForRooms, setSelectedBuildingForRooms] =
     useState(null);
 
+  // DENTRO DEL COMPONENTE Map, AGREGAR ESTOS ESTADOS:
+  const [showRouteForm, setShowRouteForm] = useState(false);
+  const [showRouteList, setShowRouteList] = useState(false);
+  const [editingRoute, setEditingRoute] = useState(null);
+  const [selectedRoute, setSelectedRoute] = useState(null);
+
+  // Hook para edificios
   const {
     buildings,
     loading: buildingsLoading,
@@ -70,6 +83,7 @@ function Map() {
     deleteBuilding,
   } = useBuildings();
 
+  // Hook para GeoServer
   const {
     status: geoServerStatus,
     features: geoServerFeatures,
@@ -77,7 +91,17 @@ function Map() {
   } = useGeoServer();
   const [buildingLayers, setBuildingLayers] = useState([]);
 
-  // ✅ INICIALIZACIÓN CORREGIDA DEL MAPA
+  // AGREGAR HOOK DE RUTAS
+  const {
+    routes,
+    loading: routesLoading,
+    error: routesError,
+    createRoute,
+    updateRoute,
+    deleteRoute,
+    loadRoutes,
+  } = useRoutes();
+
   useEffect(() => {
     if (!mapInitialized && mapRef.current && !mapInstance) {
       console.log("🔄 Inicializando mapa por primera vez...");
@@ -164,6 +188,83 @@ function Map() {
     console.log("🏢 Creando salas para edificio:", building.nombre);
   };
 
+  // FUNCIONES PARA RUTAS - AGREGAR
+  const handleAddRoute = () => {
+    setEditingRoute(null);
+    setShowRouteForm(true);
+    setShowRouteList(false);
+  };
+
+  const handleManageRoutes = () => {
+    setShowRouteList(true);
+    setShowBuildingList(false);
+    setShowRoomManagement(false);
+  };
+
+  const handleEditRoute = (route) => {
+    setEditingRoute(route);
+    setShowRouteForm(true);
+    setShowRouteList(false);
+  };
+
+  const handleSaveRoute = async (routeData) => {
+    try {
+      if (editingRoute) {
+        await updateRoute(editingRoute.id, routeData);
+        alert("✅ Ruta actualizada");
+      } else {
+        await createRoute(routeData);
+        alert("✅ Ruta creada");
+      }
+
+      setEditingRoute(null);
+      setShowRouteForm(false);
+      await loadRoutes();
+    } catch (error) {
+      console.error("Error al guardar ruta:", error);
+      alert("❌ Error al guardar ruta");
+    }
+  };
+
+  const handleCancelRouteEdit = () => {
+    setEditingRoute(null);
+    setShowRouteForm(false);
+  };
+
+  const handleRouteClick = (route) => {
+    console.log("🛣️ Ruta seleccionada:", route);
+    setSelectedRoute(route);
+    // Opcional: centrar el mapa en la ruta
+    if (mapInstance && route.geometria) {
+      const coordinates = route.geometria.coordinates;
+      if (coordinates.length > 0) {
+        const bounds = coordinates.map((coord) => [coord[1], coord[0]]);
+        mapInstance.fitBounds(bounds, { padding: [20, 20] });
+      }
+    }
+  };
+
+  const handleDeleteRoute = async (route) => {
+    if (
+      window.confirm(`¿Estás seguro de eliminar la ruta "${route.nombre}"?`)
+    ) {
+      try {
+        await deleteRoute(route.id);
+        console.log("✅ Ruta eliminada");
+        if (selectedRoute && selectedRoute.id === route.id) {
+          setSelectedRoute(null);
+        }
+      } catch (err) {
+        console.error("❌ Error al eliminar ruta:", err);
+        alert("Error al eliminar ruta");
+      }
+    }
+  };
+
+  const handleCloseRouteList = () => {
+    setShowRouteList(false);
+  };
+
   const toggleCoordinateDetection = useCallback(() => {
     const newState = !coordinateDetection;
     setCoordinateDetection(newState);
@@ -238,7 +339,7 @@ function Map() {
     };
   }, [mapInstance, coordinateDetection, tempMarker]);
 
-  // ✅ Guardar o actualizar edificio
+  // Guardar o actualizar edificio
   const handleSaveBuilding = async (buildingData) => {
     try {
       if (editingBuilding) {
@@ -268,10 +369,11 @@ function Map() {
     setShowBuildingForm(true);
   };
 
-  // ✅ FUNCIÓN UNIFICADA PARA GESTIÓN DE EDIFICIOS
+  // FUNCIÓN UNIFICADA PARA GESTIÓN DE EDIFICIOS
   const handleManageBuildings = () => {
     setShowBuildingList(true);
     setShowRoomManagement(false);
+    setShowRouteList(false);
   };
 
   const handleEditBuilding = (b) => {
@@ -303,7 +405,7 @@ function Map() {
     }
   };
 
-  // ✅ Render de capas de edificios
+  // Render de capas de edificios
   useEffect(() => {
     if (!mapInstance || !isMapReady) return;
 
@@ -358,7 +460,7 @@ function Map() {
     console.log(`🏢 ${newLayers.length} edificios renderizados`);
   }, [mapInstance, buildings, isMapReady]);
 
-  // ✅ Cargar datos de GeoServer cuando el mapa esté listo
+  // Cargar datos de GeoServer cuando el mapa esté listo
   useEffect(() => {
     if (isMapReady && mapInstance && geoServerStatus === "checking") {
       console.log("🌍 Cargando datos de GeoServer...");
@@ -395,6 +497,7 @@ function Map() {
       <SidePanel
         status={backendStatus === "connected" ? "success" : "error"}
         featuresCount={buildings.length}
+        routesCount={routes.length}
         onLogout={handleLogout}
         onSyncData={handleSyncData}
         buildingsLoading={buildingsLoading}
@@ -402,10 +505,11 @@ function Map() {
         geoServerStatus={geoServerStatus}
         geoServerFeaturesCount={geoServerFeatures.length}
         onAddBuilding={handleAddBuilding}
-        onManageBuildings={handleManageBuildings} // ✅ Botón unificado
+        onManageBuildings={handleManageBuildings}
         onToggleCoordinateDetection={toggleCoordinateDetection}
         coordinateDetectionActive={coordinateDetection}
-        // ❌ ELIMINADOS: onManageRooms, onEditRoom, onCreateRooms
+        onAddRoute={handleAddRoute}
+        onManageRoutes={handleManageRoutes}
       />
 
       {/* BUILDINGFORM */}
@@ -428,7 +532,7 @@ function Map() {
           onClose={handleCloseBuildingList}
           onEditRoom={handleOpenEditRoom}
           onCreateRooms={handleCreateRoomsForBuilding}
-          onAddRooms={handleOpenCreateRooms} // ✅ Nueva función para agregar salas
+          onAddRooms={handleOpenCreateRooms}
           onDeleteRoom={handleDeleteRoom}
           onReload={loadBuildings}
         />
@@ -447,6 +551,35 @@ function Map() {
           existingRooms={selectedRooms}
         />
       )}
+
+      {/* AGREGAR LOS NUEVOS COMPONENTES AL JSX */}
+      {/* RouteForm */}
+      <RouteForm
+        onSave={handleSaveRoute}
+        onCancel={handleCancelRouteEdit}
+        isVisible={showRouteForm}
+        route={editingRoute}
+        isEditing={!!editingRoute}
+        buildings={buildings}
+      />
+
+      {/* RouteList */}
+      {showRouteList && (
+        <RouteList
+          routes={routes}
+          onEditRoute={handleEditRoute}
+          onDeleteRoute={handleDeleteRoute}
+          onClose={handleCloseRouteList}
+          onSelectRoute={handleRouteClick}
+        />
+      )}
+
+      {/* RouteLayer */}
+      <RouteLayer
+        mapInstance={mapInstance}
+        routes={routes}
+        onRouteClick={handleRouteClick}
+      />
 
       {/* MODO CAPTURA */}
       {coordinateDetection && (
@@ -474,6 +607,25 @@ function Map() {
 
         {buildingsError && (
           <div className="error-indicator">❌ Error: {buildingsError}</div>
+        )}
+
+        {/* INDICADORES AGREGAR AL MAPA */}
+        {routesLoading && (
+          <div className="loading-indicator">🛣️ Cargando rutas...</div>
+        )}
+
+        {selectedRoute && (
+          <div className="selected-route-indicator">
+            🧭 Ruta seleccionada: {selectedRoute.nombre}
+            {selectedRoute.distancia && ` (${selectedRoute.distancia}m`}
+            {selectedRoute.tiempo_estimado &&
+              ` - ${selectedRoute.tiempo_estimado}min)`}
+            <button onClick={() => setSelectedRoute(null)}>×</button>
+          </div>
+        )}
+
+        {routesError && (
+          <div className="error-indicator">❌ Error rutas: {routesError}</div>
         )}
 
         <div className="building-counter">
