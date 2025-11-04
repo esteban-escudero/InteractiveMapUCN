@@ -55,6 +55,58 @@ const RouteForm = ({
     }
   }, [route, isEditing]);
 
+  // ✅ Agregar event listener para la tecla ESC
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === "Escape" && selectionActive) {
+        handleDeactivateMapSelection();
+      }
+    };
+
+    // Agregar event listener cuando la selección está activa
+    if (selectionActive) {
+      document.addEventListener("keydown", handleKeyPress);
+
+      // Mostrar indicador visual de que ESC funciona
+      const indicator = document.createElement("div");
+      indicator.className = "esc-indicator";
+      indicator.innerHTML = "⏹️ Presiona ESC para detener la selección";
+      indicator.style.cssText = `
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(52, 152, 219, 0.9);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        z-index: 10000;
+        font-size: 14px;
+        font-weight: bold;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+      `;
+      document.body.appendChild(indicator);
+
+      // Remover después de 3 segundos
+      setTimeout(() => {
+        if (document.body.contains(indicator)) {
+          document.body.removeChild(indicator);
+        }
+      }, 3000);
+    }
+
+    // Limpiar event listener
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+      // Remover indicador si existe
+      const existingIndicator = document.querySelector(".esc-indicator");
+      if (existingIndicator && document.body.contains(existingIndicator)) {
+        document.body.removeChild(existingIndicator);
+      }
+    };
+  }, [selectionActive]);
+
   // Limpiar marcadores temporales al cerrar
   useEffect(() => {
     if (!isVisible) {

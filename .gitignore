@@ -1,0 +1,9 @@
+# Ignorar dependencias de Node.js
+frontend/node_modules/
+backend/node_modules/
+
+# Ignorar otros archivos comunes
+.env
+*.log
+*.tmp
+.DS_Store
