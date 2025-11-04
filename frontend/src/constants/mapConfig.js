@@ -1,10 +1,10 @@
 // 🎯 Coordenadas del Campus Guayacán - Universidad Católica del Norte
 export const UCN_COQUIMBO_BOUNDS = [
-  [-29.972, -71.362], // Suroeste (más margen)
-  [-29.958, -71.343], // Noreste (más margen)
+  [-29.96672, -71.356201], // Suroeste
+  [-29.96328, -71.346792], // Noreste
 ];
 
-export const UCN_CAMPUS_CENTER = [-29.965, -71.3525];
+export const UCN_CAMPUS_CENTER = [-29.965, -71.35103]; // Centro calculado
 
 export const MAP_ZOOM_LIMITS = {
   min: 16, // Más zoom out para ver contexto

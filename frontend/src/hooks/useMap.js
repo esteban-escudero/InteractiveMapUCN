@@ -48,15 +48,13 @@ export const useMap = () => {
         maxZoom: MAP_ZOOM_LIMITS.max,
       }).addTo(map);
 
-      // 🎯 Usar fitBounds en lugar de center/zoom
       const boundsLatLng = L.latLngBounds(bounds);
       map.fitBounds(boundsLatLng, {
-        padding: [50, 50], // ✅ Padding para no cortar bordes
+        padding: [50, 50],
         maxZoom: MAP_ZOOM_LIMITS.default,
         animate: false,
       });
 
-      // ✅ Límites flexibles
       map.setMaxBounds(boundsLatLng);
 
       console.log("✅ Vista inicial establecida:", {
