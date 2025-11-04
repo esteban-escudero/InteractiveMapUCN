@@ -8,3 +8,5 @@
 *.log
 *.tmp
 .DS_Store
+
+postgres_data/
