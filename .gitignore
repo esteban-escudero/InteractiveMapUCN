@@ -1,9 +1,11 @@
 # Ignorar dependencias de Node.js
-frontend/node_modules/
-backend/node_modules/
+**/node_modules
+**/pacakage-lock.json
 
 # Ignorar otros archivos comunes
 .env
 *.log
 *.tmp
 .DS_Store
+
+postgres_data/
