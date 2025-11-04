@@ -60,13 +60,20 @@ const routesController = {
         });
       }
 
+      // ✅ CORREGIDO: Limpiar datos antes de enviar al modelo
+      const cleanPuntosRuta = (puntos_ruta || []).map((punto) => ({
+        ...punto,
+        id_edificio: punto.id_edificio || null, // Asegurar que sea null si no existe
+        id_sala: punto.id_sala || null, // Asegurar que sea null si no existe
+      }));
+
       const routeData = {
         nombre,
         tipo: tipo || "peatonal",
         distancia: distancia || 0,
         tiempo_estimado: tiempo_estimado || 0,
         geometria: geometria,
-        puntos_ruta: puntos_ruta || [],
+        puntos_ruta: cleanPuntosRuta,
       };
 
       console.log("Datos a guardar en BD:", routeData);
@@ -109,13 +116,20 @@ const routesController = {
         });
       }
 
+      // ✅ CORREGIDO: Limpiar datos antes de enviar al modelo
+      const cleanPuntosRuta = (puntos_ruta || []).map((punto) => ({
+        ...punto,
+        id_edificio: punto.id_edificio || null,
+        id_sala: punto.id_sala || null,
+      }));
+
       const routeData = {
         nombre,
         tipo: tipo || "peatonal",
         distancia: distancia || 0,
         tiempo_estimado: tiempo_estimado || 0,
         geometria: geometria,
-        puntos_ruta: puntos_ruta || [],
+        puntos_ruta: cleanPuntosRuta,
       };
 
       const updatedRoute = await routeModel.update(id, routeData);

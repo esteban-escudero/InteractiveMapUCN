@@ -63,11 +63,12 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
 
         const style = getRouteStyle(route.tipo);
 
-        // Crear línea de la ruta
-        const coordinates = route.geometria.coordinates.map((coord) => [
-          coord[1],
-          coord[0],
+        // ✅ CORREGIDO: Coordenadas GeoJSON son [lng, lat], Leaflet usa [lat, lng]
+        const coordinates = route.geometria.coordinates.map(([lng, lat]) => [
+          lat,
+          lng,
         ]);
+
         const routeLine = L.polyline(coordinates, {
           color: style.color,
           weight: style.weight,
@@ -112,6 +113,7 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
         if (route.puntos_ruta && route.puntos_ruta.length > 0) {
           route.puntos_ruta.forEach((punto) => {
             if (punto.coordenadas && punto.coordenadas.type === "Point") {
+              // ✅ CORREGIDO: Coordenadas GeoJSON son [lng, lat]
               const [lng, lat] = punto.coordenadas.coordinates;
               const pointMarker = L.marker([lat, lng], {
                 icon: createRoutePointIcon(punto.tipo_punto),
@@ -123,6 +125,11 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
                   <h5>${punto.descripcion || "Punto de ruta"}</h5>
                   <p><strong>Tipo:</strong> ${punto.tipo_punto}</p>
                   <p><strong>Orden:</strong> ${punto.orden}</p>
+                  ${
+                    punto.id_edificio
+                      ? `<p><strong>Edificio ID:</strong> ${punto.id_edificio}</p>`
+                      : ""
+                  }
                 </div>
               `;
 

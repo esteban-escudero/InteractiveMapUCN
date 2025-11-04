@@ -13,7 +13,7 @@ const routeModel = {
           r.distancia_metros as distancia,
           r.tiempo_estimado_minutos as tiempo_estimado,
           r.activa,
-          -- Usar coordenadas_geo (PostGIS geometry) en lugar de coordenadas (point)
+          -- Usar coordenadas_geo (PostGIS geometry)
           CASE 
             WHEN r.geometria_ruta IS NOT NULL THEN
               ST_AsGeoJSON(r.geometria_ruta)
@@ -26,8 +26,7 @@ const routeModel = {
                 'orden', pr.orden,
                 'tipo_punto', pr.tipo_punto,
                 'descripcion', pr.descripcion,
-                'id_edificio', pr.id_edificio,
-                'id_sala', pr.id_sala,
+                'nombre_punto', pr.nombre_punto,
                 'coordenadas', 
                 CASE 
                   WHEN pr.coordenadas_geo IS NOT NULL THEN
@@ -35,14 +34,11 @@ const routeModel = {
                       'type', 'Point',
                       'coordinates', ARRAY[ST_X(pr.coordenadas_geo), ST_Y(pr.coordenadas_geo)]
                     )
-                  -- Fallback: si no hay coordenadas_geo, usar el punto nativo
-                  WHEN pr.coordenadas IS NOT NULL THEN
+                  -- Fallback: usar latitud/longitud si existen
+                  WHEN pr.latitud IS NOT NULL AND pr.longitud IS NOT NULL THEN
                     json_build_object(
                       'type', 'Point',
-                      'coordinates', ARRAY[
-                        (pr.coordenadas::text::point)[0]::float,
-                        (pr.coordenadas::text::point)[1]::float
-                      ]
+                      'coordinates', ARRAY[pr.longitud::float, pr.latitud::float]
                     )
                   ELSE NULL
                 END
@@ -90,9 +86,6 @@ const routeModel = {
       return routes;
     } catch (error) {
       console.error("❌ Error en routeModel.getAll:", error.message);
-
-      // Fallback: consulta simplificada sin JOIN
-      console.log("🔄 Intentando consulta simplificada...");
       return await this.getAllBasic();
     }
   },
@@ -172,7 +165,7 @@ const routeModel = {
         routeData.tipo || "peatonal",
         routeData.distancia || 0,
         routeData.tiempo_estimado || 0,
-        geometriaWKT || "LINESTRING(0 0, 1 1)", // Valor por defecto
+        geometriaWKT || "LINESTRING(0 0, 1 1)",
       ];
 
       const routeResult = await client.query(routeQuery, routeValues);
@@ -183,16 +176,19 @@ const routeModel = {
         for (const punto of routeData.puntos_ruta) {
           if (punto.coordenadas && punto.coordenadas.type === "Point") {
             const [lng, lat] = punto.coordenadas.coordinates;
+
+            // ✅ CORREGIDO: Usar solo las columnas que existen en la BD
             const puntoQuery = `
               INSERT INTO punto_ruta (
                 id_ruta,
                 orden,
                 tipo_punto,
                 descripcion,
-                id_edificio,
-                id_sala,
-                coordenadas_geo
-              ) VALUES ($1, $2, $3, $4, $5, $6, ST_GeomFromText($7, 4326))
+                nombre_punto,
+                coordenadas_geo,
+                latitud,
+                longitud
+              ) VALUES ($1, $2, $3, $4, $5, ST_GeomFromText($6, 4326), $7, $8)
             `;
 
             const puntoValues = [
@@ -200,9 +196,10 @@ const routeModel = {
               punto.orden,
               punto.tipo_punto,
               punto.descripcion || "",
-              punto.id_edificio || null,
-              punto.id_sala || null,
+              punto.nombre_punto || punto.descripcion || `Punto ${punto.orden}`,
               `POINT(${lng} ${lat})`,
+              lat,
+              lng,
             ];
 
             await client.query(puntoQuery, puntoValues);
@@ -292,16 +289,19 @@ const routeModel = {
         for (const punto of routeData.puntos_ruta) {
           if (punto.coordenadas && punto.coordenadas.type === "Point") {
             const [lng, lat] = punto.coordenadas.coordinates;
+
+            // ✅ CORREGIDO: Usar solo las columnas que existen en la BD
             const puntoQuery = `
               INSERT INTO punto_ruta (
                 id_ruta,
                 orden,
                 tipo_punto,
                 descripcion,
-                id_edificio,
-                id_sala,
-                coordenadas_geo
-              ) VALUES ($1, $2, $3, $4, $5, $6, ST_GeomFromText($7, 4326))
+                nombre_punto,
+                coordenadas_geo,
+                latitud,
+                longitud
+              ) VALUES ($1, $2, $3, $4, $5, ST_GeomFromText($6, 4326), $7, $8)
             `;
 
             const puntoValues = [
@@ -309,9 +309,10 @@ const routeModel = {
               punto.orden,
               punto.tipo_punto,
               punto.descripcion || "",
-              punto.id_edificio || null,
-              punto.id_sala || null,
+              punto.nombre_punto || punto.descripcion || `Punto ${punto.orden}`,
               `POINT(${lng} ${lat})`,
+              lat,
+              lng,
             ];
 
             await client.query(puntoQuery, puntoValues);

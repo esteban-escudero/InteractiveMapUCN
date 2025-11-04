@@ -1,132 +1,70 @@
 import { useState, useEffect } from "react";
 import { routeService } from "../services/routeService";
 
-export const useRoutes = () => {
+const useRoutes = () => {
   const [routes, setRoutes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const loadRoutes = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-      console.log("🔄 Cargando rutas...");
-
-      const response = await routeService.getAllRoutes();
-
-      // ✅ CORREGIDO: Manejar diferentes estructuras de respuesta
-      const routesData = response.data || response || [];
-      console.log("📦 Respuesta de rutas:", response);
-      console.log("🛣️ Datos de rutas:", routesData);
-
-      setRoutes(routesData);
-
+      const routesData = await routeService.getAllRoutes();
+      setRoutes(Array.isArray(routesData) ? routesData : []);
       console.log(`✅ ${routesData.length} rutas cargadas`);
-      return routesData;
     } catch (err) {
-      console.error("❌ Error cargando rutas:", err);
       setError(err.message);
-      setRoutes([]);
-      throw err;
+      console.error("❌ Error loading routes:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    loadRoutes();
+  }, []);
+
   const createRoute = async (routeData) => {
     try {
-      setError(null);
-      console.log("➕ Creando ruta...");
-
-      const response = await routeService.createRoute(routeData);
-
-      // ✅ CORREGIDO: Manejar diferentes estructuras de respuesta
-      const newRoute = response.data || response;
-      await loadRoutes(); // Recargar la lista
-
-      console.log("✅ Ruta creada exitosamente");
+      const newRoute = await routeService.createRoute(routeData);
+      await loadRoutes();
       return newRoute;
     } catch (err) {
-      console.error("❌ Error creando ruta:", err);
-      setError(err.message);
+      console.error("❌ Error creating route:", err);
       throw err;
     }
   };
 
   const updateRoute = async (routeId, routeData) => {
     try {
-      setError(null);
-      console.log(`✏️ Actualizando ruta ${routeId}...`);
-
-      const response = await routeService.updateRoute(routeId, routeData);
-
-      // ✅ CORREGIDO: Manejar diferentes estructuras de respuesta
-      const updatedRoute = response.data || response;
-      await loadRoutes(); // Recargar la lista
-
-      console.log("✅ Ruta actualizada exitosamente");
+      const updatedRoute = await routeService.updateRoute(routeId, routeData);
+      await loadRoutes();
       return updatedRoute;
     } catch (err) {
-      console.error("❌ Error actualizando ruta:", err);
-      setError(err.message);
+      console.error("❌ Error updating route:", err);
       throw err;
     }
   };
 
   const deleteRoute = async (routeId) => {
     try {
-      setError(null);
-      console.log(`🗑️ Eliminando ruta ${routeId}...`);
-
-      const response = await routeService.deleteRoute(routeId);
-      await loadRoutes(); // Recargar la lista
-
-      console.log("✅ Ruta eliminada exitosamente");
-      return response;
+      await routeService.deleteRoute(routeId);
+      await loadRoutes();
     } catch (err) {
-      console.error("❌ Error eliminando ruta:", err);
-      setError(err.message);
+      console.error("❌ Error deleting route:", err);
       throw err;
     }
   };
-
-  const calculateRoute = async (origen, destino, tipo_ruta) => {
-    try {
-      setError(null);
-      console.log("🧮 Calculando ruta...");
-
-      const response = await routeService.calculateRoute(
-        origen,
-        destino,
-        tipo_ruta
-      );
-
-      // ✅ CORREGIDO: Manejar diferentes estructuras de respuesta
-      const calculatedRoute = response.data || response;
-
-      console.log("✅ Ruta calculada exitosamente");
-      return calculatedRoute;
-    } catch (err) {
-      console.error("❌ Error calculando ruta:", err);
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  // Cargar rutas al inicializar el hook
-  useEffect(() => {
-    loadRoutes();
-  }, []);
 
   return {
     routes,
     loading,
     error,
-    loadRoutes,
     createRoute,
     updateRoute,
     deleteRoute,
-    calculateRoute,
+    loadRoutes,
   };
 };
 

@@ -5,17 +5,11 @@ export const routeService = {
     try {
       console.log("🛣️ Solicitando todas las rutas...");
       const response = await api.get("/routes");
-      console.log("📦 Respuesta completa:", response);
+      console.log("📦 Respuesta de rutas:", response);
 
-      // ✅ Manejar diferentes estructuras de respuesta
+      // ✅ Manejo consistente de respuesta
       if (response.success !== false) {
-        const routesData = response.data || response;
-        console.log(
-          `✅ ${
-            Array.isArray(routesData) ? routesData.length : "?"
-          } rutas obtenidas`
-        );
-        return routesData;
+        return response.data || response;
       } else {
         throw new Error(response.message || "Error obteniendo rutas");
       }
@@ -29,7 +23,7 @@ export const routeService = {
     try {
       console.log("➕ Creando nueva ruta:", routeData);
       const response = await api.post("/routes", routeData);
-      console.log("✅ Ruta creada exitosamente:", response);
+      console.log("✅ Respuesta creación ruta:", response);
 
       if (response.success !== false) {
         return response.data || response;
@@ -46,7 +40,7 @@ export const routeService = {
     try {
       console.log(`✏️ Actualizando ruta ID: ${routeId}`, routeData);
       const response = await api.put(`/routes/${routeId}`, routeData);
-      console.log("✅ Ruta actualizada exitosamente:", response);
+      console.log("✅ Respuesta actualización ruta:", response);
 
       if (response.success !== false) {
         return response.data || response;
@@ -63,7 +57,7 @@ export const routeService = {
     try {
       console.log(`🗑️ Eliminando ruta ID: ${routeId}`);
       const response = await api.delete(`/routes/${routeId}`);
-      console.log("✅ Ruta eliminada exitosamente:", response);
+      console.log("✅ Respuesta eliminación ruta:", response);
 
       if (response.success !== false) {
         return response.data || response;
