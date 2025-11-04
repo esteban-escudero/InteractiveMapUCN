@@ -37,7 +37,7 @@ const RouteForm = ({
     if (route && isEditing) {
       setFormData({
         nombre: route.nombre || "",
-        tipo: route.tipo || "peatonal",
+        tipo: route.tipo || "peatonal", // ← Ya es válido
         distancia: route.distancia || 0,
         tiempo_estimado: route.tiempo_estimado || 0,
         geometria: route.geometria || null,
@@ -46,7 +46,7 @@ const RouteForm = ({
     } else {
       setFormData({
         nombre: "",
-        tipo: "peatonal",
+        tipo: "peatonal", // ← Valor por defecto válido
         distancia: 0,
         tiempo_estimado: 0,
         geometria: null,
@@ -78,6 +78,16 @@ const RouteForm = ({
       removeMapClickListener();
     }
   }, [isVisible]);
+
+  // ✅ Efecto para monitorear el estado del formulario
+  useEffect(() => {
+    console.log("📊 Estado del formulario:", {
+      nombre: formData.nombre || "(vacío)",
+      tieneGeometria: !!formData.geometria,
+      puntos: formData.puntos_ruta.length,
+      puedeGuardar: formData.puntos_ruta.length >= 2 && !!formData.geometria,
+    });
+  }, [formData.nombre, formData.geometria, formData.puntos_ruta.length]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -174,7 +184,7 @@ const RouteForm = ({
     console.log("✅ Mapa listo para recibir múltiples clics");
   };
 
-  // ✅ Finalizar selección con ESC
+  // ✅ Finalizar selección con ESC - VERSIÓN MEJORADA
   const handleFinishWithESC = () => {
     console.log("⏹️ FINALIZANDO con ESC. Puntos:", formData.puntos_ruta.length);
 
@@ -213,14 +223,28 @@ const RouteForm = ({
       };
     });
 
+    // ✅ Crear geometría inmediatamente
+    const coordinates = updatedPuntos.map((p) => p.coordenadas.coordinates);
+    const geometria = {
+      type: "LineString",
+      coordinates: coordinates,
+    };
+
+    const distancia = calculateTotalDistance(updatedPuntos);
+    const tiempo_estimado = Math.round(distancia / 80);
+
+    console.log("✅ Geometría creada en handleFinishWithESC:", geometria);
+
     setFormData((prev) => ({
       ...prev,
       puntos_ruta: updatedPuntos,
+      geometria,
+      distancia,
+      tiempo_estimado,
     }));
 
     updateMarkersWithColors(updatedPuntos);
     drawRouteLine(updatedPuntos);
-    calculateRouteData(updatedPuntos);
     handleDeactivateMapSelection();
   };
 
@@ -283,17 +307,31 @@ const RouteForm = ({
   };
 
   const calculateRouteData = (puntos) => {
-    const coordinates = puntos.map((p) => p.coordenadas.coordinates);
-    const geometria = { type: "LineString", coordinates };
-    const distancia = calculateTotalDistance(puntos);
-    const tiempo_estimado = Math.round(distancia / 80);
+    if (puntos.length < 2) {
+      console.log("❌ No hay suficientes puntos para calcular ruta");
+      return;
+    }
 
-    setFormData((prev) => ({
-      ...prev,
-      geometria,
-      distancia,
-      tiempo_estimado,
-    }));
+    try {
+      const coordinates = puntos.map((p) => p.coordenadas.coordinates);
+      const geometria = {
+        type: "LineString",
+        coordinates: coordinates,
+      };
+      const distancia = calculateTotalDistance(puntos);
+      const tiempo_estimado = Math.round(distancia / 80);
+
+      console.log("✅ Geometría creada en calculateRouteData:", geometria);
+
+      setFormData((prev) => ({
+        ...prev,
+        geometria,
+        distancia,
+        tiempo_estimado,
+      }));
+    } catch (error) {
+      console.error("❌ Error al calcular ruta:", error);
+    }
   };
 
   const calculateTotalDistance = (puntos) => {
@@ -379,17 +417,67 @@ const RouteForm = ({
     }
   };
 
+  // ✅ SUBMIT CORREGIDO - Usar solo tipos válidos
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (
-      !formData.nombre ||
-      !formData.geometria ||
-      formData.puntos_ruta.length < 2
-    )
+
+    if (formData.puntos_ruta.length < 2) {
+      console.log("❌ Se necesitan al menos 2 puntos para crear una ruta");
       return;
+    }
+
+    // ✅ Asegurar que tenemos geometría (crearla si no existe)
+    let geometriaParaEnviar = formData.geometria;
+
+    if (!geometriaParaEnviar && formData.puntos_ruta.length >= 2) {
+      const coordinates = formData.puntos_ruta.map(
+        (p) => p.coordenadas.coordinates
+      );
+      geometriaParaEnviar = {
+        type: "LineString",
+        coordinates: coordinates,
+      };
+      console.log("🔄 Geometría creada automáticamente");
+    }
+
+    // ✅ Asegurar que tenemos nombre (usar uno por defecto si está vacío)
+    // ✅ Asegurar que tenemos nombre
+    const nombreParaEnviar =
+      formData.nombre.trim() ||
+      `Ruta ${new Date().toLocaleDateString(
+        "es-ES"
+      )} ${new Date().toLocaleTimeString("es-ES", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+
+    // ✅ EL TIPO YA ES VÁLIDO (no necesita mapeo)
+    console.log("✅ Tipo validado:", formData.tipo);
+
+    // ✅ Preparar datos para enviar
+    const datosParaGuardar = {
+      ...formData,
+      nombre: nombreParaEnviar,
+      // tipo: formData.tipo, // ← Ya es válido (peatonal, accesible, emergencia, rapida)
+      geometria: geometriaParaEnviar,
+    };
+
+    console.log("✅ Enviando al backend:", {
+      nombre: datosParaGuardar.nombre,
+      tipo: datosParaGuardar.tipo, // ← Debe ser uno de: peatonal, accesible, emergencia, rapida
+      puntos: datosParaGuardar.puntos_ruta.length,
+      tieneGeometria: !!datosParaGuardar.geometria,
+    });
+
+    // ✅ Validación final antes de enviar
+    if (!datosParaGuardar.geometria) {
+      console.error("❌ Error crítico: No se pudo crear la geometría");
+      return;
+    }
+
     clearTempMarkers();
     removeMapClickListener();
-    onSave(formData);
+    onSave(datosParaGuardar);
   };
 
   const handleCancel = () => {
@@ -412,15 +500,15 @@ const RouteForm = ({
         </div>
 
         <form onSubmit={handleSubmit} className="route-form">
+          {/* ✅ NOMBRE OPCIONAL */}
           <div className="form-group">
-            <label>Nombre de la Ruta *</label>
+            <label>Nombre de la Ruta (opcional)</label>
             <input
               type="text"
               name="nombre"
               value={formData.nombre}
               onChange={handleInputChange}
-              required
-              placeholder="Ej: Ruta desde Punto A hasta Punto B"
+              placeholder="Dejar vacío para nombre automático"
             />
           </div>
 
@@ -431,8 +519,9 @@ const RouteForm = ({
               value={formData.tipo}
               onChange={handleInputChange}>
               <option value="peatonal">Peatonal</option>
-              <option value="vehicular">Vehicular</option>
               <option value="accesible">Accesible</option>
+              <option value="emergencia">Emergencia</option>
+              <option value="rapida">Rápida</option>
             </select>
           </div>
 
@@ -446,12 +535,17 @@ const RouteForm = ({
 
             <div className="selection-instructions">
               <p>
-                1️⃣ Presiona <strong>Activar Selección</strong>
+                1️⃣ <strong>Primero selecciona los puntos en el mapa</strong>
               </p>
-              <p>2️⃣ Haz varios clics en el mapa</p>
+              <p>2️⃣ Haz clic en "Activar Selección"</p>
+              <p>3️⃣ Haz varios clics en el mapa para agregar puntos</p>
               <p>
-                3️⃣ Presiona <strong>ESC</strong> para finalizar
+                4️⃣ Presiona <strong>ESC</strong> para finalizar
               </p>
+              <p>
+                5️⃣ <strong>Opcional:</strong> Elige tipo de ruta y pon nombre
+              </p>
+              <p>6️⃣ Guarda la ruta</p>
             </div>
 
             <div className="map-selection-controls">
@@ -522,10 +616,11 @@ const RouteForm = ({
             <button type="button" className="cancel-btn" onClick={handleCancel}>
               Cancelar
             </button>
+            {/* ✅ BOTÓN SOLO VALIDA PUNTOS */}
             <button
               type="submit"
               className="save-btn"
-              disabled={!formData.geometria || formData.puntos_ruta.length < 2}>
+              disabled={formData.puntos_ruta.length < 2}>
               {isEditing ? "Actualizar" : "Crear"} Ruta
             </button>
           </div>
