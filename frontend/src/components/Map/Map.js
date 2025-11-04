@@ -560,7 +560,8 @@ function Map() {
         isVisible={showRouteForm}
         route={editingRoute}
         isEditing={!!editingRoute}
-        buildings={buildings}
+        //buildings={buildings}
+        mapInstance={mapInstance}
       />
 
       {/* RouteList */}
