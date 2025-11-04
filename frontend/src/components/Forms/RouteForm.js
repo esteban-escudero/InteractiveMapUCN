@@ -185,6 +185,7 @@ const RouteForm = ({
   };
 
   // ✅ Finalizar selección con ESC - VERSIÓN MEJORADA
+  // ✅ Finalizar selección con ESC - VERSIÓN MEJORADA
   const handleFinishWithESC = () => {
     console.log("⏹️ FINALIZANDO con ESC. Puntos:", formData.puntos_ruta.length);
 
@@ -223,7 +224,7 @@ const RouteForm = ({
       };
     });
 
-    // ✅ Crear geometría inmediatamente
+    // ✅ Crear geometría y calcular distancia/tiempo inmediatamente
     const coordinates = updatedPuntos.map((p) => p.coordenadas.coordinates);
     const geometria = {
       type: "LineString",
@@ -233,7 +234,11 @@ const RouteForm = ({
     const distancia = calculateTotalDistance(updatedPuntos);
     const tiempo_estimado = Math.round(distancia / 80);
 
-    console.log("✅ Geometría creada en handleFinishWithESC:", geometria);
+    console.log("✅ Datos calculados en handleFinishWithESC:", {
+      distancia,
+      tiempo_estimado,
+      puntos: updatedPuntos.length,
+    });
 
     setFormData((prev) => ({
       ...prev,
@@ -321,7 +326,11 @@ const RouteForm = ({
       const distancia = calculateTotalDistance(puntos);
       const tiempo_estimado = Math.round(distancia / 80);
 
-      console.log("✅ Geometría creada en calculateRouteData:", geometria);
+      console.log("✅ Ruta calculada:", {
+        distancia,
+        tiempo_estimado,
+        puntos: puntos.length,
+      });
 
       setFormData((prev) => ({
         ...prev,
@@ -335,13 +344,20 @@ const RouteForm = ({
   };
 
   const calculateTotalDistance = (puntos) => {
+    if (puntos.length < 2) return 0;
+
     let total = 0;
     for (let i = 0; i < puntos.length - 1; i++) {
       const [lngA, latA] = puntos[i].coordenadas.coordinates;
       const [lngB, latB] = puntos[i + 1].coordenadas.coordinates;
       total += calculateDistance(latA, lngA, latB, lngB);
     }
-    return Math.round(total);
+
+    const distanciaRedondeada = Math.round(total);
+    console.log(
+      `📏 Distancia calculada: ${distanciaRedondeada}m (${puntos.length} puntos)`
+    );
+    return distanciaRedondeada;
   };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -418,6 +434,7 @@ const RouteForm = ({
   };
 
   // ✅ SUBMIT CORREGIDO - Usar solo tipos válidos
+  // ✅ SUBMIT CORREGIDO - Incluir distancia y tiempo_estimado
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -426,7 +443,7 @@ const RouteForm = ({
       return;
     }
 
-    // ✅ Asegurar que tenemos geometría (crearla si no existe)
+    // ✅ Asegurar que tenemos geometría
     let geometriaParaEnviar = formData.geometria;
 
     if (!geometriaParaEnviar && formData.puntos_ruta.length >= 2) {
@@ -440,7 +457,6 @@ const RouteForm = ({
       console.log("🔄 Geometría creada automáticamente");
     }
 
-    // ✅ Asegurar que tenemos nombre (usar uno por defecto si está vacío)
     // ✅ Asegurar que tenemos nombre
     const nombreParaEnviar =
       formData.nombre.trim() ||
@@ -451,20 +467,36 @@ const RouteForm = ({
         minute: "2-digit",
       })}`;
 
-    // ✅ EL TIPO YA ES VÁLIDO (no necesita mapeo)
+    // ✅ Calcular distancia y tiempo si no existen
+    let distanciaParaEnviar = formData.distancia;
+    let tiempoParaEnviar = formData.tiempo_estimado;
+
+    if (!distanciaParaEnviar && formData.puntos_ruta.length >= 2) {
+      distanciaParaEnviar = calculateTotalDistance(formData.puntos_ruta);
+      tiempoParaEnviar = Math.round(distanciaParaEnviar / 80); // 80m/min caminando
+      console.log("🔄 Distancia y tiempo calculados automáticamente:", {
+        distancia: distanciaParaEnviar,
+        tiempo: tiempoParaEnviar,
+      });
+    }
+
     console.log("✅ Tipo validado:", formData.tipo);
 
-    // ✅ Preparar datos para enviar
+    // ✅ Preparar datos para enviar - INCLUYENDO DISTANCIA Y TIEMPO
     const datosParaGuardar = {
       ...formData,
       nombre: nombreParaEnviar,
-      // tipo: formData.tipo, // ← Ya es válido (peatonal, accesible, emergencia, rapida)
+      distancia: distanciaParaEnviar,
+      tiempo_estimado: tiempoParaEnviar,
       geometria: geometriaParaEnviar,
+      puntos_ruta: formData.puntos_ruta, // ← Asegurar que los puntos también se envíen
     };
 
     console.log("✅ Enviando al backend:", {
       nombre: datosParaGuardar.nombre,
-      tipo: datosParaGuardar.tipo, // ← Debe ser uno de: peatonal, accesible, emergencia, rapida
+      tipo: datosParaGuardar.tipo,
+      distancia: datosParaGuardar.distancia,
+      tiempo_estimado: datosParaGuardar.tiempo_estimado,
       puntos: datosParaGuardar.puntos_ruta.length,
       tieneGeometria: !!datosParaGuardar.geometria,
     });
