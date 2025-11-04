@@ -423,3 +423,100 @@
   background: #bdc3c7 !important;
   cursor: not-allowed !important;
 }
+
+/* Agrega estos estilos al final del RouteForm.css */
+
+/* Vista minimizada */
+.route-form-container.minimized {
+  width: 350px;
+  max-height: 200px;
+}
+
+.minimized-view {
+  padding: 15px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.minimized-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.minimized-header h4 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.restore-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.restore-btn:hover {
+  background: #2980b9;
+}
+
+.minimized-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.minimized-stats {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.minimized-stats span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.distance-preview {
+  color: #27ae60 !important;
+  font-weight: bold;
+}
+
+.minimized-instructions {
+  background: #e8f4fd;
+  padding: 10px;
+  border-radius: 4px;
+  border-left: 3px solid #3498db;
+}
+
+.minimized-instructions p {
+  margin: 5px 0;
+  font-size: 12px;
+  color: #2c3e50;
+}
+
+/* Estilos responsivos para vista minimizada */
+@media (max-width: 768px) {
+  .route-form-container.minimized {
+    width: 90%;
+    max-height: 180px;
+  }
+
+  .minimized-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .minimized-header h4 {
+    font-size: 14px;
+  }
+}
