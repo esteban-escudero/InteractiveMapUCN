@@ -520,3 +520,125 @@
     font-size: 14px;
   }
 }
+
+/* Agrega esto al RouteForm.css */
+.selection-instructions {
+  background: #e8f4fd;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  border-left: 4px solid #3498db;
+}
+
+.selection-instructions p {
+  margin: 5px 0;
+  font-size: 13px;
+  color: #2c3e50;
+  line-height: 1.4;
+}
+
+.route-structure {
+  font-size: 12px;
+  color: #7f8c8d;
+  margin-left: 8px;
+  font-style: italic;
+}
+
+/* Agrega al final del RouteForm.css */
+
+/* Estilos para la línea temporal */
+.temp-route-line {
+  stroke-dasharray: 10, 10;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+/* Estilos para la línea definitiva */
+.definitive-route-line {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Mejora la visualización de los puntos en la lista */
+.points-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e1e8ed;
+  border-radius: 4px;
+  background: white;
+  padding: 5px;
+}
+
+.point-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid #f1f1f1;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.point-item:hover {
+  background-color: #f8f9fa;
+}
+
+.point-order {
+  font-weight: bold;
+  color: #e74c3c;
+  min-width: 25px;
+  text-align: center;
+}
+
+.point-name {
+  flex: 1;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.point-coords {
+  font-size: 11px;
+  color: #7f8c8d;
+  font-family: monospace;
+  background: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.point-type {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-transform: capitalize;
+  color: white;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* Estilos para los marcadores de ruta */
+.temp-route-point,
+.route-point-marker {
+  z-index: 1000;
+}
+
+/* Estilo para la línea de ruta */
+.route-line {
+  z-index: 500;
+}
+
+/* Mejorar la visualización de puntos en la lista */
+.point-type.intermedio {
+  background: #95a5a6 !important; /* Gris durante selección */
+}
+
+.point-type.inicio {
+  background: #27ae60 !important; /* Verde para inicio */
+}
+
+.point-type.fin {
+  background: #e74c3c !important; /* Rojo para fin */
+}
