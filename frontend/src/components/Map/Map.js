@@ -10,7 +10,10 @@ import SidePanel from "../UI/SidePanel";
 import BuildingForm from "../Forms/BuildingForm";
 import BuildingList from "../UI/BuildingList/BuildingList";
 import RoomManagement from "../UI/RoomManagement/RoomManagement";
-import { UCN_COQUIMBO_BOUNDS, MAP_ZOOM_LIMITS } from "../../constants/mapConfig";
+import {
+  UCN_COQUIMBO_BOUNDS,
+  MAP_ZOOM_LIMITS,
+} from "../../constants/mapConfig";
 import { buildingService } from "../../services/buildingService";
 import { roomService } from "../../services/roomService";
 
