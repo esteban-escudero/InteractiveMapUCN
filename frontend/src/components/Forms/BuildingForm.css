@@ -70,7 +70,7 @@
   border-color: #3498db;
 }
 
-/* Sección de Coordenadas */
+/* Sección de Coordenadas - MODIFICADO */
 .coordinates-section {
   margin-bottom: 20px;
   padding: 15px;
@@ -81,39 +81,46 @@
 
 .coordinates-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column; /* Cambiado a columna */
+  align-items: center; /* Centrado */
   margin-bottom: 15px;
+  gap: 10px; /* Espacio entre elementos */
 }
 
 .coordinates-header label {
   font-weight: 600;
   color: #34495e;
   margin: 0;
+  text-align: center; /* Texto centrado */
+  width: 100%; /* Ocupa todo el ancho */
 }
 
 .coordinate-options {
   display: flex;
-  gap: 10px;
+  width: 100%; /* Ocupa todo el ancho disponible */
+  justify-content: center; /* Centra el contenido */
 }
 
-.capture-btn,
-.manual-btn {
-  padding: 8px 12px;
+.capture-btn {
+  padding: 12px 20px; /* Padding más grande */
   border: 2px solid #3498db;
-  border-radius: 6px;
+  border-radius: 8px;
   background: white;
   color: #3498db;
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
-  white-space: nowrap;
+  width: 100%; /* Ocupa todo el ancho */
+  max-width: 300px; /* Ancho máximo opcional */
+  text-align: center;
+  font-weight: 600;
 }
 
-.capture-btn:hover,
-.manual-btn:hover {
+.capture-btn:hover {
   background: #3498db;
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
 .coordinates-group {
@@ -179,13 +186,18 @@
 @media (max-width: 768px) {
   .coordinates-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center; /* Centrado en mobile también */
     gap: 10px;
   }
 
   .coordinate-options {
     width: 100%;
-    justify-content: space-between;
+    justify-content: center; /* Centrado en mobile */
+  }
+
+  .capture-btn {
+    width: 100%; /* Ocupa todo el ancho en mobile */
+    max-width: none; /* Sin límite máximo en mobile */
   }
 
   .coordinates-group {

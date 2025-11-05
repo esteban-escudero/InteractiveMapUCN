@@ -258,12 +258,6 @@ const BuildingForm = ({
                     onClick={handleCaptureCoordinates}>
                     📍 Capturar en Mapa
                   </button>
-                  <button
-                    type="button"
-                    className="manual-btn"
-                    onClick={handleManualCoordinateInput}>
-                    ⌨️ Ingresar Manualmente
-                  </button>
                 </div>
               </div>
 
