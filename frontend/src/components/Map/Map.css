@@ -4,19 +4,7 @@
   width: 100vw;
   margin: 0;
   padding: 0;
-}
-
-.Panel {
-  width: 300px;
-  background: linear-gradient(135deg, #1179e0 0%, #0d67c4 100%);
-  padding: 20px;
-  color: white;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  overflow-y: auto;
-  flex-shrink: 0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .Mapa {
@@ -24,6 +12,7 @@
   background-color: #f8f9fa;
   position: relative;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 .map-container {
@@ -34,6 +23,7 @@
   bottom: 0 !important;
   height: 100% !important;
   width: 100% !important;
+  z-index: 1;
 }
 
 .leaflet-container {
