@@ -29,63 +29,47 @@ export const useMap = () => {
     }
 
     try {
-      // CALCULAR CORRECTAMENTE el centro
-      const centerLat = (bounds[0][0] + bounds[1][0]) / 2;
-      const centerLng = (bounds[0][1] + bounds[1][1]) / 2;
-
-      console.log("Inicializando mapa:", {
-        center: [centerLat, centerLng],
-        bounds: bounds,
-        zoom: MAP_ZOOM_LIMITS.default,
-      });
+      console.log("🗺️ Inicializando mapa con bounds:", bounds);
 
       const map = L.map(mapRef.current, {
-        center: [centerLat, centerLng],
-        zoom: MAP_ZOOM_LIMITS.default,
-        minZoom: 15,
-        maxZoom: 20,
-        zoomControl: false,
+        minZoom: MAP_ZOOM_LIMITS.min,
+        maxZoom: MAP_ZOOM_LIMITS.max,
+        zoomControl: true, // ✅ Activar controles de zoom
         attributionControl: true,
+        maxBoundsViscosity: 0.8, // ✅ Permite desplazamiento suave en bordes
+        zoomSnap: 0.5, // ✅ Zooms intermedios más suaves
+        zoomDelta: 0.5, // ✅ Control fino de zoom
+        wheelPxPerZoomLevel: 80, // ✅ Control suave con rueda del mouse
       });
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap contributors",
-        minZoom: 15,
-        maxZoom: 20,
+        minZoom: MAP_ZOOM_LIMITS.min,
+        maxZoom: MAP_ZOOM_LIMITS.max,
       }).addTo(map);
 
-      // ESTABLECER LÍMITES DE MOVIMIENTO PRIMERO
-      const extendedBounds = [
-        [bounds[0][0] - 0.002, bounds[0][1] - 0.002],
-        [bounds[1][0] + 0.002, bounds[1][1] + 0.002],
-      ];
-
-      map.setMaxBounds(extendedBounds);
-      console.log("Límites establecidos:", extendedBounds);
-
-      // AJUSTAR AL BOUNDS INICIALMENTE (con delay)
-      setTimeout(() => {
-        try {
-          if (map && !map._destroyed) {
-            map.fitBounds(bounds, {
-              padding: [20, 20],
-              maxZoom: 17,
-            });
-            console.log("📍 Mapa ajustado a bounds:", bounds);
-          }
-        } catch (fitError) {
-          console.error("Error en fitBounds:", fitError);
-        }
-      }, 150);
-
-      // EVENTOS PARA MANTENER DENTRO DE LOS LÍMITES
-      map.on("drag", function () {
-        if (!map._destroyed) {
-          map.panInsideBounds(bounds, { animate: false });
-        }
+      const boundsLatLng = L.latLngBounds(bounds);
+      map.fitBounds(boundsLatLng, {
+        padding: [50, 50],
+        maxZoom: MAP_ZOOM_LIMITS.default,
+        animate: false,
       });
 
-      // EVENTO PARA DEBUG (cuando el mapa está realmente listo)
+      map.setMaxBounds(boundsLatLng);
+
+      console.log("✅ Vista inicial establecida:", {
+        bounds: bounds,
+        center: map.getCenter(),
+        zoom: map.getZoom(),
+      });
+
+      console.log("✅ Vista inicial establecida:", {
+        bounds: bounds,
+        center: map.getCenter(),
+        zoom: map.getZoom(),
+      });
+
+      // EVENTO PARA DEBUG
       map.on("load", function () {
         console.log("✅ Mapa cargado completamente");
         console.log("📊 Estado inicial:", {

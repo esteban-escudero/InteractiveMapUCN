@@ -10,7 +10,10 @@ import SidePanel from "../UI/SidePanel";
 import BuildingForm from "../Forms/BuildingForm";
 import BuildingList from "../UI/BuildingList/BuildingList";
 import RoomManagement from "../UI/RoomManagement/RoomManagement";
-import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig";
+import {
+  UCN_COQUIMBO_BOUNDS,
+  MAP_ZOOM_LIMITS,
+} from "../../constants/mapConfig";
 import { buildingService } from "../../services/buildingService";
 import { roomService } from "../../services/roomService";
 
@@ -491,6 +494,20 @@ function Map() {
     }
   };
 
+  // 🎯 Función para resetear vista al campus
+  const handleResetView = () => {
+    if (mapInstance) {
+      const boundsLatLng = L.latLngBounds(UCN_COQUIMBO_BOUNDS);
+      mapInstance.fitBounds(boundsLatLng, {
+        padding: [50, 50],
+        maxZoom: MAP_ZOOM_LIMITS.default,
+        animate: true,
+        duration: 0.5,
+      });
+      console.log("🎯 Vista reseteada al Campus Guayacán");
+    }
+  };
+
   return (
     <div className="container">
       {/* SIDEPANEL SIMPLIFICADO */}
@@ -591,6 +608,13 @@ function Map() {
 
       {/* CONTENEDOR DEL MAPA */}
       <div className="Mapa">
+        {/* 🎯 Botón de Reset Vista */}
+        {isMapReady && (
+          <button className="reset-view-btn" onClick={handleResetView}>
+            🎯 Resetear Vista Campus
+          </button>
+        )}
+
         <div ref={mapRef} className="map-container"></div>
 
         {!isMapReady && (
