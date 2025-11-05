@@ -550,10 +550,11 @@ const RouteForm = ({
               name="tipo"
               value={formData.tipo}
               onChange={handleInputChange}>
-              <option value="peatonal">Peatonal</option>
               <option value="accesible">Accesible</option>
               <option value="emergencia">Emergencia</option>
+              <option value="peatonal">Peatonal</option>
               <option value="rapida">Rápida</option>
+              <option value="vehicular">Vehicular</option>
             </select>
           </div>
 

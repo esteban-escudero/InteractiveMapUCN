@@ -190,12 +190,16 @@
 
 .route-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 15px;
-  padding: 10px;
+  grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+  justify-items: center; /* centra cada columna */
+  align-items: center;
+  gap: 20px;
+  margin: 0 auto 15px auto;
+  padding: 10px 20px;
   background: #f8f9fa;
   border-radius: 6px;
+  width: fit-content; /* se ajusta al contenido */
+  text-align: center;
 }
 
 .stat {

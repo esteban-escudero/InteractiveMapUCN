@@ -105,6 +105,7 @@ function Map() {
     loadRoutes,
   } = useRoutes();
 
+  // INICIALIZAR MAPA
   useEffect(() => {
     if (!mapInitialized && mapRef.current && !mapInstance) {
       console.log("🔄 Inicializando mapa por primera vez...");
@@ -129,7 +130,7 @@ function Map() {
     }
   }, [mapInitialized, mapRef, initializeMap, mapInstance]);
 
-  // ✅ FUNCIÓN MEJORADA PARA CREAR SALAS DESDE BUILDINGLIST
+  // FUNCIONES PARA GESTIÓN DE SALAS
   const handleCreateRoomsForBuilding = (building) => {
     console.log("🏢 Agregando sala al edificio:", building.nombre);
     setSelectedBuildingForRooms(building); // Guardar el edificio seleccionado
@@ -140,7 +141,7 @@ function Map() {
     console.log("🏢 Creando salas para edificio:", building.nombre);
   };
 
-  // ✅ AGREGAR ESTA FUNCIÓN FALTANTE
+  // FUNCIONES PARA GESTIÓN DE SALAS
   const handleOpenCreateRooms = () => {
     setRoomManagementMode("create");
     setSelectedRooms([]);
@@ -656,10 +657,6 @@ function Map() {
         {routesError && (
           <div className="error-indicator">❌ Error rutas: {routesError}</div>
         )}
-
-        <div className="building-counter">
-          🏢 Edificios: {buildingLayers.length}
-        </div>
       </div>
     </div>
   );
