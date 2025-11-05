@@ -612,12 +612,12 @@ function Map() {
 
       {/* CONTENEDOR DEL MAPA */}
       <div className="Mapa">
-        {/* 🎯 Botón de Reset Vista */}
+        {/* 🎯 Botón de Reset Vista 
         {isMapReady && (
           <button className="reset-view-btn" onClick={handleResetView}>
             🎯 Resetear Vista Campus
           </button>
-        )}
+        )}*/}
 
         <div ref={mapRef} className="map-container"></div>
 
