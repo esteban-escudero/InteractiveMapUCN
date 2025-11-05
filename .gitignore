@@ -1,7 +1,13 @@
 # Ignorar dependencias de Node.js
+<<<<<<< HEAD
 node_modules/
 .npm
 .yarn-integrity
+=======
+**/node_modules/
+**/node_modules/
+**/package-lock.json
+>>>>>>> origin/main
 
 # Ignorar archivos de cache
 .cache/
@@ -15,6 +21,7 @@ node_modules/
 
 # Ignorar archivos del sistema
 .DS_Store
+<<<<<<< HEAD
 Thumbs.db
 
 # Ignorar logs
@@ -32,3 +39,7 @@ build/
 # Ignorar coverage
 coverage/
 .nyc_output/
+=======
+
+postgres_data/
+>>>>>>> origin/main

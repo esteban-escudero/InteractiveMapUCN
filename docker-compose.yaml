@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: interactive_map_postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: InteractiveMapDB
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
