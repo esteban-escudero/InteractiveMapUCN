@@ -21,10 +21,11 @@ const BuildingForm = ({
   });
 
   const [isCapturing, setIsCapturing] = useState(false);
+  const [hasBeenReset, setHasBeenReset] = useState(false);
 
   const tiposEdificio = [
     { value: "Oficina Profesor", label: "👨‍🏫 Oficina Profesor" },
-    { value: "Oficina Administracion", label: "📊 Oficina Admin" },
+    { value: "Oficina Administracion", label: "📊 Oficina Adminstrativa" },
     { value: "Sala de Clase", label: "📚 Sala de Clase" },
     { value: "Laboratorio", label: "🔬 Laboratorio" },
     { value: "Biblioteca", label: "📖 Biblioteca" },
@@ -34,11 +35,12 @@ const BuildingForm = ({
     { value: "Cafeteria", label: "☕ Cafetería" },
     { value: "Gimnasio", label: "💪 Gimnasio" },
     { value: "Estacionamiento", label: "🅿️ Estacionamiento" },
+    { value: "Centro de Salud", label: "🏥 Centro de Salud" },
   ];
 
-  // Resetear form cuando se abre/cierra o cambia el edificio
+  // Resetear form solo cuando se abre por primera vez o cambia entre edición/creación
   useEffect(() => {
-    if (isVisible) {
+    if (isVisible && !hasBeenReset) {
       if (isEditing && building) {
         // Modo edición: cargar datos del edificio
         const coords = building.ubicacion?.coordinates || [];
@@ -49,26 +51,26 @@ const BuildingForm = ({
           latitud: coords[1]?.toString() || building.lat?.toString() || "",
           longitud: coords[0]?.toString() || building.lng?.toString() || "",
         });
-        setIsCapturing(false);
       } else {
-        // Para nuevo edificio, usar coordenadas capturadas si existen
-        const lat = capturedCoordinates
-          ? capturedCoordinates.lat.toString()
-          : "";
-        const lng = capturedCoordinates
-          ? capturedCoordinates.lng.toString()
-          : "";
-
-        setFormData((prev) => ({
-          ...prev,
-          latitud: lat,
-          longitud: lng,
-        }));
+        // Modo creación: resetear completamente el formulario
+        setFormData({
+          nombre: "",
+          descripcion: "",
+          tipo: "Oficina Profesor",
+          latitud: "",
+          longitud: "",
+        });
       }
+      setHasBeenReset(true);
     }
-  }, [isVisible, isEditing, building]);
 
-  // Efecto específico para capturar coordenadas nuevas
+    // Resetear el flag cuando el formulario se cierra
+    if (!isVisible) {
+      setHasBeenReset(false);
+    }
+  }, [isVisible, isEditing, building, hasBeenReset]);
+
+  // Efecto específico para capturar coordenadas nuevas - ESTE ES EL IMPORTANTE
   useEffect(() => {
     if (capturedCoordinates && isCapturing) {
       console.log("📍 Coordenadas capturadas recibidas:", capturedCoordinates);
@@ -92,6 +94,18 @@ const BuildingForm = ({
     }
   }, [capturedCoordinates, isCapturing, onToggleCoordinateDetection]);
 
+  // Efecto para limpiar coordenadas cuando se inicia la captura
+  useEffect(() => {
+    if (isCapturing) {
+      // Limpiar solo las coordenadas, mantener el resto del formulario
+      setFormData((prev) => ({
+        ...prev,
+        latitud: "",
+        longitud: "",
+      }));
+    }
+  }, [isCapturing]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -103,13 +117,6 @@ const BuildingForm = ({
   const handleCaptureCoordinates = () => {
     console.log("📍 Iniciando captura de coordenadas para edificio...");
 
-    // Limpiar coordenadas anteriores antes de capturar nuevas
-    setFormData((prev) => ({
-      ...prev,
-      latitud: "",
-      longitud: "",
-    }));
-
     if (onToggleCoordinateDetection) {
       setIsCapturing(true);
       onToggleCoordinateDetection();
@@ -118,19 +125,6 @@ const BuildingForm = ({
       console.error("❌ onToggleCoordinateDetection no está definido");
       alert("Error: Función de captura no disponible");
     }
-  };
-
-  const handleManualCoordinateInput = () => {
-    console.log("📍 Cambiando a ingreso manual");
-    setIsCapturing(false);
-    // Limpiar coordenadas capturadas
-    onClearCoordinates();
-    // Limpiar campos de coordenadas
-    setFormData((prev) => ({
-      ...prev,
-      latitud: "",
-      longitud: "",
-    }));
   };
 
   const handleSubmit = async (e) => {

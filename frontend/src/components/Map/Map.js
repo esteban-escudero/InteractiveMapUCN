@@ -443,9 +443,7 @@ function Map() {
               <p><strong>Descripción:</strong> ${
                 b.descripcion || "Sin descripción"
               }</p>
-              <p><strong>Tipo:</strong> ${b.tipo || "No especificado"}</p>
-              <hr>
-              <small style="color:#27ae60;">📍 En Base de Datos</small>
+              
             </div>`;
 
           layer.bindPopup(popup).addTo(mapInstance);
