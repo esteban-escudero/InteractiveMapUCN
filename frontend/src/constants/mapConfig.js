@@ -4,9 +4,9 @@ export const UCN_COQUIMBO_BOUNDS = [
 ];
 
 export const MAP_ZOOM_LIMITS = {
-  min: 17,
-  max: 19,
-  default: 18,
+  min: 15,
+  max: 16,
+  //default: 18,
 };
 
 export const GEO_SERVER_CONFIG = {

@@ -521,6 +521,7 @@ function Map() {
         isEditing={!!editingBuilding}
         capturedCoordinates={capturedCoords}
         onClearCoordinates={() => setCapturedCoords(null)}
+        onToggleCoordinateDetection={toggleCoordinateDetection}
       />
 
       {/* BUILDINGLIST CON GESTIÓN DE SALAS INTEGRADA */}
