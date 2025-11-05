@@ -129,14 +129,25 @@ function Map() {
     }
   }, [mapInitialized, mapRef, initializeMap, mapInstance]);
 
-  // FUNCIONES PARA SALAS - AHORA DENTRO DE EDIFICIOS
+  // ✅ FUNCIÓN MEJORADA PARA CREAR SALAS DESDE BUILDINGLIST
+  const handleCreateRoomsForBuilding = (building) => {
+    console.log("🏢 Agregando sala al edificio:", building.nombre);
+    setSelectedBuildingForRooms(building); // Guardar el edificio seleccionado
+    setRoomManagementMode("create");
+    setSelectedRooms([]);
+    setShowRoomManagement(true);
+    setShowBuildingList(false);
+    console.log("🏢 Creando salas para edificio:", building.nombre);
+  };
+
+  // ✅ AGREGAR ESTA FUNCIÓN FALTANTE
   const handleOpenCreateRooms = () => {
     setRoomManagementMode("create");
     setSelectedRooms([]);
     setSelectedBuildingForRooms(null);
     setShowRoomManagement(true);
     setShowBuildingList(false);
-    console.log("➕ Abriendo creación de salas");
+    console.log("➕ Abriendo creación de salas (sin edificio específico)");
   };
 
   const handleOpenEditRoom = (room) => {
@@ -179,16 +190,6 @@ function Map() {
       console.error("❌ Error al eliminar sala:", error);
       throw error;
     }
-  };
-
-  // ✅ FUNCIÓN PARA CREAR SALAS DESDE BUILDINGLIST
-  const handleCreateRoomsForBuilding = (building) => {
-    setSelectedBuildingForRooms(building);
-    setRoomManagementMode("create");
-    setSelectedRooms([]);
-    setShowRoomManagement(true);
-    setShowBuildingList(false);
-    console.log("🏢 Creando salas para edificio:", building.nombre);
   };
 
   // FUNCIONES PARA RUTAS - AGREGAR
@@ -446,9 +447,7 @@ function Map() {
               <p><strong>Descripción:</strong> ${
                 b.descripcion || "Sin descripción"
               }</p>
-              <p><strong>Tipo:</strong> ${b.tipo || "No especificado"}</p>
-              <hr>
-              <small style="color:#27ae60;">📍 En Base de Datos</small>
+              
             </div>`;
 
           layer.bindPopup(popup).addTo(mapInstance);
@@ -538,6 +537,7 @@ function Map() {
         isEditing={!!editingBuilding}
         capturedCoordinates={capturedCoords}
         onClearCoordinates={() => setCapturedCoords(null)}
+        onToggleCoordinateDetection={toggleCoordinateDetection}
       />
 
       {/* BUILDINGLIST CON GESTIÓN DE SALAS INTEGRADA */}
@@ -555,7 +555,7 @@ function Map() {
         />
       )}
 
-      {/* ROOMMANAGEMENT */}
+      {/* ROOMMANAGEMENT - ACTUALIZADO CON DETECCIÓN AUTOMÁTICA */}
       {showRoomManagement && (
         <RoomManagement
           mode={roomManagementMode}
@@ -564,7 +564,11 @@ function Map() {
           onSaveRooms={handleSaveRooms}
           onUpdateRoom={handleUpdateRoom}
           onDeleteRoom={handleDeleteRoom}
-          onClose={() => setShowRoomManagement(false)}
+          onClose={() => {
+            setShowRoomManagement(false);
+            setSelectedBuildingForRooms(null);
+            setSelectedRooms([]);
+          }}
           existingRooms={selectedRooms}
         />
       )}

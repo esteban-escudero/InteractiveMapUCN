@@ -85,45 +85,7 @@
   transform: translateX(5px);
 }
 
-/* Sección de detección de coordenadas */
-.coordinate-detection-section {
-  margin-bottom: 20px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.coordinate-detection-btn {
-  width: 100%;
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
-  border: none;
-  padding: 12px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.coordinate-detection-btn:hover {
-  background: linear-gradient(135deg, #2980b9, #2471a3);
-  transform: translateY(-1px);
-}
-
-.coordinate-detection-btn.active {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
-  animation: pulse 2s infinite;
-}
-
-.coordinate-hint {
-  color: #e74c3c;
-  display: block;
-  text-align: center;
-  margin-top: 5px;
-  font-size: 11px;
-}
+/* ELIMINADA LA SECCIÓN DE DETECCIÓN DE COORDENADAS */
 
 /* Sección de sincronización */
 .sync-section {
@@ -253,7 +215,6 @@
     padding: 10px 12px;
   }
 
-  .coordinate-detection-section,
   .sync-section,
   .status-section {
     padding: 12px;

@@ -1,12 +1,45 @@
 # Ignorar dependencias de Node.js
+<<<<<<< HEAD
+node_modules/
+.npm
+.yarn-integrity
+=======
 **/node_modules/
 **/node_modules/
 **/package-lock.json
+>>>>>>> origin/main
 
-# Ignorar otros archivos comunes
+# Ignorar archivos de cache
+.cache/
+*.cache
+.npmrc
+.yarnrc
+
+# Ignorar variables de entorno
 .env
-*.log
-*.tmp
+.env.local
+
+# Ignorar archivos del sistema
 .DS_Store
+<<<<<<< HEAD
+Thumbs.db
+
+# Ignorar logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+*.log
+
+# Ignorar build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Ignorar coverage
+coverage/
+.nyc_output/
+=======
 
 postgres_data/
+>>>>>>> origin/main

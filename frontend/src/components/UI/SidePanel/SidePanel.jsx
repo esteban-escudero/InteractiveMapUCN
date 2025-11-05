@@ -3,16 +3,11 @@ import "./SidePanel.css";
 
 const SidePanel = ({
   status,
-  featuresCount,
   onLogout,
   onSyncData,
-  buildingsLoading,
   backendStatus,
-  geoServerFeaturesCount,
   onAddBuilding,
   onManageBuildings,
-  onToggleCoordinateDetection,
-  coordinateDetectionActive = false,
   onAddRoute,
   onManageRoutes,
   routesCount = 0,
@@ -40,11 +35,6 @@ const SidePanel = ({
   const handleManageBuildings = () => {
     console.log("🏢 SidePanel: Gestionar Edificios clickeado");
     if (onManageBuildings) onManageBuildings();
-  };
-
-  const handleToggleCoordinateDetection = () => {
-    console.log("📍 Botón detección de coordenadas clickeado");
-    if (onToggleCoordinateDetection) onToggleCoordinateDetection();
   };
 
   const handleAddRoute = () => {
@@ -148,22 +138,6 @@ const SidePanel = ({
             </ul>
           )}
         </div>
-      </div>
-
-      {/* BOTÓN: Detección de coordenadas */}
-      <div className="coordinate-detection-section">
-        <button
-          className={`coordinate-detection-btn ${
-            coordinateDetectionActive ? "active" : ""
-          }`}
-          onClick={handleToggleCoordinateDetection}>
-          {coordinateDetectionActive
-            ? "📍 Capturando..."
-            : "📍 Capturar Coordenadas"}
-        </button>
-        {coordinateDetectionActive && (
-          <small className="coordinate-hint">Haz clic en el mapa</small>
-        )}
       </div>
 
       <button className="logout-btn" onClick={handleLogout}>
