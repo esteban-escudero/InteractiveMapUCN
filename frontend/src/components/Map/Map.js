@@ -152,39 +152,72 @@ function Map() {
   }, [campusBoundsPolygon]);
 
   // ✅ ENCONTRAR EDIFICIO MÁS CERCANO CON TURF
-  const findNearestBuilding = useCallback((lat, lng) => {
-    if (!buildings.length) return null;
+ // En Map.js - función findNearestBuilding mejorada
+
+const findNearestBuilding = useCallback((lat, lng) => {
+  if (!buildings || !buildings.length) {
+    console.log('🏢 No hay edificios para buscar el más cercano');
+    return null;
+  }
+
+  try {
+    const targetPoint = { lat, lng };
     
-    try {
-      const targetPoint = { lat, lng };
-      const buildingPoints = buildings.map(building => {
+    // Validar coordenadas objetivo
+    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+      console.warn('❌ Coordenadas objetivo inválidas:', { lat, lng });
+      return null;
+    }
+
+    const buildingPoints = buildings.map(building => {
+      try {
+        if (!building) return null;
+
         let buildingLat, buildingLng;
         
         if (building.ubicacion && building.ubicacion.type === "Point") {
-          [buildingLng, buildingLat] = building.ubicacion.coordinates;
+          const coords = building.ubicacion.coordinates;
+          if (!coords || coords.length < 2) return null;
+          [buildingLng, buildingLat] = coords;
         } else if (building.lat && building.lng) {
           buildingLat = building.lat;
           buildingLng = building.lng;
         } else {
           return null;
         }
-        
+
+        // Validar que las coordenadas del edificio sean números
+        if (typeof buildingLat !== 'number' || typeof buildingLng !== 'number' ||
+            isNaN(buildingLat) || isNaN(buildingLng)) {
+          console.warn('❌ Coordenadas de edificio inválidas:', building.nombre, { buildingLat, buildingLng });
+          return null;
+        }
+
         return {
           lat: buildingLat,
           lng: buildingLng,
           building: building
         };
-      }).filter(Boolean);
+      } catch (error) {
+        console.warn('❌ Error procesando edificio:', building?.nombre, error);
+        return null;
+      }
+    }).filter(Boolean);
 
-      if (buildingPoints.length === 0) return null;
-
-      const nearest = SpatialUtils.findNearestPoint(targetPoint, buildingPoints);
-      return nearest ? nearest.building : null;
-    } catch (error) {
-      console.error("❌ Error encontrando edificio más cercano:", error);
+    if (buildingPoints.length === 0) {
+      console.log('🏢 No se encontraron puntos de edificio válidos');
       return null;
     }
-  }, [buildings]);
+
+    console.log(`🏢 Buscando entre ${buildingPoints.length} edificios válidos`);
+    const nearest = SpatialUtils.findNearestPoint(targetPoint, buildingPoints);
+    return nearest ? nearest.building : null;
+
+  } catch (error) {
+    console.error("❌ Error encontrando edificio más cercano:", error);
+    return null;
+  }
+}, [buildings]);
 
   // ✅ FUNCIÓN PARA FILTRAR EDIFICIOS POR CATEGORÍA
   const filteredBuildings = useMemo(() => {
@@ -486,39 +519,50 @@ function Map() {
   }, [coordinateDetection, mapInstance, tempMarker]);
 
   // ✅ CAPTURAR CLIC EN EL MAPA CON VALIDACIÓN TURF
-  useEffect(() => {
-    if (!mapInstance || !coordinateDetection) return;
+  // ✅ CAPTURAR CLIC EN EL MAPA CON VALIDACIÓN TURF
+useEffect(() => {
+  if (!mapInstance || !coordinateDetection) return;
 
-    const handleMapClick = (e) => {
-      const { lat, lng } = e.latlng;
-      console.log("📍 Coordenadas capturadas:", { lat, lng });
+  const handleMapClick = (e) => {
+    const { lat, lng } = e.latlng;
+    console.log("📍 Coordenadas capturadas:", { lat, lng });
 
-      // ✅ VALIDAR CON TURF
-      const isValid = validateCoordinates(lat, lng);
-      
-      if (tempMarker) mapInstance.removeLayer(tempMarker);
+    // ✅ VALIDAR COORDENADAS ANTES DE PROCESAR
+    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+      console.error('❌ Coordenadas capturadas inválidas');
+      return;
+    }
 
-      const newTempMarker = L.marker([lat, lng], {
-        icon: createTempIcon(),
-        zIndexOffset: 1000,
-      }).addTo(mapInstance);
+    // ✅ VALIDAR CON TURF - FALTA ESTA LÍNEA
+    const isValid = validateCoordinates(lat, lng);
 
-      let popupContent = `
-        <div style="text-align: center;">
-          <h4>📍 Coordenadas Capturadas</h4>
-          <p><strong>Lat:</strong> ${lat.toFixed(6)}</p>
-          <p><strong>Lng:</strong> ${lng.toFixed(6)}</p>
+    // Limpiar marcador anterior si existe
+    if (tempMarker && mapInstance) {
+      mapInstance.removeLayer(tempMarker);
+    }
+
+    const newTempMarker = L.marker([lat, lng], {
+      icon: createTempIcon(),
+      zIndexOffset: 1000,
+    }).addTo(mapInstance);
+
+    let popupContent = `
+      <div style="text-align: center;">
+        <h4>📍 Coordenadas Capturadas</h4>
+        <p><strong>Lat:</strong> ${lat.toFixed(6)}</p>
+        <p><strong>Lng:</strong> ${lng.toFixed(6)}</p>
+    `;
+
+    if (!isValid) {
+      popupContent += `
+        <p style="color: #e74c3c; font-weight: bold;">
+          ⚠️ Fuera del campus
+        </p>
       `;
+    }
 
-      if (!isValid) {
-        popupContent += `
-          <p style="color: #e74c3c; font-weight: bold;">
-            ⚠️ Fuera del campus
-          </p>
-        `;
-      }
-
-      // ✅ ENCONTRAR EDIFICIO MÁS CERCANO
+    // ✅ ENCONTRAR EDIFICIO MÁS CERCANO
+    try {
       const nearestBuilding = findNearestBuilding(lat, lng);
       if (nearestBuilding) {
         const distance = SpatialUtils.calculateDistance(
@@ -528,47 +572,55 @@ function Map() {
             lng: nearestBuilding.lng || nearestBuilding.ubicacion?.coordinates[0]
           }
         );
-        popupContent += `
-          <p style="color: #27ae60; font-size: 12px;">
-            🏢 Más cercano: ${nearestBuilding.nombre} (${Math.round(distance)}m)
-          </p>
-        `;
+        
+        // Solo mostrar si la distancia es un número válido
+        if (!isNaN(distance) && distance !== Infinity) {
+          popupContent += `
+            <p style="color: #27ae60; font-size: 12px;">
+              🏢 Más cercano: ${nearestBuilding.nombre} (${Math.round(distance)}m)
+            </p>
+          `;
+        }
       }
+    } catch (error) {
+      console.warn('❌ Error mostrando edificio más cercano:', error);
+      // No agregar nada al popup si hay error
+    }
 
-      popupContent += `
-          <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
-            style="background: ${isValid ? '#27ae60' : '#e74c3c'}; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
-            ${isValid ? 'Usar estas coordenadas' : 'Usar de todas formas'}
-          </button>
-        </div>
-      `;
+    popupContent += `
+        <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
+          style="background: ${isValid ? '#27ae60' : '#e74c3c'}; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
+          ${isValid ? 'Usar estas coordenadas' : 'Usar de todas formas'}
+        </button>
+      </div>
+    `;
 
-      newTempMarker.bindPopup(popupContent).openPopup();
+    newTempMarker.bindPopup(popupContent).openPopup();
 
-      setTempMarker(newTempMarker);
-      setCapturedCoords({ lat, lng });
-    };
+    setTempMarker(newTempMarker);
+    setCapturedCoords({ lat, lng });
+  };
 
-    window.useCapturedCoords = (lat, lng) => {
-      console.log("🔄 Coordenadas usadas:", { lat, lng });
-      setCapturedCoords({ lat, lng });
-      setCoordinateDetection(false);
-      setEditingBuilding(null);
-      setShowBuildingForm(true);
-      if (tempMarker) mapInstance.removeLayer(tempMarker);
-      setTempMarker(null);
-      mapInstance.getContainer().style.cursor = "";
-    };
+  window.useCapturedCoords = (lat, lng) => {
+    console.log("🔄 Coordenadas usadas:", { lat, lng });
+    setCapturedCoords({ lat, lng });
+    setCoordinateDetection(false);
+    setEditingBuilding(null);
+    setShowBuildingForm(true);
+    if (tempMarker) mapInstance.removeLayer(tempMarker);
+    setTempMarker(null);
+    mapInstance.getContainer().style.cursor = "";
+  };
 
-    mapInstance.on("click", handleMapClick);
+  mapInstance.on("click", handleMapClick);
 
-    return () => {
-      mapInstance.off("click", handleMapClick);
-      delete window.useCapturedCoords;
-    };
-  }, [mapInstance, coordinateDetection, tempMarker, validateCoordinates, findNearestBuilding]);
-
-  // Guardar o actualizar edificio
+  return () => {
+    mapInstance.off("click", handleMapClick);
+    delete window.useCapturedCoords;
+  };
+}, [mapInstance, coordinateDetection, tempMarker, validateCoordinates, findNearestBuilding]);
+  
+ // Guardar o actualizar edificio
   const handleSaveBuilding = async (buildingData) => {
     try {
       // ✅ VALIDAR COORDENADAS CON TURF ANTES DE GUARDAR
@@ -899,10 +951,22 @@ function Map() {
               <option value="">Todas las categorías</option>
               <option value="Académico">Académico</option>
               <option value="Administrativo">Administrativo</option>
-              <option value="Servicios">Servicios</option>
-              <option value="Deportivo">Deportivo</option>
+              <option value="Baño">Baño</option>
+              <option value="Biblioteca">Biblioteca</option>
+              <option value="Cafeteria">Cafetería</option>
+              <option value="Casino">Casino</option>
+              <option value="Centro de Salud">Centro de Salud</option>
               <option value="Cultural">Cultural</option>
+              <option value="Deportivo">Deportivo</option>
+              <option value="Estacionamiento">Estacionamiento</option>
+              <option value="Gimnasio">Gimnasio</option>
               <option value="Investigación">Investigación</option>
+              <option value="Laboratorio">Laboratorio</option>
+              <option value="Oficina Administracion">Oficina Administración</option>
+              <option value="Oficina Profesor">Oficina Profesor</option>
+              <option value="Sala de Clase">Sala de Clase</option>
+              <option value="Sala de Estudio">Sala de Estudio</option>
+              <option value="Servicios">Servicios</option>
             </select>
           </div>
 

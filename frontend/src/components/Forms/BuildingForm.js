@@ -1,4 +1,3 @@
-// components/Forms/BuildingForm.js
 import React, { useState, useEffect } from "react";
 import "./BuildingForm.css";
 import { SpatialUtils } from "../../utils/spatialUtils";
@@ -18,8 +17,8 @@ const BuildingForm = ({
     descripcion: "",
     lat: "",
     lng: "",
-    tipo: "académico",
-    estado: "activo",
+    tipo: "Sala de Clase", // ✅ Valor por defecto que existe en la BD
+    estado: "activo", // ✅ Valor por defecto que existe en la BD
   });
 
   const [validation, setValidation] = useState({
@@ -32,7 +31,37 @@ const BuildingForm = ({
   const [isCapturing, setIsCapturing] = useState(false);
   const [hasBeenReset, setHasBeenReset] = useState(false);
 
-  // ✅ CARGAR DATOS SI ESTAMOS EDITANDO - CON RESET MEJORADO
+  // ✅ OPCIONES EXACTAS QUE COINCIDEN CON LA BASE DE DATOS
+  const tiposEdificio = [
+    { value: "Baño", label: "🚻 Baño" },
+    { value: "Sala de Clase", label: "📚 Sala de Clase" },
+    { value: "Laboratorio", label: "🔬 Laboratorio" },
+    { value: "Oficina Administracion", label: "📊 Oficina Administración" },
+    { value: "Casino", label: "🍽️ Casino" },
+    { value: "Cafeteria", label: "☕ Cafetería" },
+    { value: "Biblioteca", label: "📖 Biblioteca" },
+    { value: "Sala de Estudio", label: "💻 Sala de Estudio" },
+    { value: "Gimnasio", label: "💪 Gimnasio" },
+    { value: "Estacionamiento", label: "🅿️ Estacionamiento" },
+    { value: "Oficina Profesor", label: "👨‍🏫 Oficina Profesor" },
+    { value: "Centro de Salud", label: "🏥 Centro de Salud" },
+    // Nuevos tipos que agregaremos
+    { value: "Académico", label: "🏫 Académico" },
+    { value: "Administrativo", label: "📋 Administrativo" },
+    { value: "Investigación", label: "🔍 Investigación" },
+    { value: "Servicios", label: "🛠️ Servicios" },
+    { value: "Deportivo", label: "⚽ Deportivo" },
+    { value: "Cultural", label: "🎭 Cultural" },
+  ];
+
+  const estadosEdificio = [
+    { value: "activo", label: "✅ Activo" },
+    { value: "mantenimiento", label: "🔧 En Mantenimiento" },
+    { value: "cerrado", label: "🚫 Cerrado" },
+    { value: "construccion", label: "🏗️ En Construcción" },
+  ];
+
+  // ✅ CARGAR DATOS SI ESTAMOS EDITANDO
   useEffect(() => {
     if (isVisible && !hasBeenReset) {
       if (isEditing && building) {
@@ -50,24 +79,22 @@ const BuildingForm = ({
           descripcion: building.descripcion || "",
           lat: lat.toString(),
           lng: lng.toString(),
-          tipo: building.tipo || "académico",
+          tipo: building.tipo || "Sala de Clase",
           estado: building.estado || "activo",
         });
       } else {
-        // Modo creación: resetear completamente el formulario
         setFormData({
           nombre: "",
           descripcion: "",
           lat: "",
           lng: "",
-          tipo: "académico",
+          tipo: "Sala de Clase",
           estado: "activo",
         });
       }
       setHasBeenReset(true);
     }
 
-    // Resetear el flag cuando el formulario se cierra
     if (!isVisible) {
       setHasBeenReset(false);
     }
@@ -308,7 +335,7 @@ const BuildingForm = ({
               <button
                 type="button"
                 className="capture-btn"
-                onClick={handleCaptureCoordinates} // ✅ USAR LA NUEVA FUNCIÓN
+                onClick={handleCaptureCoordinates}
               >
                 🎯 Capturar del Mapa
               </button>
@@ -383,34 +410,37 @@ const BuildingForm = ({
             )}
           </div>
 
-          {/* TIPO Y ESTADO */}
+          {/* TIPO Y ESTADO - ACTUALIZADO */}
           <div className="form-row">
             <div className="form-group">
-              <label>Tipo de Edificio</label>
+              <label>Tipo de Edificio *</label>
               <select
                 name="tipo"
                 value={formData.tipo}
                 onChange={handleInputChange}
+                required
               >
-                <option value="académico">Académico</option>
-                <option value="administrativo">Administrativo</option>
-                <option value="investigación">Investigación</option>
-                <option value="servicios">Servicios</option>
-                <option value="deportivo">Deportivo</option>
+                {tiposEdificio.map(tipo => (
+                  <option key={tipo.value} value={tipo.value}>
+                    {tipo.label}
+                  </option>
+                ))}
               </select>
             </div>
 
             <div className="form-group">
-              <label>Estado</label>
+              <label>Estado *</label>
               <select
                 name="estado"
                 value={formData.estado}
                 onChange={handleInputChange}
+                required
               >
-                <option value="activo">Activo</option>
-                <option value="mantención">En Mantención</option>
-                <option value="cerrado">Cerrado</option>
-                <option value="construcción">En Construcción</option>
+                {estadosEdificio.map(estado => (
+                  <option key={estado.value} value={estado.value}>
+                    {estado.label}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
