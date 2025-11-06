@@ -16,17 +16,14 @@ import {
 } from "../../constants/mapConfig";
 import { buildingService } from "../../services/buildingService";
 import { roomService } from "../../services/roomService";
-
-// IMPORTACIONES AGREGADAS
 import useRoutes from "../../hooks/useRoutes";
-import RouteForm from "../Forms/RouteForm";
+import RouteFormWithNodes from "../Forms/RouteFormWithNodes";
 import RouteLayer from "./RouteLayer";
 import RouteList from "../UI/RouteList/RouteList";
-
-// ✅ IMPORTAR TURF UTILS
 import { SpatialUtils } from "../../utils/spatialUtils";
+import RouteNetwork from '../RouteNetwork/RouteNetwork';
 
-// 🔧 Configuración de íconos de Leaflet
+// Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -71,16 +68,13 @@ function Map() {
   const [selectedRooms, setSelectedRooms] = useState([]);
   const [selectedBuildingForRooms, setSelectedBuildingForRooms] =
     useState(null);
-
-  // ✅ ESTADOS PARA VALIDACIONES TURF
   const [campusBoundsPolygon, setCampusBoundsPolygon] = useState(null);
   const [validationErrors, setValidationErrors] = useState([]);
-
-  // DENTRO DEL COMPONENTE Map, AGREGAR ESTOS ESTADOS:
   const [showRouteForm, setShowRouteForm] = useState(false);
   const [showRouteList, setShowRouteList] = useState(false);
   const [editingRoute, setEditingRoute] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const [showRouteNetwork, setShowRouteNetwork] = useState(false);
 
   // Hook para edificios
   const {
@@ -696,6 +690,9 @@ function Map() {
         coordinateDetectionActive={coordinateDetection}
         onAddRoute={handleAddRoute}
         onManageRoutes={handleManageRoutes}
+        // AGREGAR PROPS PARA RouteNetwork
+        onToggleRouteNetwork={() => setShowRouteNetwork(!showRouteNetwork)}
+        routeNetworkActive={showRouteNetwork}
       />
 
       {/* BUILDINGFORM */}
@@ -745,14 +742,15 @@ function Map() {
 
       {/* AGREGAR LOS NUEVOS COMPONENTES AL JSX */}
       {/* RouteForm */}
-      <RouteForm
-        onSave={handleSaveRoute}
-        onCancel={handleCancelRouteEdit}
-        isVisible={showRouteForm}
-        route={editingRoute}
-        isEditing={!!editingRoute}
-        mapInstance={mapInstance}
-      />
+     <RouteFormWithNodes
+  onSave={handleSaveRoute}
+  onCancel={handleCancelRouteEdit}
+  isVisible={showRouteForm}
+  route={editingRoute}
+  isEditing={!!editingRoute}
+  mapInstance={mapInstance}
+  existingRoutes={routes} // ✅ PASA LAS RUTAS EXISTENTES
+/>
 
       {/* RouteList */}
       {showRouteList && (
@@ -771,6 +769,29 @@ function Map() {
         routes={routes}
         onRouteClick={handleRouteClick}
       />
+
+      {/* AGREGAR COMPONENTE RouteNetwork */}
+      {showRouteNetwork && (
+        <RouteNetwork
+          mapInstance={mapInstance}
+          onNodeClick={(node) => {
+            console.log('🔗 Nodo seleccionado:', node);
+            // Zoom automático al nodo
+            if (mapInstance) {
+              mapInstance.setView([node.coordenadas.lat, node.coordenadas.lng], 18);
+            }
+          }}
+          onRouteClick={(routeInfo) => {
+            console.log('🛣️ Ruta seleccionada desde nodo:', routeInfo);
+            // Buscar la ruta completa y seleccionarla
+            const fullRoute = routes.find(r => r.id === routeInfo.routeId);
+            if (fullRoute) {
+              setSelectedRoute(fullRoute);
+              handleRouteClick(fullRoute);
+            }
+          }}
+        />
+      )}
 
       {/* MODO CAPTURA */}
       {coordinateDetection && (
@@ -820,18 +841,7 @@ function Map() {
           <div className="loading-indicator">🛣️ Cargando rutas...</div>
         )}
 
-        {selectedRoute && (
-          <div className="selected-route-indicator">
-            🧭 Ruta seleccionada: {selectedRoute.nombre}
-            {selectedRoute.distancia && ` (${selectedRoute.distancia}m`}
-            {selectedRoute.tiempo_estimado &&
-              ` - ${selectedRoute.tiempo_estimado}min)`}
-            <span style={{color: '#27ae60', marginLeft: '10px'}}>
-              📏 Turf.js
-            </span>
-            <button onClick={() => setSelectedRoute(null)}>×</button>
-          </div>
-        )}
+        
 
         {routesError && (
           <div className="error-indicator">❌ Error rutas: {routesError}</div>

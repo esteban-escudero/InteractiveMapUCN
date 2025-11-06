@@ -1,5 +1,5 @@
 // components/Map/RouteLayer.js
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import L from "leaflet";
 import { SpatialUtils } from "../../utils/spatialUtils";
 
@@ -7,6 +7,10 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
   const [routeLayers, setRouteLayers] = useState([]);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const previousRoutesRef = useRef([]);
+
+  // ✅ REFERENCIAS PARA LAS FUNCIONES GLOBALES
+  const selectRouteRef = useRef(null);
+  const zoomToRouteRef = useRef(null);
 
   // ✅ CONFIGURACIÓN DE ESTILOS POR TIPO DE RUTA
   const getRouteStyle = (routeType) => {
@@ -48,8 +52,8 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
     });
   };
 
-  // ✅ CREAR POPUP INFORMATIVO CON MÉTRICAS TURF
-  const createRoutePopup = (route) => {
+  // ✅ CREAR POPUP INFORMATIVO CON MÉTRICAS TURF (CORREGIDO)
+  const createRoutePopup = useCallback((route) => {
     let metricsHTML = "";
     
     try {
@@ -84,6 +88,7 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
       console.error("❌ Error calculando métricas Turf:", error);
     }
 
+    // ✅ CORREGIDO: Usar data attributes en lugar de funciones globales
     return `
       <div class="route-popup">
         <h4>${route.nombre || "Ruta sin nombre"}</h4>
@@ -92,20 +97,73 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
           <p><strong>Distancia:</strong> ${route.distancia || 0}m</p>
           <p><strong>Tiempo estimado:</strong> ${route.tiempo_estimado || 0}min</p>
         </div>
-        ${metricsHTML}
-        <div class="popup-actions">
-          <button onclick="window.selectRoute('${route.id}')" 
-            class="popup-btn select-btn">
-            🎯 Seleccionar
-          </button>
-          <button onclick="window.zoomToRoute('${route.id}')" 
-            class="popup-btn zoom-btn">
-            🔍 Zoom
-          </button>
-        </div>
       </div>
     `;
-  };
+  }, []);
+
+  // ✅ MANEJAR CLIC EN BOTONES DEL POPUP
+  const handlePopupButtonClick = useCallback((e) => {
+    if (!mapInstance) return;
+
+    const button = e.target;
+    const routeId = button.getAttribute('data-route-id');
+    const action = button.getAttribute('data-action');
+    
+    if (!routeId) return;
+
+    const route = routes.find(r => r.id === routeId || r.id.toString() === routeId);
+    if (!route) return;
+
+    if (action === 'select') {
+      setSelectedRoute(route);
+      onRouteClick?.(route);
+      console.log(`🎯 Ruta seleccionada: ${route.nombre}`);
+    } else if (action === 'zoom') {
+      // ✅ USAR TURF PARA CALCULAR BOUNDS DE LA RUTA
+      if (route.geometria) {
+        const coordinates = route.geometria.coordinates;
+        if (coordinates.length > 0) {
+          try {
+            const points = coordinates.map(coord => ({ lng: coord[0], lat: coord[1] }));
+            const bbox = SpatialUtils.calculateBoundingBox(points);
+            if (bbox) {
+              const bounds = L.latLngBounds(
+                [bbox[1], bbox[0]], // [minLat, minLng]
+                [bbox[3], bbox[2]]  // [maxLat, maxLng]
+              );
+              mapInstance.fitBounds(bounds, { padding: [20, 20] });
+              console.log(`🔍 Zoom a ruta: ${route.nombre}`);
+            }
+          } catch (error) {
+            console.error("❌ Error calculando bounds con Turf:", error);
+            // Fallback al método original
+            const bounds = coordinates.map(coord => [coord[1], coord[0]]);
+            mapInstance.fitBounds(bounds, { padding: [20, 20] });
+          }
+        }
+      }
+    }
+  }, [mapInstance, routes, onRouteClick]);
+
+  // ✅ AGREGAR EVENT LISTENER PARA POPUPS
+  useEffect(() => {
+    if (!mapInstance) return;
+
+    const handleMapClick = (e) => {
+      const button = e.target;
+      if (button.classList.contains('popup-btn')) {
+        handlePopupButtonClick(e);
+      }
+    };
+
+    // Agregar event listener al contenedor del mapa
+    const mapContainer = mapInstance.getContainer();
+    mapContainer.addEventListener('click', handleMapClick);
+
+    return () => {
+      mapContainer.removeEventListener('click', handleMapClick);
+    };
+  }, [mapInstance, handlePopupButtonClick]);
 
   // ✅ RENDERIZAR RUTAS EN EL MAPA
   useEffect(() => {
@@ -113,7 +171,7 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
       // Limpiar capas si no hay rutas
       if (routeLayers.length > 0) {
         routeLayers.forEach(layer => {
-          if (mapInstance.hasLayer(layer)) {
+          if (mapInstance?.hasLayer(layer)) {
             mapInstance.removeLayer(layer);
           }
         });
@@ -162,7 +220,7 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
           className: `route-line route-${route.tipo}`
         });
 
-        // ✅ AGREGAR POPUP Y EVENTOS
+        // ✅ AGREGAR POPUP Y EVENTOS (CORREGIDO)
         routeLine.bindPopup(createRoutePopup(route));
         
         routeLine.on('click', (e) => {
@@ -209,49 +267,10 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
       }
     });
 
-    // ✅ CONFIGURAR FUNCIONES GLOBALES PARA POPUPS
-    window.selectRoute = (routeId) => {
-      const route = routes.find(r => r.id === routeId);
-      if (route) {
-        setSelectedRoute(route);
-        onRouteClick?.(route);
-      }
-    };
-
-    window.zoomToRoute = (routeId) => {
-      const route = routes.find(r => r.id === routeId);
-      if (route && route.geometria) {
-        try {
-          const coordinates = route.geometria.coordinates;
-          const points = coordinates.map(coord => ({ lng: coord[0], lat: coord[1] }));
-          const bbox = SpatialUtils.calculateBoundingBox(points);
-          
-          if (bbox) {
-            const bounds = L.latLngBounds(
-              [bbox[1], bbox[0]],
-              [bbox[3], bbox[2]]
-            );
-            mapInstance.fitBounds(bounds, { 
-              padding: [30, 30],
-              maxZoom: 18 
-            });
-          }
-        } catch (error) {
-          console.error("❌ Error en zoom con Turf:", error);
-        }
-      }
-    };
-
     setRouteLayers(newLayers);
     previousRoutesRef.current = routes;
 
-    return () => {
-      // Limpiar funciones globales
-      delete window.selectRoute;
-      delete window.zoomToRoute;
-    };
-
-  }, [mapInstance, routes, selectedRoute, onRouteClick]);
+  }, [mapInstance, routes, selectedRoute, onRouteClick, createRoutePopup]);
 
   // ✅ EFECTO PARA DESTACAR RUTA SELECCIONADA
   useEffect(() => {
@@ -259,9 +278,10 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
 
     routeLayers.forEach(layer => {
       if (layer instanceof L.Polyline) {
+        // Verificar si esta capa pertenece a la ruta seleccionada
         const isSelected = selectedRoute && 
           layer._popup && 
-          layer._popup._content.includes(selectedRoute.id);
+          layer._popup._content.includes(`data-route-id="${selectedRoute.id}"`);
 
         if (isSelected) {
           layer.setStyle({
@@ -271,8 +291,11 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
           });
           layer.bringToFront();
         } else {
-          const routeType = layer.options.className?.replace('route-line ', '') || 'peatonal';
-          const style = getRouteStyle(routeType.replace('route-', ''));
+          // Obtener el tipo de ruta del className
+          const className = layer.options.className || '';
+          const routeTypeMatch = className.match(/route-(\w+)/);
+          const routeType = routeTypeMatch ? routeTypeMatch[1] : 'peatonal';
+          const style = getRouteStyle(routeType);
           layer.setStyle(style);
         }
       }
@@ -296,27 +319,7 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
         return sum + (route.puntos_ruta?.length || route.geometria?.coordinates.length || 0);
       }, 0) / routes.length;
 
-      return (
-        <div className="turf-analytics-overlay">
-          <div className="turf-analytics">
-            <h4>📊 Analytics Turf.js</h4>
-            <div className="analytics-stats">
-              <div className="stat">
-                <span className="stat-label">Rutas totales:</span>
-                <span className="stat-value">{routes.length}</span>
-              </div>
-              <div className="stat">
-                <span className="stat-label">Distancia total:</span>
-                <span className="stat-value">{Math.round(totalDistance)}m</span>
-              </div>
-              <div className="stat">
-                <span className="stat-label">Puntos promedio:</span>
-                <span className="stat-value">{avgPoints.toFixed(1)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+      
     } catch (error) {
       console.error("❌ Error en analytics Turf:", error);
       return null;
@@ -372,8 +375,19 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
             font-size: 11px;
           }
           
-          .select-btn { background: #3498db; color: white; }
-          .zoom-btn { background: #27ae60; color: white; }
+          .select-btn { 
+            background: #3498db; 
+            color: white; 
+          }
+          
+          .zoom-btn { 
+            background: #27ae60; 
+            color: white; 
+          }
+          
+          .popup-btn:hover {
+            opacity: 0.9;
+          }
           
           .point-popup {
             text-align: center;

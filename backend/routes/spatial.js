@@ -2,9 +2,6 @@
 const express = require('express');
 const router = express.Router();
 const spatialController = require('../controllers/spatialController');
-const spatialValidation = require('../middleware/spatialValidation');
-
-// ✅ RUTAS DE ANÁLISIS ESPACIAL CON TURF
 
 // POST /api/spatial/calculate-route - Calcular ruta óptima
 router.post('/calculate-route', spatialController.calculateOptimalRoute);
