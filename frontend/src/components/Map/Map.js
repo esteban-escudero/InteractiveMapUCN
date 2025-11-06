@@ -740,17 +740,16 @@ function Map() {
         />
       )}
 
-      {/* AGREGAR LOS NUEVOS COMPONENTES AL JSX */}
-      {/* RouteForm */}
-     <RouteFormWithNodes
-  onSave={handleSaveRoute}
-  onCancel={handleCancelRouteEdit}
-  isVisible={showRouteForm}
-  route={editingRoute}
-  isEditing={!!editingRoute}
-  mapInstance={mapInstance}
-  existingRoutes={routes} // ✅ PASA LAS RUTAS EXISTENTES
-/>
+      {/* ✅ RouteFormWithNodes CORREGIDO */}
+      <RouteFormWithNodes
+        onSave={handleSaveRoute}
+        onCancel={handleCancelRouteEdit}
+        isVisible={showRouteForm}
+        route={editingRoute}
+        isEditing={!!editingRoute}
+        mapInstance={mapInstance}
+        existingRoutes={routes} // ✅ PASA LAS RUTAS EXISTENTES
+      />
 
       {/* RouteList */}
       {showRouteList && (
@@ -840,8 +839,6 @@ function Map() {
         {routesLoading && (
           <div className="loading-indicator">🛣️ Cargando rutas...</div>
         )}
-
-        
 
         {routesError && (
           <div className="error-indicator">❌ Error rutas: {routesError}</div>

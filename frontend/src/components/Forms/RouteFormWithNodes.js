@@ -32,7 +32,7 @@ const RouteFormWithNodes = ({
   const [selectedExistingNode, setSelectedExistingNode] = useState(null);
   const [showNodesPanel, setShowNodesPanel] = useState(false);
 
-  // ✅ AGREGAR LA FUNCIÓN handleInputChange QUE FALTABA
+  // ✅ FUNCIÓN handleInputChange AGREGADA
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -161,6 +161,28 @@ const RouteFormWithNodes = ({
     }
   }, [isVisible]);
 
+  useEffect(() => {
+  if (formData.puntos_ruta.length >= 2) {
+    const distancia = calculateTotalDistance(formData.puntos_ruta);
+    const tiempo_estimado = Math.round(distancia / 80);
+    
+    setFormData(prev => ({
+      ...prev,
+      distancia,
+      tiempo_estimado
+    }));
+    
+    console.log("🔄 Distancia actualizada automáticamente:", distancia + "m");
+  } else if (formData.puntos_ruta.length < 2) {
+    // Resetear si hay menos de 2 puntos
+    setFormData(prev => ({
+      ...prev,
+      distancia: 0,
+      tiempo_estimado: 0
+    }));
+  }
+}, [formData.puntos_ruta]);
+
   // Agregar punto con detección de nodos existentes
   const addPointToRoute = useCallback(
     (lat, lng) => {
@@ -187,19 +209,18 @@ const RouteFormWithNodes = ({
           return prev;
         }
 
-       if (selectedExistingNode && selectedExistingNode.selectedNode) {
-  // Usar nodo existente seleccionado
-  puntoFinal = {
-    ...selectedExistingNode.selectedNode,
-    lat: selectedExistingNode.selectedNode.coordenadas.lat,
-    lng: selectedExistingNode.selectedNode.coordenadas.lng,
-    nombre: selectedExistingNode.selectedNode.nombre,
-    tipo_punto: "intermedio",
-    es_nodo_existente: true,
-    id_punto_existente: selectedExistingNode.selectedNode.puntoId
-  };
-  markerColor = "#9b59b6"; // Púrpura para nodos existentes
-
+        if (selectedExistingNode && selectedExistingNode.selectedNode) {
+          // Usar nodo existente seleccionado
+          puntoFinal = {
+            ...selectedExistingNode.selectedNode,
+            lat: selectedExistingNode.selectedNode.coordenadas.lat,
+            lng: selectedExistingNode.selectedNode.coordenadas.lng,
+            nombre: selectedExistingNode.selectedNode.nombre,
+            tipo_punto: "intermedio",
+            es_nodo_existente: true,
+            id_punto_existente: selectedExistingNode.selectedNode.puntoId
+          };
+          markerColor = "#9b59b6"; // Púrpura para nodos existentes
         } else {
           // Crear nuevo punto
           puntoFinal = {
@@ -343,27 +364,28 @@ const RouteFormWithNodes = ({
 
   // Calcular distancia total
   const calculateTotalDistance = (puntos) => {
-    if (puntos.length < 2) return 0;
-    try {
-      const coordinates = puntos.map(p => p.coordenadas.coordinates);
-      const distancia = SpatialUtils.calculateRouteLength(coordinates);
-      const distanciaRedondeada = Math.round(distancia);
-      console.log(`📏 Distancia calculada con Turf: ${distanciaRedondeada}m`);
-      return distanciaRedondeada;
-    } catch (error) {
-      console.error("❌ Error calculando distancia con Turf:", error);
-      let total = 0;
-      for (let i = 0; i < puntos.length - 1; i++) {
-        const [lngA, latA] = puntos[i].coordenadas.coordinates;
-        const [lngB, latB] = puntos[i + 1].coordenadas.coordinates;
-        total += SpatialUtils.calculateDistance(
-          { lat: latA, lng: lngA },
-          { lat: latB, lng: lngB }
-        );
-      }
-      return Math.round(total);
+  if (puntos.length < 2) return 0;
+  try {
+    const coordinates = puntos.map(p => p.coordenadas.coordinates);
+    const distancia = SpatialUtils.calculateRouteLength(coordinates);
+    const distanciaRedondeada = Math.round(distancia);
+    console.log(`📏 Distancia calculada con Turf: ${distanciaRedondeada}m (${puntos.length} puntos)`);
+    return distanciaRedondeada;
+  } catch (error) {
+    console.error("❌ Error calculando distancia con Turf:", error);
+    // Fallback manual
+    let total = 0;
+    for (let i = 0; i < puntos.length - 1; i++) {
+      const [lngA, latA] = puntos[i].coordenadas.coordinates;
+      const [lngB, latB] = puntos[i + 1].coordenadas.coordinates;
+      total += SpatialUtils.calculateDistance(
+        { lat: latA, lng: lngA },
+        { lat: latB, lng: lngB }
+      );
     }
-  };
+    return Math.round(total);
+  }
+};
 
   // Finalizar con ESC
   const handleFinishWithESC = () => {
