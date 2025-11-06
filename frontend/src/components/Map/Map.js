@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react"; // ✅ AGREGAR useMemo
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Map.css";
@@ -75,6 +75,10 @@ function Map() {
   const [editingRoute, setEditingRoute] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [showRouteNetwork, setShowRouteNetwork] = useState(false);
+
+  const [originFilter, setOriginFilter] = useState('');
+  const [destinationFilter, setDestinationFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   // Hook para edificios
   const {
@@ -182,6 +186,16 @@ function Map() {
     }
   }, [buildings]);
 
+  // ✅ FUNCIÓN PARA FILTRAR EDIFICIOS POR CATEGORÍA
+  const filteredBuildings = useMemo(() => {
+    if (!categoryFilter) return buildings;
+    
+    return buildings.filter(building => 
+      building.categoria === categoryFilter || 
+      building.tipo === categoryFilter
+    );
+  }, [buildings, categoryFilter]);
+
   // INICIALIZAR MAPA
   useEffect(() => {
     if (!mapInitialized && mapRef.current && !mapInstance) {
@@ -206,6 +220,74 @@ function Map() {
       return () => clearTimeout(timer);
     }
   }, [mapInitialized, mapRef, initializeMap, mapInstance]);
+
+  // ✅ UN SOLO useEffect PARA RENDERIZAR EDIFICIOS (ELIMINAR EL DUPLICADO)
+  useEffect(() => {
+    if (!mapInstance || !isMapReady) return;
+
+    // Limpiar capas anteriores
+    buildingLayers.forEach((layer) => {
+      if (mapInstance.hasLayer(layer)) {
+        mapInstance.removeLayer(layer);
+      }
+    });
+
+    const newLayers = [];
+
+    // ✅ USAR filteredBuildings EN LUGAR DE buildings
+    filteredBuildings.forEach((b) => {
+      if (!b.ubicacion) return;
+
+      let layer;
+      try {
+        if (b.ubicacion.type === "Point") {
+          const [lng, lat] = b.ubicacion.coordinates;
+          layer = L.marker([lat, lng], { icon: createDatabaseIcon() });
+        } else if (b.ubicacion.type === "Polygon") {
+          const coords = b.ubicacion.coordinates[0].map((c) => [c[1], c[0]]);
+          layer = L.polygon(coords, {
+            color: "#27ae60",
+            weight: 3,
+            fillOpacity: 0.3,
+            className: "building-polygon",
+          });
+        }
+
+        if (layer) {
+          // ✅ CALCULAR ÁREA CON TURF PARA POLÍGONOS
+          let areaInfo = "";
+          if (b.ubicacion.type === "Polygon") {
+            try {
+              const area = SpatialUtils.calculatePolygonArea(b.ubicacion.coordinates[0]);
+              areaInfo = `<p><strong>Área aproximada:</strong> ${Math.round(area)} m²</p>`;
+            } catch (error) {
+              console.error("Error calculando área:", error);
+            }
+          }
+
+          const popup = `
+            <div style="min-width:200px;">
+              <h4>${b.nombre || "Sin nombre"}</h4>
+              <p><strong>Descripción:</strong> ${
+                b.descripcion || "Sin descripción"
+              }</p>
+              <p><strong>Categoría:</strong> ${
+                b.categoria || b.tipo || "No especificada"
+              }</p>
+              ${areaInfo}
+            </div>`;
+
+          layer.bindPopup(popup).addTo(mapInstance);
+          newLayers.push(layer);
+        }
+      } catch (error) {
+        console.error("❌ Error renderizando edificio:", b.nombre, error);
+      }
+    });
+
+    setBuildingLayers(newLayers);
+    console.log(`🏢 ${newLayers.length} edificios renderizados (filtro: ${categoryFilter || 'ninguno'})`);
+  }, [mapInstance, filteredBuildings, isMapReady]); // ✅ SOLO filteredBuildings
 
   // FUNCIONES PARA GESTIÓN DE SALAS
   const handleCreateRoomsForBuilding = (building) => {
@@ -562,70 +644,6 @@ function Map() {
     }
   };
 
-  // Render de capas de edificios
-  useEffect(() => {
-    if (!mapInstance || !isMapReady) return;
-
-    // Limpiar capas anteriores
-    buildingLayers.forEach((layer) => {
-      if (mapInstance.hasLayer(layer)) {
-        mapInstance.removeLayer(layer);
-      }
-    });
-
-    const newLayers = [];
-
-    buildings.forEach((b) => {
-      if (!b.ubicacion) return;
-
-      let layer;
-      try {
-        if (b.ubicacion.type === "Point") {
-          const [lng, lat] = b.ubicacion.coordinates;
-          layer = L.marker([lat, lng], { icon: createDatabaseIcon() });
-        } else if (b.ubicacion.type === "Polygon") {
-          const coords = b.ubicacion.coordinates[0].map((c) => [c[1], c[0]]);
-          layer = L.polygon(coords, {
-            color: "#27ae60",
-            weight: 3,
-            fillOpacity: 0.3,
-            className: "building-polygon",
-          });
-        }
-
-        if (layer) {
-          // ✅ CALCULAR ÁREA CON TURF PARA POLÍGONOS
-          let areaInfo = "";
-          if (b.ubicacion.type === "Polygon") {
-            try {
-              const area = SpatialUtils.calculatePolygonArea(b.ubicacion.coordinates[0]);
-              areaInfo = `<p><strong>Área aproximada:</strong> ${Math.round(area)} m²</p>`;
-            } catch (error) {
-              console.error("Error calculando área:", error);
-            }
-          }
-
-          const popup = `
-            <div style="min-width:200px;">
-              <h4>${b.nombre || "Sin nombre"}</h4>
-              <p><strong>Descripción:</strong> ${
-                b.descripcion || "Sin descripción"
-              }</p>
-              ${areaInfo}
-            </div>`;
-
-          layer.bindPopup(popup).addTo(mapInstance);
-          newLayers.push(layer);
-        }
-      } catch (error) {
-        console.error("❌ Error renderizando edificio:", b.nombre, error);
-      }
-    });
-
-    setBuildingLayers(newLayers);
-    console.log(`🏢 ${newLayers.length} edificios renderizados`);
-  }, [mapInstance, buildings, isMapReady]);
-
   // Cargar datos de GeoServer cuando el mapa esté listo
   useEffect(() => {
     if (isMapReady && mapInstance && geoServerStatus === "checking") {
@@ -722,7 +740,7 @@ function Map() {
         />
       )}
 
-      {/* ROOMMANAGEMENT - ACTUALIZADO CON DETECCIÓN AUTOMÁTICA */}
+      {/* ROOMMANAGEMENT */}
       {showRoomManagement && (
         <RoomManagement
           mode={roomManagementMode}
@@ -740,7 +758,7 @@ function Map() {
         />
       )}
 
-      {/* ✅ RouteFormWithNodes CORREGIDO */}
+      {/* ✅ RouteFormWithNodes */}
       <RouteFormWithNodes
         onSave={handleSaveRoute}
         onCancel={handleCancelRouteEdit}
@@ -748,7 +766,7 @@ function Map() {
         route={editingRoute}
         isEditing={!!editingRoute}
         mapInstance={mapInstance}
-        existingRoutes={routes} // ✅ PASA LAS RUTAS EXISTENTES
+        existingRoutes={routes}
       />
 
       {/* RouteList */}
@@ -814,8 +832,94 @@ function Map() {
         </div>
       )}
 
-      {/* CONTENEDOR DEL MAPA */}
+    {/* CONTENEDOR DEL MAPA */}
       <div className="Mapa">
+        {/* ✅ CONTENEDOR DE FILTROS EN LA PARTE SUPERIOR */}
+        <div className="map-filters-container">
+          {/* FILTRO POR ORIGEN */}
+          <div className="map-filter">
+            <label htmlFor="origin-filter">🔍 Origen:</label>
+            <select
+              id="origin-filter"
+              value={originFilter}
+              onChange={(e) => setOriginFilter(e.target.value)}
+              className="map-select"
+            >
+              <option value="">Seleccionar origen</option>
+              {filteredBuildings
+                .filter((building, index, self) => 
+                  self.findIndex(b => b.nombre === building.nombre) === index
+                )
+                .map(building => (
+                  <option key={`origin-${building.id || building._id}`} value={building.nombre}>
+                    {building.nombre || 'Sin nombre'}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+
+          {/* FILTRO POR DESTINO */}
+          <div className="map-filter">
+            <label htmlFor="destination-filter">🔍 Destino:</label>
+            <select
+              id="destination-filter"
+              value={destinationFilter}
+              onChange={(e) => setDestinationFilter(e.target.value)}
+              className="map-select"
+            >
+              <option value="">Seleccionar destino</option>
+              {filteredBuildings
+                .filter((building, index, self) => 
+                  self.findIndex(b => b.nombre === building.nombre) === index
+                )
+                .map(building => (
+                  <option key={`destination-${building.id || building._id}`} value={building.nombre}>
+                    {building.nombre || 'Sin nombre'}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+
+          {/* FILTRO POR CATEGORÍA */}
+          <div className="map-filter">
+            <label htmlFor="category-filter">🏛️ Categoria:</label>
+            <select
+              id="category-filter"
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                // ✅ LIMPIAR ORIGEN Y DESTINO AL CAMBIAR CATEGORÍA
+                setOriginFilter('');
+                setDestinationFilter('');
+              }}
+              className="map-select"
+            >
+              <option value="">Todas las categorías</option>
+              <option value="Académico">Académico</option>
+              <option value="Administrativo">Administrativo</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Deportivo">Deportivo</option>
+              <option value="Cultural">Cultural</option>
+              <option value="Investigación">Investigación</option>
+            </select>
+          </div>
+
+          {/* BOTÓN PARA LIMPIAR FILTROS - SIEMPRE PRESENTE */}
+          <button
+            onClick={() => {
+              setOriginFilter('');
+              setDestinationFilter('');
+              setCategoryFilter('');
+            }}
+            className="clear-filters-btn"
+            disabled={!originFilter && !destinationFilter && !categoryFilter}
+          >
+            🗑️ Limpiar Filtros
+          </button>
+        </div>
+
         <div ref={mapRef} className="map-container"></div>
 
         {!isMapReady && (

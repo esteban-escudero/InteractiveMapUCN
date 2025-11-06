@@ -93,7 +93,7 @@ const BuildingForm = ({
         return;
       }
 
-      // Validar si está dentro del campus
+      // Validar si está dentro del campus (coordenadas aproximadas de UCN Coquimbo)
       const isInCampus = SpatialUtils.isPointInPolygon(latNum, lngNum, [
         [-71.355622, -29.967316],
         [-71.346738, -29.967316],
@@ -275,6 +275,7 @@ const BuildingForm = ({
                   onChange={(e) => handleCoordinateChange("lat", e.target.value)}
                   placeholder="Ej: -29.965000"
                   required
+                  className={formData.lat && formData.lng ? (validation.isInCampus ? 'input-valid' : 'input-warning') : ''}
                 />
               </div>
 
@@ -288,6 +289,7 @@ const BuildingForm = ({
                   onChange={(e) => handleCoordinateChange("lng", e.target.value)}
                   placeholder="Ej: -71.350000"
                   required
+                  className={formData.lat && formData.lng ? (validation.isInCampus ? 'input-valid' : 'input-warning') : ''}
                 />
               </div>
             </div>

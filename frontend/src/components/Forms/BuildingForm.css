@@ -23,20 +23,44 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.form-content {
-  padding: 24px;
+.building-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
 }
 
-.form-header {
-  margin-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 15px;
-}
-
-.form-header h3 {
+.building-form-header h3 {
   margin: 0;
   color: #2c3e50;
   font-size: 1.4em;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #7f8c8d;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-btn:hover {
+  background: #e74c3c;
+  color: white;
+}
+
+.building-form {
+  padding: 24px;
 }
 
 .form-group {
@@ -70,7 +94,7 @@
   border-color: #3498db;
 }
 
-/* Sección de Coordenadas - MODIFICADO */
+/* Sección de Coordenadas */
 .coordinates-section {
   margin-bottom: 20px;
   padding: 15px;
@@ -79,93 +103,111 @@
   border: 1px solid #e9ecef;
 }
 
-.coordinates-header {
+.section-header {
   display: flex;
-  flex-direction: column; /* Cambiado a columna */
-  align-items: center; /* Centrado */
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 15px;
-  gap: 10px; /* Espacio entre elementos */
 }
 
-.coordinates-header label {
-  font-weight: 600;
-  color: #34495e;
+.section-header h4 {
   margin: 0;
-  text-align: center; /* Texto centrado */
-  width: 100%; /* Ocupa todo el ancho */
-}
-
-.coordinate-options {
-  display: flex;
-  width: 100%; /* Ocupa todo el ancho disponible */
-  justify-content: center; /* Centra el contenido */
+  color: #2c3e50;
 }
 
 .capture-btn {
-  padding: 12px 20px; /* Padding más grande */
+  padding: 8px 16px;
   border: 2px solid #3498db;
-  border-radius: 8px;
+  border-radius: 6px;
   background: white;
   color: #3498db;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  width: 100%; /* Ocupa todo el ancho */
-  max-width: 300px; /* Ancho máximo opcional */
-  text-align: center;
   font-weight: 600;
 }
 
 .capture-btn:hover {
   background: #3498db;
   color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
-.coordinates-group {
+.captured-coords-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  color: #155724;
+  font-size: 12px;
+}
+
+.clear-capture-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #155724;
+  font-size: 16px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.coordinates-inputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 }
 
-/* ESTILOS MEJORADOS PARA VALIDACIÓN TURF */
-.coordinates-feedback {
+/* Validación */
+.validation-info {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 6px;
   margin-top: 10px;
-  text-align: center;
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid;
-  transition: all 0.3s ease;
+  gap: 10px;
 }
 
-/* Estilos para diferentes estados de validación */
-.validation-valid {
+.validation-info.valid {
   background: #d4edda;
-  border-color: #c3e6cb;
+  border: 1px solid #c3e6cb;
   color: #155724;
 }
 
-.validation-warning {
-  background: #fff3cd;
-  border-color: #ffeaa7;
-  color: #856404;
-}
-
-.validation-error {
+.validation-info.invalid {
   background: #f8d7da;
-  border-color: #f5c6cb;
+  border: 1px solid #f5c6cb;
   color: #721c24;
 }
 
-/* Mejora visual para inputs con validación */
-.form-group input:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+.validation-icon {
+  font-size: 16px;
 }
 
-/* Indicadores de estado en los inputs */
+.validation-details {
+  flex: 1;
+}
+
+.validation-coords {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.validation-warning {
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+/* Inputs con validación */
 .input-valid {
   border-color: #27ae60 !important;
 }
@@ -178,22 +220,123 @@
   border-color: #e74c3c !important;
 }
 
-/* Leyenda de Turf */
-.turf-legend {
-  margin-top: 10px;
-  padding: 8px;
-  background: #e8f4fd;
-  border-radius: 4px;
-  border: 1px solid #b8daff;
-  font-size: 10px;
-  color: #004085;
-  text-align: center;
+/* Fila de formulario */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
 }
 
-/* Responsive para la leyenda */
+/* Información Turf */
+.turf-info-section {
+  margin: 20px 0;
+  padding: 15px;
+  background: #e8f4fd;
+  border-radius: 8px;
+  border: 1px solid #b8daff;
+}
+
+.turf-info-section h4 {
+  margin: 0 0 10px 0;
+  color: #004085;
+  font-size: 14px;
+}
+
+.turf-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.turf-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feature-icon {
+  font-size: 14px;
+}
+
+.feature-text {
+  font-size: 12px;
+  color: #004085;
+}
+
+/* Acciones del formulario */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cancel-btn {
+  padding: 10px 20px;
+  border: 2px solid #95a5a6;
+  border-radius: 6px;
+  background: white;
+  color: #7f8c8d;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: #95a5a6;
+  color: white;
+}
+
+.save-btn {
+  padding: 10px 20px;
+  border: 2px solid #27ae60;
+  border-radius: 6px;
+  background: #27ae60;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #219a52;
+  border-color: #219a52;
+  transform: translateY(-1px);
+}
+
+.save-btn:disabled {
+  background: #bdc3c7;
+  border-color: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .turf-legend {
-    font-size: 9px;
-    padding: 6px;
+  .building-form-container {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .coordinates-inputs,
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
   }
 }
