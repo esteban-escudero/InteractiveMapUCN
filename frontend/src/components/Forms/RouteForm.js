@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./RouteForm.css";
+import { SpatialUtils } from "../../utils/spatialUtils";
 
 const RouteForm = ({
   onSave,
@@ -37,7 +38,7 @@ const RouteForm = ({
     if (route && isEditing) {
       setFormData({
         nombre: route.nombre || "",
-        tipo: route.tipo || "peatonal", // ← Ya es válido
+        tipo: route.tipo || "peatonal",
         distancia: route.distancia || 0,
         tiempo_estimado: route.tiempo_estimado || 0,
         geometria: route.geometria || null,
@@ -46,7 +47,7 @@ const RouteForm = ({
     } else {
       setFormData({
         nombre: "",
-        tipo: "peatonal", // ← Valor por defecto válido
+        tipo: "peatonal",
         distancia: 0,
         tiempo_estimado: 0,
         geometria: null,
@@ -184,8 +185,37 @@ const RouteForm = ({
     console.log("✅ Mapa listo para recibir múltiples clics");
   };
 
-  // ✅ Finalizar selección con ESC - VERSIÓN MEJORADA
-  // ✅ Finalizar selección con ESC - VERSIÓN MEJORADA
+  // ✅ CALCULAR DISTANCIA CON TURF - FUNCIÓN MEJORADA
+  const calculateTotalDistance = (puntos) => {
+    if (puntos.length < 2) return 0;
+
+    try {
+      const coordinates = puntos.map(p => p.coordenadas.coordinates);
+      const distancia = SpatialUtils.calculateRouteLength(coordinates);
+      const distanciaRedondeada = Math.round(distancia);
+      
+      console.log(
+        `📏 Distancia calculada con Turf: ${distanciaRedondeada}m (${puntos.length} puntos)`
+      );
+      return distanciaRedondeada;
+    } catch (error) {
+      console.error("❌ Error calculando distancia con Turf:", error);
+      
+      // Fallback al método manual si Turf falla
+      let total = 0;
+      for (let i = 0; i < puntos.length - 1; i++) {
+        const [lngA, latA] = puntos[i].coordenadas.coordinates;
+        const [lngB, latB] = puntos[i + 1].coordenadas.coordinates;
+        total += SpatialUtils.calculateDistance(
+          { lat: latA, lng: lngA },
+          { lat: latB, lng: lngB }
+        );
+      }
+      return Math.round(total);
+    }
+  };
+
+  // ✅ Finalizar selección con ESC - VERSIÓN MEJORADA CON TURF
   const handleFinishWithESC = () => {
     console.log("⏹️ FINALIZANDO con ESC. Puntos:", formData.puntos_ruta.length);
 
@@ -224,17 +254,18 @@ const RouteForm = ({
       };
     });
 
-    // ✅ Crear geometría y calcular distancia/tiempo inmediatamente
+    // ✅ Crear geometría y calcular distancia/tiempo con Turf
     const coordinates = updatedPuntos.map((p) => p.coordenadas.coordinates);
     const geometria = {
       type: "LineString",
       coordinates: coordinates,
     };
 
+    // ✅ USAR TURF PARA CÁLCULOS
     const distancia = calculateTotalDistance(updatedPuntos);
-    const tiempo_estimado = Math.round(distancia / 80);
+    const tiempo_estimado = Math.round(distancia / 80); // 80m/min caminando
 
-    console.log("✅ Datos calculados en handleFinishWithESC:", {
+    console.log("✅ Datos calculados con Turf:", {
       distancia,
       tiempo_estimado,
       puntos: updatedPuntos.length,
@@ -323,10 +354,12 @@ const RouteForm = ({
         type: "LineString",
         coordinates: coordinates,
       };
+      
+      // ✅ USAR TURF PARA CÁLCULOS
       const distancia = calculateTotalDistance(puntos);
       const tiempo_estimado = Math.round(distancia / 80);
 
-      console.log("✅ Ruta calculada:", {
+      console.log("✅ Ruta calculada con Turf:", {
         distancia,
         tiempo_estimado,
         puntos: puntos.length,
@@ -341,35 +374,6 @@ const RouteForm = ({
     } catch (error) {
       console.error("❌ Error al calcular ruta:", error);
     }
-  };
-
-  const calculateTotalDistance = (puntos) => {
-    if (puntos.length < 2) return 0;
-
-    let total = 0;
-    for (let i = 0; i < puntos.length - 1; i++) {
-      const [lngA, latA] = puntos[i].coordenadas.coordinates;
-      const [lngB, latB] = puntos[i + 1].coordenadas.coordinates;
-      total += calculateDistance(latA, lngA, latB, lngB);
-    }
-
-    const distanciaRedondeada = Math.round(total);
-    console.log(
-      `📏 Distancia calculada: ${distanciaRedondeada}m (${puntos.length} puntos)`
-    );
-    return distanciaRedondeada;
-  };
-
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3;
-    const φ1 = (lat1 * Math.PI) / 180;
-    const φ2 = (lat2 * Math.PI) / 180;
-    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(Δφ / 2) ** 2 +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
   const handleDeactivateMapSelection = () => {
@@ -433,13 +437,20 @@ const RouteForm = ({
     }
   };
 
-  // ✅ SUBMIT CORREGIDO - Usar solo tipos válidos
-  // ✅ SUBMIT CORREGIDO - Incluir distancia y tiempo_estimado
+  // ✅ SUBMIT MEJORADO CON VALIDACIONES TURF
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (formData.puntos_ruta.length < 2) {
       console.log("❌ Se necesitan al menos 2 puntos para crear una ruta");
+      alert("❌ Se necesitan al menos 2 puntos para crear una ruta");
+      return;
+    }
+
+    // ✅ VALIDAR GEOMETRÍA CON TURF
+    const coordinates = formData.puntos_ruta.map(p => p.coordenadas.coordinates);
+    if (!SpatialUtils.isValidLineString(coordinates)) {
+      alert("❌ La geometría de la ruta no es válida");
       return;
     }
 
@@ -447,9 +458,6 @@ const RouteForm = ({
     let geometriaParaEnviar = formData.geometria;
 
     if (!geometriaParaEnviar && formData.puntos_ruta.length >= 2) {
-      const coordinates = formData.puntos_ruta.map(
-        (p) => p.coordenadas.coordinates
-      );
       geometriaParaEnviar = {
         type: "LineString",
         coordinates: coordinates,
@@ -467,14 +475,14 @@ const RouteForm = ({
         minute: "2-digit",
       })}`;
 
-    // ✅ Calcular distancia y tiempo si no existen
+    // ✅ Calcular distancia y tiempo con Turf si no existen
     let distanciaParaEnviar = formData.distancia;
     let tiempoParaEnviar = formData.tiempo_estimado;
 
     if (!distanciaParaEnviar && formData.puntos_ruta.length >= 2) {
       distanciaParaEnviar = calculateTotalDistance(formData.puntos_ruta);
-      tiempoParaEnviar = Math.round(distanciaParaEnviar / 80); // 80m/min caminando
-      console.log("🔄 Distancia y tiempo calculados automáticamente:", {
+      tiempoParaEnviar = Math.round(distanciaParaEnviar / 80);
+      console.log("🔄 Distancia y tiempo calculados con Turf:", {
         distancia: distanciaParaEnviar,
         tiempo: tiempoParaEnviar,
       });
@@ -482,17 +490,17 @@ const RouteForm = ({
 
     console.log("✅ Tipo validado:", formData.tipo);
 
-    // ✅ Preparar datos para enviar - INCLUYENDO DISTANCIA Y TIEMPO
+    // ✅ Preparar datos para enviar
     const datosParaGuardar = {
       ...formData,
       nombre: nombreParaEnviar,
       distancia: distanciaParaEnviar,
       tiempo_estimado: tiempoParaEnviar,
       geometria: geometriaParaEnviar,
-      puntos_ruta: formData.puntos_ruta, // ← Asegurar que los puntos también se envíen
+      puntos_ruta: formData.puntos_ruta,
     };
 
-    console.log("✅ Enviando al backend:", {
+    console.log("✅ Enviando al backend con Turf:", {
       nombre: datosParaGuardar.nombre,
       tipo: datosParaGuardar.tipo,
       distancia: datosParaGuardar.distancia,
@@ -504,6 +512,7 @@ const RouteForm = ({
     // ✅ Validación final antes de enviar
     if (!datosParaGuardar.geometria) {
       console.error("❌ Error crítico: No se pudo crear la geometría");
+      alert("❌ Error: No se pudo crear la geometría de la ruta");
       return;
     }
 
@@ -579,6 +588,9 @@ const RouteForm = ({
                 5️⃣ <strong>Opcional:</strong> Elige tipo de ruta y pon nombre
               </p>
               <p>6️⃣ Guarda la ruta</p>
+              <p style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                📏 <strong>NUEVO:</strong> Distancias calculadas con Turf.js
+              </p>
             </div>
 
             <div className="map-selection-controls">
@@ -615,6 +627,11 @@ const RouteForm = ({
             <div className="points-counter">
               Puntos seleccionados:{" "}
               <strong>{formData.puntos_ruta.length}</strong>
+              {formData.puntos_ruta.length >= 2 && (
+                <span style={{ color: '#27ae60', marginLeft: '10px' }}>
+                  📏 {formData.distancia}m calculados
+                </span>
+              )}
             </div>
 
             {formData.puntos_ruta.length > 0 && (
@@ -639,9 +656,25 @@ const RouteForm = ({
 
           {formData.geometria && (
             <div className="route-details">
-              <h4>📊 Detalles</h4>
-              <p>Distancia: {formData.distancia} m</p>
-              <p>Tiempo estimado: {formData.tiempo_estimado} min</p>
+              <h4>📊 Detalles de Ruta (Turf.js)</h4>
+              <div className="route-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Distancia:</span>
+                  <span className="stat-value">{formData.distancia} m</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Tiempo estimado:</span>
+                  <span className="stat-value">{formData.tiempo_estimado} min</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Puntos:</span>
+                  <span className="stat-value">{formData.puntos_ruta.length}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Tecnología:</span>
+                  <span className="stat-value">Turf.js ✅</span>
+                </div>
+              </div>
             </div>
           )}
 

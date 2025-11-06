@@ -23,6 +23,9 @@ import RouteForm from "../Forms/RouteForm";
 import RouteLayer from "./RouteLayer";
 import RouteList from "../UI/RouteList/RouteList";
 
+// ✅ IMPORTAR TURF UTILS
+import { SpatialUtils } from "../../utils/spatialUtils";
+
 // 🔧 Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -69,6 +72,10 @@ function Map() {
   const [selectedBuildingForRooms, setSelectedBuildingForRooms] =
     useState(null);
 
+  // ✅ ESTADOS PARA VALIDACIONES TURF
+  const [campusBoundsPolygon, setCampusBoundsPolygon] = useState(null);
+  const [validationErrors, setValidationErrors] = useState([]);
+
   // DENTRO DEL COMPONENTE Map, AGREGAR ESTOS ESTADOS:
   const [showRouteForm, setShowRouteForm] = useState(false);
   const [showRouteList, setShowRouteList] = useState(false);
@@ -105,6 +112,82 @@ function Map() {
     loadRoutes,
   } = useRoutes();
 
+  // ✅ INICIALIZAR POLÍGONO DEL CAMPUS CON TURF
+  useEffect(() => {
+    if (UCN_COQUIMBO_BOUNDS && UCN_COQUIMBO_BOUNDS.length >= 2) {
+      try {
+        const polygonCoords = [
+          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[0][0]], // [lng, lat]
+          [UCN_COQUIMBO_BOUNDS[1][1], UCN_COQUIMBO_BOUNDS[0][0]],
+          [UCN_COQUIMBO_BOUNDS[1][1], UCN_COQUIMBO_BOUNDS[1][0]],
+          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[1][0]],
+          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[0][0]], // cerrar polígono
+        ];
+        setCampusBoundsPolygon(polygonCoords);
+        console.log("✅ Polígono del campus inicializado con Turf");
+      } catch (error) {
+        console.error("❌ Error inicializando polígono del campus:", error);
+      }
+    }
+  }, []);
+
+  // ✅ VALIDAR COORDENADAS CON TURF
+  const validateCoordinates = useCallback((lat, lng) => {
+    if (!campusBoundsPolygon) return true; // Si no hay polígono, permitir todas
+    
+    try {
+      const isValid = SpatialUtils.isPointInPolygon(lat, lng, campusBoundsPolygon);
+      if (!isValid) {
+        console.warn(`❌ Coordenadas fuera del campus: ${lat}, ${lng}`);
+        setValidationErrors(prev => [...prev, {
+          type: 'out_of_bounds',
+          lat,
+          lng,
+          message: 'Coordenadas fuera de los límites del campus'
+        }]);
+      }
+      return isValid;
+    } catch (error) {
+      console.error("❌ Error validando coordenadas:", error);
+      return true; // En caso de error, permitir
+    }
+  }, [campusBoundsPolygon]);
+
+  // ✅ ENCONTRAR EDIFICIO MÁS CERCANO CON TURF
+  const findNearestBuilding = useCallback((lat, lng) => {
+    if (!buildings.length) return null;
+    
+    try {
+      const targetPoint = { lat, lng };
+      const buildingPoints = buildings.map(building => {
+        let buildingLat, buildingLng;
+        
+        if (building.ubicacion && building.ubicacion.type === "Point") {
+          [buildingLng, buildingLat] = building.ubicacion.coordinates;
+        } else if (building.lat && building.lng) {
+          buildingLat = building.lat;
+          buildingLng = building.lng;
+        } else {
+          return null;
+        }
+        
+        return {
+          lat: buildingLat,
+          lng: buildingLng,
+          building: building
+        };
+      }).filter(Boolean);
+
+      if (buildingPoints.length === 0) return null;
+
+      const nearest = SpatialUtils.findNearestPoint(targetPoint, buildingPoints);
+      return nearest ? nearest.building : null;
+    } catch (error) {
+      console.error("❌ Error encontrando edificio más cercano:", error);
+      return null;
+    }
+  }, [buildings]);
+
   // INICIALIZAR MAPA
   useEffect(() => {
     if (!mapInitialized && mapRef.current && !mapInstance) {
@@ -133,7 +216,7 @@ function Map() {
   // FUNCIONES PARA GESTIÓN DE SALAS
   const handleCreateRoomsForBuilding = (building) => {
     console.log("🏢 Agregando sala al edificio:", building.nombre);
-    setSelectedBuildingForRooms(building); // Guardar el edificio seleccionado
+    setSelectedBuildingForRooms(building);
     setRoomManagementMode("create");
     setSelectedRooms([]);
     setShowRoomManagement(true);
@@ -141,7 +224,6 @@ function Map() {
     console.log("🏢 Creando salas para edificio:", building.nombre);
   };
 
-  // FUNCIONES PARA GESTIÓN DE SALAS
   const handleOpenCreateRooms = () => {
     setRoomManagementMode("create");
     setSelectedRooms([]);
@@ -214,6 +296,28 @@ function Map() {
 
   const handleSaveRoute = async (routeData) => {
     try {
+      // ✅ VALIDAR RUTA CON TURF ANTES DE GUARDAR
+      if (routeData.puntos_ruta && routeData.puntos_ruta.length >= 2) {
+        const coordinates = routeData.puntos_ruta.map(p => p.coordenadas.coordinates);
+        
+        // Validar que todos los puntos estén dentro del campus
+        const invalidPoints = routeData.puntos_ruta.filter(punto => {
+          const [lng, lat] = punto.coordenadas.coordinates;
+          return !validateCoordinates(lat, lng);
+        });
+
+        if (invalidPoints.length > 0) {
+          alert("⚠️ Algunos puntos de la ruta están fuera de los límites del campus");
+          return;
+        }
+
+        // Validar geometría de la ruta
+        if (!SpatialUtils.isValidLineString(coordinates)) {
+          alert("❌ La geometría de la ruta no es válida");
+          return;
+        }
+      }
+
       if (editingRoute) {
         await updateRoute(editingRoute.id, routeData);
         alert("✅ Ruta actualizada");
@@ -239,12 +343,27 @@ function Map() {
   const handleRouteClick = (route) => {
     console.log("🛣️ Ruta seleccionada:", route);
     setSelectedRoute(route);
-    // Opcional: centrar el mapa en la ruta
+    
+    // ✅ USAR TURF PARA CALCULAR BOUNDS DE LA RUTA
     if (mapInstance && route.geometria) {
       const coordinates = route.geometria.coordinates;
       if (coordinates.length > 0) {
-        const bounds = coordinates.map((coord) => [coord[1], coord[0]]);
-        mapInstance.fitBounds(bounds, { padding: [20, 20] });
+        try {
+          const points = coordinates.map(coord => ({ lng: coord[0], lat: coord[1] }));
+          const bbox = SpatialUtils.calculateBoundingBox(points);
+          if (bbox) {
+            const bounds = L.latLngBounds(
+              [bbox[1], bbox[0]], // [minLat, minLng]
+              [bbox[3], bbox[2]]  // [maxLat, maxLng]
+            );
+            mapInstance.fitBounds(bounds, { padding: [20, 20] });
+          }
+        } catch (error) {
+          console.error("❌ Error calculando bounds con Turf:", error);
+          // Fallback al método original
+          const bounds = coordinates.map(coord => [coord[1], coord[0]]);
+          mapInstance.fitBounds(bounds, { padding: [20, 20] });
+        }
       }
     }
   };
@@ -290,7 +409,7 @@ function Map() {
     }
   }, [coordinateDetection, mapInstance, tempMarker]);
 
-  // ✅ Capturar clic en el mapa
+  // ✅ CAPTURAR CLIC EN EL MAPA CON VALIDACIÓN TURF
   useEffect(() => {
     if (!mapInstance || !coordinateDetection) return;
 
@@ -298,6 +417,9 @@ function Map() {
       const { lat, lng } = e.latlng;
       console.log("📍 Coordenadas capturadas:", { lat, lng });
 
+      // ✅ VALIDAR CON TURF
+      const isValid = validateCoordinates(lat, lng);
+      
       if (tempMarker) mapInstance.removeLayer(tempMarker);
 
       const newTempMarker = L.marker([lat, lng], {
@@ -305,21 +427,47 @@ function Map() {
         zIndexOffset: 1000,
       }).addTo(mapInstance);
 
-      newTempMarker
-        .bindPopup(
-          `
+      let popupContent = `
         <div style="text-align: center;">
           <h4>📍 Coordenadas Capturadas</h4>
           <p><strong>Lat:</strong> ${lat.toFixed(6)}</p>
           <p><strong>Lng:</strong> ${lng.toFixed(6)}</p>
+      `;
+
+      if (!isValid) {
+        popupContent += `
+          <p style="color: #e74c3c; font-weight: bold;">
+            ⚠️ Fuera del campus
+          </p>
+        `;
+      }
+
+      // ✅ ENCONTRAR EDIFICIO MÁS CERCANO
+      const nearestBuilding = findNearestBuilding(lat, lng);
+      if (nearestBuilding) {
+        const distance = SpatialUtils.calculateDistance(
+          { lat, lng },
+          { 
+            lat: nearestBuilding.lat || nearestBuilding.ubicacion?.coordinates[1],
+            lng: nearestBuilding.lng || nearestBuilding.ubicacion?.coordinates[0]
+          }
+        );
+        popupContent += `
+          <p style="color: #27ae60; font-size: 12px;">
+            🏢 Más cercano: ${nearestBuilding.nombre} (${Math.round(distance)}m)
+          </p>
+        `;
+      }
+
+      popupContent += `
           <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
-            style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-            Usar estas coordenadas
+            style="background: ${isValid ? '#27ae60' : '#e74c3c'}; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
+            ${isValid ? 'Usar estas coordenadas' : 'Usar de todas formas'}
           </button>
         </div>
-      `
-        )
-        .openPopup();
+      `;
+
+      newTempMarker.bindPopup(popupContent).openPopup();
 
       setTempMarker(newTempMarker);
       setCapturedCoords({ lat, lng });
@@ -342,11 +490,21 @@ function Map() {
       mapInstance.off("click", handleMapClick);
       delete window.useCapturedCoords;
     };
-  }, [mapInstance, coordinateDetection, tempMarker]);
+  }, [mapInstance, coordinateDetection, tempMarker, validateCoordinates, findNearestBuilding]);
 
   // Guardar o actualizar edificio
   const handleSaveBuilding = async (buildingData) => {
     try {
+      // ✅ VALIDAR COORDENADAS CON TURF ANTES DE GUARDAR
+      const isValid = validateCoordinates(buildingData.lat, buildingData.lng);
+      
+      if (!isValid) {
+        const confirmSave = window.confirm(
+          "⚠️ Las coordenadas están fuera de los límites del campus. ¿Deseas guardar de todas formas?"
+        );
+        if (!confirmSave) return;
+      }
+
       if (editingBuilding) {
         const id =
           editingBuilding.id ||
@@ -442,13 +600,24 @@ function Map() {
         }
 
         if (layer) {
+          // ✅ CALCULAR ÁREA CON TURF PARA POLÍGONOS
+          let areaInfo = "";
+          if (b.ubicacion.type === "Polygon") {
+            try {
+              const area = SpatialUtils.calculatePolygonArea(b.ubicacion.coordinates[0]);
+              areaInfo = `<p><strong>Área aproximada:</strong> ${Math.round(area)} m²</p>`;
+            } catch (error) {
+              console.error("Error calculando área:", error);
+            }
+          }
+
           const popup = `
             <div style="min-width:200px;">
               <h4>${b.nombre || "Sin nombre"}</h4>
               <p><strong>Descripción:</strong> ${
                 b.descripcion || "Sin descripción"
               }</p>
-              
+              ${areaInfo}
             </div>`;
 
           layer.bindPopup(popup).addTo(mapInstance);
@@ -582,7 +751,6 @@ function Map() {
         isVisible={showRouteForm}
         route={editingRoute}
         isEditing={!!editingRoute}
-        //buildings={buildings}
         mapInstance={mapInstance}
       />
 
@@ -608,18 +776,26 @@ function Map() {
       {coordinateDetection && (
         <div className="coordinate-detection-indicator">
           🎯 Modo Captura - Haz clic en el mapa
+          <span style={{color: '#27ae60', marginLeft: '10px'}}>
+            📍 Turf.js activado
+          </span>
+        </div>
+      )}
+
+      {/* ✅ INDICADOR DE VALIDACIONES TURF */}
+      {validationErrors.length > 0 && (
+        <div className="error-indicator" style={{top: '110px'}}>
+          ⚠️ {validationErrors.length} advertencia(s) de validación
+          <button 
+            onClick={() => setValidationErrors([])}
+            style={{marginLeft: '10px', background: 'none', border: 'none', color: 'white', cursor: 'pointer'}}>
+            ×
+          </button>
         </div>
       )}
 
       {/* CONTENEDOR DEL MAPA */}
       <div className="Mapa">
-        {/* 🎯 Botón de Reset Vista 
-        {isMapReady && (
-          <button className="reset-view-btn" onClick={handleResetView}>
-            🎯 Resetear Vista Campus
-          </button>
-        )}*/}
-
         <div ref={mapRef} className="map-container"></div>
 
         {!isMapReady && (
@@ -650,6 +826,9 @@ function Map() {
             {selectedRoute.distancia && ` (${selectedRoute.distancia}m`}
             {selectedRoute.tiempo_estimado &&
               ` - ${selectedRoute.tiempo_estimado}min)`}
+            <span style={{color: '#27ae60', marginLeft: '10px'}}>
+              📏 Turf.js
+            </span>
             <button onClick={() => setSelectedRoute(null)}>×</button>
           </div>
         )}
