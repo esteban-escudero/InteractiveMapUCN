@@ -6,12 +6,12 @@ import { SpatialUtils } from "../../utils/spatialUtils";
 const BuildingForm = ({
   onSave,
   onCancel,
-  isVisible,
+  isVisible = false,
   building = null,
   isEditing = false,
   capturedCoordinates = null,
-  onClearCoordinates,
-  onToggleCoordinateDetection,
+  onClearCoordinates = () => {},
+  onToggleCoordinateDetection = null,
 }) => {
   const [formData, setFormData] = useState({
     nombre: "",
@@ -29,51 +29,83 @@ const BuildingForm = ({
     isInCampus: true,
   });
 
-  // ✅ CARGAR DATOS SI ESTAMOS EDITANDO
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [hasBeenReset, setHasBeenReset] = useState(false);
+
+  // ✅ CARGAR DATOS SI ESTAMOS EDITANDO - CON RESET MEJORADO
   useEffect(() => {
-    if (building && isEditing) {
-      let lat, lng;
-      
-      if (building.ubicacion && building.ubicacion.type === "Point") {
-        [lng, lat] = building.ubicacion.coordinates;
+    if (isVisible && !hasBeenReset) {
+      if (isEditing && building) {
+        let lat, lng;
+        
+        if (building.ubicacion && building.ubicacion.type === "Point") {
+          [lng, lat] = building.ubicacion.coordinates;
+        } else {
+          lat = building.lat || "";
+          lng = building.lng || "";
+        }
+
+        setFormData({
+          nombre: building.nombre || "",
+          descripcion: building.descripcion || "",
+          lat: lat.toString(),
+          lng: lng.toString(),
+          tipo: building.tipo || "académico",
+          estado: building.estado || "activo",
+        });
       } else {
-        lat = building.lat || "";
-        lng = building.lng || "";
+        // Modo creación: resetear completamente el formulario
+        setFormData({
+          nombre: "",
+          descripcion: "",
+          lat: "",
+          lng: "",
+          tipo: "académico",
+          estado: "activo",
+        });
       }
-
-      setFormData({
-        nombre: building.nombre || "",
-        descripcion: building.descripcion || "",
-        lat: lat.toString(),
-        lng: lng.toString(),
-        tipo: building.tipo || "académico",
-        estado: building.estado || "activo",
-      });
-    } else {
-      setFormData({
-        nombre: "",
-        descripcion: "",
-        lat: "",
-        lng: "",
-        tipo: "académico",
-        estado: "activo",
-      });
+      setHasBeenReset(true);
     }
-  }, [building, isEditing]);
 
-  // ✅ USAR COORDENADAS CAPTURADAS
+    // Resetear el flag cuando el formulario se cierra
+    if (!isVisible) {
+      setHasBeenReset(false);
+    }
+  }, [isVisible, isEditing, building, hasBeenReset]);
+
+  // ✅ USAR COORDENADAS CAPTURADAS - ADAPTADO CON isCapturing
   useEffect(() => {
-    if (capturedCoordinates) {
+    if (capturedCoordinates && isCapturing) {
+      console.log("📍 Coordenadas capturadas recibidas:", capturedCoordinates);
+
+      // Actualizar el formulario con las nuevas coordenadas
       setFormData(prev => ({
         ...prev,
         lat: capturedCoordinates.lat.toString(),
         lng: capturedCoordinates.lng.toString(),
       }));
-      
+
+      // Desactivar modo captura
+      setIsCapturing(false);
+
       // Validar automáticamente las coordenadas capturadas
       validateCoordinates(capturedCoordinates.lat, capturedCoordinates.lng);
+
+      console.log("✅ Coordenadas actualizadas en el formulario");
     }
-  }, [capturedCoordinates]);
+  }, [capturedCoordinates, isCapturing]);
+
+  // ✅ Efecto para limpiar coordenadas cuando se inicia la captura
+  useEffect(() => {
+    if (isCapturing) {
+      // Limpiar solo las coordenadas, mantener el resto del formulario
+      setFormData(prev => ({
+        ...prev,
+        lat: "",
+        lng: "",
+      }));
+    }
+  }, [isCapturing]);
 
   // ✅ VALIDAR COORDENADAS CON TURF
   const validateCoordinates = (lat, lng) => {
@@ -152,7 +184,21 @@ const BuildingForm = ({
     }
   };
 
-  const handleSubmit = (e) => {
+  // ✅ FUNCIÓN MEJORADA PARA CAPTURAR COORDENADAS
+  const handleCaptureCoordinates = () => {
+    console.log("📍 Iniciando captura de coordenadas para edificio...");
+
+    if (onToggleCoordinateDetection) {
+      setIsCapturing(true);
+      onToggleCoordinateDetection();
+      console.log("📍 Modo captura activado para edificio");
+    } else {
+      console.error("❌ onToggleCoordinateDetection no está definido");
+      alert("Error: Función de captura no disponible");
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validaciones básicas
@@ -194,16 +240,33 @@ const BuildingForm = ({
       validacion: validation
     });
 
-    onSave(buildingData);
+    try {
+      await onSave(buildingData);
+      setIsCapturing(false);
+    } catch (error) {
+      console.error("Error al guardar:", error);
+      alert("Error al guardar el edificio: " + error.message);
+    }
   };
 
   const handleCancel = () => {
+    if (isCapturing && onToggleCoordinateDetection) {
+      onToggleCoordinateDetection(); // Desactivar modo captura
+    }
+    setIsCapturing(false);
     onClearCoordinates?.();
     onCancel();
   };
 
+  // ✅ SI ESTAMOS EN MODO CAPTURA, NO MOSTRAR NINGÚN FORMULARIO - SOLO EL MAPA
+  if (isCapturing) {
+    return null;
+  }
+
+  // Si el formulario no es visible, no mostrar nada
   if (!isVisible) return null;
 
+  // ✅ VISTA PRINCIPAL DEL FORMULARIO (solo se muestra cuando NO estamos capturando)
   return (
     <div className="building-form-overlay">
       <div className="building-form-container">
@@ -245,7 +308,7 @@ const BuildingForm = ({
               <button
                 type="button"
                 className="capture-btn"
-                onClick={onToggleCoordinateDetection}
+                onClick={handleCaptureCoordinates} // ✅ USAR LA NUEVA FUNCIÓN
               >
                 🎯 Capturar del Mapa
               </button>
@@ -349,25 +412,6 @@ const BuildingForm = ({
                 <option value="cerrado">Cerrado</option>
                 <option value="construcción">En Construcción</option>
               </select>
-            </div>
-          </div>
-
-          {/* INFORMACIÓN TURF */}
-          <div className="turf-info-section">
-            <h4>🧮 Información Geoespacial (Turf.js)</h4>
-            <div className="turf-features">
-              <div className="turf-feature">
-                <span className="feature-icon">📍</span>
-                <span className="feature-text">Validación de coordenadas</span>
-              </div>
-              <div className="turf-feature">
-                <span className="feature-icon">📏</span>
-                <span className="feature-text">Cálculos de distancia</span>
-              </div>
-              <div className="turf-feature">
-                <span className="feature-icon">🎯</span>
-                <span className="feature-text">Detección de límites</span>
-              </div>
             </div>
           </div>
 

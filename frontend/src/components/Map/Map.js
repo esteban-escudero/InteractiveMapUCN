@@ -810,7 +810,7 @@ function Map() {
         />
       )}
 
-      {/* MODO CAPTURA */}
+      {/* MODO CAPTURA - REVISAR*/}
       {coordinateDetection && (
         <div className="coordinate-detection-indicator">
           🎯 Modo Captura - Haz clic en el mapa
