@@ -331,22 +331,6 @@
   transform: scale(1.1);
 }
 
-/* INDICADORES DE ESTADO */
-.loading-indicator {
-  position: absolute;
-  top: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  z-index: 1000;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-}
 
 .error-indicator {
   position: absolute;

@@ -835,11 +835,6 @@ function Map() {
           <div className="error-indicator">❌ Error: {buildingsError}</div>
         )}
 
-        {/* INDICADORES AGREGAR AL MAPA */}
-        {routesLoading && (
-          <div className="loading-indicator">🛣️ Cargando rutas...</div>
-        )}
-
         {routesError && (
           <div className="error-indicator">❌ Error rutas: {routesError}</div>
         )}

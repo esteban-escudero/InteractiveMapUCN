@@ -114,6 +114,7 @@ const RouteFormWithNodes = ({
   }, [existingNodes]);
 
   useEffect(() => {
+  if (isVisible) {
     if (route && isEditing) {
       setFormData({
         nombre: route.nombre || "",
@@ -123,6 +124,7 @@ const RouteFormWithNodes = ({
         geometria: route.geometria || null,
         puntos_ruta: route.puntos_ruta || [],
       });
+      console.log("📝 Cargando ruta existente para edición");
     } else {
       setFormData({
         nombre: "",
@@ -130,10 +132,16 @@ const RouteFormWithNodes = ({
         distancia: 0,
         tiempo_estimado: 0,
         geometria: null,
-        puntos_ruta: [],
+        puntos_ruta: [], // ← VACÍO
       });
+      clearTempMarkers();
+      removeMapClickListener();
+      setSelectedExistingNode(null);
+      setShowNodesPanel(false);
+      console.log("🔄 Formulario reiniciado - lista de puntos vacía");
     }
-  }, [route, isEditing]);
+  }
+}, [isVisible, route, isEditing]); 
 
   // Tecla ESC para finalizar selección
   useEffect(() => {
@@ -364,28 +372,27 @@ const RouteFormWithNodes = ({
 
   // Calcular distancia total
   const calculateTotalDistance = (puntos) => {
-  if (puntos.length < 2) return 0;
-  try {
-    const coordinates = puntos.map(p => p.coordenadas.coordinates);
-    const distancia = SpatialUtils.calculateRouteLength(coordinates);
-    const distanciaRedondeada = Math.round(distancia);
-    console.log(`📏 Distancia calculada con Turf: ${distanciaRedondeada}m (${puntos.length} puntos)`);
-    return distanciaRedondeada;
-  } catch (error) {
-    console.error("❌ Error calculando distancia con Turf:", error);
-    // Fallback manual
-    let total = 0;
-    for (let i = 0; i < puntos.length - 1; i++) {
-      const [lngA, latA] = puntos[i].coordenadas.coordinates;
-      const [lngB, latB] = puntos[i + 1].coordenadas.coordinates;
-      total += SpatialUtils.calculateDistance(
-        { lat: latA, lng: lngA },
-        { lat: latB, lng: lngB }
-      );
+    if (puntos.length < 2) return 0;
+    try {
+      const coordinates = puntos.map(p => p.coordenadas.coordinates);
+      const distancia = SpatialUtils.calculateRouteLength(coordinates);
+      const distanciaRedondeada = Math.round(distancia);
+      console.log(`📏 Distancia calculada con Turf: ${distanciaRedondeada}m`);
+      return distanciaRedondeada;
+    } catch (error) {
+      console.error("❌ Error calculando distancia con Turf:", error);
+      let total = 0;
+      for (let i = 0; i < puntos.length - 1; i++) {
+        const [lngA, latA] = puntos[i].coordenadas.coordinates;
+        const [lngB, latB] = puntos[i + 1].coordenadas.coordinates;
+        total += SpatialUtils.calculateDistance(
+          { lat: latA, lng: lngA },
+          { lat: latB, lng: lngB }
+        );
+      }
+      return Math.round(total);
     }
-    return Math.round(total);
-  }
-};
+  };
 
   // Finalizar con ESC
   const handleFinishWithESC = () => {
@@ -610,13 +617,26 @@ const RouteFormWithNodes = ({
     onSave(datosParaGuardar);
   };
 
-  const handleCancel = () => {
-    clearTempMarkers();
-    removeMapClickListener();
-    setSelectedExistingNode(null);
-    setShowNodesPanel(false);
-    onCancel();
-  };
+ const handleCancel = () => {
+  clearTempMarkers();
+  removeMapClickListener();
+  setSelectedExistingNode(null);
+  setShowNodesPanel(false);
+  
+  // ✅ OPCIONAL: Resetear el estado aquí también
+  if (!isEditing) {
+    setFormData({
+      nombre: "",
+      tipo: "peatonal",
+      distancia: 0,
+      tiempo_estimado: 0,
+      geometria: null,
+      puntos_ruta: [], // ← LIMPIAR PUNTOS
+    });
+  }
+  
+  onCancel();
+};
 
   if (!isVisible) return null;
   if (selectionActive && !showNodesPanel) return null;
