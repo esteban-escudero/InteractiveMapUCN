@@ -11,6 +11,8 @@ const SidePanel = ({
   onAddRoute,
   onManageRoutes,
   routesCount = 0,
+  onToggleRouteNetwork,
+  routeNetworkActive
 }) => {
   const [activeMenu, setActiveMenu] = useState(null);
 
@@ -135,10 +137,13 @@ const SidePanel = ({
                   📝 Gestionar Rutas ({routesCount})
                 </button>
               </li>
+              
             </ul>
           )}
         </div>
       </div>
+
+      
 
       <button className="logout-btn" onClick={handleLogout}>
         Cerrar Sesión

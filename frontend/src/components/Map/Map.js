@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react"; // ✅ AGREGAR useMemo
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Map.css";
@@ -16,14 +16,14 @@ import {
 } from "../../constants/mapConfig";
 import { buildingService } from "../../services/buildingService";
 import { roomService } from "../../services/roomService";
-
-// IMPORTACIONES AGREGADAS
 import useRoutes from "../../hooks/useRoutes";
-import RouteForm from "../Forms/RouteForm";
+import RouteFormWithNodes from "../Forms/RouteFormWithNodes";
 import RouteLayer from "./RouteLayer";
 import RouteList from "../UI/RouteList/RouteList";
+import { SpatialUtils } from "../../utils/spatialUtils";
+import RouteNetwork from '../RouteNetwork/RouteNetwork';
 
-// 🔧 Configuración de íconos de Leaflet
+// Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -68,12 +68,17 @@ function Map() {
   const [selectedRooms, setSelectedRooms] = useState([]);
   const [selectedBuildingForRooms, setSelectedBuildingForRooms] =
     useState(null);
-
-  // DENTRO DEL COMPONENTE Map, AGREGAR ESTOS ESTADOS:
+  const [campusBoundsPolygon, setCampusBoundsPolygon] = useState(null);
+  const [validationErrors, setValidationErrors] = useState([]);
   const [showRouteForm, setShowRouteForm] = useState(false);
   const [showRouteList, setShowRouteList] = useState(false);
   const [editingRoute, setEditingRoute] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
+  const [showRouteNetwork, setShowRouteNetwork] = useState(false);
+
+  const [originFilter, setOriginFilter] = useState('');
+  const [destinationFilter, setDestinationFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   // Hook para edificios
   const {
@@ -105,6 +110,126 @@ function Map() {
     loadRoutes,
   } = useRoutes();
 
+  // ✅ INICIALIZAR POLÍGONO DEL CAMPUS CON TURF
+  useEffect(() => {
+    if (UCN_COQUIMBO_BOUNDS && UCN_COQUIMBO_BOUNDS.length >= 2) {
+      try {
+        const polygonCoords = [
+          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[0][0]], // [lng, lat]
+          [UCN_COQUIMBO_BOUNDS[1][1], UCN_COQUIMBO_BOUNDS[0][0]],
+          [UCN_COQUIMBO_BOUNDS[1][1], UCN_COQUIMBO_BOUNDS[1][0]],
+          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[1][0]],
+          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[0][0]], // cerrar polígono
+        ];
+        setCampusBoundsPolygon(polygonCoords);
+        console.log("✅ Polígono del campus inicializado con Turf");
+      } catch (error) {
+        console.error("❌ Error inicializando polígono del campus:", error);
+      }
+    }
+  }, []);
+
+  // ✅ VALIDAR COORDENADAS CON TURF
+  const validateCoordinates = useCallback((lat, lng) => {
+    if (!campusBoundsPolygon) return true; // Si no hay polígono, permitir todas
+    
+    try {
+      const isValid = SpatialUtils.isPointInPolygon(lat, lng, campusBoundsPolygon);
+      if (!isValid) {
+        console.warn(`❌ Coordenadas fuera del campus: ${lat}, ${lng}`);
+        setValidationErrors(prev => [...prev, {
+          type: 'out_of_bounds',
+          lat,
+          lng,
+          message: 'Coordenadas fuera de los límites del campus'
+        }]);
+      }
+      return isValid;
+    } catch (error) {
+      console.error("❌ Error validando coordenadas:", error);
+      return true; // En caso de error, permitir
+    }
+  }, [campusBoundsPolygon]);
+
+  // ✅ ENCONTRAR EDIFICIO MÁS CERCANO CON TURF
+ // En Map.js - función findNearestBuilding mejorada
+
+const findNearestBuilding = useCallback((lat, lng) => {
+  if (!buildings || !buildings.length) {
+    console.log('🏢 No hay edificios para buscar el más cercano');
+    return null;
+  }
+
+  try {
+    const targetPoint = { lat, lng };
+    
+    // Validar coordenadas objetivo
+    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+      console.warn('❌ Coordenadas objetivo inválidas:', { lat, lng });
+      return null;
+    }
+
+    const buildingPoints = buildings.map(building => {
+      try {
+        if (!building) return null;
+
+        let buildingLat, buildingLng;
+        
+        if (building.ubicacion && building.ubicacion.type === "Point") {
+          const coords = building.ubicacion.coordinates;
+          if (!coords || coords.length < 2) return null;
+          [buildingLng, buildingLat] = coords;
+        } else if (building.lat && building.lng) {
+          buildingLat = building.lat;
+          buildingLng = building.lng;
+        } else {
+          return null;
+        }
+
+        // Validar que las coordenadas del edificio sean números
+        if (typeof buildingLat !== 'number' || typeof buildingLng !== 'number' ||
+            isNaN(buildingLat) || isNaN(buildingLng)) {
+          console.warn('❌ Coordenadas de edificio inválidas:', building.nombre, { buildingLat, buildingLng });
+          return null;
+        }
+
+        return {
+          lat: buildingLat,
+          lng: buildingLng,
+          building: building
+        };
+      } catch (error) {
+        console.warn('❌ Error procesando edificio:', building?.nombre, error);
+        return null;
+      }
+    }).filter(Boolean);
+
+    if (buildingPoints.length === 0) {
+      console.log('🏢 No se encontraron puntos de edificio válidos');
+      return null;
+    }
+
+    console.log(`🏢 Buscando entre ${buildingPoints.length} edificios válidos`);
+    const nearest = SpatialUtils.findNearestPoint(targetPoint, buildingPoints);
+    return nearest ? nearest.building : null;
+
+  } catch (error) {
+    console.error("❌ Error encontrando edificio más cercano:", error);
+    return null;
+  }
+}, [buildings]);
+
+  // ✅ FUNCIÓN PARA FILTRAR EDIFICIOS POR CATEGORÍA
+  const filteredBuildings = useMemo(() => {
+    if (!categoryFilter) return buildings;
+    
+    return buildings.filter(building => 
+      building.categoria === categoryFilter || 
+      building.tipo === categoryFilter
+    );
+  }, [buildings, categoryFilter]);
+
+  // INICIALIZAR MAPA
   useEffect(() => {
     if (!mapInitialized && mapRef.current && !mapInstance) {
       console.log("🔄 Inicializando mapa por primera vez...");
@@ -129,10 +254,78 @@ function Map() {
     }
   }, [mapInitialized, mapRef, initializeMap, mapInstance]);
 
-  // ✅ FUNCIÓN MEJORADA PARA CREAR SALAS DESDE BUILDINGLIST
+  // ✅ UN SOLO useEffect PARA RENDERIZAR EDIFICIOS (ELIMINAR EL DUPLICADO)
+  useEffect(() => {
+    if (!mapInstance || !isMapReady) return;
+
+    // Limpiar capas anteriores
+    buildingLayers.forEach((layer) => {
+      if (mapInstance.hasLayer(layer)) {
+        mapInstance.removeLayer(layer);
+      }
+    });
+
+    const newLayers = [];
+
+    // ✅ USAR filteredBuildings EN LUGAR DE buildings
+    filteredBuildings.forEach((b) => {
+      if (!b.ubicacion) return;
+
+      let layer;
+      try {
+        if (b.ubicacion.type === "Point") {
+          const [lng, lat] = b.ubicacion.coordinates;
+          layer = L.marker([lat, lng], { icon: createDatabaseIcon() });
+        } else if (b.ubicacion.type === "Polygon") {
+          const coords = b.ubicacion.coordinates[0].map((c) => [c[1], c[0]]);
+          layer = L.polygon(coords, {
+            color: "#27ae60",
+            weight: 3,
+            fillOpacity: 0.3,
+            className: "building-polygon",
+          });
+        }
+
+        if (layer) {
+          // ✅ CALCULAR ÁREA CON TURF PARA POLÍGONOS
+          let areaInfo = "";
+          if (b.ubicacion.type === "Polygon") {
+            try {
+              const area = SpatialUtils.calculatePolygonArea(b.ubicacion.coordinates[0]);
+              areaInfo = `<p><strong>Área aproximada:</strong> ${Math.round(area)} m²</p>`;
+            } catch (error) {
+              console.error("Error calculando área:", error);
+            }
+          }
+
+          const popup = `
+            <div style="min-width:200px;">
+              <h4>${b.nombre || "Sin nombre"}</h4>
+              <p><strong>Descripción:</strong> ${
+                b.descripcion || "Sin descripción"
+              }</p>
+              <p><strong>Categoría:</strong> ${
+                b.categoria || b.tipo || "No especificada"
+              }</p>
+              ${areaInfo}
+            </div>`;
+
+          layer.bindPopup(popup).addTo(mapInstance);
+          newLayers.push(layer);
+        }
+      } catch (error) {
+        console.error("❌ Error renderizando edificio:", b.nombre, error);
+      }
+    });
+
+    setBuildingLayers(newLayers);
+    console.log(`🏢 ${newLayers.length} edificios renderizados (filtro: ${categoryFilter || 'ninguno'})`);
+  }, [mapInstance, filteredBuildings, isMapReady]); // ✅ SOLO filteredBuildings
+
+  // FUNCIONES PARA GESTIÓN DE SALAS
   const handleCreateRoomsForBuilding = (building) => {
     console.log("🏢 Agregando sala al edificio:", building.nombre);
-    setSelectedBuildingForRooms(building); // Guardar el edificio seleccionado
+    setSelectedBuildingForRooms(building);
     setRoomManagementMode("create");
     setSelectedRooms([]);
     setShowRoomManagement(true);
@@ -140,7 +333,6 @@ function Map() {
     console.log("🏢 Creando salas para edificio:", building.nombre);
   };
 
-  // ✅ AGREGAR ESTA FUNCIÓN FALTANTE
   const handleOpenCreateRooms = () => {
     setRoomManagementMode("create");
     setSelectedRooms([]);
@@ -213,6 +405,28 @@ function Map() {
 
   const handleSaveRoute = async (routeData) => {
     try {
+      // ✅ VALIDAR RUTA CON TURF ANTES DE GUARDAR
+      if (routeData.puntos_ruta && routeData.puntos_ruta.length >= 2) {
+        const coordinates = routeData.puntos_ruta.map(p => p.coordenadas.coordinates);
+        
+        // Validar que todos los puntos estén dentro del campus
+        const invalidPoints = routeData.puntos_ruta.filter(punto => {
+          const [lng, lat] = punto.coordenadas.coordinates;
+          return !validateCoordinates(lat, lng);
+        });
+
+        if (invalidPoints.length > 0) {
+          alert("⚠️ Algunos puntos de la ruta están fuera de los límites del campus");
+          return;
+        }
+
+        // Validar geometría de la ruta
+        if (!SpatialUtils.isValidLineString(coordinates)) {
+          alert("❌ La geometría de la ruta no es válida");
+          return;
+        }
+      }
+
       if (editingRoute) {
         await updateRoute(editingRoute.id, routeData);
         alert("✅ Ruta actualizada");
@@ -238,12 +452,27 @@ function Map() {
   const handleRouteClick = (route) => {
     console.log("🛣️ Ruta seleccionada:", route);
     setSelectedRoute(route);
-    // Opcional: centrar el mapa en la ruta
+    
+    // ✅ USAR TURF PARA CALCULAR BOUNDS DE LA RUTA
     if (mapInstance && route.geometria) {
       const coordinates = route.geometria.coordinates;
       if (coordinates.length > 0) {
-        const bounds = coordinates.map((coord) => [coord[1], coord[0]]);
-        mapInstance.fitBounds(bounds, { padding: [20, 20] });
+        try {
+          const points = coordinates.map(coord => ({ lng: coord[0], lat: coord[1] }));
+          const bbox = SpatialUtils.calculateBoundingBox(points);
+          if (bbox) {
+            const bounds = L.latLngBounds(
+              [bbox[1], bbox[0]], // [minLat, minLng]
+              [bbox[3], bbox[2]]  // [maxLat, maxLng]
+            );
+            mapInstance.fitBounds(bounds, { padding: [20, 20] });
+          }
+        } catch (error) {
+          console.error("❌ Error calculando bounds con Turf:", error);
+          // Fallback al método original
+          const bounds = coordinates.map(coord => [coord[1], coord[0]]);
+          mapInstance.fitBounds(bounds, { padding: [20, 20] });
+        }
       }
     }
   };
@@ -289,63 +518,121 @@ function Map() {
     }
   }, [coordinateDetection, mapInstance, tempMarker]);
 
-  // ✅ Capturar clic en el mapa
-  useEffect(() => {
-    if (!mapInstance || !coordinateDetection) return;
+  // ✅ CAPTURAR CLIC EN EL MAPA CON VALIDACIÓN TURF
+  // ✅ CAPTURAR CLIC EN EL MAPA CON VALIDACIÓN TURF
+useEffect(() => {
+  if (!mapInstance || !coordinateDetection) return;
 
-    const handleMapClick = (e) => {
-      const { lat, lng } = e.latlng;
-      console.log("📍 Coordenadas capturadas:", { lat, lng });
+  const handleMapClick = (e) => {
+    const { lat, lng } = e.latlng;
+    console.log("📍 Coordenadas capturadas:", { lat, lng });
 
-      if (tempMarker) mapInstance.removeLayer(tempMarker);
+    // ✅ VALIDAR COORDENADAS ANTES DE PROCESAR
+    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+      console.error('❌ Coordenadas capturadas inválidas');
+      return;
+    }
 
-      const newTempMarker = L.marker([lat, lng], {
-        icon: createTempIcon(),
-        zIndexOffset: 1000,
-      }).addTo(mapInstance);
+    // ✅ VALIDAR CON TURF - FALTA ESTA LÍNEA
+    const isValid = validateCoordinates(lat, lng);
 
-      newTempMarker
-        .bindPopup(
-          `
-        <div style="text-align: center;">
-          <h4>📍 Coordenadas Capturadas</h4>
-          <p><strong>Lat:</strong> ${lat.toFixed(6)}</p>
-          <p><strong>Lng:</strong> ${lng.toFixed(6)}</p>
-          <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
-            style="background: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
-            Usar estas coordenadas
-          </button>
-        </div>
-      `
-        )
-        .openPopup();
+    // Limpiar marcador anterior si existe
+    if (tempMarker && mapInstance) {
+      mapInstance.removeLayer(tempMarker);
+    }
 
-      setTempMarker(newTempMarker);
-      setCapturedCoords({ lat, lng });
-    };
+    const newTempMarker = L.marker([lat, lng], {
+      icon: createTempIcon(),
+      zIndexOffset: 1000,
+    }).addTo(mapInstance);
 
-    window.useCapturedCoords = (lat, lng) => {
-      console.log("🔄 Coordenadas usadas:", { lat, lng });
-      setCapturedCoords({ lat, lng });
-      setCoordinateDetection(false);
-      setEditingBuilding(null);
-      setShowBuildingForm(true);
-      if (tempMarker) mapInstance.removeLayer(tempMarker);
-      setTempMarker(null);
-      mapInstance.getContainer().style.cursor = "";
-    };
+    let popupContent = `
+      <div style="text-align: center;">
+        <h4>📍 Coordenadas Capturadas</h4>
+        <p><strong>Lat:</strong> ${lat.toFixed(6)}</p>
+        <p><strong>Lng:</strong> ${lng.toFixed(6)}</p>
+    `;
 
-    mapInstance.on("click", handleMapClick);
+    if (!isValid) {
+      popupContent += `
+        <p style="color: #e74c3c; font-weight: bold;">
+          ⚠️ Fuera del campus
+        </p>
+      `;
+    }
 
-    return () => {
-      mapInstance.off("click", handleMapClick);
-      delete window.useCapturedCoords;
-    };
-  }, [mapInstance, coordinateDetection, tempMarker]);
+    // ✅ ENCONTRAR EDIFICIO MÁS CERCANO
+    try {
+      const nearestBuilding = findNearestBuilding(lat, lng);
+      if (nearestBuilding) {
+        const distance = SpatialUtils.calculateDistance(
+          { lat, lng },
+          { 
+            lat: nearestBuilding.lat || nearestBuilding.ubicacion?.coordinates[1],
+            lng: nearestBuilding.lng || nearestBuilding.ubicacion?.coordinates[0]
+          }
+        );
+        
+        // Solo mostrar si la distancia es un número válido
+        if (!isNaN(distance) && distance !== Infinity) {
+          popupContent += `
+            <p style="color: #27ae60; font-size: 12px;">
+              🏢 Más cercano: ${nearestBuilding.nombre} (${Math.round(distance)}m)
+            </p>
+          `;
+        }
+      }
+    } catch (error) {
+      console.warn('❌ Error mostrando edificio más cercano:', error);
+      // No agregar nada al popup si hay error
+    }
 
-  // Guardar o actualizar edificio
+    popupContent += `
+        <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
+          style="background: ${isValid ? '#27ae60' : '#e74c3c'}; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
+          ${isValid ? 'Usar estas coordenadas' : 'Usar de todas formas'}
+        </button>
+      </div>
+    `;
+
+    newTempMarker.bindPopup(popupContent).openPopup();
+
+    setTempMarker(newTempMarker);
+    setCapturedCoords({ lat, lng });
+  };
+
+  window.useCapturedCoords = (lat, lng) => {
+    console.log("🔄 Coordenadas usadas:", { lat, lng });
+    setCapturedCoords({ lat, lng });
+    setCoordinateDetection(false);
+    setEditingBuilding(null);
+    setShowBuildingForm(true);
+    if (tempMarker) mapInstance.removeLayer(tempMarker);
+    setTempMarker(null);
+    mapInstance.getContainer().style.cursor = "";
+  };
+
+  mapInstance.on("click", handleMapClick);
+
+  return () => {
+    mapInstance.off("click", handleMapClick);
+    delete window.useCapturedCoords;
+  };
+}, [mapInstance, coordinateDetection, tempMarker, validateCoordinates, findNearestBuilding]);
+  
+ // Guardar o actualizar edificio
   const handleSaveBuilding = async (buildingData) => {
     try {
+      // ✅ VALIDAR COORDENADAS CON TURF ANTES DE GUARDAR
+      const isValid = validateCoordinates(buildingData.lat, buildingData.lng);
+      
+      if (!isValid) {
+        const confirmSave = window.confirm(
+          "⚠️ Las coordenadas están fuera de los límites del campus. ¿Deseas guardar de todas formas?"
+        );
+        if (!confirmSave) return;
+      }
+
       if (editingBuilding) {
         const id =
           editingBuilding.id ||
@@ -408,59 +695,6 @@ function Map() {
       }
     }
   };
-
-  // Render de capas de edificios
-  useEffect(() => {
-    if (!mapInstance || !isMapReady) return;
-
-    // Limpiar capas anteriores
-    buildingLayers.forEach((layer) => {
-      if (mapInstance.hasLayer(layer)) {
-        mapInstance.removeLayer(layer);
-      }
-    });
-
-    const newLayers = [];
-
-    buildings.forEach((b) => {
-      if (!b.ubicacion) return;
-
-      let layer;
-      try {
-        if (b.ubicacion.type === "Point") {
-          const [lng, lat] = b.ubicacion.coordinates;
-          layer = L.marker([lat, lng], { icon: createDatabaseIcon() });
-        } else if (b.ubicacion.type === "Polygon") {
-          const coords = b.ubicacion.coordinates[0].map((c) => [c[1], c[0]]);
-          layer = L.polygon(coords, {
-            color: "#27ae60",
-            weight: 3,
-            fillOpacity: 0.3,
-            className: "building-polygon",
-          });
-        }
-
-        if (layer) {
-          const popup = `
-            <div style="min-width:200px;">
-              <h4>${b.nombre || "Sin nombre"}</h4>
-              <p><strong>Descripción:</strong> ${
-                b.descripcion || "Sin descripción"
-              }</p>
-              
-            </div>`;
-
-          layer.bindPopup(popup).addTo(mapInstance);
-          newLayers.push(layer);
-        }
-      } catch (error) {
-        console.error("❌ Error renderizando edificio:", b.nombre, error);
-      }
-    });
-
-    setBuildingLayers(newLayers);
-    console.log(`🏢 ${newLayers.length} edificios renderizados`);
-  }, [mapInstance, buildings, isMapReady]);
 
   // Cargar datos de GeoServer cuando el mapa esté listo
   useEffect(() => {
@@ -526,6 +760,9 @@ function Map() {
         coordinateDetectionActive={coordinateDetection}
         onAddRoute={handleAddRoute}
         onManageRoutes={handleManageRoutes}
+        // AGREGAR PROPS PARA RouteNetwork
+        onToggleRouteNetwork={() => setShowRouteNetwork(!showRouteNetwork)}
+        routeNetworkActive={showRouteNetwork}
       />
 
       {/* BUILDINGFORM */}
@@ -555,7 +792,7 @@ function Map() {
         />
       )}
 
-      {/* ROOMMANAGEMENT - ACTUALIZADO CON DETECCIÓN AUTOMÁTICA */}
+      {/* ROOMMANAGEMENT */}
       {showRoomManagement && (
         <RoomManagement
           mode={roomManagementMode}
@@ -573,16 +810,15 @@ function Map() {
         />
       )}
 
-      {/* AGREGAR LOS NUEVOS COMPONENTES AL JSX */}
-      {/* RouteForm */}
-      <RouteForm
+      {/* ✅ RouteFormWithNodes */}
+      <RouteFormWithNodes
         onSave={handleSaveRoute}
         onCancel={handleCancelRouteEdit}
         isVisible={showRouteForm}
         route={editingRoute}
         isEditing={!!editingRoute}
-        //buildings={buildings}
         mapInstance={mapInstance}
+        existingRoutes={routes}
       />
 
       {/* RouteList */}
@@ -603,21 +839,150 @@ function Map() {
         onRouteClick={handleRouteClick}
       />
 
-      {/* MODO CAPTURA */}
+      {/* AGREGAR COMPONENTE RouteNetwork */}
+      {showRouteNetwork && (
+        <RouteNetwork
+          mapInstance={mapInstance}
+          onNodeClick={(node) => {
+            console.log('🔗 Nodo seleccionado:', node);
+            // Zoom automático al nodo
+            if (mapInstance) {
+              mapInstance.setView([node.coordenadas.lat, node.coordenadas.lng], 18);
+            }
+          }}
+          onRouteClick={(routeInfo) => {
+            console.log('🛣️ Ruta seleccionada desde nodo:', routeInfo);
+            // Buscar la ruta completa y seleccionarla
+            const fullRoute = routes.find(r => r.id === routeInfo.routeId);
+            if (fullRoute) {
+              setSelectedRoute(fullRoute);
+              handleRouteClick(fullRoute);
+            }
+          }}
+        />
+      )}
+
+      {/* MODO CAPTURA - REVISAR*/}
       {coordinateDetection && (
         <div className="coordinate-detection-indicator">
           🎯 Modo Captura - Haz clic en el mapa
+          <span style={{color: '#27ae60', marginLeft: '10px'}}>
+            📍 Turf.js activado
+          </span>
         </div>
       )}
 
-      {/* CONTENEDOR DEL MAPA */}
-      <div className="Mapa">
-        {/* 🎯 Botón de Reset Vista 
-        {isMapReady && (
-          <button className="reset-view-btn" onClick={handleResetView}>
-            🎯 Resetear Vista Campus
+      {/* ✅ INDICADOR DE VALIDACIONES TURF */}
+      {validationErrors.length > 0 && (
+        <div className="error-indicator" style={{top: '110px'}}>
+          ⚠️ {validationErrors.length} advertencia(s) de validación
+          <button 
+            onClick={() => setValidationErrors([])}
+            style={{marginLeft: '10px', background: 'none', border: 'none', color: 'white', cursor: 'pointer'}}>
+            ×
           </button>
-        )}*/}
+        </div>
+      )}
+
+    {/* CONTENEDOR DEL MAPA */}
+      <div className="Mapa">
+        {/* ✅ CONTENEDOR DE FILTROS EN LA PARTE SUPERIOR */}
+        <div className="map-filters-container">
+          {/* FILTRO POR ORIGEN */}
+          <div className="map-filter">
+            <label htmlFor="origin-filter">🔍 Origen:</label>
+            <select
+              id="origin-filter"
+              value={originFilter}
+              onChange={(e) => setOriginFilter(e.target.value)}
+              className="map-select"
+            >
+              <option value="">Seleccionar origen</option>
+              {filteredBuildings
+                .filter((building, index, self) => 
+                  self.findIndex(b => b.nombre === building.nombre) === index
+                )
+                .map(building => (
+                  <option key={`origin-${building.id || building._id}`} value={building.nombre}>
+                    {building.nombre || 'Sin nombre'}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+
+          {/* FILTRO POR DESTINO */}
+          <div className="map-filter">
+            <label htmlFor="destination-filter">🔍 Destino:</label>
+            <select
+              id="destination-filter"
+              value={destinationFilter}
+              onChange={(e) => setDestinationFilter(e.target.value)}
+              className="map-select"
+            >
+              <option value="">Seleccionar destino</option>
+              {filteredBuildings
+                .filter((building, index, self) => 
+                  self.findIndex(b => b.nombre === building.nombre) === index
+                )
+                .map(building => (
+                  <option key={`destination-${building.id || building._id}`} value={building.nombre}>
+                    {building.nombre || 'Sin nombre'}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
+
+          {/* FILTRO POR CATEGORÍA */}
+          <div className="map-filter">
+            <label htmlFor="category-filter">🏛️ Categoria:</label>
+            <select
+              id="category-filter"
+              value={categoryFilter}
+              onChange={(e) => {
+                setCategoryFilter(e.target.value);
+                // ✅ LIMPIAR ORIGEN Y DESTINO AL CAMBIAR CATEGORÍA
+                setOriginFilter('');
+                setDestinationFilter('');
+              }}
+              className="map-select"
+            >
+              <option value="">Todas las categorías</option>
+              <option value="Académico">Académico</option>
+              <option value="Administrativo">Administrativo</option>
+              <option value="Baño">Baño</option>
+              <option value="Biblioteca">Biblioteca</option>
+              <option value="Cafeteria">Cafetería</option>
+              <option value="Casino">Casino</option>
+              <option value="Centro de Salud">Centro de Salud</option>
+              <option value="Cultural">Cultural</option>
+              <option value="Deportivo">Deportivo</option>
+              <option value="Estacionamiento">Estacionamiento</option>
+              <option value="Gimnasio">Gimnasio</option>
+              <option value="Investigación">Investigación</option>
+              <option value="Laboratorio">Laboratorio</option>
+              <option value="Oficina Administracion">Oficina Administración</option>
+              <option value="Oficina Profesor">Oficina Profesor</option>
+              <option value="Sala de Clase">Sala de Clase</option>
+              <option value="Sala de Estudio">Sala de Estudio</option>
+              <option value="Servicios">Servicios</option>
+            </select>
+          </div>
+
+          {/* BOTÓN PARA LIMPIAR FILTROS - SIEMPRE PRESENTE */}
+          <button
+            onClick={() => {
+              setOriginFilter('');
+              setDestinationFilter('');
+              setCategoryFilter('');
+            }}
+            className="clear-filters-btn"
+            disabled={!originFilter && !destinationFilter && !categoryFilter}
+          >
+            🗑️ Limpiar Filtros
+          </button>
+        </div>
 
         <div ref={mapRef} className="map-container"></div>
 
@@ -638,28 +1003,9 @@ function Map() {
           <div className="error-indicator">❌ Error: {buildingsError}</div>
         )}
 
-        {/* INDICADORES AGREGAR AL MAPA */}
-        {routesLoading && (
-          <div className="loading-indicator">🛣️ Cargando rutas...</div>
-        )}
-
-        {selectedRoute && (
-          <div className="selected-route-indicator">
-            🧭 Ruta seleccionada: {selectedRoute.nombre}
-            {selectedRoute.distancia && ` (${selectedRoute.distancia}m`}
-            {selectedRoute.tiempo_estimado &&
-              ` - ${selectedRoute.tiempo_estimado}min)`}
-            <button onClick={() => setSelectedRoute(null)}>×</button>
-          </div>
-        )}
-
         {routesError && (
           <div className="error-indicator">❌ Error rutas: {routesError}</div>
         )}
-
-        <div className="building-counter">
-          🏢 Edificios: {buildingLayers.length}
-        </div>
       </div>
     </div>
   );

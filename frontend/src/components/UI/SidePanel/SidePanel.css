@@ -221,3 +221,30 @@
     margin-bottom: 15px;
   }
 }
+
+/* Agregar estos estilos a tu archivo SidePanel.css */
+
+.standalone-controls {
+  margin: 10px 0;
+  padding: 0 10px;
+}
+
+.control-btn {
+  transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.control-btn.active {
+  box-shadow: 0 0 10px rgba(142, 68, 173, 0.5);
+}
+
+/* Estilos para el botón activo dentro del dropdown */
+.dropdown-menu button.active {
+  background: #8e44ad !important;
+  color: white !important;
+  font-weight: bold;
+}

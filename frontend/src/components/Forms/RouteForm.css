@@ -41,10 +41,12 @@
   font-size: 24px;
   cursor: pointer;
   color: #7f8c8d;
+  transition: all 0.3s ease;
 }
 
 .close-btn:hover {
   color: #e74c3c;
+  transform: rotate(90deg);
 }
 
 .route-form {
@@ -113,10 +115,13 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 .select-btn:hover {
   background: #219a52;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 .deactivate-btn {
@@ -128,10 +133,13 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 .deactivate-btn:hover {
   background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
 .point-actions {
@@ -152,10 +160,13 @@
 .remove-btn {
   background: #f39c12;
   color: white;
+  transition: all 0.3s ease;
 }
 
 .remove-btn:hover:not(:disabled) {
   background: #e67e22;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
 }
 
 .remove-btn:disabled {
@@ -166,10 +177,13 @@
 .clear-btn {
   background: #e74c3c;
   color: white;
+  transition: all 0.3s ease;
 }
 
 .clear-btn:hover:not(:disabled) {
   background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }
 
 .clear-btn:disabled {
@@ -280,10 +294,13 @@
   font-size: 16px;
   width: 100%;
   font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 .calculate-btn:hover {
   background: #8e44ad;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
 }
 
 .route-details {
@@ -344,10 +361,13 @@
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .cancel-btn:hover {
   background: #7f8c8d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
 }
 
 .save-btn {
@@ -358,10 +378,13 @@
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 .save-btn:hover:not(:disabled) {
   background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
 .save-btn:disabled {
@@ -460,10 +483,13 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
+  transition: all 0.3s ease;
 }
 
 .restore-btn:hover {
   background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
 }
 
 .minimized-info {

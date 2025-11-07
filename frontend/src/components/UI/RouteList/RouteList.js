@@ -84,19 +84,31 @@ const RouteList = ({
               Todas
             </button>
             <button
+              className={`filter-btn ${filter === "accesible" ? "active" : ""}`}
+              onClick={() => setFilter("accesible")}>
+              ♿ Accesibles
+            </button>
+            <button
+              className={`filter-btn ${
+                filter === "emergencia" ? "active" : ""
+              }`}
+              onClick={() => setFilter("emergencia")}>
+              🚨 Emergencia
+            </button>
+            <button
               className={`filter-btn ${filter === "peatonal" ? "active" : ""}`}
               onClick={() => setFilter("peatonal")}>
               🚶 Peatonales
             </button>
             <button
+              className={`filter-btn ${filter === "rapida" ? "active" : ""}`}
+              onClick={() => setFilter("rapida")}>
+              ⚡ Rápidas
+            </button>
+            <button
               className={`filter-btn ${filter === "vehicular" ? "active" : ""}`}
               onClick={() => setFilter("vehicular")}>
               🚗 Vehiculares
-            </button>
-            <button
-              className={`filter-btn ${filter === "accesible" ? "active" : ""}`}
-              onClick={() => setFilter("accesible")}>
-              ♿ Accesibles
             </button>
           </div>
         </div>
@@ -150,31 +162,7 @@ const RouteList = ({
                           {route.tiempo_estimado}min
                         </span>
                       </div>
-                      <div className="stat">
-                        <span className="stat-label">Puntos:</span>
-                        <span className="stat-value">
-                          {route.puntos_ruta ? route.puntos_ruta.length : 0}
-                        </span>
-                      </div>
                     </div>
-
-                    {route.puntos_ruta && route.puntos_ruta.length > 0 && (
-                      <div className="route-points-preview">
-                        <div className="points-line">
-                          <div className="point start">
-                            {route.puntos_ruta.find(
-                              (p) => p.tipo_punto === "inicio"
-                            )?.descripcion || "Inicio"}
-                          </div>
-                          <div className="points-connector">→</div>
-                          <div className="point end">
-                            {route.puntos_ruta.find(
-                              (p) => p.tipo_punto === "fin"
-                            )?.descripcion || "Fin"}
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
                     <div className="route-actions">
                       <button

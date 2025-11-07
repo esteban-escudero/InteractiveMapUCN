@@ -1,4 +1,5 @@
 const pool = require("../config/database");
+const RouteNodes = require('../utils/routeNodes');
 
 const routeModel = {
   async getAll() {
@@ -382,6 +383,187 @@ const routeModel = {
       throw error;
     } finally {
       client.release();
+    }
+  },
+
+   async createWithSharedNodes(routeData) {
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      console.log("🛣️ Creando ruta con nodos compartidos:", routeData);
+
+      // Crear geometría LineString
+      let geometriaWKT = null;
+      if (routeData.geometria && routeData.geometria.type === "LineString") {
+        const coords = routeData.geometria.coordinates
+          .map((coord) => `${coord[0]} ${coord[1]}`)
+          .join(",");
+        geometriaWKT = `LINESTRING(${coords})`;
+      }
+
+      // Insertar la ruta principal
+      const routeQuery = `
+        INSERT INTO ruta (
+          nombre_ruta, 
+          tipo_ruta, 
+          distancia_metros, 
+          tiempo_estimado_minutos,
+          geometria_ruta
+        ) VALUES ($1, $2, $3, $4, ST_GeomFromText($5, 4326))
+        RETURNING id_ruta as id
+      `;
+
+      const routeValues = [
+        routeData.nombre,
+        routeData.tipo || "peatonal",
+        routeData.distancia || 0,
+        routeData.tiempo_estimado || 0,
+        geometriaWKT || "LINESTRING(0 0, 1 1)",
+      ];
+
+      const routeResult = await client.query(routeQuery, routeValues);
+      const newRouteId = routeResult.rows[0].id;
+
+      // Insertar puntos de ruta con nodos compartidos
+      if (routeData.puntos_ruta && routeData.puntos_ruta.length > 0) {
+        for (const punto of routeData.puntos_ruta) {
+          if (punto.coordenadas && punto.coordenadas.type === "Point") {
+            const [lng, lat] = punto.coordenadas.coordinates;
+
+            // Buscar o crear nodo
+            const nodeResult = await RouteNodes.createOrReuseNode({
+              lng, lat, 
+              nombre_punto: punto.nombre_punto,
+              tipo_punto: punto.tipo_punto
+            });
+
+            if (nodeResult.reutilizado) {
+              // Reutilizar nodo existente
+              console.log(`🔄 Reutilizando nodo existente: ${nodeResult.nodo_existente.id}`);
+              
+              const reuseQuery = `
+                INSERT INTO punto_ruta (
+                  id_ruta, id_punto, orden, tipo_punto, descripcion, nombre_punto
+                ) VALUES ($1, $2, $3, $4, $5, $6)
+              `;
+              
+              await client.query(reuseQuery, [
+                newRouteId,
+                nodeResult.nodo_existente.id,
+                punto.orden,
+                punto.tipo_punto,
+                punto.descripcion || "",
+                punto.nombre_punto || `Punto ${punto.orden}`
+              ]);
+              
+            } else {
+              // Crear nuevo nodo
+              const puntoQuery = `
+                INSERT INTO punto_ruta (
+                  id_ruta, orden, tipo_punto, descripcion, nombre_punto,
+                  coordenadas_geo, latitud, longitud
+                ) VALUES ($1, $2, $3, $4, $5, ST_GeomFromText($6, 4326), $7, $8)
+                RETURNING id_punto
+              `;
+
+              const puntoValues = [
+                newRouteId,
+                punto.orden,
+                punto.tipo_punto,
+                punto.descripcion || "",
+                punto.nombre_punto || punto.descripcion || `Punto ${punto.orden}`,
+                `POINT(${lng} ${lat})`,
+                lat,
+                lng,
+              ];
+
+              await client.query(puntoQuery, puntoValues);
+            }
+          }
+        }
+      }
+
+      await client.query("COMMIT");
+
+      console.log("✅ Ruta creada con nodos compartidos, ID:", newRouteId);
+
+      // Obtener la ruta completa para retornar
+      const completeRoute = await this.getById(newRouteId);
+      return completeRoute;
+
+    } catch (error) {
+      await client.query("ROLLBACK");
+      console.error("❌ Error en routeModel.createWithSharedNodes:", error.message);
+      throw error;
+    } finally {
+      client.release();
+    }
+  },
+
+  async getById(routeId) {
+    try {
+      const query = `
+        SELECT 
+          r.id_ruta as id,
+          r.nombre_ruta as nombre,
+          r.tipo_ruta as tipo,
+          r.distancia_metros as distancia,
+          r.tiempo_estimado_minutos as tiempo_estimado,
+          r.activa,
+          ST_AsGeoJSON(r.geometria_ruta) as geometria_geojson,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', pr.id_punto,
+                'orden', pr.orden,
+                'tipo_punto', pr.tipo_punto,
+                'descripcion', pr.descripcion,
+                'nombre_punto', pr.nombre_punto,
+                'coordenadas', json_build_object(
+                  'type', 'Point',
+                  'coordinates', ARRAY[ST_X(pr.coordenadas_geo), ST_Y(pr.coordenadas_geo)]
+                )
+              ) ORDER BY pr.orden
+            ) FILTER (WHERE pr.id_punto IS NOT NULL),
+            '[]'
+          ) as puntos_ruta
+        FROM ruta r
+        LEFT JOIN punto_ruta pr ON r.id_ruta = pr.id_ruta
+        WHERE r.id_ruta = $1
+        GROUP BY r.id_ruta
+      `;
+
+      const result = await pool.query(query, [routeId]);
+      
+      if (result.rows.length === 0) return null;
+      
+      const row = result.rows[0];
+      let geometria = null;
+      
+      try {
+        if (row.geometria_geojson) {
+          geometria = JSON.parse(row.geometria_geojson);
+        }
+      } catch (error) {
+        console.warn("❌ Error parseando geometría:", error);
+      }
+
+      return {
+        id: row.id,
+        nombre: row.nombre,
+        tipo: row.tipo,
+        distancia: row.distancia,
+        tiempo_estimado: row.tiempo_estimado,
+        activa: row.activa,
+        geometria: geometria,
+        puntos_ruta: row.puntos_ruta || []
+      };
+      
+    } catch (error) {
+      console.error("❌ Error en routeModel.getById:", error.message);
+      throw error;
     }
   },
 };

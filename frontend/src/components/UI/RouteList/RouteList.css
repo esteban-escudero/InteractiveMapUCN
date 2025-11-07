@@ -42,10 +42,20 @@
   font-size: 24px;
   cursor: pointer;
   color: #7f8c8d;
+  transition: all 0.3s ease;
+  padding: 5px;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-btn:hover {
-  color: #e74c3c;
+  color: white;
+  background: #e74c3c;
+  transform: rotate(90deg);
 }
 
 .route-list-controls {
@@ -91,12 +101,16 @@
 .filter-btn:hover {
   background: #f8f9fa;
   border-color: #3498db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
 }
 
 .filter-btn.active {
   background: #3498db;
   color: white;
   border-color: #3498db;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
 }
 
 .route-list-content {
@@ -190,12 +204,16 @@
 
 .route-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 15px;
-  padding: 10px;
+  grid-template-columns: repeat(2, 1fr); /* 2 columnas */
+  justify-items: center; /* centra cada columna */
+  align-items: center;
+  gap: 20px;
+  margin: 0 auto 15px auto;
+  padding: 10px 20px;
   background: #f8f9fa;
   border-radius: 6px;
+  width: fit-content; /* se ajusta al contenido */
+  text-align: center;
 }
 
 .stat {
@@ -281,6 +299,8 @@
 
 .select-btn:hover {
   background: #219a52;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
 }
 
 .edit-btn {
@@ -290,6 +310,8 @@
 
 .edit-btn:hover {
   background: #e67e22;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(243, 156, 18, 0.3);
 }
 
 .delete-btn {
@@ -299,6 +321,8 @@
 
 .delete-btn:hover {
   background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
 }
 
 .route-list-footer {

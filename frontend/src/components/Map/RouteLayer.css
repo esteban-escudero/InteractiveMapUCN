@@ -1,5 +1,5 @@
 .route-popup {
-  min-width: 250px;
+  min-width: 280px;
 }
 
 .route-popup h4 {
@@ -31,14 +31,31 @@
   cursor: pointer;
   width: 100%;
   font-size: 14px;
+  transition: background 0.3s ease;
 }
 
 .select-route-btn:hover {
   background: #219a52;
 }
 
+.analyze-route-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 12px;
+  transition: background 0.3s ease;
+}
+
+.analyze-route-btn:hover {
+  background: #2980b9;
+}
+
 .route-point-popup {
-  min-width: 200px;
+  min-width: 220px;
 }
 
 .route-point-popup h5 {
@@ -51,13 +68,67 @@
   font-size: 13px;
 }
 
-/* Estilos para las líneas de ruta */
+/* ✅ ESTILOS MEJORADOS PARA LÍNEAS DE RUTA CON TURF */
 .route-line {
   cursor: pointer;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .route-line:hover {
   opacity: 1 !important;
   filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+/* Estilo para rutas validadas con Turf */
+.route-line.turf-validated {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.route-line.turf-validated:hover {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* ✅ ESTILOS PARA PUNTOS DE ANÁLISIS */
+.route-analysis-point {
+  cursor: help;
+}
+
+.route-analysis-point:hover {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* ✅ ESTILOS PARA PUNTOS INTERMEDIOS NUMERADOS */
+.route-point-icon.intermedio {
+  font-family: 'Arial', sans-serif;
+}
+
+/* ✅ INDICADORES DE ESTADO PARA RUTAS LARGAS/CORTAS */
+.route-long {
+  stroke-dasharray: 10, 5;
+}
+
+.route-short {
+  stroke-dasharray: 5, 2;
+}
+
+/* ✅ RESPONSIVE MEJORADO */
+@media (max-width: 768px) {
+  .route-popup {
+    min-width: 250px;
+  }
+  
+  .route-point-popup {
+    min-width: 200px;
+  }
+  
+  .route-info p {
+    font-size: 13px;
+  }
 }

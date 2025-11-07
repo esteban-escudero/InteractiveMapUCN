@@ -331,23 +331,6 @@
   transform: scale(1.1);
 }
 
-/* INDICADORES DE ESTADO */
-.loading-indicator {
-  position: absolute;
-  top: 70px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 20px;
-  z-index: 1000;
-  font-size: 13px;
-  font-weight: 600;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-}
-
 .error-indicator {
   position: absolute;
   top: 70px;
@@ -379,22 +362,6 @@
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
   animation: pulse 2s infinite;
-}
-
-/* CONTADOR DE EDIFICIOS */
-.building-counter {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(52, 152, 219, 0.9);
-  color: white;
-  padding: 8px 15px;
-  border-radius: 20px;
-  z-index: 1000;
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
 }
 
 /* 🎯 BOTÓN DE RESET VISTA */
@@ -490,5 +457,126 @@
   .error-indicator {
     font-size: 12px;
     padding: 8px 15px;
+  }
+}
+
+/* CONTENEDOR DE FILTROS DEL MAPA */
+.map-filters-container {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  border: 1px solid #ddd;
+  max-width: 90%;
+  flex-wrap: nowrap;
+  justify-content: center;
+}
+
+/* FILTROS INDIVIDUALES */
+.map-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 180px;
+}
+
+.map-filter label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+.map-select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+  min-width: 150px;
+}
+
+.map-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* BOTÓN LIMPIAR FILTROS - SIEMPRE PRESENTE */
+.clear-filters-btn {
+  padding: 8px 15px;
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  margin-left: 10px;
+  height: fit-content;
+}
+
+.clear-filters-btn:hover:not(:disabled) {
+  background: #7f8c8d;
+}
+
+.clear-filters-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Cuando hay filtros activos, cambia el color */
+.clear-filters-btn:not(:disabled) {
+  background: #e74c3c;
+}
+
+.clear-filters-btn:not(:disabled):hover {
+  background: #c0392b;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .map-filters-container {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 12px;
+  }
+  
+  .map-filter {
+    min-width: 150px;
+  }
+  
+  .clear-filters-btn {
+    margin-left: 0;
+    margin-top: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-filters-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .map-filter {
+    min-width: auto;
+  }
+  
+  .clear-filters-btn {
+    align-self: center;
+    margin-top: 5px;
   }
 }
