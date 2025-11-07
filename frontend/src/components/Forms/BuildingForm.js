@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./BuildingForm.css";
 import { SpatialUtils } from "../../utils/spatialUtils";
+import { tiposEdificio, estadosEdificio } from "./constants/constants.ts";
 
 const BuildingForm = ({
   onSave,
@@ -32,41 +33,13 @@ const BuildingForm = ({
   const [hasBeenReset, setHasBeenReset] = useState(false);
 
   // ✅ OPCIONES EXACTAS QUE COINCIDEN CON LA BASE DE DATOS
-  const tiposEdificio = [
-    { value: "Baño", label: "🚻 Baño" },
-    { value: "Sala de Clase", label: "📚 Sala de Clase" },
-    { value: "Laboratorio", label: "🔬 Laboratorio" },
-    { value: "Oficina Administracion", label: "📊 Oficina Administración" },
-    { value: "Casino", label: "🍽️ Casino" },
-    { value: "Cafeteria", label: "☕ Cafetería" },
-    { value: "Biblioteca", label: "📖 Biblioteca" },
-    { value: "Sala de Estudio", label: "💻 Sala de Estudio" },
-    { value: "Gimnasio", label: "💪 Gimnasio" },
-    { value: "Estacionamiento", label: "🅿️ Estacionamiento" },
-    { value: "Oficina Profesor", label: "👨‍🏫 Oficina Profesor" },
-    { value: "Centro de Salud", label: "🏥 Centro de Salud" },
-    // Nuevos tipos que agregaremos
-    { value: "Académico", label: "🏫 Académico" },
-    { value: "Administrativo", label: "📋 Administrativo" },
-    { value: "Investigación", label: "🔍 Investigación" },
-    { value: "Servicios", label: "🛠️ Servicios" },
-    { value: "Deportivo", label: "⚽ Deportivo" },
-    { value: "Cultural", label: "🎭 Cultural" },
-  ];
-
-  const estadosEdificio = [
-    { value: "activo", label: "✅ Activo" },
-    { value: "mantenimiento", label: "🔧 En Mantenimiento" },
-    { value: "cerrado", label: "🚫 Cerrado" },
-    { value: "construccion", label: "🏗️ En Construcción" },
-  ];
 
   // ✅ CARGAR DATOS SI ESTAMOS EDITANDO
   useEffect(() => {
     if (isVisible && !hasBeenReset) {
       if (isEditing && building) {
         let lat, lng;
-        
+
         if (building.ubicacion && building.ubicacion.type === "Point") {
           [lng, lat] = building.ubicacion.coordinates;
         } else {
@@ -106,7 +79,7 @@ const BuildingForm = ({
       console.log("📍 Coordenadas capturadas recibidas:", capturedCoordinates);
 
       // Actualizar el formulario con las nuevas coordenadas
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         lat: capturedCoordinates.lat.toString(),
         lng: capturedCoordinates.lng.toString(),
@@ -126,7 +99,7 @@ const BuildingForm = ({
   useEffect(() => {
     if (isCapturing) {
       // Limpiar solo las coordenadas, mantener el resto del formulario
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         lat: "",
         lng: "",
@@ -141,7 +114,7 @@ const BuildingForm = ({
     try {
       const latNum = parseFloat(lat);
       const lngNum = parseFloat(lng);
-      
+
       if (isNaN(latNum) || isNaN(lngNum)) {
         setValidation({
           isValidLocation: false,
@@ -158,32 +131,33 @@ const BuildingForm = ({
         [-71.346738, -29.967316],
         [-71.346738, -29.963208],
         [-71.355622, -29.963208],
-        [-71.355622, -29.967316]
+        [-71.355622, -29.967316],
       ]);
 
-      setValidation(prev => ({
+      setValidation((prev) => ({
         ...prev,
         isInCampus,
-        isValidLocation: true
+        isValidLocation: true,
       }));
 
-      console.log(`📍 Validación Turf: ${isInCampus ? 'DENTRO' : 'FUERA'} del campus`);
-
+      console.log(
+        `📍 Validación Turf: ${isInCampus ? "DENTRO" : "FUERA"} del campus`
+      );
     } catch (error) {
       console.error("❌ Error validando coordenadas:", error);
-      setValidation(prev => ({
+      setValidation((prev) => ({
         ...prev,
         isValidLocation: false,
-        isInCampus: false
+        isInCampus: false,
       }));
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // Validar coordenadas en tiempo real
@@ -196,9 +170,9 @@ const BuildingForm = ({
   };
 
   const handleCoordinateChange = (coordType, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [coordType]: value
+      [coordType]: value,
     }));
 
     // Validar cuando ambos campos están llenos
@@ -257,14 +231,14 @@ const BuildingForm = ({
       estado: formData.estado,
       ubicacion: {
         type: "Point",
-        coordinates: [lng, lat]
-      }
+        coordinates: [lng, lat],
+      },
     };
 
     console.log("✅ Enviando edificio con Turf:", {
       nombre: buildingData.nombre,
       coordenadas: [lng, lat],
-      validacion: validation
+      validacion: validation,
     });
 
     try {
@@ -299,7 +273,9 @@ const BuildingForm = ({
       <div className="building-form-container">
         <div className="building-form-header">
           <h3>{isEditing ? "✏️ Editar Edificio" : "➕ Crear Edificio"}</h3>
-          <button className="close-btn" onClick={handleCancel}>×</button>
+          <button className="close-btn" onClick={handleCancel}>
+            ×
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="building-form">
@@ -344,8 +320,8 @@ const BuildingForm = ({
             {capturedCoordinates && (
               <div className="captured-coords-info">
                 <span>✅ Coordenadas capturadas del mapa</span>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={onClearCoordinates}
                   className="clear-capture-btn"
                 >
@@ -362,10 +338,18 @@ const BuildingForm = ({
                   step="any"
                   name="lat"
                   value={formData.lat}
-                  onChange={(e) => handleCoordinateChange("lat", e.target.value)}
+                  onChange={(e) =>
+                    handleCoordinateChange("lat", e.target.value)
+                  }
                   placeholder="Ej: -29.965000"
                   required
-                  className={formData.lat && formData.lng ? (validation.isInCampus ? 'input-valid' : 'input-warning') : ''}
+                  className={
+                    formData.lat && formData.lng
+                      ? validation.isInCampus
+                        ? "input-valid"
+                        : "input-warning"
+                      : ""
+                  }
                 />
               </div>
 
@@ -376,29 +360,41 @@ const BuildingForm = ({
                   step="any"
                   name="lng"
                   value={formData.lng}
-                  onChange={(e) => handleCoordinateChange("lng", e.target.value)}
+                  onChange={(e) =>
+                    handleCoordinateChange("lng", e.target.value)
+                  }
                   placeholder="Ej: -71.350000"
                   required
-                  className={formData.lat && formData.lng ? (validation.isInCampus ? 'input-valid' : 'input-warning') : ''}
+                  className={
+                    formData.lat && formData.lng
+                      ? validation.isInCampus
+                        ? "input-valid"
+                        : "input-warning"
+                      : ""
+                  }
                 />
               </div>
             </div>
 
             {/* ✅ VALIDACIÓN TURF */}
             {formData.lat && formData.lng && (
-              <div className={`validation-info ${validation.isInCampus ? 'valid' : 'invalid'}`}>
+              <div
+                className={`validation-info ${
+                  validation.isInCampus ? "valid" : "invalid"
+                }`}
+              >
                 <div className="validation-icon">
-                  {validation.isInCampus ? '✅' : '⚠️'}
+                  {validation.isInCampus ? "✅" : "⚠️"}
                 </div>
                 <div className="validation-details">
                   <strong>
-                    {validation.isInCampus 
-                      ? 'Dentro del campus UCN' 
-                      : 'FUERA de los límites del campus'
-                    }
+                    {validation.isInCampus
+                      ? "Dentro del campus UCN"
+                      : "FUERA de los límites del campus"}
                   </strong>
                   <div className="validation-coords">
-                    📍 {parseFloat(formData.lat).toFixed(6)}, {parseFloat(formData.lng).toFixed(6)}
+                    📍 {parseFloat(formData.lat).toFixed(6)},{" "}
+                    {parseFloat(formData.lng).toFixed(6)}
                   </div>
                   {!validation.isInCampus && (
                     <div className="validation-warning">
@@ -420,7 +416,7 @@ const BuildingForm = ({
                 onChange={handleInputChange}
                 required
               >
-                {tiposEdificio.map(tipo => (
+                {tiposEdificio.map((tipo) => (
                   <option key={tipo.value} value={tipo.value}>
                     {tipo.label}
                   </option>
@@ -436,7 +432,7 @@ const BuildingForm = ({
                 onChange={handleInputChange}
                 required
               >
-                {estadosEdificio.map(estado => (
+                {estadosEdificio.map((estado) => (
                   <option key={estado.value} value={estado.value}>
                     {estado.label}
                   </option>
@@ -450,10 +446,12 @@ const BuildingForm = ({
             <button type="button" className="cancel-btn" onClick={handleCancel}>
               Cancelar
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="save-btn"
-              disabled={!formData.nombre.trim() || !formData.lat || !formData.lng}
+              disabled={
+                !formData.nombre.trim() || !formData.lat || !formData.lng
+              }
             >
               {isEditing ? "Actualizar" : "Crear"} Edificio
             </button>
