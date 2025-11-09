@@ -763,6 +763,18 @@ useEffect(() => {
         // AGREGAR PROPS PARA RouteNetwork
         onToggleRouteNetwork={() => setShowRouteNetwork(!showRouteNetwork)}
         routeNetworkActive={showRouteNetwork}
+        originFilter={originFilter}
+        destinationFilter={destinationFilter}
+        categoryFilter={categoryFilter}
+        onOriginFilterChange={(e) => setOriginFilter(e.target.value)}
+        onDestinationFilterChange={(e) => setDestinationFilter(e.target.value)}
+        onCategoryFilterChange={(e) => setCategoryFilter(e.target.value)} // ✅ SIN LIMPIAR ORIGEN/DESTINO
+        onClearFilters={() => {
+          setOriginFilter('');
+          setDestinationFilter('');
+          setCategoryFilter('');
+        }}
+        filteredBuildings={filteredBuildings}
       />
 
       {/* BUILDINGFORM */}
@@ -886,104 +898,6 @@ useEffect(() => {
 
     {/* CONTENEDOR DEL MAPA */}
       <div className="Mapa">
-        {/* ✅ CONTENEDOR DE FILTROS EN LA PARTE SUPERIOR */}
-        <div className="map-filters-container">
-          {/* FILTRO POR ORIGEN */}
-          <div className="map-filter">
-            <label htmlFor="origin-filter">🔍 Origen:</label>
-            <select
-              id="origin-filter"
-              value={originFilter}
-              onChange={(e) => setOriginFilter(e.target.value)}
-              className="map-select"
-            >
-              <option value="">Seleccionar origen</option>
-              {filteredBuildings
-                .filter((building, index, self) => 
-                  self.findIndex(b => b.nombre === building.nombre) === index
-                )
-                .map(building => (
-                  <option key={`origin-${building.id || building._id}`} value={building.nombre}>
-                    {building.nombre || 'Sin nombre'}
-                  </option>
-                ))
-              }
-            </select>
-          </div>
-
-          {/* FILTRO POR DESTINO */}
-          <div className="map-filter">
-            <label htmlFor="destination-filter">🔍 Destino:</label>
-            <select
-              id="destination-filter"
-              value={destinationFilter}
-              onChange={(e) => setDestinationFilter(e.target.value)}
-              className="map-select"
-            >
-              <option value="">Seleccionar destino</option>
-              {filteredBuildings
-                .filter((building, index, self) => 
-                  self.findIndex(b => b.nombre === building.nombre) === index
-                )
-                .map(building => (
-                  <option key={`destination-${building.id || building._id}`} value={building.nombre}>
-                    {building.nombre || 'Sin nombre'}
-                  </option>
-                ))
-              }
-            </select>
-          </div>
-
-          {/* FILTRO POR CATEGORÍA */}
-          <div className="map-filter">
-            <label htmlFor="category-filter">🏛️ Categoria:</label>
-            <select
-              id="category-filter"
-              value={categoryFilter}
-              onChange={(e) => {
-                setCategoryFilter(e.target.value);
-                // ✅ LIMPIAR ORIGEN Y DESTINO AL CAMBIAR CATEGORÍA
-                setOriginFilter('');
-                setDestinationFilter('');
-              }}
-              className="map-select"
-            >
-              <option value="">Todas las categorías</option>
-              <option value="Académico">Académico</option>
-              <option value="Administrativo">Administrativo</option>
-              <option value="Baño">Baño</option>
-              <option value="Biblioteca">Biblioteca</option>
-              <option value="Cafeteria">Cafetería</option>
-              <option value="Casino">Casino</option>
-              <option value="Centro de Salud">Centro de Salud</option>
-              <option value="Cultural">Cultural</option>
-              <option value="Deportivo">Deportivo</option>
-              <option value="Estacionamiento">Estacionamiento</option>
-              <option value="Gimnasio">Gimnasio</option>
-              <option value="Investigación">Investigación</option>
-              <option value="Laboratorio">Laboratorio</option>
-              <option value="Oficina Administracion">Oficina Administración</option>
-              <option value="Oficina Profesor">Oficina Profesor</option>
-              <option value="Sala de Clase">Sala de Clase</option>
-              <option value="Sala de Estudio">Sala de Estudio</option>
-              <option value="Servicios">Servicios</option>
-            </select>
-          </div>
-
-          {/* BOTÓN PARA LIMPIAR FILTROS - SIEMPRE PRESENTE */}
-          <button
-            onClick={() => {
-              setOriginFilter('');
-              setDestinationFilter('');
-              setCategoryFilter('');
-            }}
-            className="clear-filters-btn"
-            disabled={!originFilter && !destinationFilter && !categoryFilter}
-          >
-            🗑️ Limpiar Filtros
-          </button>
-        </div>
-
         <div ref={mapRef} className="map-container"></div>
 
         {!isMapReady && (

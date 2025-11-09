@@ -7,7 +7,12 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@turf/turf": "^7.2.0",
+    "@turf/along": "^7.2.0",
+    "@turf/bearing": "^7.2.0",
+    "@turf/distance": "^7.2.0",
+    "@turf/helpers": "^7.2.0",
+    "@turf/line-slice": "^7.2.0",
+    "@turf/turf": "^6.5.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

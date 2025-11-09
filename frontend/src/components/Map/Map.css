@@ -547,7 +547,7 @@
   background: #c0392b;
 }
 
-/* RESPONSIVE */
+/* 
 @media (max-width: 768px) {
   .map-filters-container {
     flex-wrap: wrap;
@@ -579,4 +579,4 @@
     align-self: center;
     margin-top: 5px;
   }
-}
+}*/
