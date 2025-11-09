@@ -1,58 +1,66 @@
-const roomModel = require('../models/roomModel');
+const roomModel = require("../models/roomModel");
 
 const roomsController = {
   async createRooms(req, res) {
     try {
       const roomsData = req.body;
-      
-      console.log('Datos recibidos para crear salas:', roomsData);
-      
+
+      console.log("Datos recibidos para crear salas:", roomsData);
+
       if (!Array.isArray(roomsData) || roomsData.length === 0) {
         return res.status(400).json({
           success: false,
-          message: 'Se requiere un array de salas'
+          message: "Se requiere un array de salas",
         });
       }
 
       for (const room of roomsData) {
         // Validar campos básicos
-        if (!room.id_edificio || !room.nombre_sala || !room.piso || !room.tipo_sala) {
+        if (
+          !room.id_edificio ||
+          !room.nombre_sala ||
+          !room.piso ||
+          !room.tipo_sala
+        ) {
           return res.status(400).json({
             success: false,
-            message: 'Todos los campos son requeridos: id_edificio, nombre_sala, piso, tipo_sala'
+            message:
+              "Todos los campos son requeridos: id_edificio, nombre_sala, piso, tipo_sala",
           });
         }
-        
-        
+
         if (room.longitud === undefined || room.latitud === undefined) {
           return res.status(400).json({
             success: false,
-            message: 'Las coordenadas (longitud y latitud) son requeridas'
+            message: "Las coordenadas (longitud y latitud) son requeridas",
           });
         }
-        
-        // ✅ **VALIDAR QUE LAS COORDENADAS SEAN NÚMEROS VÁLIDOS**
-        if (isNaN(parseFloat(room.longitud)) || isNaN(parseFloat(room.latitud))) {
+
+        // **VALIDAR QUE LAS COORDENADAS SEAN NÚMEROS VÁLIDOS**
+        if (
+          isNaN(parseFloat(room.longitud)) ||
+          isNaN(parseFloat(room.latitud))
+        ) {
           return res.status(400).json({
             success: false,
-            message: 'Las coordenadas deben ser números válidos'
+            message: "Las coordenadas deben ser números válidos",
           });
         }
       }
-      
+
       const createdRooms = await roomModel.createRooms(roomsData);
-      
+
       res.status(201).json({
         success: true,
         message: `${createdRooms.length} salas creadas exitosamente`,
-        data: createdRooms
+        data: createdRooms,
       });
-      
     } catch (error) {
-      console.error('Error creando salas:', error);
+      console.error("Error creando salas:", error);
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor al crear las salas: ' + error.message
+        message:
+          "Error interno del servidor al crear las salas: " + error.message,
       });
     }
   },
@@ -60,27 +68,27 @@ const roomsController = {
   async getRoomsByBuilding(req, res) {
     try {
       const { buildingId } = req.params;
-      
+
       if (!buildingId) {
         return res.status(400).json({
           success: false,
-          message: 'ID del edificio es requerido'
+          message: "ID del edificio es requerido",
         });
       }
-      
+
       const rooms = await roomModel.getByBuildingId(buildingId);
-      
+
       res.json({
         success: true,
         data: rooms,
-        count: rooms.length
+        count: rooms.length,
       });
-      
     } catch (error) {
-      console.error('Error obteniendo salas:', error);
+      console.error("Error obteniendo salas:", error);
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor al obtener las salas: ' + error.message
+        message:
+          "Error interno del servidor al obtener las salas: " + error.message,
       });
     }
   },
@@ -89,49 +97,52 @@ const roomsController = {
     try {
       const { id } = req.params;
       const roomData = req.body;
-      
+
       if (!id) {
         return res.status(400).json({
           success: false,
-          message: 'ID de la sala es requerido'
+          message: "ID de la sala es requerido",
         });
       }
 
-      // ✅ **AGREGAR VALIDACIÓN DE COORDENADAS PARA UPDATE TAMBIÉN**
+      // **AGREGAR VALIDACIÓN DE COORDENADAS PARA UPDATE TAMBIÉN**
       if (roomData.longitud === undefined || roomData.latitud === undefined) {
         return res.status(400).json({
           success: false,
-          message: 'Las coordenadas (longitud y latitud) son requeridas'
+          message: "Las coordenadas (longitud y latitud) son requeridas",
         });
       }
-      
-      if (isNaN(parseFloat(roomData.longitud)) || isNaN(parseFloat(roomData.latitud))) {
+
+      if (
+        isNaN(parseFloat(roomData.longitud)) ||
+        isNaN(parseFloat(roomData.latitud))
+      ) {
         return res.status(400).json({
           success: false,
-          message: 'Las coordenadas deben ser números válidos'
+          message: "Las coordenadas deben ser números válidos",
         });
       }
-      
+
       const updatedRoom = await roomModel.update(id, roomData);
-      
+
       if (!updatedRoom) {
         return res.status(404).json({
           success: false,
-          message: 'Sala no encontrada'
+          message: "Sala no encontrada",
         });
       }
-      
+
       res.json({
         success: true,
-        message: 'Sala actualizada exitosamente',
-        data: updatedRoom
+        message: "Sala actualizada exitosamente",
+        data: updatedRoom,
       });
-      
     } catch (error) {
-      console.error('Error actualizando sala:', error);
+      console.error("Error actualizando sala:", error);
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor al actualizar la sala: ' + error.message
+        message:
+          "Error interno del servidor al actualizar la sala: " + error.message,
       });
     }
   },
@@ -139,37 +150,37 @@ const roomsController = {
   async deleteRoom(req, res) {
     try {
       const { id } = req.params;
-      
+
       if (!id) {
         return res.status(400).json({
           success: false,
-          message: 'ID de la sala es requerido'
+          message: "ID de la sala es requerido",
         });
       }
-      
+
       const result = await roomModel.delete(id);
-      
+
       if (!result) {
         return res.status(404).json({
           success: false,
-          message: 'Sala no encontrada'
+          message: "Sala no encontrada",
         });
       }
-      
+
       res.json({
         success: true,
         message: `Sala "${result.nombre_sala}" eliminada exitosamente`,
-        data: { id: result.id_sala, nombre: result.nombre_sala }
+        data: { id: result.id_sala, nombre: result.nombre_sala },
       });
-      
     } catch (error) {
-      console.error('Error eliminando sala:', error);
+      console.error("Error eliminando sala:", error);
       res.status(500).json({
         success: false,
-        message: 'Error interno del servidor al eliminar la sala: ' + error.message
+        message:
+          "Error interno del servidor al eliminar la sala: " + error.message,
       });
     }
-  }
+  },
 };
 
 module.exports = roomsController;

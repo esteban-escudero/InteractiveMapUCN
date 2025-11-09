@@ -1,19 +1,19 @@
 import React, { useEffect } from "react";
 import "./Notification.css";
 
-const Notification = ({ 
-  message, 
-  type = "success", 
-  onClose, 
+const Notification = ({
+  message,
+  type = "success",
+  onClose,
   duration = 4000,
-  position = "top-right"
+  position = "top-right",
 }) => {
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
         onClose();
       }, duration);
-      
+
       return () => clearTimeout(timer);
     }
   }, [duration, onClose]);
@@ -21,25 +21,24 @@ const Notification = ({
   const getIcon = () => {
     switch (type) {
       case "success":
-        return "✅";
+        return "check_circle";
       case "error":
-        return "❌";
+        return "error";
       case "warning":
-        return "⚠️";
+        return "warning";
       default:
-        return "ℹ️";
+        return "info";
     }
   };
 
   return (
-    <div className={`notification notification-${type} notification-${position}`}>
+    <div
+      className={`notification notification-${type} notification-${position}`}>
       <div className="notification-content">
-        <span className="notification-icon">
-          {getIcon()}
-        </span>
+        <span className="material-icons notification-icon">{getIcon()}</span>
         <span className="notification-message">{message}</span>
         <button className="notification-close" onClick={onClose}>
-          ✕
+          <span className="material-icons">close</span>
         </button>
       </div>
     </div>

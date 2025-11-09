@@ -1,10 +1,10 @@
-const pool = require('../config/database');
+const pool = require("../config/database");
 
 const roomModel = {
   async findAvailableId() {
     try {
-      console.log('🔍 Buscando ID disponible para sala...');
-      
+      console.log("Buscando ID disponible para sala...");
+
       const query = `
         WITH sequence_gaps AS (
           SELECT 
@@ -26,33 +26,34 @@ const roomModel = {
             (SELECT COALESCE(MAX(id_sala), 0) + 1 FROM sala)
           ) as available_id
       `;
-      
+
       const result = await pool.query(query);
       const availableId = parseInt(result.rows[0].available_id);
-      
-      console.log(`✅ ID disponible encontrado: ${availableId}`);
+
+      console.log(`ID disponible encontrado: ${availableId}`);
       return availableId;
-      
     } catch (error) {
-      console.error('❌ Error buscando ID disponible:', error.message);
-      const maxResult = await pool.query('SELECT COALESCE(MAX(id_sala), 0) as max_id FROM sala');
+      console.error("Error buscando ID disponible:", error.message);
+      const maxResult = await pool.query(
+        "SELECT COALESCE(MAX(id_sala), 0) as max_id FROM sala"
+      );
       return parseInt(maxResult.rows[0].max_id) + 1;
     }
   },
 
   async createRooms(roomsData) {
     const client = await pool.connect();
-    
+
     try {
-      await client.query('BEGIN');
-      
-      console.log('🏗️ Creando salas en la base de datos:', roomsData);
+      await client.query("BEGIN");
+
+      console.log("Creando salas en la base de datos:", roomsData);
 
       const createdRooms = [];
 
       for (const roomData of roomsData) {
         const availableId = await this.findAvailableId();
-        console.log(`🆔 Usando ID disponible: ${availableId}`);
+        console.log(`Usando ID disponible: ${availableId}`);
 
         const query = `
           INSERT INTO sala (
@@ -62,7 +63,7 @@ const roomModel = {
             piso, 
             tipo_sala,
             accesible_silla_ruedas,
-            ubicacion  -- ✅ NUEVO NOMBRE: ubicacion (tipo geometry)
+            ubicacion  -- NUEVO NOMBRE: ubicacion (tipo geometry)
           ) VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326))
           RETURNING 
             id_sala as id,
@@ -71,10 +72,10 @@ const roomModel = {
             piso,
             tipo_sala,
             accesible_silla_ruedas,
-            ST_X(ubicacion) as longitud,  -- ✅ Usar ST_X con geometry
-            ST_Y(ubicacion) as latitud    -- ✅ Usar ST_Y con geometry
+            ST_X(ubicacion) as longitud,  -- Usar ST_X con geometry
+            ST_Y(ubicacion) as latitud    -- Usar ST_Y con geometry
         `;
-        
+
         const values = [
           availableId,
           roomData.id_edificio,
@@ -83,23 +84,28 @@ const roomModel = {
           roomData.tipo_sala,
           roomData.accesible_silla_ruedas || false,
           roomData.longitud,
-          roomData.latitud
+          roomData.latitud,
         ];
-        
-        console.log('📝 Insertando sala con ID:', availableId, 'y ubicación:', roomData.longitud, roomData.latitud);
-        
+
+        console.log(
+          "Insertando sala con ID:",
+          availableId,
+          "y ubicación:",
+          roomData.longitud,
+          roomData.latitud
+        );
+
         const result = await client.query(query, values);
         createdRooms.push(result.rows[0]);
       }
-      
-      await client.query('COMMIT');
-      
-      console.log(`✅ ${createdRooms.length} salas creadas exitosamente`);
+
+      await client.query("COMMIT");
+
+      console.log(`${createdRooms.length} salas creadas exitosamente`);
       return createdRooms;
-      
     } catch (error) {
-      await client.query('ROLLBACK');
-      console.error('❌ Error en roomModel.createRooms:', error.message);
+      await client.query("ROLLBACK");
+      console.error("Error en roomModel.createRooms:", error.message);
       throw error;
     } finally {
       client.release();
@@ -122,11 +128,11 @@ const roomModel = {
         WHERE id_edificio = $1
         ORDER BY piso, nombre_sala
       `;
-      
+
       const result = await pool.query(query, [buildingId]);
       return result.rows;
     } catch (error) {
-      console.error('❌ Error en roomModel.getByBuildingId:', error.message);
+      console.error("Error en roomModel.getByBuildingId:", error.message);
       throw error;
     }
   },
@@ -147,7 +153,7 @@ const roomModel = {
           ST_X(ubicacion) as longitud,
           ST_Y(ubicacion) as latitud
       `;
-      
+
       const values = [
         roomData.nombre_sala,
         roomData.piso,
@@ -155,13 +161,13 @@ const roomModel = {
         roomData.accesible_silla_ruedas,
         roomData.longitud,
         roomData.latitud,
-        roomId
+        roomId,
       ];
-      
+
       const result = await pool.query(query, values);
       return result.rows[0];
     } catch (error) {
-      console.error('❌ Error en roomModel.update:', error.message);
+      console.error("Error en roomModel.update:", error.message);
       throw error;
     }
   },
@@ -189,11 +195,11 @@ const roomModel = {
         )
         ORDER BY distancia_metros
       `;
-      
+
       const result = await pool.query(query, [lng, lat, radiusMeters]);
       return result.rows;
     } catch (error) {
-      console.error('❌ Error en roomModel.findNearbyRooms:', error.message);
+      console.error("Error en roomModel.findNearbyRooms:", error.message);
       throw error;
     }
   },
@@ -205,14 +211,14 @@ const roomModel = {
         WHERE id_sala = $1 
         RETURNING id_sala, nombre_sala
       `;
-      
+
       const result = await pool.query(query, [roomId]);
       return result.rows[0];
     } catch (error) {
-      console.error('❌ Error en roomModel.delete:', error.message);
+      console.error("Error en roomModel.delete:", error.message);
       throw error;
     }
-  }
+  },
 };
 
 module.exports = roomModel;

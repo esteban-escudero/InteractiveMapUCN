@@ -40,12 +40,12 @@ const SidePanel = ({
   };
 
   const handleManageBuildings = () => {
-    console.log("🏢 SidePanel: Gestionar Edificios clickeado");
+    console.log("SidePanel: Gestionar Edificios clickeado");
     if (onManageBuildings) onManageBuildings();
   };
 
   const handleAddRoute = () => {
-    console.log("🛣️ SidePanel: Agregar Ruta clickeado");
+    console.log("SidePanel: Agregar Ruta clickeado");
     if (onAddRoute) onAddRoute();
   };
 
@@ -83,20 +83,20 @@ const SidePanel = ({
 
   const getStatusText = () => {
     if (backendStatus === "error") {
-      return "❌ Error conectando al backend";
+      return "Error conectando al backend";
     }
 
     switch (status) {
       case "checking":
-        return "🔍 Conectando...";
+        return "Conectando...";
       case "loading":
         return "⏳ Cargando edificios...";
       case "empty":
-        return "⚠️ Base de datos vacía";
+        return "Base de datos vacía";
       case "error":
-        return "❌ Error de conexión";
+        return "Error de conexión";
       default:
-        return "✅ Sistema listo";
+        return "Sistema listo";
     }
   };
 
@@ -109,16 +109,24 @@ const SidePanel = ({
           <button
             className="dropdown-toggle"
             onClick={() => toggleMenu("Edificios")}>
-            🏢 Edificios y Salas {activeMenu === "Edificios" ? "▲" : "▼"}
+            <span className="material-icons">business</span>
+            Edificios y Salas
+            <span className="material-icons">
+              {activeMenu === "Edificios" ? "expand_less" : "expand_more"}
+            </span>
           </button>
           {activeMenu === "Edificios" && (
             <ul className="dropdown-menu">
               <li>
-                <button onClick={handleAddBuilding}>➕ Agregar Edificio</button>
+                <button onClick={handleAddBuilding}>
+                  <span className="material-icons">add_location</span>
+                  Agregar Edificio
+                </button>
               </li>
               <li>
                 <button onClick={handleManageBuildings}>
-                  📝 Gestionar Edificios y Salas
+                  <span className="material-icons">edit_location</span>
+                  Gestionar Edificios y Salas
                 </button>
               </li>
             </ul>
@@ -130,16 +138,24 @@ const SidePanel = ({
           <button
             className="dropdown-toggle"
             onClick={() => toggleMenu("Rutas")}>
-            🗺️ Rutas {activeMenu === "Rutas" ? "▲" : "▼"}
+            <span className="material-icons">route</span>
+            Rutas
+            <span className="material-icons">
+              {activeMenu === "Rutas" ? "expand_less" : "expand_more"}
+            </span>
           </button>
           {activeMenu === "Rutas" && (
             <ul className="dropdown-menu">
               <li>
-                <button onClick={handleAddRoute}>➕ Agregar Ruta</button>
+                <button onClick={handleAddRoute}>
+                  <span className="material-icons">add_road</span>
+                  Agregar Ruta
+                </button>
               </li>
               <li>
                 <button onClick={handleManageRoutes}>
-                  📝 Gestionar Rutas
+                  <span className="material-icons">edit</span>
+                  Gestionar Rutas
                 </button>
               </li>
             </ul>
@@ -148,100 +164,121 @@ const SidePanel = ({
       </div>
 
       {/* SECCIÓN DE FILTROS */}
-     {/* DROPDOWN PARA FILTROS DEL MAPA */}
-        <div className={`filters-dropdown ${activeMenu === "Filtros" ? "active" : ""}`}>
-          <button
-            className="filters-toggle"
-            onClick={() => toggleMenu("Filtros")}>
-            🎯 Filtros del Mapa {activeMenu === "Filtros" ? "▲" : "▼"}
-          </button>
-          {activeMenu === "Filtros" && (
-            <div className="filters-content">
-              {/* FILTRO POR ORIGEN */}
-              <div className="filter-group">
-                <label>🔍 Origen:</label>
-                <select
-                  value={originFilter}
-                  onChange={onOriginFilterChange}
-                  className="filter-select"
-                >
-                  <option value="">Seleccionar origen</option>
-                  {filteredBuildings
-                    .filter((building, index, self) => 
-                      self.findIndex(b => b.nombre === building.nombre) === index
-                    )
-                    .map(building => (
-                      <option key={`origin-${building.id || building._id}`} value={building.nombre}>
-                        {building.nombre || 'Sin nombre'}
-                      </option>
-                    ))
-                  }
-                </select>
-              </div>
-
-              {/* FILTRO POR DESTINO */}
-              <div className="filter-group">
-                <label>🔍 Destino:</label>
-                <select
-                  value={destinationFilter}
-                  onChange={onDestinationFilterChange}
-                  className="filter-select"
-                >
-                  <option value="">Seleccionar destino</option>
-                  {filteredBuildings
-                    .filter((building, index, self) => 
-                      self.findIndex(b => b.nombre === building.nombre) === index
-                    )
-                    .map(building => (
-                      <option key={`destination-${building.id || building._id}`} value={building.nombre}>
-                        {building.nombre || 'Sin nombre'}
-                      </option>
-                    ))
-                  }
-                </select>
-              </div>
-
-              {/* FILTRO POR CATEGORÍA */}
-              <div className="filter-group">
-                <label>🏛️ Categoría:</label>
-                <select
-                  value={categoryFilter}
-                  onChange={onCategoryFilterChange}
-                  className="filter-select"
-                >
-                  <option value="">Todas las categorías</option>
-                  <option value="Académico">Académico</option>
-                  <option value="Administrativo">Administrativo</option>
-                  <option value="Baño">Baño</option>
-                  <option value="Biblioteca">Biblioteca</option>
-                  <option value="Cafeteria">Cafetería</option>
-                  <option value="Casino">Casino</option>
-                  <option value="Centro de Salud">Centro de Salud</option>
-                  <option value="Cultural">Cultural</option>
-                  <option value="Deportivo">Deportivo</option>
-                  <option value="Estacionamiento">Estacionamiento</option>
-                  <option value="Gimnasio">Gimnasio</option>
-                  <option value="Investigación">Investigación</option>
-                  <option value="Laboratorio">Laboratorio</option>
-                  <option value="Oficina Administracion">Oficina Administración</option>
-                  <option value="Oficina Profesor">Oficina Profesor</option>
-                  <option value="Sala de Clase">Sala de Clase</option>
-                  <option value="Sala de Estudio">Sala de Estudio</option>
-                  <option value="Servicios">Servicios</option>
-                </select>
-              </div>
-
-              {/* BOTÓN LIMPIAR FILTROS */}
-              <button
-                onClick={onClearFilters}
-                className="clear-filters-btn"
-                disabled={!originFilter && !destinationFilter && !categoryFilter}
-              >
-                🗑️ Limpiar Filtros
-              </button>
+      {/* DROPDOWN PARA FILTROS DEL MAPA */}
+      <div
+        className={`filters-dropdown ${
+          activeMenu === "Filtros" ? "active" : ""
+        }`}>
+        <button
+          className="filters-toggle"
+          onClick={() => toggleMenu("Filtros")}>
+          <span className="material-icons">filter_alt</span>
+          Filtros del Mapa
+          <span className="material-icons">
+            {activeMenu === "Filtros" ? "expand_less" : "expand_more"}
+          </span>
+        </button>
+        {activeMenu === "Filtros" && (
+          <div className="filters-content">
+            {/* FILTRO POR ORIGEN */}
+            <div className="filter-group">
+              <label>
+                <span className="material-icons">trip_origin</span>
+                Origen:
+              </label>
+              <select
+                value={originFilter}
+                onChange={onOriginFilterChange}
+                className="filter-select">
+                <option value="">Seleccionar origen</option>
+                {filteredBuildings
+                  .filter(
+                    (building, index, self) =>
+                      self.findIndex((b) => b.nombre === building.nombre) ===
+                      index
+                  )
+                  .map((building) => (
+                    <option
+                      key={`origin-${building.id || building._id}`}
+                      value={building.nombre}>
+                      {building.nombre || "Sin nombre"}
+                    </option>
+                  ))}
+              </select>
             </div>
-          )}
-        </div>
+
+            {/* FILTRO POR DESTINO */}
+            <div className="filter-group">
+              <label>
+                <span className="material-icons">location_on</span>
+                Destino:
+              </label>
+              <select
+                value={destinationFilter}
+                onChange={onDestinationFilterChange}
+                className="filter-select">
+                <option value="">Seleccionar destino</option>
+                {filteredBuildings
+                  .filter(
+                    (building, index, self) =>
+                      self.findIndex((b) => b.nombre === building.nombre) ===
+                      index
+                  )
+                  .map((building) => (
+                    <option
+                      key={`destination-${building.id || building._id}`}
+                      value={building.nombre}>
+                      {building.nombre || "Sin nombre"}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            {/* FILTRO POR CATEGORÍA */}
+            <div className="filter-group">
+              <label>
+                <span className="material-icons">category</span>
+                Categoría:
+              </label>
+              <select
+                value={categoryFilter}
+                onChange={onCategoryFilterChange}
+                className="filter-select">
+                <option value="">Todas las categorías</option>
+                <option value="Académico">Académico</option>
+                <option value="Administrativo">Administrativo</option>
+                <option value="Baño">Baño</option>
+                <option value="Biblioteca">Biblioteca</option>
+                <option value="Cafeteria">Cafetería</option>
+                <option value="Casino">Casino</option>
+                <option value="Centro de Salud">Centro de Salud</option>
+                <option value="Cultural">Cultural</option>
+                <option value="Deportivo">Deportivo</option>
+                <option value="Estacionamiento">Estacionamiento</option>
+                <option value="Gimnasio">Gimnasio</option>
+                <option value="Investigación">Investigación</option>
+                <option value="Laboratorio">Laboratorio</option>
+                <option value="Oficina Administracion">
+                  Oficina Administración
+                </option>
+                <option value="Oficina Profesor">Oficina Profesor</option>
+                <option value="Sala de Clase">Sala de Clase</option>
+                <option value="Sala de Estudio">Sala de Estudio</option>
+                <option value="Servicios">Servicios</option>
+              </select>
+            </div>
+
+            {/* BOTÓN LIMPIAR FILTROS */}
+            <button
+              onClick={onClearFilters}
+              className="clear-filters-btn"
+              disabled={!originFilter && !destinationFilter && !categoryFilter}>
+              <span className="material-icons">clear_all</span>
+              Limpiar Filtros
+            </button>
+          </div>
+        )}
+      </div>
 
       <button className="logout-btn" onClick={handleLogout}>
         Cerrar Sesión

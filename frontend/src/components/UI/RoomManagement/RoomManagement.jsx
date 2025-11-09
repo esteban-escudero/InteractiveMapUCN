@@ -8,7 +8,7 @@ const RoomManagement = ({
   onDeleteRoom,
   onClose,
   existingRooms = [],
-  selectedBuilding = null, // ✅ NUEVO PROP: edificio seleccionado automáticamente
+  selectedBuilding = null, // NUEVO PROP: edificio seleccionado automáticamente
 }) => {
   const [selectedBuildingId, setSelectedBuildingId] = useState("");
   const [selectedBuildingData, setSelectedBuildingData] = useState(null);
@@ -32,7 +32,7 @@ const RoomManagement = ({
     "Otro",
   ];
 
-  // ✅ INICIALIZACIÓN MEJORADA - Detecta automáticamente el edificio
+  // INICIALIZACIÓN MEJORADA - Detecta automáticamente el edificio
   useEffect(() => {
     if (existingRooms.length > 0) {
       // Modo edición: cargar salas existentes
@@ -53,14 +53,14 @@ const RoomManagement = ({
       ]);
       setIsEditing(false);
 
-      // ✅ DETECCIÓN AUTOMÁTICA: Si viene un edificio seleccionado, usarlo
+      // DETECCIÓN AUTOMÁTICA: Si viene un edificio seleccionado, usarlo
       if (selectedBuilding) {
-        console.log("🏢 Edificio detectado automáticamente:", selectedBuilding);
+        console.log("Edificio detectado automáticamente:", selectedBuilding);
         setSelectedBuildingId(selectedBuilding.id.toString());
         setSelectedBuildingData(selectedBuilding);
       }
     }
-  }, [existingRooms, selectedBuilding]); // ✅ Agregar selectedBuilding como dependencia
+  }, [existingRooms, selectedBuilding]); // Agregar selectedBuilding como dependencia
 
   // Cuando se selecciona un edificio, obtener sus datos completos
   useEffect(() => {
@@ -69,7 +69,7 @@ const RoomManagement = ({
         (b) => b.id.toString() === selectedBuildingId
       );
       setSelectedBuildingData(building);
-      console.log("🏢 Edificio seleccionado:", building);
+      console.log("Edificio seleccionado:", building);
     } else {
       setSelectedBuildingData(null);
     }
@@ -136,7 +136,7 @@ const RoomManagement = ({
       return;
     }
 
-    console.log("📍 Usando coordenadas del edificio:", coords);
+    console.log("Usando coordenadas del edificio:", coords);
 
     const roomsToSave = rooms.map((room) => ({
       ...room,
@@ -185,10 +185,10 @@ const RoomManagement = ({
 
     try {
       await onUpdateRoom(room.id, roomToUpdate);
-      alert("✅ Sala actualizada exitosamente");
+      alert("Sala actualizada exitosamente");
       onClose();
     } catch (error) {
-      alert("❌ Error al actualizar la sala: " + error.message);
+      alert("Error al actualizar la sala: " + error.message);
     }
   };
 
@@ -204,10 +204,10 @@ const RoomManagement = ({
     if (confirmDelete) {
       try {
         await onDeleteRoom(room.id);
-        alert("✅ Sala eliminada exitosamente");
+        alert("Sala eliminada exitosamente");
         onClose();
       } catch (error) {
-        alert("❌ Error al eliminar la sala: " + error.message);
+        alert("Error al eliminar la sala: " + error.message);
       }
     }
   };
@@ -216,20 +216,20 @@ const RoomManagement = ({
     <div className="room-management-overlay">
       <div className="room-management-container">
         <div className="room-management-header">
-          <h3>{isEditing ? "✏️ Editar Sala" : "🏢 Gestión de Salas"}</h3>
+          <h3>{isEditing ? "Editar Sala" : "Gestión de Salas"}</h3>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
         </div>
 
-        {/* ✅ Selección de Edificio - MEJORADA */}
+        {/* Selección de Edificio - MEJORADA */}
         <div className="building-selection">
           <label>Edificio:</label>
           <select
             value={selectedBuildingId}
             onChange={(e) => setSelectedBuildingId(e.target.value)}
             required
-            disabled={isEditing || (selectedBuilding && !isEditing)} // ✅ Deshabilitar si ya viene seleccionado
+            disabled={isEditing || (selectedBuilding && !isEditing)} // Deshabilitar si ya viene seleccionado
           >
             <option value="">Selecciona un edificio</option>
             {buildings.map((building) => (
@@ -341,7 +341,7 @@ const RoomManagement = ({
                 type="button"
                 onClick={handleDelete}
                 className="delete-btn">
-                🗑️ Eliminar
+                Eliminar
               </button>
               <div className="edit-actions">
                 <button type="button" onClick={onClose} className="cancel-btn">

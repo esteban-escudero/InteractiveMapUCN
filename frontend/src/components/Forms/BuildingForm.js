@@ -18,8 +18,8 @@ const BuildingForm = ({
     descripcion: "",
     lat: "",
     lng: "",
-    tipo: "Sala de Clase", // ✅ Valor por defecto que existe en la BD
-    estado: "activo", // ✅ Valor por defecto que existe en la BD
+    tipo: "Sala de Clase", // Valor por defecto que existe en la BD
+    estado: "activo", // Valor por defecto que existe en la BD
   });
 
   const [validation, setValidation] = useState({
@@ -32,9 +32,6 @@ const BuildingForm = ({
   const [isCapturing, setIsCapturing] = useState(false);
   const [hasBeenReset, setHasBeenReset] = useState(false);
 
-  // ✅ OPCIONES EXACTAS QUE COINCIDEN CON LA BASE DE DATOS
-
-  // ✅ CARGAR DATOS SI ESTAMOS EDITANDO
   useEffect(() => {
     if (isVisible && !hasBeenReset) {
       if (isEditing && building) {
@@ -73,10 +70,9 @@ const BuildingForm = ({
     }
   }, [isVisible, isEditing, building, hasBeenReset]);
 
-  // ✅ USAR COORDENADAS CAPTURADAS - ADAPTADO CON isCapturing
   useEffect(() => {
     if (capturedCoordinates && isCapturing) {
-      console.log("📍 Coordenadas capturadas recibidas:", capturedCoordinates);
+      console.log("Coordenadas capturadas recibidas:", capturedCoordinates);
 
       // Actualizar el formulario con las nuevas coordenadas
       setFormData((prev) => ({
@@ -91,11 +87,11 @@ const BuildingForm = ({
       // Validar automáticamente las coordenadas capturadas
       validateCoordinates(capturedCoordinates.lat, capturedCoordinates.lng);
 
-      console.log("✅ Coordenadas actualizadas en el formulario");
+      console.log("Coordenadas actualizadas en el formulario");
     }
   }, [capturedCoordinates, isCapturing]);
 
-  // ✅ Efecto para limpiar coordenadas cuando se inicia la captura
+  // Efecto para limpiar coordenadas cuando se inicia la captura
   useEffect(() => {
     if (isCapturing) {
       // Limpiar solo las coordenadas, mantener el resto del formulario
@@ -107,7 +103,7 @@ const BuildingForm = ({
     }
   }, [isCapturing]);
 
-  // ✅ VALIDAR COORDENADAS CON TURF
+  // VALIDAR COORDENADAS CON TURF
   const validateCoordinates = (lat, lng) => {
     if (!lat || !lng) return;
 
@@ -141,10 +137,10 @@ const BuildingForm = ({
       }));
 
       console.log(
-        `📍 Validación Turf: ${isInCampus ? "DENTRO" : "FUERA"} del campus`
+        `Validación Turf: ${isInCampus ? "DENTRO" : "FUERA"} del campus`
       );
     } catch (error) {
-      console.error("❌ Error validando coordenadas:", error);
+      console.error("Error validando coordenadas:", error);
       setValidation((prev) => ({
         ...prev,
         isValidLocation: false,
@@ -185,16 +181,16 @@ const BuildingForm = ({
     }
   };
 
-  // ✅ FUNCIÓN MEJORADA PARA CAPTURAR COORDENADAS
+  // FUNCIÓN MEJORADA PARA CAPTURAR COORDENADAS
   const handleCaptureCoordinates = () => {
-    console.log("📍 Iniciando captura de coordenadas para edificio...");
+    console.log("Iniciando captura de coordenadas para edificio...");
 
     if (onToggleCoordinateDetection) {
       setIsCapturing(true);
       onToggleCoordinateDetection();
-      console.log("📍 Modo captura activado para edificio");
+      console.log("Modo captura activado para edificio");
     } else {
-      console.error("❌ onToggleCoordinateDetection no está definido");
+      console.error("onToggleCoordinateDetection no está definido");
       alert("Error: Función de captura no disponible");
     }
   };
@@ -204,12 +200,12 @@ const BuildingForm = ({
 
     // Validaciones básicas
     if (!formData.nombre.trim()) {
-      alert("❌ El nombre del edificio es requerido");
+      alert("El nombre del edificio es requerido");
       return;
     }
 
     if (!formData.lat || !formData.lng) {
-      alert("❌ Las coordenadas son requeridas");
+      alert("Las coordenadas son requeridas");
       return;
     }
 
@@ -217,7 +213,7 @@ const BuildingForm = ({
     const lng = parseFloat(formData.lng);
 
     if (isNaN(lat) || isNaN(lng)) {
-      alert("❌ Las coordenadas deben ser números válidos");
+      alert("Las coordenadas deben ser números válidos");
       return;
     }
 
@@ -235,7 +231,7 @@ const BuildingForm = ({
       },
     };
 
-    console.log("✅ Enviando edificio con Turf:", {
+    console.log("Enviando edificio con Turf:", {
       nombre: buildingData.nombre,
       coordenadas: [lng, lat],
       validacion: validation,
@@ -259,7 +255,7 @@ const BuildingForm = ({
     onCancel();
   };
 
-  // ✅ SI ESTAMOS EN MODO CAPTURA, NO MOSTRAR NINGÚN FORMULARIO - SOLO EL MAPA
+  // SI ESTAMOS EN MODO CAPTURA, NO MOSTRAR NINGÚN FORMULARIO - SOLO EL MAPA
   if (isCapturing) {
     return null;
   }
@@ -267,14 +263,17 @@ const BuildingForm = ({
   // Si el formulario no es visible, no mostrar nada
   if (!isVisible) return null;
 
-  // ✅ VISTA PRINCIPAL DEL FORMULARIO (solo se muestra cuando NO estamos capturando)
+  // VISTA PRINCIPAL DEL FORMULARIO (solo se muestra cuando NO estamos capturando)
   return (
     <div className="building-form-overlay">
       <div className="building-form-container">
         <div className="building-form-header">
-          <h3>{isEditing ? "✏️ Editar Edificio" : "➕ Crear Edificio"}</h3>
+          <h3>
+            <span className="material-icons">{isEditing ? "edit" : "add"}</span>
+            {isEditing ? "Editar Edificio" : "Crear Edificio"}
+          </h3>
           <button className="close-btn" onClick={handleCancel}>
-            ×
+            <span className="material-icons">close</span>
           </button>
         </div>
 
@@ -307,24 +306,26 @@ const BuildingForm = ({
           {/* COORDENADAS */}
           <div className="coordinates-section">
             <div className="section-header">
-              <h4>📍 Coordenadas</h4>
+              <h4>
+                <span className="material-icons">location_on</span>
+                Coordenadas
+              </h4>
               <button
                 type="button"
                 className="capture-btn"
-                onClick={handleCaptureCoordinates}
-              >
-                🎯 Capturar del Mapa
+                onClick={handleCaptureCoordinates}>
+                <span className="material-icons">my_location</span>
+                Capturar del Mapa
               </button>
             </div>
 
             {capturedCoordinates && (
               <div className="captured-coords-info">
-                <span>✅ Coordenadas capturadas del mapa</span>
+                <span>Coordenadas capturadas del mapa</span>
                 <button
                   type="button"
                   onClick={onClearCoordinates}
-                  className="clear-capture-btn"
-                >
+                  className="clear-capture-btn">
                   ×
                 </button>
               </div>
@@ -376,15 +377,14 @@ const BuildingForm = ({
               </div>
             </div>
 
-            {/* ✅ VALIDACIÓN TURF */}
+            {/* VALIDACIÓN TURF */}
             {formData.lat && formData.lng && (
               <div
                 className={`validation-info ${
                   validation.isInCampus ? "valid" : "invalid"
-                }`}
-              >
+                }`}>
                 <div className="validation-icon">
-                  {validation.isInCampus ? "✅" : "⚠️"}
+                  {validation.isInCampus ? "" : "⚠️"}
                 </div>
                 <div className="validation-details">
                   <strong>
@@ -414,8 +414,7 @@ const BuildingForm = ({
                 name="tipo"
                 value={formData.tipo}
                 onChange={handleInputChange}
-                required
-              >
+                required>
                 {tiposEdificio.map((tipo) => (
                   <option key={tipo.value} value={tipo.value}>
                     {tipo.label}
@@ -430,8 +429,7 @@ const BuildingForm = ({
                 name="estado"
                 value={formData.estado}
                 onChange={handleInputChange}
-                required
-              >
+                required>
                 {estadosEdificio.map((estado) => (
                   <option key={estado.value} value={estado.value}>
                     {estado.label}
@@ -451,8 +449,7 @@ const BuildingForm = ({
               className="save-btn"
               disabled={
                 !formData.nombre.trim() || !formData.lat || !formData.lng
-              }
-            >
+              }>
               {isEditing ? "Actualizar" : "Crear"} Edificio
             </button>
           </div>

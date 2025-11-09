@@ -1,10 +1,10 @@
 const pool = require("../config/database");
-const RouteNodes = require('../utils/routeNodes');
+const RouteNodes = require("../utils/routeNodes");
 
 const routeModel = {
   async getAll() {
     try {
-      console.log("🔍 Ejecutando consulta de rutas...");
+      console.log("Ejecutando consulta de rutas...");
 
       const query = `
         SELECT 
@@ -55,7 +55,7 @@ const routeModel = {
       `;
 
       const result = await pool.query(query);
-      console.log(`📊 ${result.rows.length} rutas encontradas`);
+      console.log(`${result.rows.length} rutas encontradas`);
 
       const routes = result.rows.map((row) => {
         let geometria = null;
@@ -64,7 +64,7 @@ const routeModel = {
             geometria = JSON.parse(row.geometria_geojson);
           }
         } catch (error) {
-          console.warn("❌ Error parseando geometría para ruta", row.id, error);
+          console.warn("Error parseando geometría para ruta", row.id, error);
         }
 
         const route = {
@@ -79,14 +79,14 @@ const routeModel = {
         };
 
         console.log(
-          `🛣️ Ruta ${route.id}: "${route.nombre}", puntos: ${route.puntos_ruta.length}`
+          `Ruta ${route.id}: "${route.nombre}", puntos: ${route.puntos_ruta.length}`
         );
         return route;
       });
 
       return routes;
     } catch (error) {
-      console.error("❌ Error en routeModel.getAll:", error.message);
+      console.error("Error en routeModel.getAll:", error.message);
       return await this.getAllBasic();
     }
   },
@@ -118,10 +118,10 @@ const routeModel = {
         puntos_ruta: [],
       }));
 
-      console.log(`⚠️ ${routes.length} rutas cargadas (modo básico)`);
+      console.log(`${routes.length} rutas cargadas (modo básico)`);
       return routes;
     } catch (error) {
-      console.error("❌ Error en consulta básica:", error.message);
+      console.error("Error en consulta básica:", error.message);
       return [];
     }
   },
@@ -132,7 +132,7 @@ const routeModel = {
     try {
       await client.query("BEGIN");
 
-      console.log("🛣️ Creando nueva ruta en la base de datos:", routeData);
+      console.log("Creando nueva ruta en la base de datos:", routeData);
 
       // Crear geometría LineString desde coordenadas
       let geometriaWKT = null;
@@ -178,7 +178,7 @@ const routeModel = {
           if (punto.coordenadas && punto.coordenadas.type === "Point") {
             const [lng, lat] = punto.coordenadas.coordinates;
 
-            // ✅ CORREGIDO: Usar solo las columnas que existen en la BD
+            // CORREGIDO: Usar solo las columnas que existen en la BD
             const puntoQuery = `
               INSERT INTO punto_ruta (
                 id_ruta,
@@ -210,7 +210,7 @@ const routeModel = {
 
       await client.query("COMMIT");
 
-      console.log("✅ Ruta creada exitosamente con ID:", newRoute.id);
+      console.log("Ruta creada exitosamente con ID:", newRoute.id);
 
       return {
         id: newRoute.id,
@@ -224,7 +224,7 @@ const routeModel = {
       };
     } catch (error) {
       await client.query("ROLLBACK");
-      console.error("❌ Error en routeModel.create:", error.message);
+      console.error("Error en routeModel.create:", error.message);
       throw error;
     } finally {
       client.release();
@@ -237,7 +237,7 @@ const routeModel = {
     try {
       await client.query("BEGIN");
 
-      console.log("✏️ Actualizando ruta ID:", id);
+      console.log("Actualizando ruta ID:", id);
 
       // Crear geometría LineString desde coordenadas
       let geometriaWKT = null;
@@ -291,7 +291,7 @@ const routeModel = {
           if (punto.coordenadas && punto.coordenadas.type === "Point") {
             const [lng, lat] = punto.coordenadas.coordinates;
 
-            // ✅ CORREGIDO: Usar solo las columnas que existen en la BD
+            // CORREGIDO: Usar solo las columnas que existen en la BD
             const puntoQuery = `
               INSERT INTO punto_ruta (
                 id_ruta,
@@ -323,7 +323,7 @@ const routeModel = {
 
       await client.query("COMMIT");
 
-      console.log("✅ Ruta actualizada exitosamente");
+      console.log("Ruta actualizada exitosamente");
 
       return {
         id: routeResult.rows[0].id,
@@ -337,7 +337,7 @@ const routeModel = {
       };
     } catch (error) {
       await client.query("ROLLBACK");
-      console.error("❌ Error en routeModel.update:", error.message);
+      console.error("Error en routeModel.update:", error.message);
       throw error;
     } finally {
       client.release();
@@ -350,7 +350,7 @@ const routeModel = {
     try {
       await client.query("BEGIN");
 
-      console.log("🗑️ Eliminando ruta ID:", id);
+      console.log("Eliminando ruta ID:", id);
 
       // Primero eliminar puntos de ruta (por la FK)
       await client.query("DELETE FROM punto_ruta WHERE id_ruta = $1", [id]);
@@ -370,7 +370,7 @@ const routeModel = {
 
       await client.query("COMMIT");
 
-      console.log("✅ Ruta eliminada:", deleteResult.rows[0]);
+      console.log("Ruta eliminada:", deleteResult.rows[0]);
 
       return {
         id: deleteResult.rows[0].id,
@@ -379,20 +379,20 @@ const routeModel = {
       };
     } catch (error) {
       await client.query("ROLLBACK");
-      console.error("❌ Error en routeModel.delete:", error.message);
+      console.error("Error en routeModel.delete:", error.message);
       throw error;
     } finally {
       client.release();
     }
   },
 
-   async createWithSharedNodes(routeData) {
+  async createWithSharedNodes(routeData) {
     const client = await pool.connect();
 
     try {
       await client.query("BEGIN");
 
-      console.log("🛣️ Creando ruta con nodos compartidos:", routeData);
+      console.log("Creando ruta con nodos compartidos:", routeData);
 
       // Crear geometría LineString
       let geometriaWKT = null;
@@ -434,30 +434,32 @@ const routeModel = {
 
             // Buscar o crear nodo
             const nodeResult = await RouteNodes.createOrReuseNode({
-              lng, lat, 
+              lng,
+              lat,
               nombre_punto: punto.nombre_punto,
-              tipo_punto: punto.tipo_punto
+              tipo_punto: punto.tipo_punto,
             });
 
             if (nodeResult.reutilizado) {
               // Reutilizar nodo existente
-              console.log(`🔄 Reutilizando nodo existente: ${nodeResult.nodo_existente.id}`);
-              
+              console.log(
+                `Reutilizando nodo existente: ${nodeResult.nodo_existente.id}`
+              );
+
               const reuseQuery = `
                 INSERT INTO punto_ruta (
                   id_ruta, id_punto, orden, tipo_punto, descripcion, nombre_punto
                 ) VALUES ($1, $2, $3, $4, $5, $6)
               `;
-              
+
               await client.query(reuseQuery, [
                 newRouteId,
                 nodeResult.nodo_existente.id,
                 punto.orden,
                 punto.tipo_punto,
                 punto.descripcion || "",
-                punto.nombre_punto || `Punto ${punto.orden}`
+                punto.nombre_punto || `Punto ${punto.orden}`,
               ]);
-              
             } else {
               // Crear nuevo nodo
               const puntoQuery = `
@@ -473,7 +475,9 @@ const routeModel = {
                 punto.orden,
                 punto.tipo_punto,
                 punto.descripcion || "",
-                punto.nombre_punto || punto.descripcion || `Punto ${punto.orden}`,
+                punto.nombre_punto ||
+                  punto.descripcion ||
+                  `Punto ${punto.orden}`,
                 `POINT(${lng} ${lat})`,
                 lat,
                 lng,
@@ -487,15 +491,17 @@ const routeModel = {
 
       await client.query("COMMIT");
 
-      console.log("✅ Ruta creada con nodos compartidos, ID:", newRouteId);
+      console.log("Ruta creada con nodos compartidos, ID:", newRouteId);
 
       // Obtener la ruta completa para retornar
       const completeRoute = await this.getById(newRouteId);
       return completeRoute;
-
     } catch (error) {
       await client.query("ROLLBACK");
-      console.error("❌ Error en routeModel.createWithSharedNodes:", error.message);
+      console.error(
+        "Error en routeModel.createWithSharedNodes:",
+        error.message
+      );
       throw error;
     } finally {
       client.release();
@@ -536,18 +542,18 @@ const routeModel = {
       `;
 
       const result = await pool.query(query, [routeId]);
-      
+
       if (result.rows.length === 0) return null;
-      
+
       const row = result.rows[0];
       let geometria = null;
-      
+
       try {
         if (row.geometria_geojson) {
           geometria = JSON.parse(row.geometria_geojson);
         }
       } catch (error) {
-        console.warn("❌ Error parseando geometría:", error);
+        console.warn("Error parseando geometría:", error);
       }
 
       return {
@@ -558,11 +564,10 @@ const routeModel = {
         tiempo_estimado: row.tiempo_estimado,
         activa: row.activa,
         geometria: geometria,
-        puntos_ruta: row.puntos_ruta || []
+        puntos_ruta: row.puntos_ruta || [],
       };
-      
     } catch (error) {
-      console.error("❌ Error en routeModel.getById:", error.message);
+      console.error("Error en routeModel.getById:", error.message);
       throw error;
     }
   },

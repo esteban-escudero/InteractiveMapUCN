@@ -40,7 +40,7 @@ const RouteList = ({
   };
 
   const handleRouteAction = (route, action) => {
-    console.log(`🛣️ ${action} ruta:`, route.nombre);
+    console.log(`${action} ruta:`, route.nombre);
     switch (action) {
       case "edit":
         if (onEditRoute) onEditRoute(route);
@@ -60,17 +60,21 @@ const RouteList = ({
     <div className="route-list-overlay">
       <div className="route-list-container">
         <div className="route-list-header">
-          <h3>🗺️ Gestión de Rutas</h3>
+          <h3>
+            <span className="material-icons">map</span>
+            Gestión de Rutas
+          </h3>
           <button className="close-btn" onClick={onClose}>
-            ×
+            <span className="material-icons">close</span>
           </button>
         </div>
 
         <div className="route-list-controls">
           <div className="search-box">
+            <span className="material-icons">search</span>
             <input
               type="text"
-              placeholder="🔍 Buscar rutas..."
+              placeholder="Buscar rutas..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -81,34 +85,40 @@ const RouteList = ({
             <button
               className={`filter-btn ${filter === "all" ? "active" : ""}`}
               onClick={() => setFilter("all")}>
+              <span className="material-icons">all_inclusive</span>
               Todas
             </button>
             <button
               className={`filter-btn ${filter === "accesible" ? "active" : ""}`}
               onClick={() => setFilter("accesible")}>
-              ♿ Accesibles
+              <span className="material-icons">accessible</span>
+              Accesibles
             </button>
             <button
               className={`filter-btn ${
                 filter === "emergencia" ? "active" : ""
               }`}
               onClick={() => setFilter("emergencia")}>
-              🚨 Emergencia
+              <span className="material-icons">emergency</span>
+              Emergencia
             </button>
             <button
               className={`filter-btn ${filter === "peatonal" ? "active" : ""}`}
               onClick={() => setFilter("peatonal")}>
-              🚶 Peatonales
+              <span className="material-icons">directions_walk</span>
+              Peatonales
             </button>
             <button
               className={`filter-btn ${filter === "rapida" ? "active" : ""}`}
               onClick={() => setFilter("rapida")}>
-              ⚡ Rápidas
+              <span className="material-icons">bolt</span>
+              Rápidas
             </button>
             <button
               className={`filter-btn ${filter === "vehicular" ? "active" : ""}`}
               onClick={() => setFilter("vehicular")}>
-              🚗 Vehiculares
+              <span className="material-icons">directions_car</span>
+              Vehiculares
             </button>
           </div>
         </div>
@@ -118,13 +128,17 @@ const RouteList = ({
             <div className="empty-state">
               {routes.length === 0 ? (
                 <>
-                  <div className="empty-icon">🛣️</div>
+                  <div className="empty-icon">
+                    <span className="material-icons">route</span>
+                  </div>
                   <h4>No hay rutas creadas</h4>
                   <p>Crea tu primera ruta para comenzar</p>
                 </>
               ) : (
                 <>
-                  <div className="empty-icon">🔍</div>
+                  <div className="empty-icon">
+                    <span className="material-icons">search_off</span>
+                  </div>
                   <h4>No se encontraron rutas</h4>
                   <p>Intenta con otros filtros o términos de búsqueda</p>
                 </>
@@ -169,19 +183,22 @@ const RouteList = ({
                         className="action-btn select-btn"
                         onClick={() => handleRouteAction(route, "select")}
                         title="Seleccionar ruta en el mapa">
-                        🧭 Seleccionar
+                        <span className="material-icons">my_location</span>
+                        Seleccionar
                       </button>
                       <button
                         className="action-btn edit-btn"
                         onClick={() => handleRouteAction(route, "edit")}
                         title="Editar ruta">
-                        ✏️ Editar
+                        <span className="material-icons">edit</span>
+                        Editar
                       </button>
                       <button
                         className="action-btn delete-btn"
                         onClick={() => handleRouteAction(route, "delete")}
                         title="Eliminar ruta">
-                        🗑️ Eliminar
+                        <span className="material-icons">delete</span>
+                        Eliminar
                       </button>
                     </div>
                   </div>

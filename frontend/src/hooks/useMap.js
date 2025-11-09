@@ -21,7 +21,7 @@ export const useMap = () => {
 
     // VERIFICAR SI EL CONTENEDOR YA TIENE UN MAPA (más robusto)
     if (mapRef.current._leaflet_id) {
-      console.log("⚠️ Contenedor ya tiene un mapa, limpiando primero");
+      console.log("Contenedor ya tiene un mapa, limpiando primero");
       // Limpiar cualquier instancia previa de Leaflet
       const container = mapRef.current;
       container._leaflet_id = null;
@@ -34,12 +34,12 @@ export const useMap = () => {
       const map = L.map(mapRef.current, {
         minZoom: MAP_ZOOM_LIMITS.min,
         maxZoom: MAP_ZOOM_LIMITS.max,
-        zoomControl: true, // ✅ Activar controles de zoom
+        zoomControl: true, // Activar controles de zoom
         attributionControl: true,
-        maxBoundsViscosity: 0.8, // ✅ Permite desplazamiento suave en bordes
-        zoomSnap: 0.5, // ✅ Zooms intermedios más suaves
-        zoomDelta: 0.5, // ✅ Control fino de zoom
-        wheelPxPerZoomLevel: 80, // ✅ Control suave con rueda del mouse
+        maxBoundsViscosity: 0.8, // Permite desplazamiento suave en bordes
+        zoomSnap: 0.5, // Zooms intermedios más suaves
+        zoomDelta: 0.5, // Control fino de zoom
+        wheelPxPerZoomLevel: 80, // Control suave con rueda del mouse
       });
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -57,13 +57,13 @@ export const useMap = () => {
 
       map.setMaxBounds(boundsLatLng);
 
-      console.log("✅ Vista inicial establecida:", {
+      console.log("Vista inicial establecida:", {
         bounds: bounds,
         center: map.getCenter(),
         zoom: map.getZoom(),
       });
 
-      console.log("✅ Vista inicial establecida:", {
+      console.log("Vista inicial establecida:", {
         bounds: bounds,
         center: map.getCenter(),
         zoom: map.getZoom(),
@@ -71,8 +71,8 @@ export const useMap = () => {
 
       // EVENTO PARA DEBUG
       map.on("load", function () {
-        console.log("✅ Mapa cargado completamente");
-        console.log("📊 Estado inicial:", {
+        console.log("Mapa cargado completamente");
+        console.log("Estado inicial:", {
           center: map.getCenter(),
           zoom: map.getZoom(),
           bounds: map.getBounds(),
@@ -87,7 +87,7 @@ export const useMap = () => {
         if (map && !map._destroyed) {
           try {
             map.invalidateSize(true);
-            console.log("🔄 Mapa redimensionado");
+            console.log("Mapa redimensionado");
           } catch (sizeError) {
             console.error("Error en invalidateSize:", sizeError);
           }
@@ -96,7 +96,7 @@ export const useMap = () => {
 
       return map;
     } catch (error) {
-      console.error("❌ Error crítico inicializando mapa:", error);
+      console.error("Error crítico inicializando mapa:", error);
 
       // LIMPIEZA COMPLETA EN CASO DE ERROR
       if (mapRef.current) {

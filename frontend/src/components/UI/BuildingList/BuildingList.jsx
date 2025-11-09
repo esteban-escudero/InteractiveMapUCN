@@ -1,4 +1,3 @@
-// components/UI/BuildingList/BuildingList.jsx
 import React, { useState } from "react";
 import { useNotification } from "../../../hooks/useNotification";
 import Notification from "../Notification/Notification";
@@ -17,16 +16,13 @@ function BuildingList({
   const [deletingId, setDeletingId] = useState(null);
   const [expandedBuilding, setExpandedBuilding] = useState(null);
   const [deletingRoomId, setDeletingRoomId] = useState(null);
-  
-  // 🆕 HOOK GLOBAL DE NOTIFICACIONES
-  const { notification, showNotification, hideNotification } = useNotification();
+  const { notification, showNotification, hideNotification } =
+    useNotification();
 
   const handleDelete = async (building) => {
     const buildingId = building.id || building._id || building.id_edificio;
     const buildingName = building.nombre;
 
-    // ✅ ELIMINACIÓN DIRECTA - YA NO HAY CONFIRMACIÓN AQUÍ
-    // LA CONFIRMACIÓN SE MANEJA EN Map.js CON EL CONFIRM DIALOG
     setDeletingId(buildingId);
 
     try {
@@ -57,15 +53,13 @@ function BuildingList({
     }
   };
 
-  // ✅ FUNCIÓN PARA ELIMINAR SALAS
+  // FUNCIÓN PARA ELIMINAR SALAS
   const handleDeleteRoom = async (room, building) => {
     setDeletingRoomId(room.id);
 
     try {
       if (onDeleteRoom) {
         await onDeleteRoom(room.id);
-        // Las notificaciones se manejan en el componente padre
-
         if (onReload) {
           await onReload();
         }
@@ -79,7 +73,7 @@ function BuildingList({
 
   return (
     <div className="building-list-overlay">
-      {/* 🆕 NOTIFICACIÓN GLOBAL */}
+      {/* NOTIFICACIÓN GLOBAL */}
       {notification.show && (
         <Notification
           message={notification.message}
@@ -92,16 +86,22 @@ function BuildingList({
 
       <div className="building-list-modal">
         <div className="building-list-header">
-          <h2>📝 Gestionar Edificios</h2>
+          <h2>
+            <span className="material-icons">apartment</span>
+            Gestionar Edificios
+          </h2>
           <button className="close-btn" onClick={onClose}>
-            ×
+            <span className="material-icons">close</span>
           </button>
         </div>
 
         <div className="building-list-content">
           {buildings.length === 0 ? (
             <div className="empty-state">
-              <p>🏗️ No hay edificios registrados</p>
+              <p>
+                <span className="material-icons">apartment</span>
+                No hay edificios registrados
+              </p>
               <small>
                 Crea el primer edificio usando el botón "Agregar Edificio"
               </small>
@@ -124,9 +124,7 @@ function BuildingList({
                         <h3>{building.nombre}</h3>
                         <button
                           className="expand-btn"
-                          onClick={() =>
-                            toggleBuildingExpansion(buildingId)
-                          }>
+                          onClick={() => toggleBuildingExpansion(buildingId)}>
                           {isExpanded ? "▲" : "▼"}
                         </button>
                       </div>
@@ -148,11 +146,15 @@ function BuildingList({
                     {isExpanded && (
                       <div className="rooms-section">
                         <div className="rooms-header">
-                          <h4>🏢 Salas del Edificio ({salas.length})</h4>
+                          <h4>
+                            <span className="material-icons">meeting_room</span>
+                            Salas del Edificio ({salas.length})
+                          </h4>
                           <button
                             className="add-room-btn"
                             onClick={() => handleCreateRooms(building)}>
-                            + Agregar Sala
+                            <span className="material-icons">add</span>
+                            Agregar Sala
                           </button>
                         </div>
 
@@ -173,7 +175,13 @@ function BuildingList({
                                     <strong>{room.nombre_sala}</strong>
                                     <span className="room-details">
                                       Piso {room.piso} • {room.tipo_sala}
-                                      {room.accesible_silla_ruedas && " ♿"}
+                                      {room.accesible_silla_ruedas && (
+                                        <span
+                                          className="material-icons"
+                                          title="Accesible para silla de ruedas">
+                                          accessible
+                                        </span>
+                                      )}
                                     </span>
                                     <span className="room-id">
                                       ID: {room.id}
@@ -185,7 +193,9 @@ function BuildingList({
                                       onClick={() => handleEditRoom(room)}
                                       title="Editar sala"
                                       disabled={isRoomDeleting}>
-                                      ✏️
+                                      <span className="material-icons">
+                                        edit
+                                      </span>
                                     </button>
                                     <button
                                       className="delete-room-btn"
@@ -194,7 +204,11 @@ function BuildingList({
                                       }
                                       title="Eliminar sala"
                                       disabled={isRoomDeleting}>
-                                      {isRoomDeleting ? "⏳" : "🗑️"}
+                                      <span className="material-icons">
+                                        {isRoomDeleting
+                                          ? "hourglass_empty"
+                                          : "delete"}
+                                      </span>
                                     </button>
                                   </div>
                                 </div>
@@ -210,7 +224,8 @@ function BuildingList({
                         className="edit-btn"
                         onClick={() => onEditBuilding(building)}
                         disabled={isDeleting}>
-                        ✏️ Editar
+                        <span className="material-icons">edit</span>
+                        Editar
                       </button>
                       <button
                         className="manage-rooms-btn"
@@ -221,7 +236,7 @@ function BuildingList({
                         className="delete-btn"
                         onClick={() => handleDelete(building)}
                         disabled={isDeleting}>
-                        {isDeleting ? "🗑️ Eliminando..." : "🗑️ Eliminar"}
+                        {isDeleting ? "Eliminando..." : "Eliminar"}
                       </button>
                     </div>
                   </div>
@@ -234,7 +249,7 @@ function BuildingList({
         <div className="building-list-footer">
           <p>Total: {buildings.length} edificio(s)</p>
           <small style={{ color: "#e74c3c", marginTop: "5px" }}>
-            ⚠️ La eliminación es permanente e irreversible
+            La eliminación es permanente e irreversible
           </small>
         </div>
       </div>

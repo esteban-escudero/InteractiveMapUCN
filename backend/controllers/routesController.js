@@ -3,24 +3,24 @@ const routeModel = require("../models/routeModel");
 const routesController = {
   async getAllRoutes(req, res) {
     try {
-      console.log("📥 Solicitud para obtener todas las rutas...");
+      console.log("Solicitud para obtener todas las rutas...");
       const routes = await routeModel.getAll();
 
-      console.log("📦 Rutas desde modelo:", routes);
-      console.log("🔍 Tipo de rutas:", typeof routes);
-      console.log("🔍 Es array?", Array.isArray(routes));
+      console.log("Rutas desde modelo:", routes);
+      console.log("Tipo de rutas:", typeof routes);
+      console.log("Es array?", Array.isArray(routes));
 
       let totalPuntos = 0;
       if (Array.isArray(routes)) {
         routes.forEach((route) => {
           const puntosCount = route.puntos_ruta ? route.puntos_ruta.length : 0;
           totalPuntos += puntosCount;
-          console.log(`🛣️ "${route.nombre}": ${puntosCount} puntos`);
+          console.log(`"${route.nombre}": ${puntosCount} puntos`);
         });
       }
 
       console.log(
-        `📊 TOTAL: ${
+        `TOTAL: ${
           Array.isArray(routes) ? routes.length : 0
         } rutas, ${totalPuntos} puntos de ruta`
       );
@@ -32,7 +32,7 @@ const routesController = {
         totalPuntos: totalPuntos,
       });
     } catch (error) {
-      console.error("❌ Error obteniendo rutas:", error);
+      console.error("Error obteniendo rutas:", error);
       res.status(500).json({
         success: false,
         message: "Error interno del servidor: " + error.message,
@@ -51,7 +51,7 @@ const routesController = {
         puntos_ruta,
       } = req.body;
 
-      console.log("📥 Datos recibidos para crear ruta:", req.body);
+      console.log("Datos recibidos para crear ruta:", req.body);
 
       if (!nombre || !geometria) {
         return res.status(400).json({
@@ -60,11 +60,11 @@ const routesController = {
         });
       }
 
-      // ✅ CORREGIDO: Limpiar datos antes de enviar al modelo
+      // CORREGIDO: Limpiar datos antes de enviar al modelo
       const cleanPuntosRuta = (puntos_ruta || []).map((punto) => ({
         ...punto,
-        id_edificio: punto.id_edificio || null, // Asegurar que sea null si no existe
-        id_sala: punto.id_sala || null, // Asegurar que sea null si no existe
+        id_edificio: punto.id_edificio || null,
+        id_sala: punto.id_sala || null,
       }));
 
       const routeData = {
@@ -86,7 +86,7 @@ const routesController = {
         data: newRoute,
       });
     } catch (error) {
-      console.error("❌ Error creando ruta:", error);
+      console.error("Error creando ruta:", error);
       res.status(500).json({
         success: false,
         message:
@@ -107,7 +107,7 @@ const routesController = {
         puntos_ruta,
       } = req.body;
 
-      console.log(`✏️ Actualizando ruta ID: ${id}`, req.body);
+      console.log(`Actualizando ruta ID: ${id}`, req.body);
 
       if (!nombre || !geometria) {
         return res.status(400).json({
@@ -116,7 +116,6 @@ const routesController = {
         });
       }
 
-      // ✅ CORREGIDO: Limpiar datos antes de enviar al modelo
       const cleanPuntosRuta = (puntos_ruta || []).map((punto) => ({
         ...punto,
         id_edificio: punto.id_edificio || null,
@@ -147,7 +146,7 @@ const routesController = {
         data: updatedRoute,
       });
     } catch (error) {
-      console.error("❌ Error actualizando ruta:", error);
+      console.error("Error actualizando ruta:", error);
       res.status(500).json({
         success: false,
         message:
@@ -160,7 +159,7 @@ const routesController = {
     try {
       const { id } = req.params;
 
-      console.log(`🗑️ Solicitando ELIMINACIÓN de ruta ID: ${id}`);
+      console.log(`Solicitando ELIMINACIÓN de ruta ID: ${id}`);
 
       if (!id) {
         return res.status(400).json({
@@ -180,7 +179,7 @@ const routesController = {
         },
       });
     } catch (error) {
-      console.error("❌ Error eliminando ruta:", error);
+      console.error("Error eliminando ruta:", error);
       res.status(500).json({
         success: false,
         message:
@@ -193,7 +192,7 @@ const routesController = {
     try {
       const { origen, destino, tipo_ruta } = req.body;
 
-      console.log("🧮 Calculando ruta desde:", origen, "hasta:", destino);
+      console.log("Calculando ruta desde:", origen, "hasta:", destino);
 
       if (!origen || !destino) {
         return res.status(400).json({
@@ -246,7 +245,7 @@ const routesController = {
         data: rutaCalculada,
       });
     } catch (error) {
-      console.error("❌ Error calculando ruta:", error);
+      console.error("Error calculando ruta:", error);
       res.status(500).json({
         success: false,
         message:

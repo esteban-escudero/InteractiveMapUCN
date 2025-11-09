@@ -1,4 +1,3 @@
-// components/UI/ConfirmDialog/ConfirmDialog.jsx
 import React from "react";
 import "./ConfirmDialog.css";
 
@@ -10,20 +9,20 @@ const ConfirmDialog = ({
   cancelText = "Cancelar",
   onConfirm,
   onCancel,
-  type = "warning"
+  type = "warning",
 }) => {
   if (!isOpen) return null;
 
   const getIcon = () => {
     switch (type) {
       case "warning":
-        return "⚠️";
+        return "warning";
       case "danger":
-        return "🚨";
+        return "error";
       case "info":
-        return "ℹ️";
+        return "info";
       default:
-        return "❓";
+        return "help";
     }
   };
 
@@ -31,25 +30,23 @@ const ConfirmDialog = ({
     <div className="confirm-dialog-overlay">
       <div className="confirm-dialog">
         <div className="confirm-dialog-header">
-          <span className="confirm-dialog-icon">{getIcon()}</span>
+          <span className="material-icons confirm-dialog-icon">
+            {getIcon()}
+          </span>
           <h3>{title}</h3>
         </div>
-        
+
         <div className="confirm-dialog-body">
           <p>{message}</p>
         </div>
 
         <div className="confirm-dialog-actions">
-          <button 
-            className="confirm-dialog-cancel"
-            onClick={onCancel}
-          >
+          <button className="confirm-dialog-cancel" onClick={onCancel}>
             {cancelText}
           </button>
-          <button 
+          <button
             className={`confirm-dialog-confirm confirm-dialog-${type}`}
-            onClick={onConfirm}
-          >
+            onClick={onConfirm}>
             {confirmText}
           </button>
         </div>

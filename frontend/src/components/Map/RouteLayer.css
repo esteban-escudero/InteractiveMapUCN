@@ -68,7 +68,7 @@
   font-size: 13px;
 }
 
-/* ✅ ESTILOS MEJORADOS PARA LÍNEAS DE RUTA CON TURF */
+/* ESTILOS MEJORADOS PARA LÍNEAS DE RUTA CON TURF */
 .route-line {
   cursor: pointer;
   transition: all 0.3s ease;
@@ -89,7 +89,7 @@
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
-/* ✅ ESTILOS PARA PUNTOS DE ANÁLISIS */
+/* ESTILOS PARA PUNTOS DE ANÁLISIS */
 .route-analysis-point {
   cursor: help;
 }
@@ -99,17 +99,23 @@
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
-/* ✅ ESTILOS PARA PUNTOS INTERMEDIOS NUMERADOS */
+/* ESTILOS PARA PUNTOS INTERMEDIOS NUMERADOS */
 .route-point-icon.intermedio {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 }
 
-/* ✅ INDICADORES DE ESTADO PARA RUTAS LARGAS/CORTAS */
+/* INDICADORES DE ESTADO PARA RUTAS LARGAS/CORTAS */
 .route-long {
   stroke-dasharray: 10, 5;
 }
@@ -118,16 +124,16 @@
   stroke-dasharray: 5, 2;
 }
 
-/* ✅ RESPONSIVE MEJORADO */
+/* RESPONSIVE MEJORADO */
 @media (max-width: 768px) {
   .route-popup {
     min-width: 250px;
   }
-  
+
   .route-point-popup {
     min-width: 200px;
   }
-  
+
   .route-info p {
     font-size: 13px;
   }
