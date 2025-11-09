@@ -1,8 +1,8 @@
 // src/components/RouteNetwork/RouteNetwork.js
 import React, { useState, useEffect } from 'react';
-import { routeService } from '../../services/routeService'; // ✅ CORRECTO
-import { SpatialUtils } from '../../utils/spatialUtils'; // ✅ CORRECTO
-import './RouteNetwork.css'; // ✅ Este archivo no existe - vamos a crearlo
+import { routeService } from '../../services/routeService'; //  CORRECTO
+import { SpatialUtils } from '../../utils/spatialUtils'; //  CORRECTO
+import './RouteNetwork.css'; //  Este archivo no existe - vamos a crearlo
 
 const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
   const [sharedNodes, setSharedNodes] = useState([]);
@@ -11,20 +11,20 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  // ✅ CARGAR NODOS COMPARTIDOS DESDE FRONTEND (sin backend por ahora)
+  //  CARGAR NODOS COMPARTIDOS DESDE FRONTEND (sin backend por ahora)
   const loadSharedNodes = async () => {
     setLoading(true);
     try {
       console.log('🔗 Calculando nodos compartidos desde frontend...');
       await calculateSharedNodesFromFrontend();
     } catch (error) {
-      console.error('❌ Error cargando nodos compartidos:', error);
+      console.error(' Error cargando nodos compartidos:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ CALCULAR NODOS COMPARTIDOS DESDE RUTAS EXISTENTES
+  //  CALCULAR NODOS COMPARTIDOS DESDE RUTAS EXISTENTES
   const calculateSharedNodesFromFrontend = async () => {
     try {
       const routesResponse = await routeService.getAllRoutes();
@@ -97,12 +97,12 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
       console.log(`📍 ${sharedNodesArray.length} nodos compartidos calculados`);
       
     } catch (error) {
-      console.error('❌ Error calculando nodos compartidos:', error);
+      console.error(' Error calculando nodos compartidos:', error);
       setSharedNodes([]);
     }
   };
 
-  // ✅ ANALIZAR RED
+  //  ANALIZAR RED
   const analyzeNetwork = () => {
     if (sharedNodes.length === 0) {
       setNetworkAnalysis(null);
@@ -152,7 +152,7 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
     console.log('📊 Análisis de red:', analysis);
   };
 
-  // ✅ RENDERIZAR NODOS EN EL MAPA
+  //  RENDERIZAR NODOS EN EL MAPA
   const renderNodesOnMap = () => {
     if (!mapInstance || sharedNodes.length === 0) return;
     
@@ -230,14 +230,14 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
         node.marker = marker;
         
       } catch (error) {
-        console.error('❌ Error renderizando nodo:', error);
+        console.error(' Error renderizando nodo:', error);
       }
     });
     
     console.log(`🗺️ ${sharedNodes.length} nodos renderizados en el mapa`);
   };
 
-  // ✅ OBTENER COLOR SEGÚN NÚMERO DE RUTAS
+  //  OBTENER COLOR SEGÚN NÚMERO DE RUTAS
   const getNodeColor = (numRoutes) => {
     const colors = {
       2: '#3498db',  // Azul para 2 rutas
@@ -248,7 +248,7 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
     return colors[numRoutes] || colors[5] || '#27ae60';
   };
 
-  // ✅ LIMPIAR NODOS DEL MAPA
+  //  LIMPIAR NODOS DEL MAPA
   const clearNodesFromMap = () => {
     if (!mapInstance) return;
     
@@ -259,7 +259,7 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
     });
   };
 
-  // ✅ MANEJAR CLIC EN BOTONES DEL POPUP
+  //  MANEJAR CLIC EN BOTONES DEL POPUP
   useEffect(() => {
     if (!mapInstance) return;
 
@@ -295,7 +295,7 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
     };
   }, [mapInstance, sharedNodes, onNodeClick]);
 
-  // ✅ EFECTOS
+  //  EFECTOS
   useEffect(() => {
     if (visible) {
       loadSharedNodes();

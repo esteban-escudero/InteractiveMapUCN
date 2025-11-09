@@ -22,8 +22,10 @@ import RouteLayer from "./RouteLayer";
 import RouteList from "../UI/RouteList/RouteList";
 import { SpatialUtils } from "../../utils/spatialUtils";
 import RouteNetwork from '../RouteNetwork/RouteNetwork';
-import { useNotification } from "../../hooks/useNotification"; // ← CORRECTO
-import Notification from "../UI/Notification/Notification"; // ← CORREGIDO
+import { useNotification } from "../../hooks/useNotification";
+import Notification from "../UI/Notification/Notification";
+import { useConfirm } from "../../hooks/useConfirm"; 
+import ConfirmDialog from "../UI/ConfirmDialog/ConfirmDialog"; 
 
 // Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -82,7 +84,9 @@ function Map() {
   const [destinationFilter, setDestinationFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
 
+  // 🆕 HOOKS GLOBALES
   const { notification, showNotification, hideNotification } = useNotification();
+  const { confirmState, showConfirm, hideConfirm, handleConfirm } = useConfirm();
 
   // Hook para edificios
   const {
@@ -483,21 +487,38 @@ function Map() {
   };
 
   const handleDeleteRoute = async (route) => {
-      try {
-        await deleteRoute(route.id);
-        showNotification("✅ Ruta eliminada correctamente", "success");
-        if (selectedRoute && selectedRoute.id === route.id) {
-          setSelectedRoute(null);
+    showConfirm(
+      "🗑️ Eliminar Ruta",
+      `¿Estás seguro de eliminar la ruta "${route.nombre}"?\n\n` +
+      `Esta acción no se puede deshacer.`,
+      async () => {
+        try {
+          await deleteRoute(route.id);
+          showNotification("✅ Ruta eliminada correctamente", "success");
+          if (selectedRoute && selectedRoute.id === route.id) {
+            setSelectedRoute(null);
+          }
+        } catch (err) {
+          console.error("❌ Error al eliminar ruta:", err);
+          showNotification("❌ Error al eliminar ruta", "error");
         }
-      } catch (err) {
-        console.error("❌ Error al eliminar ruta:", err);
-        showNotification("❌ Error al eliminar ruta", "error");
+      },
+      {
+        type: "warning",
+        confirmText: "Eliminar Ruta",
+        cancelText: "Cancelar"
       }
-    
+    );
   };
 
   const handleCloseRouteList = () => {
     setShowRouteList(false);
+  };
+
+  // 🆕 FUNCIÓN QUE FALTABA
+  const handleCloseBuildingList = () => {
+    setShowBuildingList(false);
+    console.log("🏢 Cerrando lista de edificios");
   };
 
   const toggleCoordinateDetection = useCallback(() => {
@@ -680,19 +701,28 @@ function Map() {
     setCapturedCoords(null);
   };
 
-  const handleCloseBuildingList = () => setShowBuildingList(false);
-// Map.js - VERSIÓN CORREGIDA:
-const handleDeleteBuilding = async (b) => {
-  // ✅ ELIMINAR EL CONFIRM - EJECUTAR DIRECTAMENTE
-  try {
-    const id = b.id || b._id || b.id_edificio;
-    await deleteBuilding(id);
-    showNotification("✅ Edificio eliminado correctamente", "success");
-  } catch (err) {
-    console.error("❌ Error al eliminar edificio:", err);
-    showNotification("❌ Error al eliminar edificio", "error");
-  }
-};
+  const handleDeleteBuilding = async (b) => {
+    showConfirm(
+      "⚠️ Eliminar Edificio",
+      `¿Estás seguro de eliminar el edificio "${b.nombre}"?\n\n` +
+      `Esta acción no se puede deshacer.`,
+      async () => {
+        try {
+          const id = b.id || b._id || b.id_edificio;
+          await deleteBuilding(id);
+          showNotification("✅ Edificio eliminado correctamente", "success");
+        } catch (err) {
+          console.error("❌ Error al eliminar edificio:", err);
+          showNotification("❌ Error al eliminar edificio", "error");
+        }
+      },
+      {
+        type: "danger",
+        confirmText: "Eliminar",
+        cancelText: "Cancelar"
+      }
+    );
+  };
 
   // Cargar datos de GeoServer cuando el mapa esté listo
   useEffect(() => {
@@ -705,9 +735,18 @@ const handleDeleteBuilding = async (b) => {
   }, [isMapReady, mapInstance, geoServerStatus, loadWFSData]);
 
   const handleLogout = () => {
-    if (window.confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-      showNotification("👋 Sesión cerrada correctamente", "success");
-    }
+    showConfirm(
+      "👋 Cerrar Sesión",
+      "¿Estás seguro de que quieres cerrar sesión?",
+      () => {
+        showNotification("👋 Sesión cerrada correctamente", "success");
+      },
+      {
+        type: "info",
+        confirmText: "Cerrar Sesión",
+        cancelText: "Cancelar"
+      }
+    );
   };
 
   const handleSyncData = async () => {
@@ -775,7 +814,7 @@ const handleDeleteBuilding = async (b) => {
         filteredBuildings={filteredBuildings}
       />
 
-       {/* 🆕 REEMPLAZAR LA NOTIFICACIÓN INLINE POR EL COMPONENTE */}
+      {/* 🆕 NOTIFICACIÓN GLOBAL */}
       {notification.show && (
         <Notification
           message={notification.message}
@@ -785,6 +824,18 @@ const handleDeleteBuilding = async (b) => {
           position="top-right"
         />
       )}
+
+      {/* 🆕 CONFIRM DIALOG GLOBAL */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmText={confirmState.confirmText}
+        cancelText={confirmState.cancelText}
+        type={confirmState.type}
+        onConfirm={handleConfirm}
+        onCancel={hideConfirm}
+      />
 
       {/* BUILDINGFORM */}
       <BuildingForm

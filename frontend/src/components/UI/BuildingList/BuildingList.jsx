@@ -18,42 +18,22 @@ function BuildingList({
   const [expandedBuilding, setExpandedBuilding] = useState(null);
   const [deletingRoomId, setDeletingRoomId] = useState(null);
   
-  // 🆕 HOOK GLOBAL DE NOTIFICACIONES - REEMPLAZA EL ESTADO LOCAL
-   const { notification, showNotification, hideNotification } = useNotification();
+  // 🆕 HOOK GLOBAL DE NOTIFICACIONES
+  const { notification, showNotification, hideNotification } = useNotification();
 
   const handleDelete = async (building) => {
     const buildingId = building.id || building._id || building.id_edificio;
     const buildingName = building.nombre;
 
-    /*
-    if (
-      !window.confirm(
-        `⚠️ ¿ESTÁS SEGURO DE QUE QUIERES ELIMINAR PERMANENTEMENTE?\n\n` +
-          `Edificio: ${buildingName}\n` +
-          `ID: ${buildingId}\n\n` +
-          `🚨 ESTA ACCIÓN NO SE PUEDE DESHACER 🚨\n\n` +
-          `Escribe "ELIMINAR" para confirmar:`
-      )
-    ) {
-      return;
-    }
-
-    const userInput = prompt(
-      `Para confirmar la eliminación permanente de "${buildingName}", escribe ELIMINAR:`
-    );
-
-    if (userInput !== "ELIMINAR") {
-      showNotification('❌ Eliminación cancelada. No se escribió "ELIMINAR" correctamente.', "warning");
-      return;
-    }*/
-
+    // ✅ ELIMINACIÓN DIRECTA - YA NO HAY CONFIRMACIÓN AQUÍ
+    // LA CONFIRMACIÓN SE MANEJA EN Map.js CON EL CONFIRM DIALOG
     setDeletingId(buildingId);
 
     try {
       await onDeleteBuilding(building);
-      showNotification(`✅ Edificio "${buildingName}" eliminado permanentemente`, "success");
+      // Las notificaciones de éxito/error se manejan en Map.js
     } catch (error) {
-      showNotification(`❌ Error al eliminar el edificio: ${error.message}`, "error");
+      // Los errores se manejan en Map.js
     } finally {
       setDeletingId(null);
     }
@@ -67,55 +47,39 @@ function BuildingList({
     if (onCreateRooms) {
       onCreateRooms(building);
     }
-    onClose(); // Cerrar BuildingList al abrir RoomManagement
+    onClose();
   };
 
   const handleEditRoom = (room) => {
     if (onEditRoom) {
       onEditRoom(room);
-      onClose(); // Cerrar BuildingList al abrir RoomManagement
+      onClose();
     }
   };
 
-  /*
-  // ✅ FUNCIÓN CORREGIDA PARA ELIMINAR SALAS CON NOTIFICACIONES
+  // ✅ FUNCIÓN PARA ELIMINAR SALAS
   const handleDeleteRoom = async (room, building) => {
-    const confirmDelete = window.confirm(
-      `¿Estás seguro de que quieres eliminar la sala "${room.nombre_sala}"?\n\n` +
-        `Edificio: ${building.nombre}\n` +
-        `Piso: ${room.piso}\n` +
-        `Tipo: ${room.tipo_sala}\n\n` +
-        `Esta acción no se puede deshacer.`
-    );
-
-    if (!confirmDelete) {
-      return;
-    }
-
     setDeletingRoomId(room.id);
 
     try {
       if (onDeleteRoom) {
         await onDeleteRoom(room.id);
-        showNotification(`✅ Sala "${room.nombre_sala}" eliminada exitosamente`, "success");
+        // Las notificaciones se manejan en el componente padre
 
-        // Recargar los datos si se proporciona la función
         if (onReload) {
           await onReload();
         }
-      } else {
-        showNotification("❌ Función de eliminación de salas no disponible", "error");
       }
     } catch (error) {
-      showNotification(`❌ Error al eliminar la sala: ${error.message}`, "error");
+      // Los errores se manejan en el componente padre
     } finally {
       setDeletingRoomId(null);
     }
-  };*/
+  };
 
   return (
     <div className="building-list-overlay">
-      {/* 🆕 COMPONENTE DE NOTIFICACIÓN GLOBAL */}
+      {/* 🆕 NOTIFICACIÓN GLOBAL */}
       {notification.show && (
         <Notification
           message={notification.message}
