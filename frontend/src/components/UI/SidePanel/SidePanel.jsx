@@ -10,9 +10,6 @@ const SidePanel = ({
   onManageBuildings,
   onAddRoute,
   onManageRoutes,
-  routesCount = 0,
-  onToggleRouteNetwork,
-  routeNetworkActive,
   originFilter,
   destinationFilter,
   categoryFilter,
@@ -21,7 +18,6 @@ const SidePanel = ({
   onCategoryFilterChange,
   onClearFilters,
   filteredBuildings = [],
-  featuresCount = 0
 }) => {
   const [activeMenu, setActiveMenu] = useState(null);
 
@@ -152,94 +148,100 @@ const SidePanel = ({
       </div>
 
       {/* SECCIÓN DE FILTROS */}
-      <div className="filters-section">
-        <h4>🎯 Filtros del Mapa</h4>
-        
-        {/* FILTRO POR CATEGORÍA */}
-       
+     {/* DROPDOWN PARA FILTROS DEL MAPA */}
+        <div className={`filters-dropdown ${activeMenu === "Filtros" ? "active" : ""}`}>
+          <button
+            className="filters-toggle"
+            onClick={() => toggleMenu("Filtros")}>
+            🎯 Filtros del Mapa {activeMenu === "Filtros" ? "▲" : "▼"}
+          </button>
+          {activeMenu === "Filtros" && (
+            <div className="filters-content">
+              {/* FILTRO POR ORIGEN */}
+              <div className="filter-group">
+                <label>🔍 Origen:</label>
+                <select
+                  value={originFilter}
+                  onChange={onOriginFilterChange}
+                  className="filter-select"
+                >
+                  <option value="">Seleccionar origen</option>
+                  {filteredBuildings
+                    .filter((building, index, self) => 
+                      self.findIndex(b => b.nombre === building.nombre) === index
+                    )
+                    .map(building => (
+                      <option key={`origin-${building.id || building._id}`} value={building.nombre}>
+                        {building.nombre || 'Sin nombre'}
+                      </option>
+                    ))
+                  }
+                </select>
+              </div>
 
-        {/* FILTRO POR ORIGEN */}
-        <div className="filter-group">
-          <label>🔍 Origen:</label>
-          <select
-            value={originFilter}
-            onChange={onOriginFilterChange}
-            className="filter-select"
-          >
-            <option value="">Seleccionar origen</option>
-            {filteredBuildings
-              .filter((building, index, self) => 
-                self.findIndex(b => b.nombre === building.nombre) === index
-              )
-              .map(building => (
-                <option key={`origin-${building.id || building._id}`} value={building.nombre}>
-                  {building.nombre || 'Sin nombre'}
-                </option>
-              ))
-            }
-          </select>
+              {/* FILTRO POR DESTINO */}
+              <div className="filter-group">
+                <label>🔍 Destino:</label>
+                <select
+                  value={destinationFilter}
+                  onChange={onDestinationFilterChange}
+                  className="filter-select"
+                >
+                  <option value="">Seleccionar destino</option>
+                  {filteredBuildings
+                    .filter((building, index, self) => 
+                      self.findIndex(b => b.nombre === building.nombre) === index
+                    )
+                    .map(building => (
+                      <option key={`destination-${building.id || building._id}`} value={building.nombre}>
+                        {building.nombre || 'Sin nombre'}
+                      </option>
+                    ))
+                  }
+                </select>
+              </div>
+
+              {/* FILTRO POR CATEGORÍA */}
+              <div className="filter-group">
+                <label>🏛️ Categoría:</label>
+                <select
+                  value={categoryFilter}
+                  onChange={onCategoryFilterChange}
+                  className="filter-select"
+                >
+                  <option value="">Todas las categorías</option>
+                  <option value="Académico">Académico</option>
+                  <option value="Administrativo">Administrativo</option>
+                  <option value="Baño">Baño</option>
+                  <option value="Biblioteca">Biblioteca</option>
+                  <option value="Cafeteria">Cafetería</option>
+                  <option value="Casino">Casino</option>
+                  <option value="Centro de Salud">Centro de Salud</option>
+                  <option value="Cultural">Cultural</option>
+                  <option value="Deportivo">Deportivo</option>
+                  <option value="Estacionamiento">Estacionamiento</option>
+                  <option value="Gimnasio">Gimnasio</option>
+                  <option value="Investigación">Investigación</option>
+                  <option value="Laboratorio">Laboratorio</option>
+                  <option value="Oficina Administracion">Oficina Administración</option>
+                  <option value="Oficina Profesor">Oficina Profesor</option>
+                  <option value="Sala de Clase">Sala de Clase</option>
+                  <option value="Sala de Estudio">Sala de Estudio</option>
+                  <option value="Servicios">Servicios</option>
+                </select>
+              </div>
+
+              {/* BOTÓN LIMPIAR FILTROS */}
+              <button
+                onClick={onClearFilters}
+                className="clear-filters-btn"
+                disabled={!originFilter && !destinationFilter && !categoryFilter}
+              >
+                🗑️ Limpiar Filtros
+              </button>
+            </div>
+          )}
         </div>
-
-        {/* FILTRO POR DESTINO */}
-        <div className="filter-group">
-          <label>🔍 Destino:</label>
-          <select
-            value={destinationFilter}
-            onChange={onDestinationFilterChange}
-            className="filter-select"
-          >
-            <option value="">Seleccionar destino</option>
-            {filteredBuildings
-              .filter((building, index, self) => 
-                self.findIndex(b => b.nombre === building.nombre) === index
-              )
-              .map(building => (
-                <option key={`destination-${building.id || building._id}`} value={building.nombre}>
-                  {building.nombre || 'Sin nombre'}
-                </option>
-              ))
-            }
-          </select>
-        </div>
-
-         <div className="filter-group">
-          <label>🏛️ Categoría:</label>
-          <select
-            value={categoryFilter}
-            onChange={onCategoryFilterChange}
-            className="filter-select"
-          >
-            <option value="">Todas las categorías</option>
-            <option value="Académico">Académico</option>
-            <option value="Administrativo">Administrativo</option>
-            <option value="Baño">Baño</option>
-            <option value="Biblioteca">Biblioteca</option>
-            <option value="Cafeteria">Cafetería</option>
-            <option value="Casino">Casino</option>
-            <option value="Centro de Salud">Centro de Salud</option>
-            <option value="Cultural">Cultural</option>
-            <option value="Deportivo">Deportivo</option>
-            <option value="Estacionamiento">Estacionamiento</option>
-            <option value="Gimnasio">Gimnasio</option>
-            <option value="Investigación">Investigación</option>
-            <option value="Laboratorio">Laboratorio</option>
-            <option value="Oficina Administracion">Oficina Administración</option>
-            <option value="Oficina Profesor">Oficina Profesor</option>
-            <option value="Sala de Clase">Sala de Clase</option>
-            <option value="Sala de Estudio">Sala de Estudio</option>
-            <option value="Servicios">Servicios</option>
-          </select>
-        </div>
-
-        {/* BOTÓN LIMPIAR FILTROS */}
-        <button
-          onClick={onClearFilters}
-          className="clear-filters-btn"
-          disabled={!originFilter && !destinationFilter && !categoryFilter}
-        >
-          🗑️ Limpiar Filtros
-        </button>
-      </div>
 
       <button className="logout-btn" onClick={handleLogout}>
         Cerrar Sesión

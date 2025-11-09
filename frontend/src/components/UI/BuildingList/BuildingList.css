@@ -427,3 +427,34 @@
   border-radius: 4px;
   border: 1px dashed #bdc3c7;
 }
+
+/* Agregar estas animaciones en BuildingList.css */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.notification-toast {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.notification-toast.fade-out {
+  animation: slideOutRight 0.3s ease-in forwards;
+}

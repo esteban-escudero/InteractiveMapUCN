@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react"; // ✅ AGREGAR useMemo
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Map.css";
@@ -22,6 +22,8 @@ import RouteLayer from "./RouteLayer";
 import RouteList from "../UI/RouteList/RouteList";
 import { SpatialUtils } from "../../utils/spatialUtils";
 import RouteNetwork from '../RouteNetwork/RouteNetwork';
+import { useNotification } from "../../hooks/useNotification"; // ← CORRECTO
+import Notification from "../UI/Notification/Notification"; // ← CORREGIDO
 
 // Configuración de íconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -79,6 +81,8 @@ function Map() {
   const [originFilter, setOriginFilter] = useState('');
   const [destinationFilter, setDestinationFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+
+  const { notification, showNotification, hideNotification } = useNotification();
 
   // Hook para edificios
   const {
@@ -152,72 +156,70 @@ function Map() {
   }, [campusBoundsPolygon]);
 
   // ✅ ENCONTRAR EDIFICIO MÁS CERCANO CON TURF
- // En Map.js - función findNearestBuilding mejorada
-
-const findNearestBuilding = useCallback((lat, lng) => {
-  if (!buildings || !buildings.length) {
-    console.log('🏢 No hay edificios para buscar el más cercano');
-    return null;
-  }
-
-  try {
-    const targetPoint = { lat, lng };
-    
-    // Validar coordenadas objetivo
-    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
-      console.warn('❌ Coordenadas objetivo inválidas:', { lat, lng });
+  const findNearestBuilding = useCallback((lat, lng) => {
+    if (!buildings || !buildings.length) {
+      console.log('🏢 No hay edificios para buscar el más cercano');
       return null;
     }
 
-    const buildingPoints = buildings.map(building => {
-      try {
-        if (!building) return null;
-
-        let buildingLat, buildingLng;
-        
-        if (building.ubicacion && building.ubicacion.type === "Point") {
-          const coords = building.ubicacion.coordinates;
-          if (!coords || coords.length < 2) return null;
-          [buildingLng, buildingLat] = coords;
-        } else if (building.lat && building.lng) {
-          buildingLat = building.lat;
-          buildingLng = building.lng;
-        } else {
-          return null;
-        }
-
-        // Validar que las coordenadas del edificio sean números
-        if (typeof buildingLat !== 'number' || typeof buildingLng !== 'number' ||
-            isNaN(buildingLat) || isNaN(buildingLng)) {
-          console.warn('❌ Coordenadas de edificio inválidas:', building.nombre, { buildingLat, buildingLng });
-          return null;
-        }
-
-        return {
-          lat: buildingLat,
-          lng: buildingLng,
-          building: building
-        };
-      } catch (error) {
-        console.warn('❌ Error procesando edificio:', building?.nombre, error);
+    try {
+      const targetPoint = { lat, lng };
+      
+      // Validar coordenadas objetivo
+      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+        console.warn('❌ Coordenadas objetivo inválidas:', { lat, lng });
         return null;
       }
-    }).filter(Boolean);
 
-    if (buildingPoints.length === 0) {
-      console.log('🏢 No se encontraron puntos de edificio válidos');
+      const buildingPoints = buildings.map(building => {
+        try {
+          if (!building) return null;
+
+          let buildingLat, buildingLng;
+          
+          if (building.ubicacion && building.ubicacion.type === "Point") {
+            const coords = building.ubicacion.coordinates;
+            if (!coords || coords.length < 2) return null;
+            [buildingLng, buildingLat] = coords;
+          } else if (building.lat && building.lng) {
+            buildingLat = building.lat;
+            buildingLng = building.lng;
+          } else {
+            return null;
+          }
+
+          // Validar que las coordenadas del edificio sean números
+          if (typeof buildingLat !== 'number' || typeof buildingLng !== 'number' ||
+              isNaN(buildingLat) || isNaN(buildingLng)) {
+            console.warn('❌ Coordenadas de edificio inválidas:', building.nombre, { buildingLat, buildingLng });
+            return null;
+          }
+
+          return {
+            lat: buildingLat,
+            lng: buildingLng,
+            building: building
+          };
+        } catch (error) {
+          console.warn('❌ Error procesando edificio:', building?.nombre, error);
+          return null;
+        }
+      }).filter(Boolean);
+
+      if (buildingPoints.length === 0) {
+        console.log('🏢 No se encontraron puntos de edificio válidos');
+        return null;
+      }
+
+      console.log(`🏢 Buscando entre ${buildingPoints.length} edificios válidos`);
+      const nearest = SpatialUtils.findNearestPoint(targetPoint, buildingPoints);
+      return nearest ? nearest.building : null;
+
+    } catch (error) {
+      console.error("❌ Error encontrando edificio más cercano:", error);
       return null;
     }
-
-    console.log(`🏢 Buscando entre ${buildingPoints.length} edificios válidos`);
-    const nearest = SpatialUtils.findNearestPoint(targetPoint, buildingPoints);
-    return nearest ? nearest.building : null;
-
-  } catch (error) {
-    console.error("❌ Error encontrando edificio más cercano:", error);
-    return null;
-  }
-}, [buildings]);
+  }, [buildings]);
 
   // ✅ FUNCIÓN PARA FILTRAR EDIFICIOS POR CATEGORÍA
   const filteredBuildings = useMemo(() => {
@@ -354,9 +356,10 @@ const findNearestBuilding = useCallback((lat, lng) => {
     try {
       await roomService.createRooms(roomsData);
       await loadBuildings();
-      console.log("✅ Salas creadas exitosamente");
+      showNotification("✅ Salas creadas exitosamente", "success");
     } catch (error) {
       console.error("Error al crear salas:", error);
+      showNotification("❌ Error al crear salas", "error");
       throw error;
     }
   };
@@ -365,9 +368,10 @@ const findNearestBuilding = useCallback((lat, lng) => {
     try {
       await roomService.updateRoom(roomId, roomData);
       await loadBuildings();
-      console.log("✅ Sala actualizada exitosamente");
+      showNotification("✅ Sala actualizada exitosamente", "success");
     } catch (error) {
       console.error("Error al actualizar sala:", error);
+      showNotification("❌ Error al actualizar sala", "error");
       throw error;
     }
   };
@@ -377,9 +381,10 @@ const findNearestBuilding = useCallback((lat, lng) => {
       console.log("🗑️ Eliminando sala ID:", roomId);
       await roomService.deleteRoom(roomId);
       await loadBuildings();
-      console.log("✅ Sala eliminada exitosamente");
+      showNotification("✅ Sala eliminada exitosamente", "success");
     } catch (error) {
       console.error("❌ Error al eliminar sala:", error);
+      showNotification("❌ Error al eliminar sala", "error");
       throw error;
     }
   };
@@ -416,23 +421,23 @@ const findNearestBuilding = useCallback((lat, lng) => {
         });
 
         if (invalidPoints.length > 0) {
-          alert("⚠️ Algunos puntos de la ruta están fuera de los límites del campus");
+          showNotification("⚠️ Algunos puntos de la ruta están fuera de los límites del campus", "warning");
           return;
         }
 
         // Validar geometría de la ruta
         if (!SpatialUtils.isValidLineString(coordinates)) {
-          alert("❌ La geometría de la ruta no es válida");
+          showNotification("❌ La geometría de la ruta no es válida", "error");
           return;
         }
       }
 
       if (editingRoute) {
         await updateRoute(editingRoute.id, routeData);
-        alert("✅ Ruta actualizada");
+        showNotification("✅ Ruta actualizada correctamente", "success");
       } else {
         await createRoute(routeData);
-        alert("✅ Ruta creada");
+        showNotification("✅ Ruta creada correctamente", "success");
       }
 
       setEditingRoute(null);
@@ -440,7 +445,7 @@ const findNearestBuilding = useCallback((lat, lng) => {
       await loadRoutes();
     } catch (error) {
       console.error("Error al guardar ruta:", error);
-      alert("❌ Error al guardar ruta");
+      showNotification("❌ Error al guardar ruta", "error");
     }
   };
 
@@ -478,20 +483,17 @@ const findNearestBuilding = useCallback((lat, lng) => {
   };
 
   const handleDeleteRoute = async (route) => {
-    if (
-      window.confirm(`¿Estás seguro de eliminar la ruta "${route.nombre}"?`)
-    ) {
       try {
         await deleteRoute(route.id);
-        console.log("✅ Ruta eliminada");
+        showNotification("✅ Ruta eliminada correctamente", "success");
         if (selectedRoute && selectedRoute.id === route.id) {
           setSelectedRoute(null);
         }
       } catch (err) {
         console.error("❌ Error al eliminar ruta:", err);
-        alert("Error al eliminar ruta");
+        showNotification("❌ Error al eliminar ruta", "error");
       }
-    }
+    
   };
 
   const handleCloseRouteList = () => {
@@ -519,108 +521,107 @@ const findNearestBuilding = useCallback((lat, lng) => {
   }, [coordinateDetection, mapInstance, tempMarker]);
 
   // ✅ CAPTURAR CLIC EN EL MAPA CON VALIDACIÓN TURF
-  // ✅ CAPTURAR CLIC EN EL MAPA CON VALIDACIÓN TURF
-useEffect(() => {
-  if (!mapInstance || !coordinateDetection) return;
+  useEffect(() => {
+    if (!mapInstance || !coordinateDetection) return;
 
-  const handleMapClick = (e) => {
-    const { lat, lng } = e.latlng;
-    console.log("📍 Coordenadas capturadas:", { lat, lng });
+    const handleMapClick = (e) => {
+      const { lat, lng } = e.latlng;
+      console.log("📍 Coordenadas capturadas:", { lat, lng });
 
-    // ✅ VALIDAR COORDENADAS ANTES DE PROCESAR
-    if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
-      console.error('❌ Coordenadas capturadas inválidas');
-      return;
-    }
-
-    // ✅ VALIDAR CON TURF - FALTA ESTA LÍNEA
-    const isValid = validateCoordinates(lat, lng);
-
-    // Limpiar marcador anterior si existe
-    if (tempMarker && mapInstance) {
-      mapInstance.removeLayer(tempMarker);
-    }
-
-    const newTempMarker = L.marker([lat, lng], {
-      icon: createTempIcon(),
-      zIndexOffset: 1000,
-    }).addTo(mapInstance);
-
-    let popupContent = `
-      <div style="text-align: center;">
-        <h4>📍 Coordenadas Capturadas</h4>
-        <p><strong>Lat:</strong> ${lat.toFixed(6)}</p>
-        <p><strong>Lng:</strong> ${lng.toFixed(6)}</p>
-    `;
-
-    if (!isValid) {
-      popupContent += `
-        <p style="color: #e74c3c; font-weight: bold;">
-          ⚠️ Fuera del campus
-        </p>
-      `;
-    }
-
-    // ✅ ENCONTRAR EDIFICIO MÁS CERCANO
-    try {
-      const nearestBuilding = findNearestBuilding(lat, lng);
-      if (nearestBuilding) {
-        const distance = SpatialUtils.calculateDistance(
-          { lat, lng },
-          { 
-            lat: nearestBuilding.lat || nearestBuilding.ubicacion?.coordinates[1],
-            lng: nearestBuilding.lng || nearestBuilding.ubicacion?.coordinates[0]
-          }
-        );
-        
-        // Solo mostrar si la distancia es un número válido
-        if (!isNaN(distance) && distance !== Infinity) {
-          popupContent += `
-            <p style="color: #27ae60; font-size: 12px;">
-              🏢 Más cercano: ${nearestBuilding.nombre} (${Math.round(distance)}m)
-            </p>
-          `;
-        }
+      // ✅ VALIDAR COORDENADAS ANTES DE PROCESAR
+      if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+        console.error('❌ Coordenadas capturadas inválidas');
+        return;
       }
-    } catch (error) {
-      console.warn('❌ Error mostrando edificio más cercano:', error);
-      // No agregar nada al popup si hay error
-    }
 
-    popupContent += `
-        <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
-          style="background: ${isValid ? '#27ae60' : '#e74c3c'}; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
-          ${isValid ? 'Usar estas coordenadas' : 'Usar de todas formas'}
-        </button>
-      </div>
-    `;
+      // ✅ VALIDAR CON TURF
+      const isValid = validateCoordinates(lat, lng);
 
-    newTempMarker.bindPopup(popupContent).openPopup();
+      // Limpiar marcador anterior si existe
+      if (tempMarker && mapInstance) {
+        mapInstance.removeLayer(tempMarker);
+      }
 
-    setTempMarker(newTempMarker);
-    setCapturedCoords({ lat, lng });
-  };
+      const newTempMarker = L.marker([lat, lng], {
+        icon: createTempIcon(),
+        zIndexOffset: 1000,
+      }).addTo(mapInstance);
 
-  window.useCapturedCoords = (lat, lng) => {
-    console.log("🔄 Coordenadas usadas:", { lat, lng });
-    setCapturedCoords({ lat, lng });
-    setCoordinateDetection(false);
-    setEditingBuilding(null);
-    setShowBuildingForm(true);
-    if (tempMarker) mapInstance.removeLayer(tempMarker);
-    setTempMarker(null);
-    mapInstance.getContainer().style.cursor = "";
-  };
+      let popupContent = `
+        <div style="text-align: center;">
+          <h4>📍 Coordenadas Capturadas</h4>
+          <p><strong>Lat:</strong> ${lat.toFixed(6)}</p>
+          <p><strong>Lng:</strong> ${lng.toFixed(6)}</p>
+      `;
 
-  mapInstance.on("click", handleMapClick);
+      if (!isValid) {
+        popupContent += `
+          <p style="color: #e74c3c; font-weight: bold;">
+            ⚠️ Fuera del campus
+          </p>
+        `;
+      }
 
-  return () => {
-    mapInstance.off("click", handleMapClick);
-    delete window.useCapturedCoords;
-  };
-}, [mapInstance, coordinateDetection, tempMarker, validateCoordinates, findNearestBuilding]);
+      // ✅ ENCONTRAR EDIFICIO MÁS CERCANO
+      try {
+        const nearestBuilding = findNearestBuilding(lat, lng);
+        if (nearestBuilding) {
+          const distance = SpatialUtils.calculateDistance(
+            { lat, lng },
+            { 
+              lat: nearestBuilding.lat || nearestBuilding.ubicacion?.coordinates[1],
+              lng: nearestBuilding.lng || nearestBuilding.ubicacion?.coordinates[0]
+            }
+          );
+          
+          // Solo mostrar si la distancia es un número válido
+          if (!isNaN(distance) && distance !== Infinity) {
+            popupContent += `
+              <p style="color: #27ae60; font-size: 12px;">
+                🏢 Más cercano: ${nearestBuilding.nombre} (${Math.round(distance)}m)
+              </p>
+            `;
+          }
+        }
+      } catch (error) {
+        console.warn('❌ Error mostrando edificio más cercano:', error);
+        // No agregar nada al popup si hay error
+      }
+
+      popupContent += `
+          <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
+            style="background: ${isValid ? '#27ae60' : '#e74c3c'}; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
+            ${isValid ? 'Usar estas coordenadas' : 'Usar de todas formas'}
+          </button>
+        </div>
+      `;
+
+      newTempMarker.bindPopup(popupContent).openPopup();
+
+      setTempMarker(newTempMarker);
+      setCapturedCoords({ lat, lng });
+    };
+
+    window.useCapturedCoords = (lat, lng) => {
+      console.log("🔄 Coordenadas usadas:", { lat, lng });
+      setCapturedCoords({ lat, lng });
+      setCoordinateDetection(false);
+      setEditingBuilding(null);
+      setShowBuildingForm(true);
+      if (tempMarker) mapInstance.removeLayer(tempMarker);
+      setTempMarker(null);
+      mapInstance.getContainer().style.cursor = "";
+    };
+
+    mapInstance.on("click", handleMapClick);
+
+    return () => {
+      mapInstance.off("click", handleMapClick);
+      delete window.useCapturedCoords;
+    };
+  }, [mapInstance, coordinateDetection, tempMarker, validateCoordinates, findNearestBuilding]);
   
- // Guardar o actualizar edificio
+  // Guardar o actualizar edificio
   const handleSaveBuilding = async (buildingData) => {
     try {
       // ✅ VALIDAR COORDENADAS CON TURF ANTES DE GUARDAR
@@ -639,10 +640,10 @@ useEffect(() => {
           editingBuilding._id ||
           editingBuilding.id_edificio;
         await buildingService.updateBuilding(id, buildingData);
-        alert("✅ Edificio actualizado");
+        showNotification("Edificio actualizado correctamente", "success");
       } else {
         await buildingService.createBuilding(buildingData);
-        alert("✅ Edificio creado");
+        showNotification("Edificio creado correctamente", "success");
       }
 
       await loadBuildings();
@@ -651,7 +652,7 @@ useEffect(() => {
       setCapturedCoords(null);
     } catch (error) {
       console.error("Error al guardar edificio:", error);
-      alert("❌ Error al guardar edificio");
+      showNotification("Error al guardar edificio", "error");
     }
   };
 
@@ -680,21 +681,18 @@ useEffect(() => {
   };
 
   const handleCloseBuildingList = () => setShowBuildingList(false);
-
-  const handleDeleteBuilding = async (b) => {
-    if (
-      window.confirm(`¿Estás seguro de eliminar el edificio "${b.nombre}"?`)
-    ) {
-      try {
-        const id = b.id || b._id || b.id_edificio;
-        await deleteBuilding(id);
-        console.log("✅ Edificio eliminado");
-      } catch (err) {
-        console.error("❌ Error al eliminar edificio:", err);
-        alert("Error al eliminar edificio");
-      }
-    }
-  };
+// Map.js - VERSIÓN CORREGIDA:
+const handleDeleteBuilding = async (b) => {
+  // ✅ ELIMINAR EL CONFIRM - EJECUTAR DIRECTAMENTE
+  try {
+    const id = b.id || b._id || b.id_edificio;
+    await deleteBuilding(id);
+    showNotification("✅ Edificio eliminado correctamente", "success");
+  } catch (err) {
+    console.error("❌ Error al eliminar edificio:", err);
+    showNotification("❌ Error al eliminar edificio", "error");
+  }
+};
 
   // Cargar datos de GeoServer cuando el mapa esté listo
   useEffect(() => {
@@ -708,7 +706,7 @@ useEffect(() => {
 
   const handleLogout = () => {
     if (window.confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-      alert("Sesión cerrada");
+      showNotification("👋 Sesión cerrada correctamente", "success");
     }
   };
 
@@ -716,14 +714,14 @@ useEffect(() => {
     if (geoServerFeatures.length > 0) {
       try {
         await syncWithGeoServer(geoServerFeatures);
-        alert(`✅ ${geoServerFeatures.length} edificios sincronizados`);
+        showNotification(`✅ ${geoServerFeatures.length} edificios sincronizados`, "success");
         await loadBuildings();
       } catch (error) {
         console.error("❌ Error sincronizando datos:", error);
-        alert("❌ Error sincronizando datos");
+        showNotification("❌ Error sincronizando datos", "error");
       }
     } else {
-      alert("ℹ️ No hay datos de GeoServer para sincronizar");
+      showNotification("ℹ️ No hay datos de GeoServer para sincronizar", "warning");
     }
   };
 
@@ -776,6 +774,17 @@ useEffect(() => {
         }}
         filteredBuildings={filteredBuildings}
       />
+
+       {/* 🆕 REEMPLAZAR LA NOTIFICACIÓN INLINE POR EL COMPONENTE */}
+      {notification.show && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={hideNotification}
+          duration={3000}
+          position="top-right"
+        />
+      )}
 
       {/* BUILDINGFORM */}
       <BuildingForm
@@ -896,7 +905,7 @@ useEffect(() => {
         </div>
       )}
 
-    {/* CONTENEDOR DEL MAPA */}
+      {/* CONTENEDOR DEL MAPA */}
       <div className="Mapa">
         <div ref={mapRef} className="map-container"></div>
 

@@ -1,5 +1,7 @@
 // components/UI/BuildingList/BuildingList.jsx
 import React, { useState } from "react";
+import { useNotification } from "../../../hooks/useNotification";
+import Notification from "../Notification/Notification";
 import "./BuildingList.css";
 
 function BuildingList({
@@ -15,11 +17,15 @@ function BuildingList({
   const [deletingId, setDeletingId] = useState(null);
   const [expandedBuilding, setExpandedBuilding] = useState(null);
   const [deletingRoomId, setDeletingRoomId] = useState(null);
+  
+  // 🆕 HOOK GLOBAL DE NOTIFICACIONES - REEMPLAZA EL ESTADO LOCAL
+   const { notification, showNotification, hideNotification } = useNotification();
 
   const handleDelete = async (building) => {
     const buildingId = building.id || building._id || building.id_edificio;
     const buildingName = building.nombre;
 
+    /*
     if (
       !window.confirm(
         `⚠️ ¿ESTÁS SEGURO DE QUE QUIERES ELIMINAR PERMANENTEMENTE?\n\n` +
@@ -37,19 +43,17 @@ function BuildingList({
     );
 
     if (userInput !== "ELIMINAR") {
-      alert(
-        '❌ Eliminación cancelada. No se escribió "ELIMINAR" correctamente.'
-      );
+      showNotification('❌ Eliminación cancelada. No se escribió "ELIMINAR" correctamente.', "warning");
       return;
-    }
+    }*/
 
     setDeletingId(buildingId);
 
     try {
       await onDeleteBuilding(building);
-      alert(`✅ Edificio "${buildingName}" eliminado permanentemente`);
+      showNotification(`✅ Edificio "${buildingName}" eliminado permanentemente`, "success");
     } catch (error) {
-      alert(`❌ Error al eliminar el edificio: ${error.message}`);
+      showNotification(`❌ Error al eliminar el edificio: ${error.message}`, "error");
     } finally {
       setDeletingId(null);
     }
@@ -73,7 +77,8 @@ function BuildingList({
     }
   };
 
-  // ✅ FUNCIÓN CORREGIDA PARA ELIMINAR SALAS
+  /*
+  // ✅ FUNCIÓN CORREGIDA PARA ELIMINAR SALAS CON NOTIFICACIONES
   const handleDeleteRoom = async (room, building) => {
     const confirmDelete = window.confirm(
       `¿Estás seguro de que quieres eliminar la sala "${room.nombre_sala}"?\n\n` +
@@ -92,24 +97,35 @@ function BuildingList({
     try {
       if (onDeleteRoom) {
         await onDeleteRoom(room.id);
-        alert(`✅ Sala "${room.nombre_sala}" eliminada exitosamente`);
+        showNotification(`✅ Sala "${room.nombre_sala}" eliminada exitosamente`, "success");
 
         // Recargar los datos si se proporciona la función
         if (onReload) {
           await onReload();
         }
       } else {
-        alert("❌ Función de eliminación de salas no disponible");
+        showNotification("❌ Función de eliminación de salas no disponible", "error");
       }
     } catch (error) {
-      alert(`❌ Error al eliminar la sala: ${error.message}`);
+      showNotification(`❌ Error al eliminar la sala: ${error.message}`, "error");
     } finally {
       setDeletingRoomId(null);
     }
-  };
+  };*/
 
   return (
     <div className="building-list-overlay">
+      {/* 🆕 COMPONENTE DE NOTIFICACIÓN GLOBAL */}
+      {notification.show && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={hideNotification}
+          duration={4000}
+          position="top-right"
+        />
+      )}
+
       <div className="building-list-modal">
         <div className="building-list-header">
           <h2>📝 Gestionar Edificios</h2>
@@ -146,7 +162,9 @@ function BuildingList({
                           className="expand-btn"
                           onClick={() =>
                             toggleBuildingExpansion(buildingId)
-                          }></button>
+                          }>
+                          {isExpanded ? "▲" : "▼"}
+                        </button>
                       </div>
                       <p className="building-description">
                         {building.descripcion}
