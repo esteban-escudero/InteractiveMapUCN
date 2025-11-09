@@ -26,9 +26,7 @@ export const useBuildings = () => {
         ? response
         : [];
 
-      console.log(
-        `📦 ${buildingsArray.length} edificios recibidos del backend`
-      );
+      console.log(`${buildingsArray.length} edificios recibidos del backend`);
 
       // ENRIQUECER EDIFICIOS CON DATOS TURF
       const buildingsWithTurfAnalysis = buildingsArray.map((building) => {
@@ -377,7 +375,7 @@ export const useBuildings = () => {
   // VERIFICAR SALUD DEL BACKEND
   const checkBackendHealth = useCallback(async () => {
     try {
-      console.log("❤️ Verificando salud del backend...");
+      console.log("Verificando salud del backend...");
 
       const response = await buildingService.checkHealth();
       setBackendStatus("connected");
@@ -484,9 +482,7 @@ export const useBuildings = () => {
 
     // Verificar salud del backend periódicamente
     const healthCheckInterval = setInterval(() => {
-      checkBackendHealth().catch(() => {
-        // El error ya se maneja en checkBackendHealth
-      });
+      checkBackendHealth().catch(() => {});
     }, 30000); // Cada 30 segundos
 
     return () => clearInterval(healthCheckInterval);

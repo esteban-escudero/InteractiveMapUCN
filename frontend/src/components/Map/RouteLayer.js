@@ -154,7 +154,7 @@ const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
                   [bbox[3], bbox[2]] // [maxLat, maxLng]
                 );
                 mapInstance.fitBounds(bounds, { padding: [20, 20] });
-                console.log(`🔍 Zoom a ruta: ${route.nombre}`);
+                console.log(`Zoom a ruta: ${route.nombre}`);
               }
             } catch (error) {
               console.error("Error calculando bounds con Turf:", error);

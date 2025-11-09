@@ -15,7 +15,7 @@ export const useMap = () => {
 
     // VERIFICAR SI EL MAPA YA ESTÁ INICIALIZADO
     if (mapInstanceRef.current) {
-      console.log("🗺️ Mapa ya inicializado, retornando instancia existente");
+      console.log("Mapa ya inicializado, retornando instancia existente");
       return mapInstanceRef.current;
     }
 
@@ -29,7 +29,7 @@ export const useMap = () => {
     }
 
     try {
-      console.log("🗺️ Inicializando mapa con bounds:", bounds);
+      console.log("Inicializando mapa con bounds:", bounds);
 
       const map = L.map(mapRef.current, {
         minZoom: MAP_ZOOM_LIMITS.min,

@@ -50,7 +50,7 @@ const SidePanel = ({
   };
 
   const handleManageRoutes = () => {
-    console.log("🗺️ SidePanel: Gestionar Rutas clickeado");
+    console.log("SidePanel: Gestionar Rutas clickeado");
     if (onManageRoutes) onManageRoutes();
   };
 

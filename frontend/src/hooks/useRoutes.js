@@ -16,7 +16,7 @@ export const useRoutes = () => {
     setError(null);
 
     try {
-      console.log("🛣️ Cargando rutas con análisis Turf...");
+      console.log("Cargando rutas con análisis Turf...");
       const response = await routeService.getAllRoutes();
 
       // Asegurar que sea un array
@@ -26,7 +26,7 @@ export const useRoutes = () => {
         ? response.data
         : [];
 
-      console.log(`📦 ${routesArray.length} rutas recibidas del backend`);
+      console.log(`${routesArray.length} rutas recibidas del backend`);
 
       // ENRIQUECER RUTAS CON DATOS TURF
       const routesWithTurfAnalysis = routesArray.map((route) => {

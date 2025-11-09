@@ -236,7 +236,7 @@ export const useGeoServer = () => {
         }
       });
 
-      console.log(`🗺️ ${featuresData.length} features agregados al mapa`);
+      console.log(`${featuresData.length} features agregados al mapa`);
     } catch (error) {
       console.error("Error en addFeaturesToMap:", error);
     }

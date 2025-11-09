@@ -5,7 +5,7 @@ export const routeService = {
     try {
       console.log("Solicitando todas las rutas...");
       const response = await api.get("/routes");
-      console.log("📦 Respuesta de rutas:", response);
+      console.log("Respuesta de rutas:", response);
 
       // Manejo consistente de respuesta
       if (response.success !== false) {
@@ -72,7 +72,7 @@ export const routeService = {
 
   async calculateRoute(origen, destino, tipo_ruta = "peatonal") {
     try {
-      console.log("🧮 Calculando ruta desde:", origen, "hasta:", destino);
+      console.log("Calculando ruta desde:", origen, "hasta:", destino);
       const response = await api.post("/routes/calculate", {
         origen,
         destino,

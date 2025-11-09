@@ -219,7 +219,7 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
                 Zoom
               </button>
               <button class="node-btn select-btn" data-node-id="${node.id}">
-                📋 Detalles
+                Detalles
               </button>
             </div>
           </div>
@@ -241,7 +241,7 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
       }
     });
 
-    console.log(`🗺️ ${sharedNodes.length} nodos renderizados en el mapa`);
+    console.log(`${sharedNodes.length} nodos renderizados en el mapa`);
   };
 
   //  OBTENER COLOR SEGÚN NÚMERO DE RUTAS
