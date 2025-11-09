@@ -582,6 +582,8 @@ function Map() {
     if (newState) {
       console.log("Modo captura ACTIVADO");
       if (mapInstance) mapInstance.getContainer().style.cursor = "crosshair";
+      // Limpiar coordenadas previas cuando se activa
+      setCapturedCoords(null);
     } else {
       console.log("Modo captura DESACTIVADO");
       if (tempMarker && mapInstance) {
@@ -692,13 +694,25 @@ function Map() {
 
     window.useCapturedCoords = (lat, lng) => {
       console.log("Coordenadas usadas:", { lat, lng });
-      setCapturedCoords({ lat, lng });
+
+      // DESACTIVAR COMPLETAMENTE EL MODO CAPTURA
       setCoordinateDetection(false);
+      setCapturedCoords({ lat, lng });
+
+      // Limpiar marcadores y restaurar cursor
+      if (tempMarker && mapInstance) {
+        mapInstance.removeLayer(tempMarker);
+        setTempMarker(null);
+      }
+      if (mapInstance) {
+        mapInstance.getContainer().style.cursor = "";
+      }
+
+      // Preparar para el formulario
       setEditingBuilding(null);
       setShowBuildingForm(true);
-      if (tempMarker) mapInstance.removeLayer(tempMarker);
-      setTempMarker(null);
-      mapInstance.getContainer().style.cursor = "";
+
+      console.log("Modo captura DESACTIVADO después de usar coordenadas");
     };
 
     mapInstance.on("click", handleMapClick);
@@ -706,6 +720,18 @@ function Map() {
     return () => {
       mapInstance.off("click", handleMapClick);
       delete window.useCapturedCoords;
+
+      // Limpiar también aquí por si acaso
+      if (coordinateDetection) {
+        setCoordinateDetection(false);
+        if (mapInstance) {
+          mapInstance.getContainer().style.cursor = "";
+        }
+        if (tempMarker && mapInstance) {
+          mapInstance.removeLayer(tempMarker);
+          setTempMarker(null);
+        }
+      }
     };
   }, [
     mapInstance,

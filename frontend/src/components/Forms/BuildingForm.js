@@ -81,13 +81,15 @@ const BuildingForm = ({
         lng: capturedCoordinates.lng.toString(),
       }));
 
-      // Desactivar modo captura
+      // Desactivar modo captura INMEDIATAMENTE
       setIsCapturing(false);
 
       // Validar automáticamente las coordenadas capturadas
       validateCoordinates(capturedCoordinates.lat, capturedCoordinates.lng);
 
-      console.log("Coordenadas actualizadas en el formulario");
+      console.log(
+        "Coordenadas actualizadas en el formulario - modo captura desactivado"
+      );
     }
   }, [capturedCoordinates, isCapturing]);
 
@@ -247,6 +249,9 @@ const BuildingForm = ({
   };
 
   const handleCancel = () => {
+    console.log("Cancelando formulario - limpiando modo captura");
+
+    // Asegurarse de desactivar el modo captura
     if (isCapturing && onToggleCoordinateDetection) {
       onToggleCoordinateDetection(); // Desactivar modo captura
     }
