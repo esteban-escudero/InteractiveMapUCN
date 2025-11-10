@@ -389,7 +389,7 @@ const RouteFormWithNodes = ({
       const coordinates = puntos.map((p) => p.coordenadas.coordinates);
       const distancia = SpatialUtils.calculateRouteLength(coordinates);
       const distanciaRedondeada = Math.round(distancia);
-      console.log(`📏 Distancia calculada con Turf: ${distanciaRedondeada}m`);
+      console.log(`Distancia calculada con Turf: ${distanciaRedondeada}m`);
       return distanciaRedondeada;
     } catch (error) {
       console.error("Error calculando distancia con Turf:", error);
@@ -408,7 +408,7 @@ const RouteFormWithNodes = ({
 
   // Finalizar con ESC
   const handleFinishWithESC = () => {
-    console.log("⏹️ FINALIZANDO con ESC. Puntos:", formData.puntos_ruta.length);
+    console.log("FINALIZANDO con ESC. Puntos:", formData.puntos_ruta.length);
 
     if (formData.puntos_ruta.length < 2) {
       console.log("Se necesitan al menos 2 puntos");

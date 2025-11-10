@@ -35,7 +35,7 @@ const SidePanel = ({
   };
 
   const handleAddBuilding = () => {
-    console.log("🟢 SidePanel: Agregar Edificio clickeado");
+    console.log("SidePanel: Agregar Edificio clickeado");
     if (onAddBuilding) onAddBuilding();
   };
 
