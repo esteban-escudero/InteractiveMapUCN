@@ -9,6 +9,9 @@ import { useBuildings } from "../../hooks/useBuildings";
 import { useGeoServer } from "../../hooks/useGeoServer";
 import { useMapManagement } from "../../hooks/useMapManagement";
 import { useCoordinateManagement } from "../../hooks/useCoordinateManagement";
+import { useMapOperations } from "../../hooks/useMapOperations";
+import { useMapHandlers } from "../../hooks/useMapHandlers";
+import useRoutes from "../../hooks/useRoutes";
 
 // Componentes
 import SidePanel from "../UI/SidePanel";
@@ -27,9 +30,6 @@ import {
   UCN_COQUIMBO_BOUNDS,
   MAP_ZOOM_LIMITS,
 } from "../../constants/mapConfig";
-import { buildingService } from "../../services/buildingService";
-import { roomService } from "../../services/roomService";
-import useRoutes from "../../hooks/useRoutes";
 import { SpatialUtils } from "../../utils/spatialUtils";
 import { useNotification } from "../../hooks/useNotification";
 import Notification from "../UI/Notification/Notification";
@@ -52,7 +52,6 @@ function Map() {
   // Hooks básicos
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
-  const [campusBoundsPolygon, setCampusBoundsPolygon] = useState(null);
 
   // Hooks globales
   const { notification, showNotification, hideNotification } =
@@ -89,146 +88,34 @@ function Map() {
     loadRoutes,
   } = useRoutes();
 
-  // Validación de coordenadas y búsqueda del edificio más cercano
-  const validateCoordinates = useCallback(
-    (lat, lng) => {
-      if (!campusBoundsPolygon) return true;
-
-      // Validar que lat y lng sean números válidos
-      try {
-        const isValid = SpatialUtils.isPointInPolygon(
-          lat,
-          lng,
-          campusBoundsPolygon
-        );
-        if (!isValid) {
-          console.warn(`Coordenadas fuera del campus: ${lat}, ${lng}`);
-        }
-        return isValid;
-      } catch (error) {
-        console.error("Error validando coordenadas:", error);
-        return true;
-      }
-    },
-    [campusBoundsPolygon]
-  );
-
-  // Búsqueda del edificio más cercano
-  const findNearestBuilding = useCallback(
-    (lat, lng) => {
-      if (!buildings || !buildings.length) {
-        console.log("No hay edificios para buscar el más cercano");
-        return null;
-      }
-
-      try {
-        const targetPoint = { lat, lng };
-
-        if (
-          typeof lat !== "number" ||
-          typeof lng !== "number" ||
-          isNaN(lat) ||
-          isNaN(lng)
-        ) {
-          console.warn("Coordenadas objetivo inválidas:", { lat, lng });
-          return null;
-        }
-
-        const buildingPoints = buildings
-          .map((building) => {
-            try {
-              if (!building) return null;
-
-              let buildingLat, buildingLng;
-
-              if (building.ubicacion && building.ubicacion.type === "Point") {
-                const coords = building.ubicacion.coordinates;
-                if (!coords || coords.length < 2) return null;
-                [buildingLng, buildingLat] = coords;
-              } else if (building.lat && building.lng) {
-                buildingLat = building.lat;
-                buildingLng = building.lng;
-              } else {
-                return null;
-              }
-
-              if (
-                typeof buildingLat !== "number" ||
-                typeof buildingLng !== "number" ||
-                isNaN(buildingLat) ||
-                isNaN(buildingLng)
-              ) {
-                console.warn(
-                  "Coordenadas de edificio inválidas:",
-                  building.nombre,
-                  { buildingLat, buildingLng }
-                );
-                return null;
-              }
-
-              return {
-                lat: buildingLat,
-                lng: buildingLng,
-                building: building,
-              };
-            } catch (error) {
-              console.warn(
-                "Error procesando edificio:",
-                building?.nombre,
-                error
-              );
-              return null;
-            }
-          })
-          .filter(Boolean);
-
-        if (buildingPoints.length === 0) {
-          console.log("No se encontraron puntos de edificio válidos");
-          return null;
-        }
-
-        console.log(
-          `Buscando entre ${buildingPoints.length} edificios válidos`
-        );
-        const nearest = SpatialUtils.findNearestPoint(
-          targetPoint,
-          buildingPoints
-        );
-        return nearest ? nearest.building : null;
-      } catch (error) {
-        console.error("Error encontrando edificio más cercano:", error);
-        return null;
-      }
-    },
-    [buildings]
-  );
+  // Hooks de operaciones del mapa
+  const { validateCoordinates, findNearestBuilding } =
+    useMapOperations(buildings);
 
   // Hooks de gestión de estado
   const mapManagement = useMapManagement();
+
   const coordinateManagement = useCoordinateManagement(
     mapInstance,
     validateCoordinates,
     findNearestBuilding
   );
 
-  // Inicialización del polígono del campus
-  useEffect(() => {
-    if (UCN_COQUIMBO_BOUNDS && UCN_COQUIMBO_BOUNDS.length >= 2) {
-      try {
-        const polygonCoords = [
-          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[0][0]],
-          [UCN_COQUIMBO_BOUNDS[1][1], UCN_COQUIMBO_BOUNDS[0][0]],
-          [UCN_COQUIMBO_BOUNDS[1][1], UCN_COQUIMBO_BOUNDS[1][0]],
-          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[1][0]],
-          [UCN_COQUIMBO_BOUNDS[0][1], UCN_COQUIMBO_BOUNDS[0][0]],
-        ];
-        setCampusBoundsPolygon(polygonCoords);
-        console.log("Polígono del campus inicializado con Turf");
-      } catch (error) {
-        console.error("Error inicializando polígono del campus:", error);
-      }
-    }
-  }, []);
+  // Handlers de negocio
+  const businessHandlers = useMapHandlers(
+    showNotification,
+    showConfirm,
+    validateCoordinates,
+    loadBuildings,
+    loadRoutes,
+    deleteBuilding,
+    createRoute,
+    updateRoute,
+    deleteRoute,
+    mapManagement,
+    coordinateManagement,
+    mapInstance
+  );
 
   // Inicializar mapa
   useEffect(() => {
@@ -392,206 +279,41 @@ function Map() {
     mapManagement,
   ]);
 
-  // Funciones de negocio
-  const handleSaveBuilding = async (buildingData) => {
-    try {
-      const isValid = validateCoordinates(buildingData.lat, buildingData.lng);
-
-      if (!isValid) {
-        const confirmSave = window.confirm(
-          "Las coordenadas están fuera de los límites del campus. ¿Deseas guardar de todas formas?"
-        );
-        if (!confirmSave) return;
-      }
-
-      if (mapManagement.editingBuilding) {
-        const id =
-          mapManagement.editingBuilding.id ||
-          mapManagement.editingBuilding._id ||
-          mapManagement.editingBuilding.id_edificio;
-        await buildingService.updateBuilding(id, buildingData);
-        showNotification("Edificio actualizado correctamente", "success");
-      } else {
-        await buildingService.createBuilding(buildingData);
-        showNotification("Edificio creado correctamente", "success");
-      }
-
-      await loadBuildings();
-      mapManagement.setEditingBuilding(null);
-      mapManagement.setShowBuildingForm(false);
-      coordinateManagement.setCapturedCoords(null);
-    } catch (error) {
-      console.error("Error al guardar edificio:", error);
-      showNotification("Error al guardar edificio", "error");
-    }
-  };
-
-  // Eliminar edificio
-  const handleDeleteBuilding = async (building) => {
-    showConfirm(
-      "Eliminar Edificio",
-      `¿Estás seguro de eliminar el edificio "${building.nombre}"?\n\nEsta acción no se puede deshacer.`,
-      async () => {
-        try {
-          const id = building.id || building._id || building.id_edificio;
-          await deleteBuilding(id);
-          showNotification("Edificio eliminado correctamente", "success");
-        } catch (err) {
-          console.error("Error al eliminar edificio:", err);
-          showNotification("Error al eliminar edificio", "error");
-        }
-      },
-      {
-        type: "danger",
-        confirmText: "Eliminar",
-        cancelText: "Cancelar",
-      }
-    );
-  };
-
-  // Crear nuevas salas
-  const handleSaveRooms = async (roomsData) => {
-    try {
-      await roomService.createRooms(roomsData);
-      await loadBuildings();
-      showNotification("Salas creadas exitosamente", "success");
-    } catch (error) {
-      console.error("Error al crear salas:", error);
-      showNotification("Error al crear salas", "error");
-      throw error;
-    }
-  };
-
-  // Actualizar sala existente
-  const handleUpdateRoom = async (roomId, roomData) => {
-    try {
-      await roomService.updateRoom(roomId, roomData);
-      await loadBuildings();
-      showNotification("Sala actualizada exitosamente", "success");
-    } catch (error) {
-      console.error("Error al actualizar sala:", error);
-      showNotification("Error al actualizar sala", "error");
-      throw error;
-    }
-  };
-
-  const handleDeleteRoom = async (roomId) => {
-    try {
-      console.log("Eliminando sala ID:", roomId);
-      await roomService.deleteRoom(roomId);
-      await loadBuildings();
-      showNotification("Sala eliminada exitosamente", "success");
-    } catch (error) {
-      console.error("Error al eliminar sala:", error);
-      showNotification("Error al eliminar sala", "error");
-      throw error;
-    }
-  };
-
-  // Guardar ruta
-  const handleSaveRoute = async (routeData) => {
-    try {
-      if (routeData.puntos_ruta && routeData.puntos_ruta.length >= 2) {
-        const coordinates = routeData.puntos_ruta.map(
-          (p) => p.coordenadas.coordinates
-        );
-
-        const invalidPoints = routeData.puntos_ruta.filter((punto) => {
-          const [lng, lat] = punto.coordenadas.coordinates;
-          return !validateCoordinates(lat, lng);
-        });
-
-        if (invalidPoints.length > 0) {
-          showNotification(
-            "Algunos puntos de la ruta están fuera de los límites del campus",
-            "warning"
-          );
-          return;
-        }
-
-        if (!SpatialUtils.isValidLineString(coordinates)) {
-          showNotification("La geometría de la ruta no es válida", "error");
-          return;
-        }
-      }
-
-      if (mapManagement.editingRoute) {
-        await updateRoute(mapManagement.editingRoute.id, routeData);
-        showNotification("Ruta actualizada correctamente", "success");
-      } else {
-        await createRoute(routeData);
-        showNotification("Ruta creada correctamente", "success");
-      }
-
-      mapManagement.setEditingRoute(null);
-      mapManagement.setShowRouteForm(false);
-      await loadRoutes();
-    } catch (error) {
-      console.error("Error al guardar ruta:", error);
-      showNotification("Error al guardar ruta", "error");
-    }
-  };
-
-  // Eliminar ruta
-  const handleDeleteRoute = async (route) => {
-    showConfirm(
-      "Eliminar Ruta",
-      `¿Estás seguro de eliminar la ruta "${route.nombre}"?\n\nEsta acción no se puede deshacer.`,
-      async () => {
-        try {
-          await deleteRoute(route.id);
-          showNotification("Ruta eliminada correctamente", "success");
-          if (
-            mapManagement.selectedRoute &&
-            mapManagement.selectedRoute.id === route.id
-          ) {
-            mapManagement.setSelectedRoute(null);
-          }
-        } catch (err) {
-          console.error("Error al eliminar ruta:", err);
-          showNotification("Error al eliminar ruta", "error");
-        }
-      },
-      {
-        type: "warning",
-        confirmText: "Eliminar Ruta",
-        cancelText: "Cancelar",
-      }
-    );
-  };
-
   // Manejar clic en ruta para ajustar vista
-  const handleRouteClick = (route) => {
-    console.log("Ruta seleccionada:", route);
-    mapManagement.setSelectedRoute(route);
+  const handleRouteClick = useCallback(
+    (route) => {
+      console.log("Ruta seleccionada:", route);
+      mapManagement.setSelectedRoute(route);
 
-    if (mapInstance && route.geometria) {
-      const coordinates = route.geometria.coordinates;
-      if (coordinates.length > 0) {
-        try {
-          const points = coordinates.map((coord) => ({
-            lng: coord[0],
-            lat: coord[1],
-          }));
-          const bbox = SpatialUtils.calculateBoundingBox(points);
-          if (bbox) {
-            const bounds = L.latLngBounds(
-              [bbox[1], bbox[0]],
-              [bbox[3], bbox[2]]
-            );
+      if (mapInstance && route.geometria) {
+        const coordinates = route.geometria.coordinates;
+        if (coordinates.length > 0) {
+          try {
+            const points = coordinates.map((coord) => ({
+              lng: coord[0],
+              lat: coord[1],
+            }));
+            const bbox = SpatialUtils.calculateBoundingBox(points);
+            if (bbox) {
+              const bounds = L.latLngBounds(
+                [bbox[1], bbox[0]],
+                [bbox[3], bbox[2]]
+              );
+              mapInstance.fitBounds(bounds, { padding: [20, 20] });
+            }
+          } catch (error) {
+            console.error("Error calculando bounds con Turf:", error);
+            const bounds = coordinates.map((coord) => [coord[1], coord[0]]);
             mapInstance.fitBounds(bounds, { padding: [20, 20] });
           }
-        } catch (error) {
-          console.error("Error calculando bounds con Turf:", error);
-          const bounds = coordinates.map((coord) => [coord[1], coord[0]]);
-          mapInstance.fitBounds(bounds, { padding: [20, 20] });
         }
       }
-    }
-  };
+    },
+    [mapInstance, mapManagement]
+  );
 
   // Cerrar sesión
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     showConfirm(
       "Cerrar Sesión",
       "¿Estás seguro de que quieres cerrar sesión?",
@@ -604,10 +326,10 @@ function Map() {
         cancelText: "Cancelar",
       }
     );
-  };
+  }, [showConfirm, showNotification]);
 
   // Sincronizar datos con GeoServer
-  const handleSyncData = async () => {
+  const handleSyncData = useCallback(async () => {
     if (geoServerFeatures.length > 0) {
       try {
         await syncWithGeoServer(geoServerFeatures);
@@ -623,10 +345,10 @@ function Map() {
     } else {
       showNotification("No hay datos de GeoServer para sincronizar", "warning");
     }
-  };
+  }, [geoServerFeatures, syncWithGeoServer, showNotification, loadBuildings]);
 
   // Resetear vista al campus
-  const handleResetView = () => {
+  const handleResetView = useCallback(() => {
     if (mapInstance) {
       const boundsLatLng = L.latLngBounds(UCN_COQUIMBO_BOUNDS);
       mapInstance.fitBounds(boundsLatLng, {
@@ -637,7 +359,7 @@ function Map() {
       });
       console.log("Vista reseteada al Campus Guayacán");
     }
-  };
+  }, [mapInstance]);
 
   // Filtrar edificios según categoría
   const filteredBuildings = useMemo(() => {
@@ -688,6 +410,7 @@ function Map() {
         }
         onClearFilters={mapManagement.handleClearFilters}
         filteredBuildings={filteredBuildings}
+        onResetView={handleResetView}
       />
 
       {notification.show && (
@@ -712,7 +435,7 @@ function Map() {
       />
 
       <BuildingForm
-        onSave={handleSaveBuilding}
+        onSave={businessHandlers.handleSaveBuilding}
         onCancel={() => {
           mapManagement.setShowBuildingForm(false);
           mapManagement.setEditingBuilding(null);
@@ -732,12 +455,12 @@ function Map() {
         <BuildingList
           buildings={buildings}
           onEditBuilding={mapManagement.handleEditBuilding}
-          onDeleteBuilding={handleDeleteBuilding}
+          onDeleteBuilding={businessHandlers.handleDeleteBuilding}
           onClose={mapManagement.handleCloseBuildingList}
           onEditRoom={mapManagement.handleOpenEditRoom}
           onCreateRooms={mapManagement.handleCreateRoomsForBuilding}
           onAddRooms={() => mapManagement.handleCreateRoomsForBuilding(null)}
-          onDeleteRoom={handleDeleteRoom}
+          onDeleteRoom={businessHandlers.handleDeleteRoom}
           onReload={loadBuildings}
         />
       )}
@@ -747,16 +470,16 @@ function Map() {
           mode={mapManagement.roomManagementMode}
           buildings={buildings}
           selectedBuilding={mapManagement.selectedBuildingForRooms}
-          onSaveRooms={handleSaveRooms}
-          onUpdateRoom={handleUpdateRoom}
-          onDeleteRoom={handleDeleteRoom}
+          onSaveRooms={businessHandlers.handleSaveRooms}
+          onUpdateRoom={businessHandlers.handleUpdateRoom}
+          onDeleteRoom={businessHandlers.handleDeleteRoom}
           onClose={mapManagement.handleCloseRoomManagement}
           existingRooms={mapManagement.selectedRooms}
         />
       )}
 
       <RouteFormWithNodes
-        onSave={handleSaveRoute}
+        onSave={businessHandlers.handleSaveRoute}
         onCancel={() => {
           mapManagement.setShowRouteForm(false);
           mapManagement.setEditingRoute(null);
@@ -772,7 +495,7 @@ function Map() {
         <RouteList
           routes={routes}
           onEditRoute={mapManagement.handleEditRoute}
-          onDeleteRoute={handleDeleteRoute}
+          onDeleteRoute={businessHandlers.handleDeleteRoute}
           onClose={mapManagement.handleCloseRouteList}
           onSelectRoute={handleRouteClick}
         />
