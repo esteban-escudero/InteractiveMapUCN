@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Map.css";
@@ -11,6 +11,10 @@ import { useMapManagement } from "../../hooks/useMapManagement";
 import { useCoordinateManagement } from "../../hooks/useCoordinateManagement";
 import { useMapOperations } from "../../hooks/useMapOperations";
 import { useMapHandlers } from "../../hooks/useMapHandlers";
+import { useMapClickHandler } from "../../hooks/useMapClickHandler";
+import { useRouteUtils } from "../../hooks/useRouteUtils";
+import { useBuildingFilters } from "../../hooks/useBuildingFilters";
+import { useMapActions } from "../../hooks/useMapActions";
 import useRoutes from "../../hooks/useRoutes";
 
 // Componentes
@@ -26,11 +30,7 @@ import BuildingRenderer from "./BuildingRenderer";
 import MapIndicators from "./MapIndicators";
 
 // Constantes y servicios
-import {
-  UCN_COQUIMBO_BOUNDS,
-  MAP_ZOOM_LIMITS,
-} from "../../constants/mapConfig";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig";
 import { useNotification } from "../../hooks/useNotification";
 import Notification from "../UI/Notification/Notification";
 import { useConfirm } from "../../hooks/useConfirm";
@@ -117,6 +117,34 @@ function Map() {
     mapInstance
   );
 
+  // Utilitarios de rutas
+  const { handleRouteClick } = useRouteUtils(mapInstance, mapManagement);
+
+  // Filtros de edificios
+  const { filteredBuildings } = useBuildingFilters(
+    buildings,
+    mapManagement.filters
+  );
+
+  // Acciones del mapa
+  const { handleLogout, handleSyncData, handleResetView } = useMapActions(
+    mapInstance,
+    showNotification,
+    showConfirm,
+    syncWithGeoServer,
+    geoServerFeatures,
+    loadBuildings
+  );
+
+  // Manejo de clics en el mapa
+  useMapClickHandler(
+    mapInstance,
+    coordinateManagement,
+    validateCoordinates,
+    findNearestBuilding,
+    mapManagement
+  );
+
   // Inicializar mapa
   useEffect(() => {
     if (!mapInitialized && mapRef.current && !mapInstance) {
@@ -152,225 +180,6 @@ function Map() {
     }
   }, [isMapReady, mapInstance, geoServerStatus, loadWFSData]);
 
-  // Manejo de clics en el mapa para captura de coordenadas
-  useEffect(() => {
-    if (!mapInstance || !coordinateManagement.coordinateDetection) return;
-
-    const handleMapClick = (e) => {
-      const { lat, lng } = e.latlng;
-      console.log("Coordenadas capturadas:", { lat, lng });
-
-      if (
-        typeof lat !== "number" ||
-        typeof lng !== "number" ||
-        isNaN(lat) ||
-        isNaN(lng)
-      ) {
-        console.error("Coordenadas capturadas inválidas");
-        return;
-      }
-
-      const isValid = validateCoordinates(lat, lng);
-
-      // Limpiar marcador anterior si existe
-      if (coordinateManagement.tempMarker && mapInstance) {
-        mapInstance.removeLayer(coordinateManagement.tempMarker);
-      }
-
-      const newTempMarker = L.marker([lat, lng], {
-        icon: coordinateManagement.createTempIcon(),
-        zIndexOffset: 1000,
-      }).addTo(mapInstance);
-
-      let popupContent = `
-        <div style="text-align: center;">
-          <h4>Coordenadas Capturadas</h4>
-          <p><strong>Lat:</strong> ${lat.toFixed(6)}</p>
-          <p><strong>Lng:</strong> ${lng.toFixed(6)}</p>
-      `;
-
-      if (!isValid) {
-        popupContent += `
-          <p style="color: #e74c3c; font-weight: bold;">
-            Fuera del campus
-          </p>
-        `;
-      }
-
-      // Encontrar edificio más cercano
-      try {
-        const nearestBuilding = findNearestBuilding(lat, lng);
-        if (nearestBuilding) {
-          const distance = SpatialUtils.calculateDistance(
-            { lat, lng },
-            {
-              lat:
-                nearestBuilding.lat ||
-                nearestBuilding.ubicacion?.coordinates[1],
-              lng:
-                nearestBuilding.lng ||
-                nearestBuilding.ubicacion?.coordinates[0],
-            }
-          );
-
-          if (!isNaN(distance) && distance !== Infinity) {
-            popupContent += `
-              <p style="color: #27ae60; font-size: 12px;">
-                Más cercano: ${nearestBuilding.nombre} (${Math.round(
-              distance
-            )}m)
-              </p>
-            `;
-          }
-        }
-      } catch (error) {
-        console.warn("Error mostrando edificio más cercano:", error);
-      }
-
-      popupContent += `
-          <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
-            style="background: ${
-              isValid ? "#27ae60" : "#e74c3c"
-            }; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
-            ${isValid ? "Usar estas coordenadas" : "Usar de todas formas"}
-          </button>
-        </div>
-      `;
-
-      newTempMarker.bindPopup(popupContent).openPopup();
-      coordinateManagement.setTempMarker(newTempMarker);
-      coordinateManagement.setCapturedCoords({ lat, lng });
-    };
-
-    window.useCapturedCoords = (lat, lng) => {
-      console.log("Coordenadas usadas:", { lat, lng });
-
-      coordinateManagement.toggleCoordinateDetection();
-      coordinateManagement.setCapturedCoords({ lat, lng });
-
-      if (coordinateManagement.tempMarker && mapInstance) {
-        mapInstance.removeLayer(coordinateManagement.tempMarker);
-        coordinateManagement.setTempMarker(null);
-      }
-
-      mapManagement.setEditingBuilding(null);
-      mapManagement.setShowBuildingForm(true);
-    };
-
-    mapInstance.on("click", handleMapClick);
-
-    return () => {
-      mapInstance.off("click", handleMapClick);
-      delete window.useCapturedCoords;
-
-      if (coordinateManagement.coordinateDetection) {
-        coordinateManagement.toggleCoordinateDetection();
-        if (coordinateManagement.tempMarker && mapInstance) {
-          mapInstance.removeLayer(coordinateManagement.tempMarker);
-          coordinateManagement.setTempMarker(null);
-        }
-      }
-    };
-  }, [
-    mapInstance,
-    coordinateManagement,
-    validateCoordinates,
-    findNearestBuilding,
-    mapManagement,
-  ]);
-
-  // Manejar clic en ruta para ajustar vista
-  const handleRouteClick = useCallback(
-    (route) => {
-      console.log("Ruta seleccionada:", route);
-      mapManagement.setSelectedRoute(route);
-
-      if (mapInstance && route.geometria) {
-        const coordinates = route.geometria.coordinates;
-        if (coordinates.length > 0) {
-          try {
-            const points = coordinates.map((coord) => ({
-              lng: coord[0],
-              lat: coord[1],
-            }));
-            const bbox = SpatialUtils.calculateBoundingBox(points);
-            if (bbox) {
-              const bounds = L.latLngBounds(
-                [bbox[1], bbox[0]],
-                [bbox[3], bbox[2]]
-              );
-              mapInstance.fitBounds(bounds, { padding: [20, 20] });
-            }
-          } catch (error) {
-            console.error("Error calculando bounds con Turf:", error);
-            const bounds = coordinates.map((coord) => [coord[1], coord[0]]);
-            mapInstance.fitBounds(bounds, { padding: [20, 20] });
-          }
-        }
-      }
-    },
-    [mapInstance, mapManagement]
-  );
-
-  // Cerrar sesión
-  const handleLogout = useCallback(() => {
-    showConfirm(
-      "Cerrar Sesión",
-      "¿Estás seguro de que quieres cerrar sesión?",
-      () => {
-        showNotification("Sesión cerrada correctamente", "success");
-      },
-      {
-        type: "info",
-        confirmText: "Cerrar Sesión",
-        cancelText: "Cancelar",
-      }
-    );
-  }, [showConfirm, showNotification]);
-
-  // Sincronizar datos con GeoServer
-  const handleSyncData = useCallback(async () => {
-    if (geoServerFeatures.length > 0) {
-      try {
-        await syncWithGeoServer(geoServerFeatures);
-        showNotification(
-          `${geoServerFeatures.length} edificios sincronizados`,
-          "success"
-        );
-        await loadBuildings();
-      } catch (error) {
-        console.error("Error sincronizando datos:", error);
-        showNotification("Error sincronizando datos", "error");
-      }
-    } else {
-      showNotification("No hay datos de GeoServer para sincronizar", "warning");
-    }
-  }, [geoServerFeatures, syncWithGeoServer, showNotification, loadBuildings]);
-
-  // Resetear vista al campus
-  const handleResetView = useCallback(() => {
-    if (mapInstance) {
-      const boundsLatLng = L.latLngBounds(UCN_COQUIMBO_BOUNDS);
-      mapInstance.fitBounds(boundsLatLng, {
-        padding: [50, 50],
-        maxZoom: MAP_ZOOM_LIMITS.default,
-        animate: true,
-        duration: 0.5,
-      });
-      console.log("Vista reseteada al Campus Guayacán");
-    }
-  }, [mapInstance]);
-
-  // Filtrar edificios según categoría
-  const filteredBuildings = useMemo(() => {
-    if (!mapManagement.filters.category) return buildings;
-    return buildings.filter(
-      (building) =>
-        building.categoria === mapManagement.filters.category ||
-        building.tipo === mapManagement.filters.category
-    );
-  }, [buildings, mapManagement.filters.category]);
-
   // Renderizado del componente
   return (
     <div className="container">
@@ -380,6 +189,7 @@ function Map() {
         routesCount={routes.length}
         onLogout={handleLogout}
         onSyncData={handleSyncData}
+        onResetView={handleResetView}
         buildingsLoading={buildingsLoading}
         backendStatus={backendStatus}
         geoServerStatus={geoServerStatus}
@@ -410,7 +220,6 @@ function Map() {
         }
         onClearFilters={mapManagement.handleClearFilters}
         filteredBuildings={filteredBuildings}
-        onResetView={handleResetView}
       />
 
       {notification.show && (
@@ -511,7 +320,6 @@ function Map() {
         mapInstance={mapInstance}
         isMapReady={isMapReady}
         buildings={filteredBuildings}
-        SpatialUtils={SpatialUtils}
       />
 
       {mapManagement.showRouteNetwork && (
