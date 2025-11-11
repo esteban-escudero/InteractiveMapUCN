@@ -13,19 +13,85 @@ const RouteLayer = ({
   const routeLayerRef = useRef(null);
   const markersLayerRef = useRef(null);
 
+  // FUNCIÓN PARA APLICAR ESTILOS CSS DIRECTAMENTE AL ELEMENTO
+  const applyCustomStyles = (polyline, route) => {
+    setTimeout(() => {
+      const pathElement = polyline.getElement();
+      if (pathElement) {
+        const routeType = route.tipo?.toLowerCase() || "default";
+        const hasFilters = originFilter && destinationFilter;
+
+        if (!hasFilters) {
+          pathElement.style.stroke = "#9b59b6";
+          pathElement.style.strokeWidth = "4px";
+          pathElement.style.strokeOpacity = "0.7";
+          pathElement.style.strokeDasharray = "none";
+        } else {
+          const typeColors = {
+            peatonal: "#27ae60",
+            accesible: "#3498db",
+            emergencia: "#e74c3c",
+            rapida: "#f39c12",
+            vehicular: "#9b59b6",
+            default: "#95a5a6",
+          };
+
+          const color = typeColors[routeType] || typeColors.default;
+
+          if (route.es_ruta_completa) {
+            pathElement.style.stroke = color;
+            pathElement.style.strokeWidth = "8px";
+            pathElement.style.strokeOpacity = "1";
+            pathElement.style.strokeDasharray = "none";
+          } else if (route.es_combinada) {
+            pathElement.style.stroke = color;
+            pathElement.style.strokeWidth = "6px";
+            pathElement.style.strokeOpacity = "0.8";
+            pathElement.style.strokeDasharray = "10, 5";
+          } else if (route.es_segmento) {
+            pathElement.style.stroke = color;
+            pathElement.style.strokeWidth = "4px";
+            pathElement.style.strokeOpacity = "0.6";
+            pathElement.style.strokeDasharray = "5, 5";
+          } else {
+            pathElement.style.stroke = color;
+            pathElement.style.strokeWidth = "6px";
+            pathElement.style.strokeOpacity = "0.7";
+            pathElement.style.strokeDasharray = "none";
+          }
+        }
+
+        pathElement.classList.add("route-line");
+        pathElement.classList.add(`route-${routeType}`);
+
+        if (!hasFilters) {
+          pathElement.classList.add("route-no-filter");
+        } else {
+          if (route.es_ruta_completa) {
+            pathElement.classList.add("route-complete");
+          } else if (route.es_combinada) {
+            pathElement.classList.add("route-combined");
+          } else if (route.es_segmento) {
+            pathElement.classList.add("route-segment");
+          } else {
+            pathElement.classList.add("route-normal");
+          }
+        }
+      }
+    }, 100);
+  };
+
   // FUNCIÓN PARA ASIGNAR COLORES SEGÚN TIPO DE RUTA
   const getRouteStyle = (route) => {
     const hasFilters = originFilter && destinationFilter;
 
     const baseStyle = {
-      weight: 6,
       opacity: 0.9,
       lineCap: "round",
       lineJoin: "round",
-      className: "route-line", // Clase base siempre aplicada
+      className: "route-line",
     };
 
-    // SIN FILTROS: todas en morado
     if (!hasFilters) {
       return {
         ...baseStyle,
@@ -33,11 +99,10 @@ const RouteLayer = ({
         weight: 4,
         opacity: 0.7,
         dashArray: null,
-        className: "route-no-filter route-line", // Múltiples clases
+        className: "route-no-filter route-line",
       };
     }
 
-    // CON FILTROS: colores por tipo
     const typeColors = {
       peatonal: "#27ae60",
       accesible: "#3498db",
@@ -48,72 +113,72 @@ const RouteLayer = ({
     };
 
     const routeType = route.tipo?.toLowerCase() || "default";
-    const color = typeColors[routeType] || typeColors.default;
+    const baseColor = typeColors[routeType] || typeColors.default;
 
-    // DEBUG DE COLORES
-    console.log(`🎨 Applying color for ${route.nombre}:`, {
-      type: routeType,
-      color: color,
-      isComplete: route.es_ruta_completa,
-      hasFilters: hasFilters,
-    });
+    let style = {
+      ...baseStyle,
+      color: baseColor,
+    };
 
-    // DIFERENCIAR POR GROSOR Y CLASE
     if (route.es_ruta_completa) {
-      return {
-        ...baseStyle,
-        color: color, // Color inline como fallback
-        weight: 8, // Más grueso para rutas prioritarias
-        opacity: 0.9,
-        dashArray: null,
-        className: `route-priority route-${routeType} route-line`, // Múltiples clases
-      };
+      style.weight = 8;
+      style.opacity = 1;
+      style.dashArray = null;
+      style.className = `route-complete route-${routeType} route-line`;
+    } else if (route.es_combinada) {
+      style.weight = 6;
+      style.opacity = 0.8;
+      style.dashArray = "10, 5";
+      style.className = `route-combined route-${routeType} route-line`;
+    } else if (route.es_segmento) {
+      style.weight = 4;
+      style.opacity = 0.6;
+      style.dashArray = "5, 5";
+      style.className = `route-segment route-${routeType} route-line`;
+    } else {
+      style.weight = 6;
+      style.opacity = 0.7;
+      style.dashArray = null;
+      style.className = `route-normal route-${routeType} route-line`;
     }
 
-    // Rutas normales (segmentos)
-    return {
-      ...baseStyle,
-      color: color, // Color inline como fallback
-      weight: 4,
-      opacity: 0.7,
-      dashArray: null,
-      className: `route-normal route-${routeType} route-line`, // Múltiples clases
-    };
+    return style;
   };
 
   // FUNCIÓN PARA TOOLTIP INFORMATIVO
   const getTooltipContent = (route) => {
     const hasFilters = originFilter && destinationFilter;
-    const isPriorityRoute = route.es_ruta_completa === true;
 
     let content = `
-      <div class="route-tooltip">
-        <strong>${route.nombre}</strong><br/>
+    <div class="route-tooltip">
+      <strong>${route.nombre}</strong><br/>
+  `;
+
+    content += `
+    <span class="route-type ${route.tipo?.toLowerCase() || "default"}">
+      Tipo: ${route.tipo || "No especificado"}
+    </span><br/>
     `;
 
-    // Mostrar tipo solo cuando hay filtros
-    if (hasFilters) {
-      content += `
-        <span class="route-type ${route.tipo?.toLowerCase() || "default"}">
-          Tipo: ${route.tipo || "No especificado"}
-        </span><br/>
-      `;
+    if (route.es_ruta_completa) {
+      content += `<span class="route-category complete">🎯 Ruta Completa</span><br/>`;
+    } else if (route.es_combinada) {
+      content += `<span class="route-category combined">🔗 Ruta Combinada (${route.segmentos_incluidos}/${route.segmentos_totales} segmentos)</span><br/>`;
+    } else if (route.es_segmento) {
+      content += `<span class="route-category segment">📏 Segmento ${
+        route.segmento_index + 1
+      }/${route.segmento_total}</span><br/>`;
     } else {
-      content += `<span class="route-type no-filter">Modo: Todas las rutas</span><br/>`;
+      content += `<span class="route-category normal">🛣️ Ruta Normal</span><br/>`;
     }
 
     content += `
-        Distancia: ${route.distancia || 0}m<br/>
-        Tiempo: ${route.tiempo_estimado || 0} min
+      📏 Distancia: ${route.distancia || 0}m<br/>
+      ⏱️ Tiempo: ${route.tiempo_estimado || 0} min
     `;
 
-    // Solo mostrar "Ruta más corta" si realmente es prioritaria Y hay filtros
-    if (isPriorityRoute && hasFilters) {
-      content += `<br/><em class="priority-label">★ Ruta más corta</em>`;
-    } else if (route.es_segmento && hasFilters) {
-      content += `<br/><em class="segment-label">● Segmento ${
-        route.segment_index + 1
-      }/${route.total_segments || 1}</em>`;
+    if (route.prioridad) {
+      content += `<br/>⭐ Prioridad: ${route.prioridad.toUpperCase()}`;
     }
 
     if (route.descripcion) {
@@ -124,29 +189,23 @@ const RouteLayer = ({
     return content;
   };
 
-  // ========== USEFFECT PRINCIPAL - AQUÍ COMIENZA ==========
+  // USEFFECT PRINCIPAL
   useEffect(() => {
     const hasFilters = originFilter && destinationFilter;
 
     console.log("🎯🔄 RouteLayer Refresh:", {
       totalRoutes: routes?.length || 0,
-      mode: hasFilters ? "CON FILTROS" : "SIN FILTROS",
+      mode: hasFilters ? "CON FILTROS - TODAS LAS RUTAS" : "SIN FILTROS",
       origin: originFilter,
       destination: destinationFilter,
       routeTypes: routes ? [...new Set(routes.map((r) => r.tipo))] : [],
-      priorityRoutes: routes
-        ? routes.filter((r) => r.es_ruta_completa).length
-        : 0,
-      segments: routes ? routes.filter((r) => r.es_segmento).length : 0,
     });
 
-    // VERIFICACIÓN DE SEGURIDAD - AÑADIR ESTA PARTE
     if (!routes || !Array.isArray(routes)) {
       console.warn("❌ Routes is not an array or is undefined:", routes);
       return;
     }
 
-    // DEBUG DETALLADO DE TODAS LAS RUTAS
     console.log("📋 LISTA COMPLETA DE RUTAS:");
     routes.forEach((route, index) => {
       if (!route) {
@@ -158,12 +217,12 @@ const RouteLayer = ({
         type: route.tipo,
         es_ruta_completa: route.es_ruta_completa,
         es_segmento: route.es_segmento,
+        es_combinada: route.es_combinada,
+        prioridad: route.prioridad,
         origen: route.origen,
         destino: route.destino,
         distancia: route.distancia,
         coordinates: route.geometria?.coordinates?.length || 0,
-        hasGeometry: !!route.geometria,
-        hasCoordinates: !!route.geometria?.coordinates,
       });
     });
 
@@ -172,7 +231,6 @@ const RouteLayer = ({
       return;
     }
 
-    // Crear capas si no existen
     if (!routeLayerRef.current) {
       routeLayerRef.current = L.layerGroup().addTo(mapInstance);
     }
@@ -180,24 +238,22 @@ const RouteLayer = ({
       markersLayerRef.current = L.layerGroup().addTo(mapInstance);
     }
 
-    // Limpiar capas anteriores
     routeLayerRef.current.clearLayers();
     markersLayerRef.current.clearLayers();
 
-    // Si no hay rutas, salir
     if (routes.length === 0) {
       console.log("No routes to display");
       return;
     }
 
-    // CONTADORES PARA DEBUG
-    let priorityCount = 0;
+    let completeCount = 0;
+    let combinedCount = 0;
     let segmentCount = 0;
     let normalCount = 0;
     let invalidCount = 0;
+    let byTypeCount = {};
 
     routes.forEach((route, index) => {
-      // VERIFICACIÓN COMPLETA DE LA RUTA - AÑADIR ESTAS VERIFICACIONES
       if (!route) {
         console.warn(`❌ Route at index ${index} is undefined`);
         invalidCount++;
@@ -210,6 +266,7 @@ const RouteLayer = ({
         coordinatesLength: route.geometria?.coordinates?.length || 0,
         isComplete: route.es_ruta_completa,
         isSegment: route.es_segmento,
+        isCombined: route.es_combinada,
       });
 
       if (!route.geometria || !route.geometria.coordinates) {
@@ -223,7 +280,6 @@ const RouteLayer = ({
 
       const coordinates = route.geometria.coordinates;
 
-      // VALIDAR COORDENADAS
       if (!Array.isArray(coordinates) || coordinates.length < 2) {
         console.warn(
           `❌ Route "${route.nombre}" has insufficient coordinates:`,
@@ -233,7 +289,6 @@ const RouteLayer = ({
         return;
       }
 
-      // CONVERTIR COORDENADAS A FORMATO [lat, lng] PARA LEAFLET
       const latLngs = coordinates
         .map((coord, coordIndex) => {
           if (!Array.isArray(coord) || coord.length < 2) {
@@ -267,29 +322,23 @@ const RouteLayer = ({
         return;
       }
 
-      // CONTAR TIPOS DE RUTAS
-      if (route.es_ruta_completa) priorityCount++;
+      if (route.es_ruta_completa) completeCount++;
+      else if (route.es_combinada) combinedCount++;
       else if (route.es_segmento) segmentCount++;
       else normalCount++;
+
+      const routeType = route.tipo || "unknown";
+      byTypeCount[routeType] = (byTypeCount[routeType] || 0) + 1;
 
       console.log(
         `✅ Processing route "${route.nombre}" with ${latLngs.length} valid points`
       );
 
-      // OBTENER ESTILO
       const polylineOptions = getRouteStyle(route);
       const polyline = L.polyline(latLngs, polylineOptions);
 
-      // DEBUG DE ESTILOS APLICADOS
-      console.log(`🌈 Route "${route.nombre}" styles:`, {
-        className: polylineOptions.className,
-        color: polylineOptions.color,
-        weight: polylineOptions.weight,
-        type: route.tipo,
-        isComplete: route.es_ruta_completa,
-      });
+      applyCustomStyles(polyline, route);
 
-      // TOOLTIP INFORMATIVO
       const tooltipContent = getTooltipContent(route);
       polyline.bindTooltip(tooltipContent, {
         permanent: false,
@@ -297,35 +346,32 @@ const RouteLayer = ({
         className: "custom-tooltip",
       });
 
-      // EVENTO CLICK
       polyline.on("click", (e) => {
         L.DomEvent.stopPropagation(e);
         console.log("Route clicked:", {
           name: route.nombre,
           type: route.tipo,
-          isPriority: route.es_ruta_completa,
+          isComplete: route.es_ruta_completa,
           isSegment: route.es_segmento,
+          isCombined: route.es_combinada,
+          priority: route.prioridad,
         });
         if (onRouteClick) {
           onRouteClick(route);
         }
       });
 
-      // RESALTAR SI ESTÁ SELECCIONADO
       if (selectedRoute && selectedRoute.id === route.id) {
         polyline.setStyle({
-          color: "#e67e22", // NARANJA intenso para rutas seleccionadas
+          color: "#e67e22",
           weight: polylineOptions.weight + 2,
           opacity: 1,
         });
       }
 
-      // AGREGAR A LA CAPA
       routeLayerRef.current.addLayer(polyline);
 
-      // AGREGAR MARCADORES SOLO PARA RUTAS COMPLETAS PRIORITARIAS (con filtros)
       if (route.es_ruta_completa && hasFilters) {
-        // Marcador de inicio
         const startCoords = latLngs[0];
         const startMarker = L.marker(startCoords, {
           icon: L.divIcon({
@@ -338,7 +384,6 @@ const RouteLayer = ({
           direction: "top",
         });
 
-        // Marcador de fin
         const endCoords = latLngs[latLngs.length - 1];
         const endMarker = L.marker(endCoords, {
           icon: L.divIcon({
@@ -351,13 +396,15 @@ const RouteLayer = ({
           direction: "top",
         });
 
-        markersLayerRef.current.addLayer(startMarker);
-        markersLayerRef.current.addLayer(endMarker);
-
-        // POPUP INFORMATIVO PARA LA RUTA COMPLETA
         const routeInfo = `
           <div class="route-summary">
-            <h3>🚗 Ruta Más Corta</h3>
+            <h3>${
+              route.tipo
+                ? `Ruta ${
+                    route.tipo.charAt(0).toUpperCase() + route.tipo.slice(1)
+                  }`
+                : "Ruta"
+            }</h3>
             <p><strong>${route.origen || "Origen"}</strong> → <strong>${
           route.destino || "Destino"
         }</strong></p>
@@ -369,26 +416,31 @@ const RouteLayer = ({
             <p>🔗 Segmentos: <strong>${
               route.segmentos_originales || 1
             }</strong></p>
-            <p>🎨 Tipo: <strong>${route.tipo || "Prioritaria"}</strong></p>
+            <p>🎨 Tipo: <strong>${route.tipo || "Completa"}</strong></p>
+            <p>⭐ Prioridad: <strong>${route.prioridad || "alta"}</strong></p>
           </div>
         `;
 
         startMarker.bindPopup(routeInfo);
+        markersLayerRef.current.addLayer(startMarker);
+        markersLayerRef.current.addLayer(endMarker);
       }
     });
 
-    // DEBUG FINAL
-    console.log("📊 RouteLayer Summary:", {
+    console.log("📊 RouteLayer Summary - ALL POSSIBLE ROUTES:", {
       total: routes.length,
       valid: routes.length - invalidCount,
       invalid: invalidCount,
-      priority: priorityCount,
-      segments: segmentCount,
-      normal: normalCount,
-      mode: hasFilters ? "FILTERED" : "ALL",
+      byCategory: {
+        complete: completeCount,
+        combined: combinedCount,
+        segments: segmentCount,
+        normal: normalCount,
+      },
+      byType: byTypeCount,
+      mode: hasFilters ? "FILTERED - SHOWING ALL OPTIONS" : "ALL ROUTES",
     });
 
-    // AJUSTAR VISTA DEL MAPA PARA MOSTRAR TODAS LAS RUTAS
     if (routeLayerRef.current.getLayers().length > 0) {
       const group = new L.featureGroup(routeLayerRef.current.getLayers());
       mapInstance.fitBounds(group.getBounds(), { padding: [20, 20] });
@@ -409,7 +461,6 @@ const RouteLayer = ({
     destinationFilter,
   ]);
 
-  // CLEANUP
   useEffect(() => {
     return () => {
       console.log("RouteLayer: Cleaning up layers");

@@ -1,4 +1,41 @@
-/* ===== ESTILOS PARA RUTAS ===== */
+/* ===== ESTILOS PARA RUTAS COMPLETAS ===== */
+.route-complete {
+  stroke-width: 6px !important;
+  stroke-opacity: 0.8 !important;
+}
+
+/* ===== ESTILOS PARA RUTAS SIN FILTROS ===== */
+.route-no-filter {
+  stroke: #9b59b6 !important;
+  stroke-width: 4px !important;
+  stroke-opacity: 0.7 !important;
+}
+
+/* ===== COLORES POR TIPO DE RUTA ===== */
+.route-peatonal.route-line {
+  stroke: #27ae60 !important;
+}
+
+.route-accesible.route-line {
+  stroke: #3498db !important;
+}
+
+.route-emergencia.route-line {
+  stroke: #e74c3c !important;
+}
+
+.route-rapida.route-line {
+  stroke: #f39c12 !important;
+}
+
+.route-vehicular.route-line {
+  stroke: #9b59b6 !important;
+}
+
+.route-default.route-line {
+  stroke: #95a5a6 !important;
+}
+
 .route-line {
   cursor: pointer;
   transition: all 0.3s ease;
@@ -6,27 +43,8 @@
 
 .route-line:hover {
   opacity: 1 !important;
+  stroke-width: calc(var(--base-stroke-width, 6px) + 2px) !important;
   filter: brightness(1.2) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
-}
-
-/* ===== ANIMACIONES ===== */
-@keyframes pulse-priority {
-  0% {
-    stroke-width: 8px;
-    stroke-opacity: 0.9;
-  }
-  50% {
-    stroke-width: 10px;
-    stroke-opacity: 1;
-  }
-  100% {
-    stroke-width: 8px;
-    stroke-opacity: 0.9;
-  }
-}
-
-.route-priority {
-  animation: pulse-priority 2s infinite;
 }
 
 /* ===== ESTILOS PARA TOOLTIPS ===== */
@@ -79,22 +97,11 @@
   background: #9b59b6;
 }
 
-.priority-label {
-  color: #e74c3c;
+.complete-label {
+  color: #2c3e50;
   font-style: italic;
   font-weight: bold;
-}
-
-.segment-label {
-  color: #f39c12;
-  font-style: italic;
-}
-
-.custom-tooltip small {
-  color: #7f8c8d;
-  font-style: italic;
-  margin-top: 4px;
-  display: block;
+  font-size: 11px;
 }
 
 /* ===== ESTILOS PARA MARCADORES ===== */
@@ -194,6 +201,14 @@
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+  .route-complete {
+    stroke-width: 5px !important;
+  }
+
+  .route-no-filter {
+    stroke-width: 3px !important;
+  }
+
   .route-legend {
     bottom: 10px;
     right: 10px;
@@ -205,7 +220,6 @@
 
 /* ===== ESTILOS DE ACCESIBILIDAD ===== */
 @media (prefers-reduced-motion: reduce) {
-  .route-priority,
   .route-marker.origin,
   .route-marker.destination {
     animation: none;

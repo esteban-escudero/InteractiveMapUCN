@@ -88,8 +88,12 @@ function Map() {
   } = useProximity();
 
   // ========== HOOK DE INTELIGENCIA DE RUTAS ==========
-  const { getPrioritizedRoutes, buildingGraph, calculateShortestRoute } =
-    useRouteIntelligence(routes, buildings);
+  const {
+    getPrioritizedRoutes,
+    buildingGraphs,
+    calculateShortestRoutesByType,
+    hasData,
+  } = useRouteIntelligence(routes, buildings);
 
   // ========== HOOKS DE GESTIÓN DE ESTADO DEL MAPA ==========
   const mapManagement = useMapManagement();
@@ -105,31 +109,95 @@ function Map() {
     mapManagement.filters
   );
 
-  // ========== RUTAS PRIORIZADAS ==========
+  // ========== VALIDACIÓN DE FILTROS ==========
+  const filtersValid = useMemo(() => {
+    return (
+      mapManagement.filters.origin &&
+      mapManagement.filters.destination &&
+      buildings.some((b) => b.nombre === mapManagement.filters.origin) &&
+      buildings.some((b) => b.nombre === mapManagement.filters.destination)
+    );
+  }, [mapManagement.filters, buildings]);
+
+  // ========== RUTAS PRIORIZADAS - VERSIÓN CORREGIDA ==========
   const prioritizedRoutes = useMemo(() => {
-    if (mapManagement.filters.origin && mapManagement.filters.destination) {
-      console.log("🎯 Calculating prioritized route:", {
-        origin: mapManagement.filters.origin,
-        destination: mapManagement.filters.destination,
+    // OBTENER EDIFICIOS COMPLETOS A PARTIR DE LOS NOMBRES
+    const getBuildingFromName = (buildingName) => {
+      return buildings.find((b) => b.nombre === buildingName);
+    };
+
+    const originBuilding = getBuildingFromName(mapManagement.filters.origin);
+    const destinationBuilding = getBuildingFromName(
+      mapManagement.filters.destination
+    );
+
+    if (originBuilding && destinationBuilding) {
+      console.log("🎯 Calculating prioritized routes between:", {
+        origin: originBuilding.nombre,
+        destination: destinationBuilding.nombre,
+        originCoords: originBuilding.ubicacion?.coordinates,
+        destinationCoords: destinationBuilding.ubicacion?.coordinates,
       });
 
-      const result = getPrioritizedRoutes(
-        mapManagement.filters.origin,
-        mapManagement.filters.destination
-      );
+      try {
+        const result = getPrioritizedRoutes(
+          originBuilding.nombre,
+          destinationBuilding.nombre
+        );
 
-      console.log("📊 Prioritized routes result:", {
-        total: result.length,
-        routes: result.map((r) => ({
-          name: r.nombre,
-          isSegment: r.es_segmento,
-          coords: r.geometria?.coordinates?.length || 0,
-        })),
-      });
+        console.log("📊 Prioritized routes calculation result:", {
+          totalRoutes: result?.length || 0,
+          routeTypes: result ? [...new Set(result.map((r) => r.tipo))] : [],
+          completeRoutes: result
+            ? result.filter((r) => r.es_ruta_completa).length
+            : 0,
+          segments: result ? result.filter((r) => r.es_segmento).length : 0,
+          combinedRoutes: result
+            ? result.filter((r) => r.es_combinada).length
+            : 0,
+        });
 
-      return result;
+        // DEBUG DETALLADO DE CADA RUTA
+        if (result && result.length > 0) {
+          console.log("🔍 Detalle de rutas generadas:");
+          result.forEach((route, index) => {
+            console.log(`Route ${index}:`, {
+              name: route.nombre,
+              type: route.tipo,
+              priority: route.prioridad,
+              distance: route.distancia,
+              isComplete: route.es_ruta_completa,
+              isSegment: route.es_segmento,
+              isCombined: route.es_combinada,
+              coordinates: route.geometria?.coordinates?.length || 0,
+              origin: route.origen,
+              destination: route.destino,
+            });
+          });
+        }
+
+        return result || [];
+      } catch (error) {
+        console.error("❌ Error en getPrioritizedRoutes:", error);
+        return routes; // Fallback a todas las rutas
+      }
     } else {
-      console.log("🔄 No filters - showing all routes:", routes.length);
+      // MOSTRAR TODAS LAS RUTAS CUANDO NO HAY FILTROS VÁLIDOS
+      console.log("🔄 No valid filters - showing all routes:", routes.length);
+
+      // DEBUG de rutas disponibles
+      if (routes.length > 0) {
+        console.log(
+          "📋 Available routes:",
+          routes.map((r) => ({
+            name: r.nombre,
+            type: r.tipo,
+            distance: r.distancia,
+            coordinates: r.geometria?.coordinates?.length || 0,
+          }))
+        );
+      }
+
       return routes;
     }
   }, [
@@ -137,202 +205,154 @@ function Map() {
     mapManagement.filters.destination,
     getPrioritizedRoutes,
     routes,
+    buildings,
   ]);
 
-  // ========== DEBUG CRÍTICO - RUTAS PRIORIZADAS ==========
-  useEffect(() => {
-    if (mapManagement.filters.origin && mapManagement.filters.destination) {
-      console.log("🔍🔄 DEBUG CRÍTICO - RUTAS PRIORIZADAS:", {
-        origen: mapManagement.filters.origin,
-        destino: mapManagement.filters.destination,
-        totalRutasPrioritarias: prioritizedRoutes.length,
-        detallesRutas: prioritizedRoutes.map((r, i) => ({
-          index: i,
-          nombre: r.nombre,
-          es_ruta_completa: r.es_ruta_completa,
-          es_segmento: r.es_segmento,
-          puntos: r.geometria?.coordinates?.length || 0,
-          distancia: r.distancia,
-          origen: r.origen,
-          destino: r.destino,
+  // ========== DIAGNÓSTICO DEL SISTEMA ==========
+  const diagnoseRouteIssues = useCallback(() => {
+    console.log("🔧 DIAGNÓSTICO DEL SISTEMA DE RUTAS:");
+
+    // 1. Verificar datos de entrada
+    console.log("1. DATOS DE ENTRADA:", {
+      buildings: {
+        total: buildings.length,
+        withCoordinates: buildings.filter((b) => b.ubicacion?.coordinates)
+          .length,
+        sample: buildings.slice(0, 3).map((b) => ({
+          name: b.nombre,
+          coords: b.ubicacion?.coordinates,
         })),
-      });
+      },
+      routes: {
+        total: routes.length,
+        withGeometry: routes.filter((r) => r.geometria?.coordinates).length,
+        types: [...new Set(routes.map((r) => r.tipo))],
+        sample: routes.slice(0, 3).map((r) => ({
+          name: r.nombre,
+          type: r.tipo,
+          coords: r.geometria?.coordinates?.length,
+        })),
+      },
+    });
 
-      // Verificar si hay alguna ruta completa
-      const rutasCompletas = prioritizedRoutes.filter(
-        (r) => r.es_ruta_completa
-      );
-      console.log("✅ RUTAS COMPLETAS ENCONTRADAS:", rutasCompletas.length);
+    // 2. Verificar filtros actuales
+    console.log("2. FILTROS ACTUALES:", {
+      origin: mapManagement.filters.origin,
+      destination: mapManagement.filters.destination,
+      originExists: buildings.some(
+        (b) => b.nombre === mapManagement.filters.origin
+      ),
+      destinationExists: buildings.some(
+        (b) => b.nombre === mapManagement.filters.destination
+      ),
+      valid: filtersValid,
+    });
 
-      if (rutasCompletas.length > 0) {
-        console.log("🎯 DETALLE RUTA COMPLETA:", rutasCompletas[0]);
-      } else {
-        console.log(
-          "❌ NO HAY RUTAS COMPLETAS - mostrando segmentos:",
-          prioritizedRoutes.filter((r) => r.es_segmento).length
-        );
-      }
-    }
-  }, [prioritizedRoutes, mapManagement.filters]);
-
-  // ========== DEBUG CRÍTICO DEL SISTEMA DE RUTAS ==========
-  useEffect(() => {
-    if (!buildingGraph) {
-      console.log("🔍🔄 buildingGraph no disponible para debug del sistema");
-      return;
-    }
-
-    if (mapManagement.filters.origin && mapManagement.filters.destination) {
-      console.log("🔍🔄 DEBUG CRÍTICO - Estado del Sistema de Rutas:", {
-        filters: mapManagement.filters,
-        buildingGraph: {
-          hasOrigin: !!buildingGraph[mapManagement.filters.origin],
-          hasDestination: !!buildingGraph[mapManagement.filters.destination],
-          totalBuildings: Object.keys(buildingGraph).length,
-          sampleBuildings: Object.keys(buildingGraph).slice(0, 3),
-        },
-        originConnections: buildingGraph[mapManagement.filters.origin]
-          ?.connections
-          ? Object.keys(buildingGraph[mapManagement.filters.origin].connections)
-          : [],
-        routesState: {
-          total: routes.length,
-          withGeometry: routes.filter((r) => r.geometria?.coordinates).length,
-          sample: routes.slice(0, 2).map((r) => ({
-            id: r.id,
-            name: r.nombre,
-            coords: r.geometria?.coordinates?.length || 0,
+    // 3. Verificar grafo
+    if (buildingGraphs) {
+      console.log("3. GRAFOS DE CONEXIONES:", {
+        totalGraphs: Object.keys(buildingGraphs).length,
+        graphTypes: Object.keys(buildingGraphs),
+        sampleGraph: Object.keys(buildingGraphs)
+          .slice(0, 1)
+          .map((graphType) => ({
+            type: graphType,
+            nodes: Object.keys(buildingGraphs[graphType]).length,
+            nodesWithConnections: Object.keys(buildingGraphs[graphType]).filter(
+              (node) =>
+                Object.keys(buildingGraphs[graphType][node]?.connections || {})
+                  .length > 0
+            ).length,
           })),
-        },
       });
-
-      if (
-        buildingGraph[mapManagement.filters.origin] &&
-        buildingGraph[mapManagement.filters.destination]
-      ) {
-        const testResult = calculateShortestRoute(
-          mapManagement.filters.origin,
-          mapManagement.filters.destination
-        );
-        console.log("🧪 Test Route Calculation:", testResult);
-      }
     }
-  }, [mapManagement.filters, buildingGraph, routes, calculateShortestRoute]);
 
-  // En Map.js - Agrega este debug
+    // 4. Verificar rutas prioritarias
+    console.log("4. RUTAS PRIORITARIAS:", {
+      total: prioritizedRoutes.length,
+      byType: prioritizedRoutes.reduce((acc, route) => {
+        acc[route.tipo] = (acc[route.tipo] || 0) + 1;
+        return acc;
+      }, {}),
+      byCategory: {
+        complete: prioritizedRoutes.filter((r) => r.es_ruta_completa).length,
+        combined: prioritizedRoutes.filter((r) => r.es_combinada).length,
+        segments: prioritizedRoutes.filter((r) => r.es_segmento).length,
+      },
+    });
+  }, [
+    buildings,
+    routes,
+    mapManagement.filters,
+    buildingGraphs,
+    prioritizedRoutes,
+    filtersValid,
+  ]);
+
+  // ========== DEBUG Y MONITOREO ==========
   useEffect(() => {
     if (mapManagement.filters.origin && mapManagement.filters.destination) {
       console.log("🔍🔄 RUTAS PRIORITARIAS POR TIPO:", {
         origen: mapManagement.filters.origin,
         destino: mapManagement.filters.destination,
         totalRutas: prioritizedRoutes.length,
-        tiposEncontrados: prioritizedRoutes.map((r) => r.tipo),
+        tiposEncontrados: [...new Set(prioritizedRoutes.map((r) => r.tipo))],
         detalles: prioritizedRoutes.map((r) => ({
           tipo: r.tipo,
           nombre: r.nombre,
           distancia: r.distancia,
           segmentos: r.segmentos_originales,
+          prioridad: r.prioridad,
+        })),
+      });
+
+      // Ejecutar diagnóstico después de un delay
+      setTimeout(diagnoseRouteIssues, 1000);
+    }
+  }, [prioritizedRoutes, mapManagement.filters, diagnoseRouteIssues]);
+
+  // DEBUG DEL GRAFO
+  useEffect(() => {
+    if (
+      buildingGraphs &&
+      mapManagement.filters.origin &&
+      mapManagement.filters.destination
+    ) {
+      console.log("🔗 DEBUG COMPLETO DEL BUILDING GRAPH:", {
+        totalGraphs: Object.keys(buildingGraphs).length,
+        graphTypes: Object.keys(buildingGraphs),
+        currentFilters: {
+          origin: mapManagement.filters.origin,
+          destination: mapManagement.filters.destination,
+        },
+        connectionStatus: Object.keys(buildingGraphs).map((graphType) => ({
+          type: graphType,
+          hasOrigin:
+            !!buildingGraphs[graphType]?.[mapManagement.filters.origin],
+          hasDestination:
+            !!buildingGraphs[graphType]?.[mapManagement.filters.destination],
+          originConnections: buildingGraphs[graphType]?.[
+            mapManagement.filters.origin
+          ]
+            ? Object.keys(
+                buildingGraphs[graphType][mapManagement.filters.origin]
+                  .connections || {}
+              )
+            : [],
+          destinationConnections: buildingGraphs[graphType]?.[
+            mapManagement.filters.destination
+          ]
+            ? Object.keys(
+                buildingGraphs[graphType][mapManagement.filters.destination]
+                  .connections || {}
+              )
+            : [],
         })),
       });
     }
-  }, [prioritizedRoutes, mapManagement.filters]);
+  }, [buildingGraphs, mapManagement.filters]);
 
-  // ========== DEBUG DEL GRAFO ==========
-  useEffect(() => {
-    if (!buildingGraph) {
-      console.log("🔗🔄 buildingGraph no está disponible aún");
-      return;
-    }
-
-    console.log("🔗🔄 DEBUG DEL GRAFO DE CONEXIONES:", {
-      totalEdificios: Object.keys(buildingGraph).length,
-      edificiosConConexiones: Object.keys(buildingGraph).filter(
-        (b) => Object.keys(buildingGraph[b]?.connections || {}).length > 0
-      ),
-      todasLasConexiones: Object.keys(buildingGraph).map((edificio) => ({
-        edificio,
-        conexiones: Object.keys(buildingGraph[edificio]?.connections || {}),
-      })),
-      casino: buildingGraph["Casino"]
-        ? {
-            tieneConexiones:
-              Object.keys(buildingGraph["Casino"]?.connections || {}).length >
-              0,
-            conexiones: Object.keys(buildingGraph["Casino"]?.connections || {}),
-          }
-        : "NO EXISTE",
-      museo: buildingGraph["Museo"]
-        ? {
-            tieneConexiones:
-              Object.keys(buildingGraph["Museo"]?.connections || {}).length > 0,
-            conexiones: Object.keys(buildingGraph["Museo"]?.connections || {}),
-          }
-        : "NO EXISTE",
-    });
-  }, [buildingGraph]);
-
-  // ========== CONEXIONES DETALLADAS ==========
-  useEffect(() => {
-    if (!buildingGraph) {
-      console.log(
-        "🔍 buildingGraph no está disponible para conexiones detalladas"
-      );
-      return;
-    }
-
-    console.log("🔍 CONEXIONES DETALLADAS DEL GRAFO:", {
-      todosLosEdificios: Object.keys(buildingGraph),
-
-      casino: buildingGraph["Casino"]
-        ? {
-            conexiones: Object.keys(
-              buildingGraph["Casino"]?.connections || {}
-            ).map((target) => ({
-              hacia: target,
-              distancia: Math.round(
-                buildingGraph["Casino"]?.connections[target]?.distance || 0
-              ),
-              ruta:
-                buildingGraph["Casino"]?.connections[target]?.routeName ||
-                "N/A",
-            })),
-          }
-        : "NO EXISTE",
-
-      museo: buildingGraph["Museo"]
-        ? {
-            conexiones: Object.keys(
-              buildingGraph["Museo"]?.connections || {}
-            ).map((target) => ({
-              hacia: target,
-              distancia: Math.round(
-                buildingGraph["Museo"]?.connections[target]?.distance || 0
-              ),
-              ruta:
-                buildingGraph["Museo"]?.connections[target]?.routeName || "N/A",
-            })),
-          }
-        : "NO EXISTE",
-
-      posiblesCaminos: Object.keys(buildingGraph)
-        .filter(
-          (edificio) =>
-            buildingGraph[edificio]?.connections &&
-            Object.keys(buildingGraph[edificio]?.connections || {}).includes(
-              "Museo"
-            )
-        )
-        .map((conectadoAMuseo) => ({
-          desdeCasino: buildingGraph["Casino"]?.connections?.[conectadoAMuseo]
-            ? "SÍ"
-            : "NO",
-          intermediario: conectadoAMuseo,
-          haciaMuseo: "SÍ",
-        })),
-    });
-  }, [buildingGraph]);
-
-  // En Map.js - Agrega este useEffect para verificar datos
+  // VERIFICACIÓN DE DATOS
   useEffect(() => {
     console.log("📊 VERIFICACIÓN DE DATOS EN MAP:", {
       edificios: {
@@ -345,17 +365,27 @@ function Map() {
         count: routes.length,
         nombres: routes.map((r) => r.nombre),
         conGeometria: routes.filter((r) => r.geometria?.coordinates).length,
+        tipos: [...new Set(routes.map((r) => r.tipo))],
       },
       grafo: {
-        edificios: buildingGraph ? Object.keys(buildingGraph).length : 0,
-        tieneConexiones: buildingGraph
-          ? Object.keys(buildingGraph).filter(
-              (b) => Object.keys(buildingGraph[b]?.connections || {}).length > 0
-            ).length
-          : 0,
+        disponible: !!buildingGraphs,
+        tipos: buildingGraphs ? Object.keys(buildingGraphs) : [],
+        tieneDatos: hasData,
+      },
+      filtros: {
+        activos:
+          !!mapManagement.filters.origin && !!mapManagement.filters.destination,
+        validos: filtersValid,
       },
     });
-  }, [buildings, routes, buildingGraph]);
+  }, [
+    buildings,
+    routes,
+    buildingGraphs,
+    hasData,
+    mapManagement.filters,
+    filtersValid,
+  ]);
 
   // ========== HANDLERS Y UTILITARIOS ==========
   const businessHandlers = useMapHandlers(
@@ -573,6 +603,7 @@ function Map() {
         onClearFilters={mapManagement.handleClearFilters}
         allBuildings={buildings}
         filteredBuildings={filteredBuildings}
+        filtersValid={filtersValid}
       />
 
       {/* NOTIFICACIONES Y DIÁLOGOS */}
@@ -679,6 +710,25 @@ function Map() {
           </div>
         )}
 
+        {/* INDICADOR DE ESTADO DE FILTROS */}
+        <div className="filter-status-indicator">
+          {filtersValid ? (
+            <div className="filter-status valid">
+              ✅ Mostrando rutas entre{" "}
+              <strong>{mapManagement.filters.origin}</strong> y{" "}
+              <strong>{mapManagement.filters.destination}</strong>
+              <span className="route-count">
+                ({prioritizedRoutes.length} rutas encontradas)
+              </span>
+            </div>
+          ) : mapManagement.filters.origin ||
+            mapManagement.filters.destination ? (
+            <div className="filter-status invalid">
+              ⚠️ Selecciona edificios válidos para ver rutas
+            </div>
+          ) : null}
+        </div>
+
         <MapIndicators
           coordinateDetection={coordinateManagement.coordinateDetection}
           validationErrors={coordinateManagement.validationErrors}
@@ -695,7 +745,7 @@ function Map() {
       <BuildingRenderer
         mapInstance={mapInstance}
         isMapReady={isMapReady}
-        buildings={filteredBuildings}
+        buildings={buildings}
         onBuildingClick={handleBuildingClickWithProximity}
       />
 

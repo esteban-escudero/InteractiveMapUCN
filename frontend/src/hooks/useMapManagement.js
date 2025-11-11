@@ -99,6 +99,25 @@ export const useMapManagement = () => {
     setFilters({ origin: "", destination: "", category: "" });
   }, []);
 
+  // Validar filtros contra lista de edificios
+  const validateFilters = useCallback(
+    (buildings) => {
+      return {
+        origin:
+          filters.origin && buildings.some((b) => b.nombre === filters.origin),
+        destination:
+          filters.destination &&
+          buildings.some((b) => b.nombre === filters.destination),
+        bothValid:
+          filters.origin &&
+          filters.destination &&
+          buildings.some((b) => b.nombre === filters.origin) &&
+          buildings.some((b) => b.nombre === filters.destination),
+      };
+    },
+    [filters]
+  );
+
   // Resetear todas las vistas
   const resetViews = useCallback(() => {
     setShowBuildingForm(false);
@@ -110,11 +129,6 @@ export const useMapManagement = () => {
     setEditingBuilding(null);
     setEditingRoute(null);
     setSelectedRoute(null);
-  }, []);
-
-  // En useMapManagement.js, agregar:
-  const handleClearRouteFilters = useCallback(() => {
-    setFilters((prev) => ({ ...prev, origin: "", destination: "" }));
   }, []);
 
   return {
@@ -162,6 +176,7 @@ export const useMapManagement = () => {
     handleCloseRouteList,
     handleFilterChange,
     handleClearFilters,
+    validateFilters,
     resetViews,
   };
 };
