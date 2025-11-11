@@ -41,17 +41,14 @@ import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig";
 
 // Componente principal del mapa
 function Map() {
-  // ========== ESTADOS Y HOOKS BÁSICOS ==========
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
-
-  // ========== HOOKS DE GESTIÓN DE ESTADO GLOBAL ==========
   const { notification, showNotification, hideNotification } =
     useNotification();
   const { confirmState, showConfirm, hideConfirm, handleConfirm } =
     useConfirm();
 
-  // ========== HOOKS DE DATOS ==========
+  //Hooks de datos
   const {
     buildings,
     loading: buildingsLoading,
@@ -87,7 +84,7 @@ function Map() {
     getProximityAnalysis,
   } = useProximity();
 
-  // ========== HOOK DE INTELIGENCIA DE RUTAS ==========
+  // Hook de Inteligencia de Rutas
   const {
     getPrioritizedRoutes,
     buildingGraphs,
@@ -132,7 +129,7 @@ function Map() {
     );
 
     if (originBuilding && destinationBuilding) {
-      console.log("🎯 Calculating prioritized routes between:", {
+      console.log("Calculando rutas priorizadas entre:", {
         origin: originBuilding.nombre,
         destination: destinationBuilding.nombre,
         originCoords: originBuilding.ubicacion?.coordinates,
@@ -145,7 +142,7 @@ function Map() {
           destinationBuilding.nombre
         );
 
-        console.log("📊 Prioritized routes calculation result:", {
+        console.log("Resultado del cálculo de rutas priorizadas:", {
           totalRoutes: result?.length || 0,
           routeTypes: result ? [...new Set(result.map((r) => r.tipo))] : [],
           completeRoutes: result
@@ -159,7 +156,7 @@ function Map() {
 
         // DEBUG DETALLADO DE CADA RUTA
         if (result && result.length > 0) {
-          console.log("🔍 Detalle de rutas generadas:");
+          console.log("Detalle de rutas generadas:");
           result.forEach((route, index) => {
             console.log(`Route ${index}:`, {
               name: route.nombre,
@@ -178,17 +175,14 @@ function Map() {
 
         return result || [];
       } catch (error) {
-        console.error("❌ Error en getPrioritizedRoutes:", error);
+        console.error("Error en getPrioritizedRoutes:", error);
         return routes; // Fallback a todas las rutas
       }
     } else {
-      // MOSTRAR TODAS LAS RUTAS CUANDO NO HAY FILTROS VÁLIDOS
-      console.log("🔄 No valid filters - showing all routes:", routes.length);
-
       // DEBUG de rutas disponibles
       if (routes.length > 0) {
         console.log(
-          "📋 Available routes:",
+          "Rutas Disponibles:",
           routes.map((r) => ({
             name: r.nombre,
             type: r.tipo,
@@ -210,7 +204,7 @@ function Map() {
 
   // ========== DIAGNÓSTICO DEL SISTEMA ==========
   const diagnoseRouteIssues = useCallback(() => {
-    console.log("🔧 DIAGNÓSTICO DEL SISTEMA DE RUTAS:");
+    console.log("DIAGNÓSTICO DEL SISTEMA DE RUTAS:");
 
     // 1. Verificar datos de entrada
     console.log("1. DATOS DE ENTRADA:", {
@@ -289,10 +283,10 @@ function Map() {
     filtersValid,
   ]);
 
-  // ========== DEBUG Y MONITOREO ==========
+  // Debug detallado de rutas priorizadas cuando los filtros cambian
   useEffect(() => {
     if (mapManagement.filters.origin && mapManagement.filters.destination) {
-      console.log("🔍🔄 RUTAS PRIORITARIAS POR TIPO:", {
+      console.log("RUTAS PRIORITARIAS POR TIPO:", {
         origen: mapManagement.filters.origin,
         destino: mapManagement.filters.destination,
         totalRutas: prioritizedRoutes.length,
@@ -318,7 +312,7 @@ function Map() {
       mapManagement.filters.origin &&
       mapManagement.filters.destination
     ) {
-      console.log("🔗 DEBUG COMPLETO DEL BUILDING GRAPH:", {
+      console.log("DEBUG COMPLETO DEL BUILDING GRAPH:", {
         totalGraphs: Object.keys(buildingGraphs).length,
         graphTypes: Object.keys(buildingGraphs),
         currentFilters: {
@@ -354,7 +348,7 @@ function Map() {
 
   // VERIFICACIÓN DE DATOS
   useEffect(() => {
-    console.log("📊 VERIFICACIÓN DE DATOS EN MAP:", {
+    console.log("VERIFICACIÓN DE DATOS EN MAP:", {
       edificios: {
         count: buildings.length,
         nombres: buildings.map((b) => b.nombre),
@@ -709,25 +703,6 @@ function Map() {
             </div>
           </div>
         )}
-
-        {/* INDICADOR DE ESTADO DE FILTROS */}
-        <div className="filter-status-indicator">
-          {filtersValid ? (
-            <div className="filter-status valid">
-              ✅ Mostrando rutas entre{" "}
-              <strong>{mapManagement.filters.origin}</strong> y{" "}
-              <strong>{mapManagement.filters.destination}</strong>
-              <span className="route-count">
-                ({prioritizedRoutes.length} rutas encontradas)
-              </span>
-            </div>
-          ) : mapManagement.filters.origin ||
-            mapManagement.filters.destination ? (
-            <div className="filter-status invalid">
-              ⚠️ Selecciona edificios válidos para ver rutas
-            </div>
-          ) : null}
-        </div>
 
         <MapIndicators
           coordinateDetection={coordinateManagement.coordinateDetection}

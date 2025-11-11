@@ -81,7 +81,7 @@ const RouteLayer = ({
     }, 100);
   };
 
-  // FUNCIÓN PARA ASIGNAR COLORES SEGÚN TIPO DE RUTA
+  // Funcion para asignar colores segun tipo de ruta
   const getRouteStyle = (route) => {
     const hasFilters = originFilter && destinationFilter;
 
@@ -145,7 +145,7 @@ const RouteLayer = ({
     return style;
   };
 
-  // FUNCIÓN PARA TOOLTIP INFORMATIVO
+  // Función para generar contenido del tooltip
   const getTooltipContent = (route) => {
     const hasFilters = originFilter && destinationFilter;
 
@@ -161,15 +161,15 @@ const RouteLayer = ({
     `;
 
     if (route.es_ruta_completa) {
-      content += `<span class="route-category complete">🎯 Ruta Completa</span><br/>`;
+      content += `<span class="route-category complete"> Ruta Completa</span><br/>`;
     } else if (route.es_combinada) {
-      content += `<span class="route-category combined">🔗 Ruta Combinada (${route.segmentos_incluidos}/${route.segmentos_totales} segmentos)</span><br/>`;
+      content += `<span class="route-category combined"> Ruta Combinada (${route.segmentos_incluidos}/${route.segmentos_totales} segmentos)</span><br/>`;
     } else if (route.es_segmento) {
-      content += `<span class="route-category segment">📏 Segmento ${
+      content += `<span class="route-category segment"> Segmento ${
         route.segmento_index + 1
       }/${route.segmento_total}</span><br/>`;
     } else {
-      content += `<span class="route-category normal">🛣️ Ruta Normal</span><br/>`;
+      content += `<span class="route-category normal"> Ruta Normal</span><br/>`;
     }
 
     content += `
@@ -178,7 +178,7 @@ const RouteLayer = ({
     `;
 
     if (route.prioridad) {
-      content += `<br/>⭐ Prioridad: ${route.prioridad.toUpperCase()}`;
+      content += `<br/>Prioridad: ${route.prioridad.toUpperCase()}`;
     }
 
     if (route.descripcion) {
@@ -193,7 +193,7 @@ const RouteLayer = ({
   useEffect(() => {
     const hasFilters = originFilter && destinationFilter;
 
-    console.log("🎯🔄 RouteLayer Refresh:", {
+    console.log("RouteLayer Refresh:", {
       totalRoutes: routes?.length || 0,
       mode: hasFilters ? "CON FILTROS - TODAS LAS RUTAS" : "SIN FILTROS",
       origin: originFilter,
@@ -202,17 +202,20 @@ const RouteLayer = ({
     });
 
     if (!routes || !Array.isArray(routes)) {
-      console.warn("❌ Routes is not an array or is undefined:", routes);
+      console.warn(
+        "La lista de rutas no es un array o está indefinida:",
+        routes
+      );
       return;
     }
 
-    console.log("📋 LISTA COMPLETA DE RUTAS:");
+    console.log("Lista Completa de Rutas:");
     routes.forEach((route, index) => {
       if (!route) {
-        console.warn(`❌ Route at index ${index} is undefined`);
+        console.warn(`Ruta en el índice ${index} está indefinida`);
         return;
       }
-      console.log(`Route ${index}:`, {
+      console.log(`Ruta ${index}:`, {
         name: route.nombre,
         type: route.tipo,
         es_ruta_completa: route.es_ruta_completa,
@@ -227,7 +230,7 @@ const RouteLayer = ({
     });
 
     if (!mapInstance) {
-      console.log("Map instance not available");
+      console.log("Instancia de Mapa no disponible");
       return;
     }
 
@@ -255,12 +258,12 @@ const RouteLayer = ({
 
     routes.forEach((route, index) => {
       if (!route) {
-        console.warn(`❌ Route at index ${index} is undefined`);
+        console.warn(`Ruta en el índice ${index} está indefinida`);
         invalidCount++;
         return;
       }
 
-      console.log(`🔍 Checking route ${index}: "${route.nombre}"`, {
+      console.log(`Revisando ruta ${index}: "${route.nombre}"`, {
         hasGeometry: !!route.geometria,
         hasCoordinates: !!route.geometria?.coordinates,
         coordinatesLength: route.geometria?.coordinates?.length || 0,
@@ -271,7 +274,7 @@ const RouteLayer = ({
 
       if (!route.geometria || !route.geometria.coordinates) {
         console.warn(
-          `❌ Route "${route.nombre}" has no geometry or coordinates:`,
+          `Ruta "${route.nombre}" sin geometría o coordenadas:`,
           route
         );
         invalidCount++;
@@ -282,7 +285,7 @@ const RouteLayer = ({
 
       if (!Array.isArray(coordinates) || coordinates.length < 2) {
         console.warn(
-          `❌ Route "${route.nombre}" has insufficient coordinates:`,
+          `Ruta "${route.nombre}" tiene coordenadas insuficientes:`,
           coordinates
         );
         invalidCount++;
@@ -293,7 +296,7 @@ const RouteLayer = ({
         .map((coord, coordIndex) => {
           if (!Array.isArray(coord) || coord.length < 2) {
             console.warn(
-              `❌ Invalid coordinate at index ${coordIndex} in route "${route.nombre}":`,
+              `Coordenada inválida en el índice ${coordIndex} de la ruta "${route.nombre}":`,
               coord
             );
             return null;
@@ -304,7 +307,7 @@ const RouteLayer = ({
 
           if (typeof lat !== "number" || typeof lng !== "number") {
             console.warn(
-              `❌ Invalid coordinate values at index ${coordIndex} in route "${route.nombre}":`,
+              `Coordenadas inválidas en el índice ${coordIndex} de la ruta "${route.nombre}":`,
               { lat, lng }
             );
             return null;
@@ -316,7 +319,7 @@ const RouteLayer = ({
 
       if (latLngs.length < 2) {
         console.warn(
-          `❌ Route "${route.nombre}" has no valid coordinates after filtering`
+          `Ruta "${route.nombre}" sin coordenadas válidas después de filtrar`
         );
         invalidCount++;
         return;
@@ -331,7 +334,7 @@ const RouteLayer = ({
       byTypeCount[routeType] = (byTypeCount[routeType] || 0) + 1;
 
       console.log(
-        `✅ Processing route "${route.nombre}" with ${latLngs.length} valid points`
+        `Procesando ruta "${route.nombre}" con ${latLngs.length} puntos válidos`
       );
 
       const polylineOptions = getRouteStyle(route);
@@ -409,15 +412,15 @@ const RouteLayer = ({
           route.destino || "Destino"
         }</strong></p>
             <hr>
-            <p>📏 Distancia total: <strong>${route.distancia || 0}m</strong></p>
-            <p>⏱️ Tiempo estimado: <strong>${
+            <p>Distancia total: <strong>${route.distancia || 0}m</strong></p>
+            <p>Tiempo estimado: <strong>${
               route.tiempo_estimado || 0
             } min</strong></p>
-            <p>🔗 Segmentos: <strong>${
+            <p>Segmentos: <strong>${
               route.segmentos_originales || 1
             }</strong></p>
-            <p>🎨 Tipo: <strong>${route.tipo || "Completa"}</strong></p>
-            <p>⭐ Prioridad: <strong>${route.prioridad || "alta"}</strong></p>
+            <p>Tipo: <strong>${route.tipo || "Completa"}</strong></p>
+            <p>Prioridad: <strong>${route.prioridad || "alta"}</strong></p>
           </div>
         `;
 
@@ -427,7 +430,7 @@ const RouteLayer = ({
       }
     });
 
-    console.log("📊 RouteLayer Summary - ALL POSSIBLE ROUTES:", {
+    console.log("Resumen de RouteLayer - TODAS LAS RUTAS POSIBLES:", {
       total: routes.length,
       valid: routes.length - invalidCount,
       invalid: invalidCount,
@@ -438,19 +441,21 @@ const RouteLayer = ({
         normal: normalCount,
       },
       byType: byTypeCount,
-      mode: hasFilters ? "FILTERED - SHOWING ALL OPTIONS" : "ALL ROUTES",
+      mode: hasFilters
+        ? "FILTRADO - MOSTRANDO TODAS LAS OPCIONES"
+        : "TODAS LAS RUTAS",
     });
 
     if (routeLayerRef.current.getLayers().length > 0) {
       const group = new L.featureGroup(routeLayerRef.current.getLayers());
       mapInstance.fitBounds(group.getBounds(), { padding: [20, 20] });
       console.log(
-        `✅ Map bounds adjusted to show ${
+        `Los límites del mapa se ajustaron para mostrar ${
           routeLayerRef.current.getLayers().length
-        } routes`
+        } rutas`
       );
     } else {
-      console.warn("⚠️ No valid routes were added to the map");
+      console.warn("Sin rutas válidas añadidas al mapa");
     }
   }, [
     mapInstance,
@@ -463,7 +468,7 @@ const RouteLayer = ({
 
   useEffect(() => {
     return () => {
-      console.log("RouteLayer: Cleaning up layers");
+      console.log("RouteLayer: Limpiando capas");
       if (routeLayerRef.current) {
         routeLayerRef.current.clearLayers();
         if (mapInstance) {

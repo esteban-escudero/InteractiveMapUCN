@@ -1,44 +1,47 @@
 import { useCallback, useMemo, useEffect } from "react";
 import { SpatialUtils } from "../utils/spatialUtils";
 
-// FUNCIÓN PARA CALCULAR ÁNGULO ENTRE TRES PUNTOS
+//Función para calcular angulo entre tres puntos
 const calculateAngle = (pointA, pointB, pointC) => {
   const vector1 = [pointA[0] - pointB[0], pointA[1] - pointB[1]];
   const vector2 = [pointC[0] - pointB[0], pointC[1] - pointB[1]];
 
+  // Calcular el ángulo entre los dos vectores usando el producto punto
   const dotProduct = vector1[0] * vector2[0] + vector1[1] * vector2[1];
   const magnitude1 = Math.sqrt(vector1[0] ** 2 + vector1[1] ** 2);
   const magnitude2 = Math.sqrt(vector2[0] ** 2 + vector1[1] ** 2);
 
+  // Evitar división por cero
   const cosine = dotProduct / (magnitude1 * magnitude2);
   const angle = Math.acos(Math.max(-1, Math.min(1, cosine))) * (180 / Math.PI);
 
   return angle;
 };
 
-// FUNCIÓN PARA ENCONTRAR EL PUNTO MÁS CERCANO EN UNA RUTA
+//Funcion para encontrar el punto más cercano en una ruta
 const findClosestPointOnRoute = (buildingCoords, routeCoordinates) => {
   let closestPoint = null;
   let minDistance = Infinity;
   let closestIndex = -1;
 
+  // Recorrer las coordenadas de la ruta
   routeCoordinates.forEach((coord, index) => {
     const distance = SpatialUtils.calculateDistance(
       { lat: buildingCoords.lat, lng: buildingCoords.lng },
       { lat: coord[1], lng: coord[0] }
     );
 
+    // Actualizar si es el punto más cercano hasta ahora
     if (distance < minDistance) {
       minDistance = distance;
       closestPoint = coord;
       closestIndex = index;
     }
   });
-
   return { point: closestPoint, distance: minDistance, index: closestIndex };
 };
 
-// FUNCIÓN PARA EXTRAER SEGMENTO DE RUTA ENTRE DOS PUNTOS
+// Función para extraer segmento de ruta entre dos índices
 const extractRouteSegment = (routeCoordinates, startIndex, endIndex) => {
   if (startIndex < endIndex) {
     return routeCoordinates.slice(startIndex, endIndex + 1);
@@ -47,10 +50,11 @@ const extractRouteSegment = (routeCoordinates, startIndex, endIndex) => {
   }
 };
 
-// FUNCIÓN PARA VALIDAR Y LIMPIAR COORDENADAS
+// Función para validar y limpiar coordenadas
 const validateAndCleanCoordinates = (coordinates) => {
   if (!Array.isArray(coordinates)) return null;
 
+  // Limpiar coordenadas
   const cleaned = coordinates
     .map((coord) => {
       if (!Array.isArray(coord) || coord.length < 2) return null;
@@ -80,7 +84,7 @@ const validateAndCleanCoordinates = (coordinates) => {
 };
 
 export const useRouteIntelligence = (routes, buildings) => {
-  // CONSTRUIR GRAFOS SEPARADOS POR TIPO DE RUTA
+  // Construir grafos de edificios y conexiones
   const buildingGraphs = useMemo(() => {
     if (
       !buildings ||
@@ -88,7 +92,6 @@ export const useRouteIntelligence = (routes, buildings) => {
       !routes ||
       routes.length === 0
     ) {
-      console.log("⏳ Esperando datos para construir grafos...");
       return {};
     }
 
@@ -101,9 +104,6 @@ export const useRouteIntelligence = (routes, buildings) => {
       default: {},
     };
 
-    console.log("🏗️ Building graphs for different route types");
-
-    // 1. AGREGAR TODOS LOS EDIFICIOS A CADA GRAFO
     buildings.forEach((building) => {
       if (
         building.ubicacion &&
@@ -114,7 +114,6 @@ export const useRouteIntelligence = (routes, buildings) => {
         const [lng, lat] = building.ubicacion.coordinates;
         const buildingKey = building.nombre;
 
-        // Validar coordenadas del edificio
         if (
           typeof lng === "number" &&
           typeof lat === "number" &&
@@ -134,12 +133,10 @@ export const useRouteIntelligence = (routes, buildings) => {
     });
 
     console.log(
-      `✅ ${
-        Object.keys(graphs.peatonal).length
-      } edificios agregados a los grafos`
+      `${Object.keys(graphs.peatonal).length} edificios agregados a los grafos`
     );
 
-    // 2. CONECTAR EDIFICIOS EN CADA GRAFO SEGÚN TIPO DE RUTA
+    // Conectar edificios en cada grafo segun tipo de ruta
     routes.forEach((route) => {
       if (
         !route.geometria?.coordinates ||
@@ -155,7 +152,7 @@ export const useRouteIntelligence = (routes, buildings) => {
 
       if (!coordinates || coordinates.length < 2) {
         console.log(
-          `➖ Ruta "${route.nombre}" sin coordenadas válidas después de limpieza`
+          `Ruta "${route.nombre}" sin coordenadas válidas después de limpieza`
         );
         return;
       }
@@ -163,7 +160,7 @@ export const useRouteIntelligence = (routes, buildings) => {
       const routeType = route.tipo?.toLowerCase() || "default";
       const targetGraph = graphs[routeType] || graphs.default;
 
-      // ESTRATEGIA MEJORADA: Conectar edificios cercanos a TODOS los vértices importantes
+      // Función para encontrar el edificio más cercano a un punto dado
       const findClosestBuilding = (point, graph, maxDistance = 50) => {
         let closestBuilding = null;
         let minDistance = Infinity;
@@ -184,7 +181,7 @@ export const useRouteIntelligence = (routes, buildings) => {
         return { building: closestBuilding, distance: minDistance };
       };
 
-      // ENCONTRAR EDIFICIOS CERCANOS A VÉRTICES ESTRATÉGICOS
+      // Encontrar puntos estratégicos a lo largo de la ruta
       const strategicPoints = [];
 
       // Puntos inicial y final (siempre importantes)
@@ -226,10 +223,10 @@ export const useRouteIntelligence = (routes, buildings) => {
       });
 
       console.log(
-        `🔄 Route "${route.nombre}": ${strategicPoints.length} strategic points → ${uniquePoints.length} unique points`
+        `Ruta "${route.nombre}": ${strategicPoints.length} puntos estratégicos → ${uniquePoints.length} puntos únicos`
       );
 
-      // CONECTAR EDIFICIOS ENTRE PUNTOS ESTRATÉGICOS
+      // Conectar edificios entre puntos estratégicos
       const connectedBuildings = new Set();
 
       // Para cada punto estratégico, encontrar el edificio más cercano
@@ -242,12 +239,8 @@ export const useRouteIntelligence = (routes, buildings) => {
 
       const buildingArray = Array.from(connectedBuildings);
 
-      // CREAR CONEXIONES ENTRE TODOS LOS EDIFICIOS ENCONTRADOS
+      // Crear conexiones entre todos los edificios encontrados
       if (buildingArray.length >= 2) {
-        console.log(
-          `🔗 Conectando ${buildingArray.length} edificios en ruta "${route.nombre}"`
-        );
-
         // Conectar cada edificio con todos los demás en la lista
         for (let i = 0; i < buildingArray.length; i++) {
           for (let j = i + 1; j < buildingArray.length; j++) {
@@ -328,20 +321,20 @@ export const useRouteIntelligence = (routes, buildings) => {
         }
 
         console.log(
-          `✅ Route "${route.nombre}" connected ${buildingArray.length} buildings`
+          `Ruta "${route.nombre}" conecta ${buildingArray.length} edificios`
         );
       } else if (buildingArray.length === 1) {
         console.log(
-          `➖ Route "${route.nombre}" found only 1 building:`,
+          `Ruta "${route.nombre}" encontró solo 1 edificio:`,
           buildingArray[0]
         );
       } else {
-        console.log(`❌ Route "${route.nombre}" found no nearby buildings`);
+        console.log(`Ruta "${route.nombre}" no encontró edificios cercanos`);
       }
     });
 
-    // 3. REPORTE DE GRAFOS CONSTRUIDOS
-    console.log("📊 GRAPHS CONSTRUCTION COMPLETE:", {
+    // Reportar resumen de grafos
+    console.log("Construccion de grafos completa:", {
       totalBuildings: Object.keys(graphs.peatonal).length,
       graphs: Object.keys(graphs).map((type) => ({
         type,
@@ -356,7 +349,7 @@ export const useRouteIntelligence = (routes, buildings) => {
     return graphs;
   }, [buildings, routes]);
 
-  // ALGORITMO DIJKSTRA PARA UN GRAFO ESPECÍFICO
+  // Algoritmo de Dijkstra para ruta más corta
   const findShortestPathInGraph = useCallback(
     (graph, startBuilding, endBuilding) => {
       if (!graph[startBuilding] || !graph[endBuilding]) {
@@ -423,7 +416,7 @@ export const useRouteIntelligence = (routes, buildings) => {
       };
 
       console.log(
-        `📍 Dijkstra result: ${result.isValid ? "VALID" : "INVALID"}`,
+        `Resultado Dijkstra: ${result.isValid ? "Valido" : "No Valido"}`,
         {
           start: startBuilding,
           end: endBuilding,
@@ -437,25 +430,25 @@ export const useRouteIntelligence = (routes, buildings) => {
     []
   );
 
-  // CALCULAR RUTA MÁS CORTA PARA CADA TIPO
+  // Calcular ruta más corta para cada tipo
   const calculateShortestRoutesByType = useCallback(
     (origin, destination) => {
-      console.log(`🎯 Calculating routes by type: ${origin} → ${destination}`);
+      console.log(`Calculando rutas por tipo: ${origin} → ${destination}`);
 
       const results = {};
 
-      // CALCULAR RUTA MÁS CORTA PARA CADA TIPO DE GRAFO
+      // Calcular ruta más corta para cada tipo de grafo
       Object.keys(buildingGraphs).forEach((routeType) => {
         const graph = buildingGraphs[routeType];
 
         if (!graph[origin] || !graph[destination]) {
           console.log(
-            `➖ No graph data for ${routeType}: ${origin} or ${destination} not found`
+            `Sin datos de grafo para ${routeType}: ${origin} o ${destination} no encontrado`
           );
           return;
         }
 
-        console.log(`🔍 Calculating ${routeType} route...`);
+        console.log(`Calculando ruta ${routeType}...`);
         const shortestPath = findShortestPathInGraph(
           graph,
           origin,
@@ -490,7 +483,7 @@ export const useRouteIntelligence = (routes, buildings) => {
             routeType: routeType,
           };
 
-          console.log(`✅ ${routeType} route found:`, {
+          console.log(`${routeType} ruta encontrada:`, {
             distance: shortestPath.totalDistance,
             segments: shortestPath.path.length,
             segmentsWithCoords: shortestPath.path.filter(
@@ -499,12 +492,12 @@ export const useRouteIntelligence = (routes, buildings) => {
           });
         } else {
           console.log(
-            `❌ No ${routeType} route found from ${origin} to ${destination}`
+            `No se encontró ruta ${routeType} de ${origin} a ${destination}`
           );
         }
       });
 
-      console.log("📊 Route calculation results:", {
+      console.log("Resultados de cálculo de rutas:", {
         totalTypes: Object.keys(results).length,
         availableTypes: Object.keys(results),
       });
@@ -518,17 +511,17 @@ export const useRouteIntelligence = (routes, buildings) => {
   const getPrioritizedRoutes = useCallback(
     (origin, destination) => {
       if (!routes || routes.length === 0) {
-        console.log("➖ No routes available");
+        console.log("Sin rutas disponibles");
         return [];
       }
 
       if (!origin || !destination) {
-        console.log("ℹ️ No origin/destination - showing all routes");
+        console.log("No origin/destination - mostrando todas las rutas");
         return routes;
       }
 
       console.log(
-        `🔍 Getting ALL possible routes for ALL types: ${origin} → ${destination}`
+        `Obteniendo TODAS las rutas posibles para TODOS los tipos: ${origin} → ${destination}`
       );
 
       const shortestRoutesByType = calculateShortestRoutesByType(
@@ -537,22 +530,22 @@ export const useRouteIntelligence = (routes, buildings) => {
       );
 
       if (Object.keys(shortestRoutesByType).length === 0) {
-        console.log("❌ No routes found for any type");
+        console.log("No se encontraron rutas para ningún tipo");
         return [];
       }
 
       const allPossibleRoutes = [];
 
-      // AGREGAR TODAS LAS RUTAS POSIBLES DE CADA TIPO
+      // Agregar rutas por tipo
       Object.keys(shortestRoutesByType).forEach((routeType) => {
         const routeData = shortestRoutesByType[routeType];
 
         if (!routeData.segments || routeData.segments.length === 0) {
-          console.log(`➖ No segments for ${routeType}`);
+          console.log(`Sin segmentos para ${routeType}`);
           return;
         }
 
-        // FILTRAR SEGMENTOS VÁLIDOS (CON COORDENADAS)
+        // Filtrar segmentos válidos
         const validSegments = routeData.segments.filter(
           (segment) =>
             segment.geometria?.coordinates &&
@@ -568,9 +561,9 @@ export const useRouteIntelligence = (routes, buildings) => {
           `✅ ${routeType} has ${validSegments.length} valid segments`
         );
 
-        // ESTRATEGIA: CREAR MÚLTIPLES OPCIONES DE RUTA
+        // Estrategia: Crear multiples opciones de ruta.
 
-        // 1. RUTA COMPLETA (todas las conexiones)
+        // 1. Ruta Completa (todas las conexiones)
         const completeRouteCoordinates = [];
         validSegments.forEach((segment, index) => {
           if (
@@ -610,10 +603,10 @@ export const useRouteIntelligence = (routes, buildings) => {
           };
 
           allPossibleRoutes.push(completeRoute);
-          console.log(`🛣️ Added complete ${routeType} route`);
+          console.log(`Agregado ruta completa ${routeType}`);
         }
 
-        // 2. RUTAS POR SEGMENTOS (opciones alternativas)
+        // 2. Rutas por segmentos (opciones alternativas)
         validSegments.forEach((segment, segmentIndex) => {
           if (
             segment.geometria?.coordinates &&
@@ -645,7 +638,7 @@ export const useRouteIntelligence = (routes, buildings) => {
           }
         });
 
-        // 3. RUTAS COMBINADAS (subconjuntos de segmentos)
+        // 3. Rutas Bombinadas (subconjuntos de segmentos)
         if (validSegments.length > 1) {
           for (let i = 0; i < validSegments.length - 1; i++) {
             const combinedSegments = validSegments.slice(0, i + 2);
@@ -700,7 +693,7 @@ export const useRouteIntelligence = (routes, buildings) => {
         }
       });
 
-      // ORDENAR RUTAS POR PRIORIDAD Y DISTANCIA
+      // Ordenar rutas por prioridad y distancia
       const prioritizedRoutes = allPossibleRoutes.sort((a, b) => {
         const priorityOrder = { alta: 0, "media-alta": 1, media: 2, baja: 3 };
         const priorityA = priorityOrder[a.prioridad] || 3;
@@ -713,7 +706,7 @@ export const useRouteIntelligence = (routes, buildings) => {
         return (a.distancia || 0) - (b.distancia || 0);
       });
 
-      console.log("📊 ALL Possible Routes Results:", {
+      console.log("Todas las rutas posibles:", {
         totalRoutes: prioritizedRoutes.length,
         byType: Object.keys(shortestRoutesByType).reduce((acc, type) => {
           acc[type] = prioritizedRoutes.filter((r) => r.tipo === type).length;
@@ -725,7 +718,6 @@ export const useRouteIntelligence = (routes, buildings) => {
         }, {}),
       });
 
-      console.log("🏁 All Available Routes:");
       prioritizedRoutes.forEach((route, index) => {
         console.log(`Route ${index}:`, {
           name: route.nombre,
