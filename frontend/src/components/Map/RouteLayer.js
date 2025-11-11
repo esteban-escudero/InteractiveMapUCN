@@ -1,473 +1,434 @@
-// components/Map/RouteLayer.js
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 import L from "leaflet";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import "./RouteLayer.css";
 
-const RouteLayer = ({ mapInstance, routes, onRouteClick }) => {
-  const [routeLayers, setRouteLayers] = useState([]);
-  const [selectedRoute, setSelectedRoute] = useState(null);
-  const previousRoutesRef = useRef([]);
+const RouteLayer = ({
+  mapInstance,
+  routes,
+  onRouteClick,
+  originFilter,
+  destinationFilter,
+  selectedRoute,
+}) => {
+  const routeLayerRef = useRef(null);
+  const markersLayerRef = useRef(null);
 
-  // REFERENCIAS PARA LAS FUNCIONES GLOBALES
-  const selectRouteRef = useRef(null);
-  const zoomToRouteRef = useRef(null);
+  // FUNCIÓN PARA ASIGNAR COLORES SEGÚN TIPO DE RUTA
+  const getRouteStyle = (route) => {
+    const hasFilters = originFilter && destinationFilter;
 
-  // CONFIGURACIÓN DE ESTILOS POR TIPO DE RUTA
-  const getRouteStyle = (routeType) => {
-    const styles = {
-      peatonal: { color: "#27ae60", weight: 6, opacity: 0.8, dashArray: null },
-      vehicular: { color: "#e74c3c", weight: 5, opacity: 0.8, dashArray: null },
-      accesible: {
-        color: "#3498db",
-        weight: 6,
-        opacity: 0.9,
-        dashArray: "5, 5",
-      },
-      emergencia: {
-        color: "#f39c12",
-        weight: 7,
-        opacity: 1.0,
+    const baseStyle = {
+      weight: 6,
+      opacity: 0.9,
+      lineCap: "round",
+      lineJoin: "round",
+      className: "route-line", // Clase base siempre aplicada
+    };
+
+    // SIN FILTROS: todas en morado
+    if (!hasFilters) {
+      return {
+        ...baseStyle,
+        color: "#9b59b6",
+        weight: 4,
+        opacity: 0.7,
         dashArray: null,
-      },
-      rapida: { color: "#9b59b6", weight: 5, opacity: 0.8, dashArray: "10, 5" },
-    };
-    return styles[routeType] || styles.peatonal;
-  };
-
-  // CREAR ICONOS PARA PUNTOS DE RUTA
-  const createRoutePointIcon = (pointType, isSelected = false) => {
-    const colors = {
-      inicio: "#27ae60",
-      fin: "#e74c3c",
-      intermedio: "#3498db",
-    };
-
-    const size = isSelected ? 20 : 16;
-    const border = isSelected ? 4 : 3;
-
-    return L.divIcon({
-      html: `
-        <div style="
-          background-color: ${colors[pointType] || "#95a5a6"};
-          width: ${size}px;
-          height: ${size}px;
-          border-radius: 50%;
-          border: ${border}px solid white;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-          ${isSelected ? "animation: pulse 1.5s infinite;" : ""}
-        "></div>
-      `,
-      iconSize: [size + 8, size + 8],
-      className: `route-point-${pointType} ${isSelected ? "selected" : ""}`,
-    });
-  };
-
-  // CREAR POPUP INFORMATIVO CON MÉTRICAS TURF (CORREGIDO)
-  const createRoutePopup = useCallback((route) => {
-    let metricsHTML = "";
-
-    try {
-      if (route.geometria && route.geometria.coordinates.length >= 2) {
-        // Calcular métricas adicionales con Turf
-        const coordinates = route.geometria.coordinates;
-        const length = SpatialUtils.calculateRouteLength(coordinates);
-        const bearing =
-          coordinates.length >= 2
-            ? SpatialUtils.calculateBearing(
-                { lng: coordinates[0][0], lat: coordinates[0][1] },
-                { lng: coordinates[1][0], lat: coordinates[1][1] }
-              ).toFixed(1)
-            : "N/A";
-
-        metricsHTML = `
-          <div class="route-metrics">
-            <div class="metric-item">
-              <span class="metric-label">📏 Longitud Turf:</span>
-              <span class="metric-value">${Math.round(length)}m</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">🧭 Rumbo inicial:</span>
-              <span class="metric-value">${bearing}°</span>
-            </div>
-            <div class="metric-item">
-              <span class="metric-label">Puntos:</span>
-              <span class="metric-value">${
-                route.puntos_ruta?.length || coordinates.length
-              }</span>
-            </div>
-          </div>
-        `;
-      }
-    } catch (error) {
-      console.error("Error calculando métricas Turf:", error);
+        className: "route-no-filter route-line", // Múltiples clases
+      };
     }
 
-    // CORREGIDO: Usar data attributes en lugar de funciones globales
-    return `
-      <div class="route-popup">
-        <h4>${route.nombre || "Ruta sin nombre"}</h4>
-        <div class="route-info">
-          <p><strong>Tipo:</strong> ${route.tipo || "peatonal"}</p>
-          <p><strong>Distancia:</strong> ${route.distancia || 0}m</p>
-          <p><strong>Tiempo estimado:</strong> ${
-            route.tiempo_estimado || 0
-          }min</p>
-        </div>
-      </div>
+    // CON FILTROS: colores por tipo
+    const typeColors = {
+      peatonal: "#27ae60",
+      accesible: "#3498db",
+      emergencia: "#e74c3c",
+      rapida: "#f39c12",
+      vehicular: "#9b59b6",
+      default: "#95a5a6",
+    };
+
+    const routeType = route.tipo?.toLowerCase() || "default";
+    const color = typeColors[routeType] || typeColors.default;
+
+    // DEBUG DE COLORES
+    console.log(`🎨 Applying color for ${route.nombre}:`, {
+      type: routeType,
+      color: color,
+      isComplete: route.es_ruta_completa,
+      hasFilters: hasFilters,
+    });
+
+    // DIFERENCIAR POR GROSOR Y CLASE
+    if (route.es_ruta_completa) {
+      return {
+        ...baseStyle,
+        color: color, // Color inline como fallback
+        weight: 8, // Más grueso para rutas prioritarias
+        opacity: 0.9,
+        dashArray: null,
+        className: `route-priority route-${routeType} route-line`, // Múltiples clases
+      };
+    }
+
+    // Rutas normales (segmentos)
+    return {
+      ...baseStyle,
+      color: color, // Color inline como fallback
+      weight: 4,
+      opacity: 0.7,
+      dashArray: null,
+      className: `route-normal route-${routeType} route-line`, // Múltiples clases
+    };
+  };
+
+  // FUNCIÓN PARA TOOLTIP INFORMATIVO
+  const getTooltipContent = (route) => {
+    const hasFilters = originFilter && destinationFilter;
+    const isPriorityRoute = route.es_ruta_completa === true;
+
+    let content = `
+      <div class="route-tooltip">
+        <strong>${route.nombre}</strong><br/>
     `;
-  }, []);
 
-  // MANEJAR CLIC EN BOTONES DEL POPUP
-  const handlePopupButtonClick = useCallback(
-    (e) => {
-      if (!mapInstance) return;
+    // Mostrar tipo solo cuando hay filtros
+    if (hasFilters) {
+      content += `
+        <span class="route-type ${route.tipo?.toLowerCase() || "default"}">
+          Tipo: ${route.tipo || "No especificado"}
+        </span><br/>
+      `;
+    } else {
+      content += `<span class="route-type no-filter">Modo: Todas las rutas</span><br/>`;
+    }
 
-      const button = e.target;
-      const routeId = button.getAttribute("data-route-id");
-      const action = button.getAttribute("data-action");
+    content += `
+        Distancia: ${route.distancia || 0}m<br/>
+        Tiempo: ${route.tiempo_estimado || 0} min
+    `;
 
-      if (!routeId) return;
+    // Solo mostrar "Ruta más corta" si realmente es prioritaria Y hay filtros
+    if (isPriorityRoute && hasFilters) {
+      content += `<br/><em class="priority-label">★ Ruta más corta</em>`;
+    } else if (route.es_segmento && hasFilters) {
+      content += `<br/><em class="segment-label">● Segmento ${
+        route.segment_index + 1
+      }/${route.total_segments || 1}</em>`;
+    }
 
-      const route = routes.find(
-        (r) => r.id === routeId || r.id.toString() === routeId
-      );
-      if (!route) return;
+    if (route.descripcion) {
+      content += `<br/><small>${route.descripcion}</small>`;
+    }
 
-      if (action === "select") {
-        setSelectedRoute(route);
-        onRouteClick?.(route);
-        console.log(`Ruta seleccionada: ${route.nombre}`);
-      } else if (action === "zoom") {
-        // USAR TURF PARA CALCULAR BOUNDS DE LA RUTA
-        if (route.geometria) {
-          const coordinates = route.geometria.coordinates;
-          if (coordinates.length > 0) {
-            try {
-              const points = coordinates.map((coord) => ({
-                lng: coord[0],
-                lat: coord[1],
-              }));
-              const bbox = SpatialUtils.calculateBoundingBox(points);
-              if (bbox) {
-                const bounds = L.latLngBounds(
-                  [bbox[1], bbox[0]], // [minLat, minLng]
-                  [bbox[3], bbox[2]] // [maxLat, maxLng]
-                );
-                mapInstance.fitBounds(bounds, { padding: [20, 20] });
-                console.log(`Zoom a ruta: ${route.nombre}`);
-              }
-            } catch (error) {
-              console.error("Error calculando bounds con Turf:", error);
-              // Fallback al método original
-              const bounds = coordinates.map((coord) => [coord[1], coord[0]]);
-              mapInstance.fitBounds(bounds, { padding: [20, 20] });
-            }
-          }
-        }
-      }
-    },
-    [mapInstance, routes, onRouteClick]
-  );
+    content += `</div>`;
+    return content;
+  };
 
-  // AGREGAR EVENT LISTENER PARA POPUPS
+  // ========== USEFFECT PRINCIPAL - AQUÍ COMIENZA ==========
   useEffect(() => {
-    if (!mapInstance) return;
+    const hasFilters = originFilter && destinationFilter;
 
-    const handleMapClick = (e) => {
-      const button = e.target;
-      if (button.classList.contains("popup-btn")) {
-        handlePopupButtonClick(e);
-      }
-    };
+    console.log("🎯🔄 RouteLayer Refresh:", {
+      totalRoutes: routes?.length || 0,
+      mode: hasFilters ? "CON FILTROS" : "SIN FILTROS",
+      origin: originFilter,
+      destination: destinationFilter,
+      routeTypes: routes ? [...new Set(routes.map((r) => r.tipo))] : [],
+      priorityRoutes: routes
+        ? routes.filter((r) => r.es_ruta_completa).length
+        : 0,
+      segments: routes ? routes.filter((r) => r.es_segmento).length : 0,
+    });
 
-    // Agregar event listener al contenedor del mapa
-    const mapContainer = mapInstance.getContainer();
-    mapContainer.addEventListener("click", handleMapClick);
-
-    return () => {
-      mapContainer.removeEventListener("click", handleMapClick);
-    };
-  }, [mapInstance, handlePopupButtonClick]);
-
-  // RENDERIZAR RUTAS EN EL MAPA
-  useEffect(() => {
-    if (!mapInstance || !routes.length) {
-      // Limpiar capas si no hay rutas
-      if (routeLayers.length > 0) {
-        routeLayers.forEach((layer) => {
-          if (mapInstance?.hasLayer(layer)) {
-            mapInstance.removeLayer(layer);
-          }
-        });
-        setRouteLayers([]);
-      }
+    // VERIFICACIÓN DE SEGURIDAD - AÑADIR ESTA PARTE
+    if (!routes || !Array.isArray(routes)) {
+      console.warn("❌ Routes is not an array or is undefined:", routes);
       return;
     }
 
-    // Verificar si las rutas cambiaron
-    const routesChanged =
-      JSON.stringify(routes) !== JSON.stringify(previousRoutesRef.current);
-    if (!routesChanged && routeLayers.length > 0) return;
+    // DEBUG DETALLADO DE TODAS LAS RUTAS
+    console.log("📋 LISTA COMPLETA DE RUTAS:");
+    routes.forEach((route, index) => {
+      if (!route) {
+        console.warn(`❌ Route at index ${index} is undefined`);
+        return;
+      }
+      console.log(`Route ${index}:`, {
+        name: route.nombre,
+        type: route.tipo,
+        es_ruta_completa: route.es_ruta_completa,
+        es_segmento: route.es_segmento,
+        origen: route.origen,
+        destino: route.destino,
+        distancia: route.distancia,
+        coordinates: route.geometria?.coordinates?.length || 0,
+        hasGeometry: !!route.geometria,
+        hasCoordinates: !!route.geometria?.coordinates,
+      });
+    });
 
-    console.log(`Renderizando ${routes.length} rutas con Turf.js`);
+    if (!mapInstance) {
+      console.log("Map instance not available");
+      return;
+    }
+
+    // Crear capas si no existen
+    if (!routeLayerRef.current) {
+      routeLayerRef.current = L.layerGroup().addTo(mapInstance);
+    }
+    if (!markersLayerRef.current) {
+      markersLayerRef.current = L.layerGroup().addTo(mapInstance);
+    }
 
     // Limpiar capas anteriores
-    routeLayers.forEach((layer) => {
-      if (mapInstance.hasLayer(layer)) {
-        mapInstance.removeLayer(layer);
-      }
-    });
+    routeLayerRef.current.clearLayers();
+    markersLayerRef.current.clearLayers();
 
-    const newLayers = [];
-
-    routes.forEach((route) => {
-      try {
-        if (!route.geometria || !route.geometria.coordinates) {
-          console.warn(`Ruta sin geometría: ${route.nombre}`);
-          return;
-        }
-
-        const coordinates = route.geometria.coordinates;
-        if (coordinates.length < 2) {
-          console.warn(`Ruta con menos de 2 puntos: ${route.nombre}`);
-          return;
-        }
-
-        // CREAR LÍNEA DE RUTA
-        const style = getRouteStyle(route.tipo);
-        const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
-
-        const routeLine = L.polyline(latLngs, {
-          color: style.color,
-          weight: style.weight,
-          opacity: style.opacity,
-          dashArray: style.dashArray,
-          className: `route-line route-${route.tipo}`,
-        });
-
-        // AGREGAR POPUP Y EVENTOS (CORREGIDO)
-        routeLine.bindPopup(createRoutePopup(route));
-
-        routeLine.on("click", (e) => {
-          L.DomEvent.stopPropagation(e);
-          setSelectedRoute(route);
-          onRouteClick?.(route);
-        });
-
-        routeLine.addTo(mapInstance);
-        newLayers.push(routeLine);
-
-        // CREAR PUNTOS DE LA RUTA
-        if (route.puntos_ruta && route.puntos_ruta.length > 0) {
-          route.puntos_ruta.forEach((punto, index) => {
-            if (punto.coordenadas && punto.coordenadas.coordinates) {
-              const [lng, lat] = punto.coordenadas.coordinates;
-              const isSelected = selectedRoute && selectedRoute.id === route.id;
-
-              const pointMarker = L.marker([lat, lng], {
-                icon: createRoutePointIcon(punto.tipo_punto, isSelected),
-                zIndexOffset: isSelected ? 1000 : 500,
-              });
-
-              pointMarker.bindPopup(`
-                <div class="point-popup">
-                  <h5>${punto.nombre_punto || `Punto ${index + 1}`}</h5>
-                  <p><strong>Tipo:</strong> ${punto.tipo_punto}</p>
-                  <p><strong>Coordenadas:</strong><br>
-                  ${lat.toFixed(6)}, ${lng.toFixed(6)}</p>
-                  <p><strong>Orden:</strong> ${punto.orden || index + 1}</p>
-                </div>
-              `);
-
-              pointMarker.addTo(mapInstance);
-              newLayers.push(pointMarker);
-            }
-          });
-        }
-
-        console.log(
-          `Ruta "${route.nombre}" renderizada: ${coordinates.length} puntos`
-        );
-      } catch (error) {
-        console.error(`Error renderizando ruta ${route.nombre}:`, error);
-      }
-    });
-
-    setRouteLayers(newLayers);
-    previousRoutesRef.current = routes;
-  }, [mapInstance, routes, selectedRoute, onRouteClick, createRoutePopup]);
-
-  // EFECTO PARA DESTACAR RUTA SELECCIONADA
-  useEffect(() => {
-    if (!mapInstance || routeLayers.length === 0) return;
-
-    routeLayers.forEach((layer) => {
-      if (layer instanceof L.Polyline) {
-        // Verificar si esta capa pertenece a la ruta seleccionada
-        const isSelected =
-          selectedRoute &&
-          layer._popup &&
-          layer._popup._content.includes(`data-route-id="${selectedRoute.id}"`);
-
-        if (isSelected) {
-          layer.setStyle({
-            weight: 8,
-            opacity: 1.0,
-            color: "#f1c40f",
-          });
-          layer.bringToFront();
-        } else {
-          // Obtener el tipo de ruta del className
-          const className = layer.options.className || "";
-          const routeTypeMatch = className.match(/route-(\w+)/);
-          const routeType = routeTypeMatch ? routeTypeMatch[1] : "peatonal";
-          const style = getRouteStyle(routeType);
-          layer.setStyle(style);
-        }
-      }
-    });
-  }, [selectedRoute, routeLayers, mapInstance]);
-
-  // RENDERIZAR INFORMACIÓN DE ANÁLISIS TURF
-  const renderTurfAnalytics = () => {
-    if (routes.length === 0) return null;
-
-    try {
-      const totalDistance = routes.reduce((sum, route) => {
-        if (route.geometria) {
-          const length = SpatialUtils.calculateRouteLength(
-            route.geometria.coordinates
-          );
-          return sum + length;
-        }
-        return sum;
-      }, 0);
-
-      const avgPoints =
-        routes.reduce((sum, route) => {
-          return (
-            sum +
-            (route.puntos_ruta?.length ||
-              route.geometria?.coordinates.length ||
-              0)
-          );
-        }, 0) / routes.length;
-    } catch (error) {
-      console.error("Error en analytics Turf:", error);
-      return null;
+    // Si no hay rutas, salir
+    if (routes.length === 0) {
+      console.log("No routes to display");
+      return;
     }
-  };
 
-  return (
-    <>
-      {renderTurfAnalytics()}
+    // CONTADORES PARA DEBUG
+    let priorityCount = 0;
+    let segmentCount = 0;
+    let normalCount = 0;
+    let invalidCount = 0;
 
-      {/* ESTILOS CSS INLINE */}
-      <style>
-        {`
-          .route-popup {
-            min-width: 250px;
+    routes.forEach((route, index) => {
+      // VERIFICACIÓN COMPLETA DE LA RUTA - AÑADIR ESTAS VERIFICACIONES
+      if (!route) {
+        console.warn(`❌ Route at index ${index} is undefined`);
+        invalidCount++;
+        return;
+      }
+
+      console.log(`🔍 Checking route ${index}: "${route.nombre}"`, {
+        hasGeometry: !!route.geometria,
+        hasCoordinates: !!route.geometria?.coordinates,
+        coordinatesLength: route.geometria?.coordinates?.length || 0,
+        isComplete: route.es_ruta_completa,
+        isSegment: route.es_segmento,
+      });
+
+      if (!route.geometria || !route.geometria.coordinates) {
+        console.warn(
+          `❌ Route "${route.nombre}" has no geometry or coordinates:`,
+          route
+        );
+        invalidCount++;
+        return;
+      }
+
+      const coordinates = route.geometria.coordinates;
+
+      // VALIDAR COORDENADAS
+      if (!Array.isArray(coordinates) || coordinates.length < 2) {
+        console.warn(
+          `❌ Route "${route.nombre}" has insufficient coordinates:`,
+          coordinates
+        );
+        invalidCount++;
+        return;
+      }
+
+      // CONVERTIR COORDENADAS A FORMATO [lat, lng] PARA LEAFLET
+      const latLngs = coordinates
+        .map((coord, coordIndex) => {
+          if (!Array.isArray(coord) || coord.length < 2) {
+            console.warn(
+              `❌ Invalid coordinate at index ${coordIndex} in route "${route.nombre}":`,
+              coord
+            );
+            return null;
           }
-          
-          .route-metrics {
-            background: #f8f9fa;
-            padding: 8px;
-            border-radius: 4px;
-            margin: 8px 0;
+
+          const lng = coord[0];
+          const lat = coord[1];
+
+          if (typeof lat !== "number" || typeof lng !== "number") {
+            console.warn(
+              `❌ Invalid coordinate values at index ${coordIndex} in route "${route.nombre}":`,
+              { lat, lng }
+            );
+            return null;
           }
-          
-          .metric-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 4px 0;
-            font-size: 12px;
-          }
-          
-          .metric-label {
-            color: #666;
-          }
-          
-          .metric-value {
-            font-weight: bold;
-            color: #2c3e50;
-          }
-          
-          .popup-actions {
-            display: flex;
-            gap: 5px;
-            margin-top: 10px;
-          }
-          
-          .popup-btn {
-            flex: 1;
-            padding: 5px 8px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 11px;
-          }
-          
-          .select-btn { 
-            background: #3498db; 
-            color: white; 
-          }
-          
-          .zoom-btn { 
-            background: #27ae60; 
-            color: white; 
-          }
-          
-          .popup-btn:hover {
-            opacity: 0.9;
-          }
-          
-          .point-popup {
-            text-align: center;
-            min-width: 180px;
-          }
-          
-          @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-          }
-          
-          .turf-analytics-overlay {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            max-width: 250px;
-          }
-          
-          .analytics-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-          }
-          
-          .stat {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-          }
-          
-          .stat-label {
-            color: #666;
-          }
-          
-          .stat-value {
-            font-weight: bold;
-            color: #2c3e50;
-          }
-        `}
-      </style>
-    </>
-  );
+
+          return [lat, lng];
+        })
+        .filter((coord) => coord !== null);
+
+      if (latLngs.length < 2) {
+        console.warn(
+          `❌ Route "${route.nombre}" has no valid coordinates after filtering`
+        );
+        invalidCount++;
+        return;
+      }
+
+      // CONTAR TIPOS DE RUTAS
+      if (route.es_ruta_completa) priorityCount++;
+      else if (route.es_segmento) segmentCount++;
+      else normalCount++;
+
+      console.log(
+        `✅ Processing route "${route.nombre}" with ${latLngs.length} valid points`
+      );
+
+      // OBTENER ESTILO
+      const polylineOptions = getRouteStyle(route);
+      const polyline = L.polyline(latLngs, polylineOptions);
+
+      // DEBUG DE ESTILOS APLICADOS
+      console.log(`🌈 Route "${route.nombre}" styles:`, {
+        className: polylineOptions.className,
+        color: polylineOptions.color,
+        weight: polylineOptions.weight,
+        type: route.tipo,
+        isComplete: route.es_ruta_completa,
+      });
+
+      // TOOLTIP INFORMATIVO
+      const tooltipContent = getTooltipContent(route);
+      polyline.bindTooltip(tooltipContent, {
+        permanent: false,
+        direction: "top",
+        className: "custom-tooltip",
+      });
+
+      // EVENTO CLICK
+      polyline.on("click", (e) => {
+        L.DomEvent.stopPropagation(e);
+        console.log("Route clicked:", {
+          name: route.nombre,
+          type: route.tipo,
+          isPriority: route.es_ruta_completa,
+          isSegment: route.es_segmento,
+        });
+        if (onRouteClick) {
+          onRouteClick(route);
+        }
+      });
+
+      // RESALTAR SI ESTÁ SELECCIONADO
+      if (selectedRoute && selectedRoute.id === route.id) {
+        polyline.setStyle({
+          color: "#e67e22", // NARANJA intenso para rutas seleccionadas
+          weight: polylineOptions.weight + 2,
+          opacity: 1,
+        });
+      }
+
+      // AGREGAR A LA CAPA
+      routeLayerRef.current.addLayer(polyline);
+
+      // AGREGAR MARCADORES SOLO PARA RUTAS COMPLETAS PRIORITARIAS (con filtros)
+      if (route.es_ruta_completa && hasFilters) {
+        // Marcador de inicio
+        const startCoords = latLngs[0];
+        const startMarker = L.marker(startCoords, {
+          icon: L.divIcon({
+            html: '<div class="route-marker origin">🏁</div>',
+            className: "route-marker-icon",
+            iconSize: [30, 30],
+          }),
+        }).bindTooltip(`Origen: ${route.origen || "Inicio"}`, {
+          permanent: false,
+          direction: "top",
+        });
+
+        // Marcador de fin
+        const endCoords = latLngs[latLngs.length - 1];
+        const endMarker = L.marker(endCoords, {
+          icon: L.divIcon({
+            html: '<div class="route-marker destination">🎯</div>',
+            className: "route-marker-icon",
+            iconSize: [30, 30],
+          }),
+        }).bindTooltip(`Destino: ${route.destino || "Fin"}`, {
+          permanent: false,
+          direction: "top",
+        });
+
+        markersLayerRef.current.addLayer(startMarker);
+        markersLayerRef.current.addLayer(endMarker);
+
+        // POPUP INFORMATIVO PARA LA RUTA COMPLETA
+        const routeInfo = `
+          <div class="route-summary">
+            <h3>🚗 Ruta Más Corta</h3>
+            <p><strong>${route.origen || "Origen"}</strong> → <strong>${
+          route.destino || "Destino"
+        }</strong></p>
+            <hr>
+            <p>📏 Distancia total: <strong>${route.distancia || 0}m</strong></p>
+            <p>⏱️ Tiempo estimado: <strong>${
+              route.tiempo_estimado || 0
+            } min</strong></p>
+            <p>🔗 Segmentos: <strong>${
+              route.segmentos_originales || 1
+            }</strong></p>
+            <p>🎨 Tipo: <strong>${route.tipo || "Prioritaria"}</strong></p>
+          </div>
+        `;
+
+        startMarker.bindPopup(routeInfo);
+      }
+    });
+
+    // DEBUG FINAL
+    console.log("📊 RouteLayer Summary:", {
+      total: routes.length,
+      valid: routes.length - invalidCount,
+      invalid: invalidCount,
+      priority: priorityCount,
+      segments: segmentCount,
+      normal: normalCount,
+      mode: hasFilters ? "FILTERED" : "ALL",
+    });
+
+    // AJUSTAR VISTA DEL MAPA PARA MOSTRAR TODAS LAS RUTAS
+    if (routeLayerRef.current.getLayers().length > 0) {
+      const group = new L.featureGroup(routeLayerRef.current.getLayers());
+      mapInstance.fitBounds(group.getBounds(), { padding: [20, 20] });
+      console.log(
+        `✅ Map bounds adjusted to show ${
+          routeLayerRef.current.getLayers().length
+        } routes`
+      );
+    } else {
+      console.warn("⚠️ No valid routes were added to the map");
+    }
+  }, [
+    mapInstance,
+    routes,
+    onRouteClick,
+    selectedRoute,
+    originFilter,
+    destinationFilter,
+  ]);
+
+  // CLEANUP
+  useEffect(() => {
+    return () => {
+      console.log("RouteLayer: Cleaning up layers");
+      if (routeLayerRef.current) {
+        routeLayerRef.current.clearLayers();
+        if (mapInstance) {
+          mapInstance.removeLayer(routeLayerRef.current);
+        }
+      }
+      if (markersLayerRef.current) {
+        markersLayerRef.current.clearLayers();
+        if (mapInstance) {
+          mapInstance.removeLayer(markersLayerRef.current);
+        }
+      }
+    };
+  }, [mapInstance]);
+
+  return null;
 };
 
 export default RouteLayer;

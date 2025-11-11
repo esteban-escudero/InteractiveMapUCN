@@ -1,19 +1,31 @@
 const MapIndicators = ({
-  coordinateDetection,
-  validationErrors,
-  buildingsLoading,
-  buildingsError,
-  routesError,
-  onClearValidationErrors,
+  coordinateDetection = false,
+  validationErrors = [],
+  buildingsLoading = false,
+  buildingsError = null,
+  routesError = null,
+  onClearValidationErrors = () => {},
 }) => {
   return (
     <>
       {coordinateDetection && (
-        <div className="coordinate-detection-indicator">
+        <div
+          className="coordinate-detection-indicator"
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            position: "fixed",
+            top: "20px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: "white",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+            zIndex: 1000,
+          }}>
           Modo Captura - Haz clic en el mapa
-          <span style={{ color: "#27ae60", marginLeft: "10px" }}>
-            Turf.js activado
-          </span>
         </div>
       )}
 

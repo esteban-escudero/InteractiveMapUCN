@@ -1,4 +1,3 @@
-// hooks/useBuildings.js
 import { useState, useEffect, useCallback } from "react";
 import { buildingService } from "../services/buildingService";
 import { SpatialUtils } from "../utils/spatialUtils";

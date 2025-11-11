@@ -1,4 +1,3 @@
-// En tu archivo principal del backend (el que mostraste)
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -10,7 +9,6 @@ const roomsRoutes = require("./routes/rooms");
 const routesRoutes = require("./routes/routes");
 const errorHandler = require("./middleware/errorHandler");
 
-// AGREGAR LAS NUEVAS RUTAS
 const routeNodesRoutes = require("./routes/routeNodes");
 const spatialRoutes = require("./routes/spatial");
 
@@ -27,7 +25,6 @@ app.use("/api/buildings", buildingsRoutes);
 app.use("/api/rooms", roomsRoutes);
 app.use("/api/routes", routesRoutes);
 
-// AGREGAR LAS NUEVAS RUTAS AL BACKEND
 app.use("/api/route-nodes", routeNodesRoutes);
 app.use("/api/spatial", spatialRoutes);
 
@@ -50,10 +47,14 @@ app.listen(PORT, () => {
   console.log(`Rutas API disponible en http://localhost:${PORT}/api/routes`);
   console.log(
     `Nodos compartidos disponible en http://localhost:${PORT}/api/route-nodes`
-  ); // NUEVO
+  );
   console.log(
     `Análisis espacial disponible en http://localhost:${PORT}/api/spatial`
-  ); // NUEVO
+  );
 });
+
+// Después de las otras rutas
+const proximityRoutes = require("./routes/proximity");
+app.use("/api/proximity", proximityRoutes);
 
 module.exports = app;

@@ -220,6 +220,51 @@ export const SpatialUtils = {
       return coordinates;
     }
   },
+
+  // Agrega esta función en spatialUtils.js
+  // En spatialUtils.js - CORREGIR la función calculateDistanceToLine
+  // En spatialUtils.js - Asegúrate de tener esta función
+  calculateDistanceToLine(point, lineStart, lineEnd) {
+    try {
+      // VALIDAR QUE LAS COORDENADAS SEAN NÚMEROS
+      if (!point || !lineStart || !lineEnd) {
+        console.warn("Puntos inválidos para calculateDistanceToLine");
+        return Infinity;
+      }
+
+      const isValidCoord = (coord) =>
+        coord &&
+        typeof coord.lat === "number" &&
+        typeof coord.lng === "number" &&
+        !isNaN(coord.lat) &&
+        !isNaN(coord.lng);
+
+      if (
+        !isValidCoord(point) ||
+        !isValidCoord(lineStart) ||
+        !isValidCoord(lineEnd)
+      ) {
+        console.warn("Coordenadas inválidas:", {
+          point,
+          lineStart,
+          lineEnd,
+        });
+        return Infinity;
+      }
+
+      const pointTurf = turf.point([point.lng, point.lat]);
+      const lineTurf = turf.lineString([
+        [lineStart.lng, lineStart.lat],
+        [lineEnd.lng, lineEnd.lat],
+      ]);
+
+      const nearestPoint = turf.nearestPointOnLine(lineTurf, pointTurf);
+      return turf.distance(pointTurf, nearestPoint, { units: "meters" });
+    } catch (error) {
+      console.error("Error calculating distance to line:", error);
+      return Infinity;
+    }
+  },
 };
 
 export default SpatialUtils;

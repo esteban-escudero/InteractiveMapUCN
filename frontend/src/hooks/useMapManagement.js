@@ -112,6 +112,11 @@ export const useMapManagement = () => {
     setSelectedRoute(null);
   }, []);
 
+  // En useMapManagement.js, agregar:
+  const handleClearRouteFilters = useCallback(() => {
+    setFilters((prev) => ({ ...prev, origin: "", destination: "" }));
+  }, []);
+
   return {
     // Estados
     showBuildingForm,

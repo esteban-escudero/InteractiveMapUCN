@@ -17,6 +17,7 @@ const SidePanel = ({
   onDestinationFilterChange,
   onCategoryFilterChange,
   onClearFilters,
+  allBuildings = [], // ← CORRECCIÓN: Nueva prop para lista completa
   filteredBuildings = [],
 }) => {
   const [activeMenu, setActiveMenu] = useState(null);
@@ -191,7 +192,7 @@ const SidePanel = ({
                 onChange={onOriginFilterChange}
                 className="filter-select">
                 <option value="">Seleccionar origen</option>
-                {filteredBuildings
+                {allBuildings // ← CORRECCIÓN: Usar allBuildings en lugar de filteredBuildings
                   .filter(
                     (building, index, self) =>
                       self.findIndex((b) => b.nombre === building.nombre) ===
@@ -218,7 +219,7 @@ const SidePanel = ({
                 onChange={onDestinationFilterChange}
                 className="filter-select">
                 <option value="">Seleccionar destino</option>
-                {filteredBuildings
+                {allBuildings // ← CORRECCIÓN: Usar allBuildings en lugar de filteredBuildings
                   .filter(
                     (building, index, self) =>
                       self.findIndex((b) => b.nombre === building.nombre) ===
