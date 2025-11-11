@@ -1,6 +1,6 @@
-import React from 'react';
-import Map from './components/Map/Map';
-import './App.css';
+import React from "react";
+import Map from "./components/map/Map"; // ← Especifica la ruta completa
+import "./App.css";
 
 function App() {
   return (
