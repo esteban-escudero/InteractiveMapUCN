@@ -353,7 +353,9 @@ export const useRouteIntelligence = (routes, buildings) => {
   const findShortestPathInGraph = useCallback(
     (graph, startBuilding, endBuilding) => {
       if (!graph[startBuilding] || !graph[endBuilding]) {
-        console.log(`❌ No graph data for ${startBuilding} or ${endBuilding}`);
+        console.log(
+          `Sin datos de grafo para ${startBuilding} o ${endBuilding}`
+        );
         return null;
       }
 
