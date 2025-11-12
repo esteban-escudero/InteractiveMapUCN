@@ -1,20 +1,24 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Map.css";
 
-// Hooks - TODOS EXISTEN, agregar extensiones .js
+// Hooks
 import { useMap } from "../../../hooks/map/useMap.js";
+import { useMapState } from "../../../hooks/map/useMapState.js";
+import { useMapData } from "../../../hooks/map/useMapData.js";
+import { useMapEffects } from "../../../hooks/map/useMapEffects.js";
+import { useMapHandlers } from "../../../hooks/map/useMapHandlers.js";
+import { useMapActions } from "../../../hooks/map/useMapActions.js";
+import { useMapClickHandler } from "../../../hooks/map/useMapClickHandler.js";
+import { useBusinessHandlers } from "../../../hooks/map/useBusinessHandlers.js";
+import { useMapOperations } from "../../../hooks/map/useMapOperations.js";
+import { useCoordinateManagement } from "../../../hooks/map/useCoordinateManagement.js";
+
 import { useRouteUtils } from "../../../hooks/routes/useRouteUtils.js";
 import { useBuildingFilters } from "../../../hooks/buildings/useBuildingFilters.js";
 import useBuildings from "../../../hooks/buildings/useBuildings.js";
 import useGeoServer from "../../../hooks/useGeoServer.js";
-import { useMapManagement } from "../../../hooks/map/useMapManagement.js";
-import { useCoordinateManagement } from "../../../hooks/map/useCoordinateManagement.js";
-import { useMapOperations } from "../../../hooks/map/useMapOperations.js";
-import { useMapHandlers } from "../../../hooks/map/useMapHandlers.js";
-import { useMapClickHandler } from "../../../hooks/map/useMapClickHandler.js";
-import { useMapActions } from "../../../hooks/map/useMapActions.js";
 import useRoutes from "../../../hooks/routes/useRoutes.js";
 import { useNotification } from "../../../hooks/common/useNotification.js";
 import { useConfirm } from "../../../hooks/common/useConfirm.js";
@@ -26,27 +30,26 @@ import { ConfirmDialog, UINotification, SidePanel } from "../../ui/index.js";
 import { BuildingList, BuildingForm } from "../../buildings/index.js";
 import { RouteList, RouteForm } from "../../routes/index.js";
 
-// CORREGIR: Importar desde archivos específicos
 import RouteLayer from "../RouteLayer/RouteLayer.jsx";
 import BuildingRenderer from "../BuildingRenderer/BuildingRenderer.jsx";
 import MapIndicators from "../MapIndicators/MapIndicators.jsx";
 import RoomManagement from "../../buildings/RoomManagement/RoomManagement.jsx";
 
-// Constantes y servicios
-import mapConfig, {
-  UCN_COQUIMBO_BOUNDS,
-} from "../../../constants/mapConfig.js";
-
-// Componente principal del mapa
 function Map() {
+  // ========== HOOKS PRINCIPALES ==========
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
+
+  // Notificaciones y confirmaciones
   const { notification, showUINotification, hideNotification } =
     useNotification();
   const { confirmState, showConfirm, hideConfirm, handleConfirm } =
     useConfirm();
 
-  //Hooks de datos
+  // Estado del mapa
+  const mapState = useMapState();
+
+  // Datos principales
   const {
     buildings,
     loading: buildingsLoading,
@@ -76,319 +79,40 @@ function Map() {
   const {
     loading: proximityLoading,
     error: proximityError,
-    proximityData,
-    findClosestRoute,
-    findRoutesInRadius,
     getProximityAnalysis,
   } = useProximity();
 
-  // Hook de Inteligencia de Rutas
-  const {
+  const { getPrioritizedRoutes, buildingGraphs, hasData } =
+    useRouteIntelligence(routes, buildings);
+
+  // ========== HOOKS FACTORIZADOS ==========
+
+  // Datos y lógica del mapa
+  const mapData = useMapData(
+    mapState,
+    buildings,
+    routes,
     getPrioritizedRoutes,
     buildingGraphs,
-    calculateShortestRoutesByType,
-    hasData,
-  } = useRouteIntelligence(routes, buildings);
+    hasData
+  );
 
-  // ========== HOOKS DE GESTIÓN DE ESTADO DEL MAPA ==========
-  const mapManagement = useMapManagement();
+  // Operaciones del mapa
   const { validateCoordinates, findNearestBuilding } =
     useMapOperations(buildings);
+
+  // Gestión de coordenadas
   const coordinateManagement = useCoordinateManagement(
     mapInstance,
     validateCoordinates,
     findNearestBuilding
   );
-  const { filteredBuildings } = useBuildingFilters(
-    buildings,
-    mapManagement.filters
-  );
 
-  // DEBUG: Verificar filtros
-  console.log("🔍 DEBUG FILTROS:", {
-    filtros: mapManagement.filters,
-    totalEdificios: buildings.length,
-    edificiosFiltrados: filteredBuildings.length,
-    edificiosFiltradosNombres: filteredBuildings.map((b) => b.nombre),
-  });
+  // Filtros de edificios
+  const { filteredBuildings } = useBuildingFilters(buildings, mapState.filters);
 
-  // ========== VALIDACIÓN DE FILTROS ==========
-  const filtersValid = useMemo(() => {
-    return (
-      mapManagement.filters.origin &&
-      mapManagement.filters.destination &&
-      buildings.some((b) => b.nombre === mapManagement.filters.origin) &&
-      buildings.some((b) => b.nombre === mapManagement.filters.destination)
-    );
-  }, [mapManagement.filters, buildings]);
-
-  // ========== RUTAS PRIORIZADAS - VERSIÓN CORREGIDA ==========
-  const prioritizedRoutes = useMemo(() => {
-    // OBTENER EDIFICIOS COMPLETOS A PARTIR DE LOS NOMBRES
-    const getBuildingFromName = (buildingName) => {
-      return buildings.find((b) => b.nombre === buildingName);
-    };
-
-    const originBuilding = getBuildingFromName(mapManagement.filters.origin);
-    const destinationBuilding = getBuildingFromName(
-      mapManagement.filters.destination
-    );
-
-    if (originBuilding && destinationBuilding) {
-      console.log("Calculando rutas priorizadas entre:", {
-        origin: originBuilding.nombre,
-        destination: destinationBuilding.nombre,
-        originCoords: originBuilding.ubicacion?.coordinates,
-        destinationCoords: destinationBuilding.ubicacion?.coordinates,
-      });
-
-      try {
-        const result = getPrioritizedRoutes(
-          originBuilding.nombre,
-          destinationBuilding.nombre
-        );
-
-        console.log("Resultado del cálculo de rutas priorizadas:", {
-          totalRoutes: result?.length || 0,
-          routeTypes: result ? [...new Set(result.map((r) => r.tipo))] : [],
-          completeRoutes: result
-            ? result.filter((r) => r.es_ruta_completa).length
-            : 0,
-          segments: result ? result.filter((r) => r.es_segmento).length : 0,
-          combinedRoutes: result
-            ? result.filter((r) => r.es_combinada).length
-            : 0,
-        });
-
-        // DEBUG DETALLADO DE CADA RUTA
-        if (result && result.length > 0) {
-          console.log("Detalle de rutas generadas:");
-          result.forEach((route, index) => {
-            console.log(`Route ${index}:`, {
-              name: route.nombre,
-              type: route.tipo,
-              priority: route.prioridad,
-              distance: route.distancia,
-              isComplete: route.es_ruta_completa,
-              isSegment: route.es_segmento,
-              isCombined: route.es_combinada,
-              coordinates: route.geometria?.coordinates?.length || 0,
-              origin: route.origen,
-              destination: route.destino,
-            });
-          });
-        }
-
-        return result || [];
-      } catch (error) {
-        console.error("Error en getPrioritizedRoutes:", error);
-        return routes; // Fallback a todas las rutas
-      }
-    } else {
-      // DEBUG de rutas disponibles
-      if (routes.length > 0) {
-        console.log(
-          "Rutas Disponibles:",
-          routes.map((r) => ({
-            name: r.nombre,
-            type: r.tipo,
-            distance: r.distancia,
-            coordinates: r.geometria?.coordinates?.length || 0,
-          }))
-        );
-      }
-
-      return routes;
-    }
-  }, [
-    mapManagement.filters.origin,
-    mapManagement.filters.destination,
-    getPrioritizedRoutes,
-    routes,
-    buildings,
-  ]);
-
-  // ========== DIAGNÓSTICO DEL SISTEMA ==========
-  const diagnoseRouteIssues = useCallback(() => {
-    console.log("DIAGNÓSTICO DEL SISTEMA DE RUTAS:");
-
-    // 1. Verificar datos de entrada
-    console.log("1. DATOS DE ENTRADA:", {
-      buildings: {
-        total: buildings.length,
-        withCoordinates: buildings.filter((b) => b.ubicacion?.coordinates)
-          .length,
-        sample: buildings.slice(0, 3).map((b) => ({
-          name: b.nombre,
-          coords: b.ubicacion?.coordinates,
-        })),
-      },
-      routes: {
-        total: routes.length,
-        withGeometry: routes.filter((r) => r.geometria?.coordinates).length,
-        types: [...new Set(routes.map((r) => r.tipo))],
-        sample: routes.slice(0, 3).map((r) => ({
-          name: r.nombre,
-          type: r.tipo,
-          coords: r.geometria?.coordinates?.length,
-        })),
-      },
-    });
-
-    // 2. Verificar filtros actuales
-    console.log("2. FILTROS ACTUALES:", {
-      origin: mapManagement.filters.origin,
-      destination: mapManagement.filters.destination,
-      originExists: buildings.some(
-        (b) => b.nombre === mapManagement.filters.origin
-      ),
-      destinationExists: buildings.some(
-        (b) => b.nombre === mapManagement.filters.destination
-      ),
-      valid: filtersValid,
-    });
-
-    // 3. Verificar grafo
-    if (buildingGraphs) {
-      console.log("3. GRAFOS DE CONEXIONES:", {
-        totalGraphs: Object.keys(buildingGraphs).length,
-        graphTypes: Object.keys(buildingGraphs),
-        sampleGraph: Object.keys(buildingGraphs)
-          .slice(0, 1)
-          .map((graphType) => ({
-            type: graphType,
-            nodes: Object.keys(buildingGraphs[graphType]).length,
-            nodesWithConnections: Object.keys(buildingGraphs[graphType]).filter(
-              (node) =>
-                Object.keys(buildingGraphs[graphType][node]?.connections || {})
-                  .length > 0
-            ).length,
-          })),
-      });
-    }
-
-    // 4. Verificar rutas prioritarias
-    console.log("4. RUTAS PRIORITARIAS:", {
-      total: prioritizedRoutes.length,
-      byType: prioritizedRoutes.reduce((acc, route) => {
-        acc[route.tipo] = (acc[route.tipo] || 0) + 1;
-        return acc;
-      }, {}),
-      byCategory: {
-        complete: prioritizedRoutes.filter((r) => r.es_ruta_completa).length,
-        combined: prioritizedRoutes.filter((r) => r.es_combinada).length,
-        segments: prioritizedRoutes.filter((r) => r.es_segmento).length,
-      },
-    });
-  }, [
-    buildings,
-    routes,
-    mapManagement.filters,
-    buildingGraphs,
-    prioritizedRoutes,
-    filtersValid,
-  ]);
-
-  // Debug detallado de rutas priorizadas cuando los filtros cambian
-  useEffect(() => {
-    if (mapManagement.filters.origin && mapManagement.filters.destination) {
-      console.log("RUTAS PRIORITARIAS POR TIPO:", {
-        origen: mapManagement.filters.origin,
-        destino: mapManagement.filters.destination,
-        totalRutas: prioritizedRoutes.length,
-        tiposEncontrados: [...new Set(prioritizedRoutes.map((r) => r.tipo))],
-        detalles: prioritizedRoutes.map((r) => ({
-          tipo: r.tipo,
-          nombre: r.nombre,
-          distancia: r.distancia,
-          segmentos: r.segmentos_originales,
-          prioridad: r.prioridad,
-        })),
-      });
-
-      // Ejecutar diagnóstico después de un delay
-      setTimeout(diagnoseRouteIssues, 1000);
-    }
-  }, [prioritizedRoutes, mapManagement.filters, diagnoseRouteIssues]);
-
-  // DEBUG DEL GRAFO
-  useEffect(() => {
-    if (
-      buildingGraphs &&
-      mapManagement.filters.origin &&
-      mapManagement.filters.destination
-    ) {
-      console.log("DEBUG COMPLETO DEL BUILDING GRAPH:", {
-        totalGraphs: Object.keys(buildingGraphs).length,
-        graphTypes: Object.keys(buildingGraphs),
-        currentFilters: {
-          origin: mapManagement.filters.origin,
-          destination: mapManagement.filters.destination,
-        },
-        connectionStatus: Object.keys(buildingGraphs).map((graphType) => ({
-          type: graphType,
-          hasOrigin:
-            !!buildingGraphs[graphType]?.[mapManagement.filters.origin],
-          hasDestination:
-            !!buildingGraphs[graphType]?.[mapManagement.filters.destination],
-          originConnections: buildingGraphs[graphType]?.[
-            mapManagement.filters.origin
-          ]
-            ? Object.keys(
-                buildingGraphs[graphType][mapManagement.filters.origin]
-                  .connections || {}
-              )
-            : [],
-          destinationConnections: buildingGraphs[graphType]?.[
-            mapManagement.filters.destination
-          ]
-            ? Object.keys(
-                buildingGraphs[graphType][mapManagement.filters.destination]
-                  .connections || {}
-              )
-            : [],
-        })),
-      });
-    }
-  }, [buildingGraphs, mapManagement.filters]);
-
-  // VERIFICACIÓN DE DATOS
-  useEffect(() => {
-    console.log("VERIFICACIÓN DE DATOS EN MAP:", {
-      edificios: {
-        count: buildings.length,
-        nombres: buildings.map((b) => b.nombre),
-        conCoordenadas: buildings.filter((b) => b.ubicacion?.coordinates)
-          .length,
-      },
-      rutas: {
-        count: routes.length,
-        nombres: routes.map((r) => r.nombre),
-        conGeometria: routes.filter((r) => r.geometria?.coordinates).length,
-        tipos: [...new Set(routes.map((r) => r.tipo))],
-      },
-      grafo: {
-        disponible: !!buildingGraphs,
-        tipos: buildingGraphs ? Object.keys(buildingGraphs) : [],
-        tieneDatos: hasData,
-      },
-      filtros: {
-        activos:
-          !!mapManagement.filters.origin && !!mapManagement.filters.destination,
-        validos: filtersValid,
-      },
-    });
-  }, [
-    buildings,
-    routes,
-    buildingGraphs,
-    hasData,
-    mapManagement.filters,
-    filtersValid,
-  ]);
-
-  // ========== HANDLERS Y UTILITARIOS ==========
-  const businessHandlers = useMapHandlers(
+  // Handlers de negocio
+  const businessHandlers = useBusinessHandlers(
     showUINotification,
     showConfirm,
     validateCoordinates,
@@ -398,13 +122,15 @@ function Map() {
     createRoute,
     updateRoute,
     deleteRoute,
-    mapManagement,
+    mapState,
     coordinateManagement,
     mapInstance
   );
 
-  const { handleRouteClick } = useRouteUtils(mapInstance, mapManagement);
+  // Utilidades de rutas
+  const { handleRouteClick } = useRouteUtils(mapInstance, mapState);
 
+  // Acciones del mapa
   const { handleLogout, handleSyncData, handleResetView } = useMapActions(
     mapInstance,
     showUINotification,
@@ -414,154 +140,35 @@ function Map() {
     loadBuildings
   );
 
-  // ========== CONFIGURACIÓN DE LEAFLET ==========
-  useEffect(() => {
-    // Configuración de íconos de Leaflet
-    delete L.Icon.Default.prototype._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl:
-        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-      iconUrl:
-        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-      shadowUrl:
-        "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-    });
-  }, []);
-
-  // Función para manejar clic en edificio con análisis de proximidad
-  // Función para manejar clic en edificio con análisis de proximidad
-  const handleBuildingClickWithProximity = useCallback(
-    async (building) => {
-      if (!building.id) return;
-
-      try {
-        // ✅ CORREGIDO
-        showUINotification(
-          `Buscando ruta más cercana a ${building.nombre}...`,
-          "info"
-        );
-
-        const analysis = await getProximityAnalysis(building.id);
-        console.log(
-          `Análisis de proximidad para ${building.nombre}:`,
-          analysis
-        );
-
-        // Mostrar notificación con resultados
-        if (analysis.closestRoute) {
-          const { route, distancia } = analysis.closestRoute;
-          // ✅ CORREGIDO
-          showUINotification(
-            `Ruta más cercana: ${route.nombre} (${distancia}m)`,
-            "success"
-          );
-
-          // Encontrar la ruta completa y seleccionarla
-          const fullRoute = routes.find((r) => r.id === route.id);
-          if (fullRoute && mapInstance) {
-            mapManagement.setSelectedRoute(fullRoute);
-            handleRouteClick(fullRoute);
-          }
-        } else {
-          // ✅ CORREGIDO
-          showUINotification(
-            "No se encontraron rutas cercanas a este edificio",
-            "warning"
-          );
-        }
-      } catch (error) {
-        console.error("Error en análisis de proximidad:", error);
-        // ✅ CORREGIDO
-        showUINotification("Error al buscar rutas cercanas", "error");
-      }
-    },
-    [
-      getProximityAnalysis,
-      showUINotification,
-      routes,
-      mapInstance,
-      mapManagement,
-      handleRouteClick,
-    ]
+  // Handlers de interacción
+  const interactionHandlers = useMapHandlers(
+    mapInstance,
+    showUINotification,
+    getProximityAnalysis,
+    routes,
+    mapState,
+    handleRouteClick
   );
 
   // ========== EFFECTS ==========
-
-  // Inicializar mapa
-  useEffect(() => {
-    if (!mapInitialized && mapRef.current && !mapInstance) {
-      console.log("Inicializando mapa...");
-
-      const initialize = () => {
-        try {
-          const initializedMap = initializeMap(UCN_COQUIMBO_BOUNDS);
-          if (initializedMap) {
-            setMapInitialized(true);
-            console.log("Mapa inicializado exitosamente");
-          }
-        } catch (error) {
-          console.error("Error inicializando mapa:", error);
-          showUINotification("Error al inicializar el mapa", "error");
-        }
-      };
-
-      const timer = setTimeout(initialize, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [mapInitialized, mapRef, initializeMap, mapInstance, showUINotification]);
-
-  // Cargar datos cuando el mapa esté listo
-  useEffect(() => {
-    if (isMapReady && mapInstance) {
-      console.log("Mapa listo, cargando datos...");
-
-      const loadData = async () => {
-        try {
-          await loadBuildings();
-          await loadRoutes();
-
-          if (geoServerStatus === "checking") {
-            await loadWFSData(mapInstance, "edificio");
-          }
-
-          console.log("Datos cargados exitosamente:", {
-            edificios: buildings.length,
-            rutas: routes.length,
-          });
-        } catch (error) {
-          console.error("Error cargando datos:", error);
-          showUINotification("Error cargando datos del mapa", "error");
-        }
-      };
-
-      loadData();
-    }
-  }, [
-    isMapReady,
+  useMapEffects(
+    mapRef,
     mapInstance,
-    geoServerStatus,
-    loadWFSData,
+    isMapReady,
+    mapInitialized,
+    setMapInitialized,
+    initializeMap,
+    showUINotification,
     loadBuildings,
     loadRoutes,
-    showUINotification,
-    buildings.length,
-    routes.length,
-  ]);
-
-  // Efecto para forzar actualización del BuildingList cuando cambian los filtros
-  useEffect(() => {
-    if (mapManagement.showBuildingList) {
-      // Forzar re-render del BuildingList cerrando y abriendo
-      mapManagement.handleCloseBuildingList();
-      setTimeout(() => {
-        mapManagement.handleManageBuildings();
-      }, 100);
-    }
-  }, [
-    mapManagement.filters.category,
-    mapManagement.filters.origin,
-    mapManagement.filters.destination,
-  ]);
+    geoServerStatus,
+    loadWFSData,
+    buildings,
+    routes,
+    mapState,
+    mapData,
+    buildingGraphs
+  );
 
   // ========== MANEJO DE INTERACCIONES DEL MAPA ==========
   useMapClickHandler(
@@ -569,7 +176,7 @@ function Map() {
     coordinateManagement,
     validateCoordinates,
     findNearestBuilding,
-    mapManagement
+    mapState
   );
 
   // ========== RENDERIZADO ==========
@@ -587,39 +194,39 @@ function Map() {
         backendStatus={backendStatus}
         geoServerStatus={geoServerStatus}
         geoServerFeaturesCount={geoServerFeatures.length}
-        onAddBuilding={mapManagement.handleAddBuilding}
-        onManageBuildings={mapManagement.handleManageBuildings}
+        onAddBuilding={mapState.handleAddBuilding}
+        onManageBuildings={mapState.handleManageBuildings}
         onToggleCoordinateDetection={
           coordinateManagement.toggleCoordinateDetection
         }
         coordinateDetectionActive={coordinateManagement.coordinateDetection}
-        onAddRoute={mapManagement.handleAddRoute}
-        onManageRoutes={mapManagement.handleManageRoutes}
+        onAddRoute={mapState.handleAddRoute}
+        onManageRoutes={mapState.handleManageRoutes}
         onToggleRouteNetwork={() =>
-          mapManagement.setShowRouteNetwork(!mapManagement.showRouteNetwork)
+          mapState.setShowRouteNetwork(!mapState.showRouteNetwork)
         }
-        routeNetworkActive={mapManagement.showRouteNetwork}
-        originFilter={mapManagement.filters.origin}
-        destinationFilter={mapManagement.filters.destination}
-        categoryFilter={mapManagement.filters.category}
+        routeNetworkActive={mapState.showRouteNetwork}
+        originFilter={mapState.filters.origin}
+        destinationFilter={mapState.filters.destination}
+        categoryFilter={mapState.filters.category}
         onOriginFilterChange={(e) =>
-          mapManagement.handleFilterChange("origin", e.target.value)
+          mapState.handleFilterChange("origin", e.target.value)
         }
         onDestinationFilterChange={(e) =>
-          mapManagement.handleFilterChange("destination", e.target.value)
+          mapState.handleFilterChange("destination", e.target.value)
         }
         onCategoryFilterChange={(e) =>
-          mapManagement.handleFilterChange("category", e.target.value)
+          mapState.handleFilterChange("category", e.target.value)
         }
-        onClearFilters={mapManagement.handleClearFilters}
+        onClearFilters={mapState.handleClearFilters}
         allBuildings={buildings}
         filteredBuildings={filteredBuildings}
-        filtersValid={filtersValid}
+        filtersValid={mapData.filtersValid}
       />
 
       {/* NOTIFICACIONES Y DIÁLOGOS */}
       {notification.show && (
-        <UINotification // ← CAMBIAR AQUÍ
+        <UINotification
           message={notification.message}
           type={notification.type}
           onClose={hideNotification}
@@ -643,13 +250,13 @@ function Map() {
       <BuildingForm
         onSave={businessHandlers.handleSaveBuilding}
         onCancel={() => {
-          mapManagement.setShowBuildingForm(false);
-          mapManagement.setEditingBuilding(null);
+          mapState.setShowBuildingForm(false);
+          mapState.setEditingBuilding(null);
           coordinateManagement.clearCapturedCoords();
         }}
-        isVisible={mapManagement.showBuildingForm}
-        building={mapManagement.editingBuilding}
-        isEditing={!!mapManagement.editingBuilding}
+        isVisible={mapState.showBuildingForm}
+        building={mapState.editingBuilding}
+        isEditing={!!mapState.editingBuilding}
         capturedCoordinates={coordinateManagement.capturedCoords}
         onClearCoordinates={coordinateManagement.clearCapturedCoords}
         onToggleCoordinateDetection={
@@ -660,52 +267,53 @@ function Map() {
       <RouteForm
         onSave={businessHandlers.handleSaveRoute}
         onCancel={() => {
-          mapManagement.setShowRouteForm(false);
-          mapManagement.setEditingRoute(null);
+          mapState.setShowRouteForm(false);
+          mapState.setEditingRoute(null);
         }}
-        isVisible={mapManagement.showRouteForm}
-        route={mapManagement.editingRoute}
-        isEditing={!!mapManagement.editingRoute}
+        isVisible={mapState.showRouteForm}
+        route={mapState.editingRoute}
+        isEditing={!!mapState.editingRoute}
         mapInstance={mapInstance}
         existingRoutes={routes}
       />
 
       {/* LISTAS Y GESTIÓN */}
-      {mapManagement.showBuildingList && (
+      {mapState.showBuildingList && (
         <BuildingList
           key={`building-list-${JSON.stringify(
-            mapManagement.filters
+            mapState.filters
           )}-${Date.now()}`}
           buildings={filteredBuildings}
-          onEditBuilding={mapManagement.handleEditBuilding}
+          onEditBuilding={mapState.handleEditBuilding}
           onDeleteBuilding={businessHandlers.handleDeleteBuilding}
-          onClose={mapManagement.handleCloseBuildingList}
-          onEditRoom={mapManagement.handleOpenEditRoom}
-          onCreateRooms={mapManagement.handleCreateRoomsForBuilding}
-          onAddRooms={() => mapManagement.handleCreateRoomsForBuilding(null)}
+          onClose={mapState.handleCloseBuildingList}
+          onEditRoom={mapState.handleOpenEditRoom}
+          onCreateRooms={mapState.handleCreateRoomsForBuilding}
+          onAddRooms={() => mapState.handleCreateRoomsForBuilding(null)}
           onDeleteRoom={businessHandlers.handleDeleteRoom}
           onReload={loadBuildings}
         />
       )}
-      {mapManagement.showRoomManagement && (
+
+      {mapState.showRoomManagement && (
         <RoomManagement
-          mode={mapManagement.roomManagementMode}
+          mode={mapState.roomManagementMode}
           buildings={buildings}
-          selectedBuilding={mapManagement.selectedBuildingForRooms}
+          selectedBuilding={mapState.selectedBuildingForRooms}
           onSaveRooms={businessHandlers.handleSaveRooms}
           onUpdateRoom={businessHandlers.handleUpdateRoom}
           onDeleteRoom={businessHandlers.handleDeleteRoom}
-          onClose={mapManagement.handleCloseRoomManagement}
-          existingRooms={mapManagement.selectedRooms}
+          onClose={mapState.handleCloseRoomManagement}
+          existingRooms={mapState.selectedRooms}
         />
       )}
 
-      {mapManagement.showRouteList && (
+      {mapState.showRouteList && (
         <RouteList
           routes={routes}
-          onEditRoute={mapManagement.handleEditRoute}
+          onEditRoute={mapState.handleEditRoute}
           onDeleteRoute={businessHandlers.handleDeleteRoute}
-          onClose={mapManagement.handleCloseRouteList}
+          onClose={mapState.handleCloseRouteList}
           onSelectRoute={handleRouteClick}
         />
       )}
@@ -739,21 +347,21 @@ function Map() {
       <BuildingRenderer
         mapInstance={mapInstance}
         isMapReady={isMapReady}
-        buildings={filteredBuildings} // ← CAMBIADO A filteredBuildings
-        onBuildingClick={handleBuildingClickWithProximity}
+        buildings={filteredBuildings}
+        onBuildingClick={interactionHandlers.handleBuildingClickWithProximity}
       />
 
       {/* ROUTE LAYER CON RUTAS PRIORIZADAS */}
       <RouteLayer
         mapInstance={mapInstance}
-        routes={prioritizedRoutes}
+        routes={mapData.prioritizedRoutes}
         onRouteClick={handleRouteClick}
-        originFilter={mapManagement.filters.origin}
-        destinationFilter={mapManagement.filters.destination}
-        selectedRoute={mapManagement.selectedRoute}
+        originFilter={mapState.filters.origin}
+        destinationFilter={mapState.filters.destination}
+        selectedRoute={mapState.selectedRoute}
       />
 
-      {mapManagement.showRouteNetwork && (
+      {mapState.showRouteNetwork && (
         <RouteNetwork
           mapInstance={mapInstance}
           onNodeClick={(node) => {
@@ -767,7 +375,7 @@ function Map() {
           onRouteClick={(routeInfo) => {
             const fullRoute = routes.find((r) => r.id === routeInfo.routeId);
             if (fullRoute) {
-              mapManagement.setSelectedRoute(fullRoute);
+              mapState.setSelectedRoute(fullRoute);
               handleRouteClick(fullRoute);
             }
           }}
