@@ -13,6 +13,12 @@ function BuildingList({
   onDeleteRoom,
   onReload,
 }) {
+  // AGREGAR ESTO PARA DEBUG
+  console.log("🏢 BuildingList recibió:", buildings.length, "edificios");
+  console.log(
+    "📋 Edificios en BuildingList:",
+    buildings.map((b) => b.nombre)
+  );
   const [deletingId, setDeletingId] = useState(null);
   const [expandedBuilding, setExpandedBuilding] = useState(null);
   const [deletingRoomId, setDeletingRoomId] = useState(null);

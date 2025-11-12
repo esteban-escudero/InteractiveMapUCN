@@ -103,6 +103,14 @@ function Map() {
     mapManagement.filters
   );
 
+  // DEBUG: Verificar filtros
+  console.log("🔍 DEBUG FILTROS:", {
+    filtros: mapManagement.filters,
+    totalEdificios: buildings.length,
+    edificiosFiltrados: filteredBuildings.length,
+    edificiosFiltradosNombres: filteredBuildings.map((b) => b.nombre),
+  });
+
   // ========== VALIDACIÓN DE FILTROS ==========
   const filtersValid = useMemo(() => {
     return (
@@ -539,6 +547,21 @@ function Map() {
     routes.length,
   ]);
 
+  // Efecto para forzar actualización del BuildingList cuando cambian los filtros
+  useEffect(() => {
+    if (mapManagement.showBuildingList) {
+      // Forzar re-render del BuildingList cerrando y abriendo
+      mapManagement.handleCloseBuildingList();
+      setTimeout(() => {
+        mapManagement.handleManageBuildings();
+      }, 100);
+    }
+  }, [
+    mapManagement.filters.category,
+    mapManagement.filters.origin,
+    mapManagement.filters.destination,
+  ]);
+
   // ========== MANEJO DE INTERACCIONES DEL MAPA ==========
   useMapClickHandler(
     mapInstance,
@@ -649,7 +672,10 @@ function Map() {
       {/* LISTAS Y GESTIÓN */}
       {mapManagement.showBuildingList && (
         <BuildingList
-          buildings={buildings}
+          key={`building-list-${JSON.stringify(
+            mapManagement.filters
+          )}-${Date.now()}`}
+          buildings={filteredBuildings}
           onEditBuilding={mapManagement.handleEditBuilding}
           onDeleteBuilding={businessHandlers.handleDeleteBuilding}
           onClose={mapManagement.handleCloseBuildingList}
@@ -660,7 +686,6 @@ function Map() {
           onReload={loadBuildings}
         />
       )}
-
       {mapManagement.showRoomManagement && (
         <RoomManagement
           mode={mapManagement.roomManagementMode}
@@ -713,7 +738,7 @@ function Map() {
       <BuildingRenderer
         mapInstance={mapInstance}
         isMapReady={isMapReady}
-        buildings={buildings}
+        buildings={filteredBuildings} // ← CAMBIADO A filteredBuildings
         onBuildingClick={handleBuildingClickWithProximity}
       />
 
