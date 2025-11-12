@@ -3,38 +3,38 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Map.css";
 
-// Hooks (mantener los necesarios)
-import { useMap } from "../../../hooks/map/useMap";
-
-import { useRouteUtils } from "../../../hooks/routes/useRouteUtils";
-import { useBuildingFilters } from "../../../hooks/buildings/useBuildingFilters";
-import useBuildings from "../../../hooks/buildings/useBuildings";
-import useGeoServer from "../../../hooks/useGeoServer";
-import { useMapManagement } from "../../../hooks/map/useMapManagement";
-import { useCoordinateManagement } from "../../../hooks/map/useCoordinateManagement";
-import { useMapOperations } from "../../../hooks/map/useMapOperations";
-import { useMapHandlers } from "../../../hooks/map/useMapHandlers";
-import { useMapClickHandler } from "../../../hooks/map/useMapClickHandler";
-import { useMapActions } from "../../../hooks/map/useMapActions";
-import useRoutes from "../../../hooks/routes/useRoutes";
-import { useNotification } from "../../../hooks/common/useNotification";
-import { useConfirm } from "../../../hooks/common/useConfirm";
-import useProximity from "../../../hooks/common/useProximity";
-import { useRouteIntelligence } from "../../../hooks/routes/useRouteIntelligence";
-import { ConfirmDialog, UINotification } from "../../ui";
+// Hooks - TODOS EXISTEN, agregar extensiones .js
+import { useMap } from "../../../hooks/map/useMap.js";
+import { useRouteUtils } from "../../../hooks/routes/useRouteUtils.js";
+import { useBuildingFilters } from "../../../hooks/buildings/useBuildingFilters.js";
+import useBuildings from "../../../hooks/buildings/useBuildings.js";
+import useGeoServer from "../../../hooks/useGeoServer.js";
+import { useMapManagement } from "../../../hooks/map/useMapManagement.js";
+import { useCoordinateManagement } from "../../../hooks/map/useCoordinateManagement.js";
+import { useMapOperations } from "../../../hooks/map/useMapOperations.js";
+import { useMapHandlers } from "../../../hooks/map/useMapHandlers.js";
+import { useMapClickHandler } from "../../../hooks/map/useMapClickHandler.js";
+import { useMapActions } from "../../../hooks/map/useMapActions.js";
+import useRoutes from "../../../hooks/routes/useRoutes.js";
+import { useNotification } from "../../../hooks/common/useNotification.js";
+import { useConfirm } from "../../../hooks/common/useConfirm.js";
+import useProximity from "../../../hooks/common/useProximity.js";
+import { useRouteIntelligence } from "../../../hooks/routes/useRouteIntelligence.js";
 
 // Componentes
-import { SidePanel } from "../../ui";
-import { BuildingList, BuildingForm } from "../../buildings";
-import { RouteList, RouteForm } from "../../routes";
+import { ConfirmDialog, UINotification, SidePanel } from "../../ui/index.js";
+import { BuildingList, BuildingForm } from "../../buildings/index.js";
+import { RouteList, RouteForm } from "../../routes/index.js";
 
-// CORREGIR: Importar desde archivos separados
-import RouteLayer from "../RouteLayer";
-import BuildingRenderer from "../BuildingRenderer";
-import MapIndicators from "../MapIndicators";
+// CORREGIR: Importar desde archivos específicos
+import RouteLayer from "../RouteLayer/RouteLayer.jsx";
+import BuildingRenderer from "../BuildingRenderer/BuildingRenderer.jsx";
+import MapIndicators from "../MapIndicators/MapIndicators.jsx";
 
 // Constantes y servicios
-import mapConfig, { UCN_COQUIMBO_BOUNDS } from "../../../constants/mapConfig";
+import mapConfig, {
+  UCN_COQUIMBO_BOUNDS,
+} from "../../../constants/mapConfig.js";
 
 // Componente principal del mapa
 function Map() {
