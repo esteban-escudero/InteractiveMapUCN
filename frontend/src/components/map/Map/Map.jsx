@@ -30,6 +30,7 @@ import { RouteList, RouteForm } from "../../routes/index.js";
 import RouteLayer from "../RouteLayer/RouteLayer.jsx";
 import BuildingRenderer from "../BuildingRenderer/BuildingRenderer.jsx";
 import MapIndicators from "../MapIndicators/MapIndicators.jsx";
+import RoomManagement from "../../buildings/RoomManagement/RoomManagement.jsx";
 
 // Constantes y servicios
 import mapConfig, {

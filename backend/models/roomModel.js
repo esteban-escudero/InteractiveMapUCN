@@ -1,46 +1,6 @@
 const pool = require("../config/database");
 
 const roomModel = {
-  async findAvailableId() {
-    try {
-      console.log("Buscando ID disponible para sala...");
-
-      const query = `
-        WITH sequence_gaps AS (
-          SELECT 
-            COALESCE(LAG(id_sala) OVER (ORDER BY id_sala), 0) + 1 as gap_start,
-            id_sala as gap_end
-          FROM sala
-          WHERE id_sala > 0
-        ),
-        available_gaps AS (
-          SELECT gap_start
-          FROM sequence_gaps
-          WHERE gap_start < gap_end
-          ORDER BY gap_start
-          LIMIT 1
-        )
-        SELECT 
-          COALESCE(
-            (SELECT gap_start FROM available_gaps),
-            (SELECT COALESCE(MAX(id_sala), 0) + 1 FROM sala)
-          ) as available_id
-      `;
-
-      const result = await pool.query(query);
-      const availableId = parseInt(result.rows[0].available_id);
-
-      console.log(`ID disponible encontrado: ${availableId}`);
-      return availableId;
-    } catch (error) {
-      console.error("Error buscando ID disponible:", error.message);
-      const maxResult = await pool.query(
-        "SELECT COALESCE(MAX(id_sala), 0) as max_id FROM sala"
-      );
-      return parseInt(maxResult.rows[0].max_id) + 1;
-    }
-  },
-
   async createRooms(roomsData) {
     const client = await pool.connect();
 
@@ -52,19 +12,16 @@ const roomModel = {
       const createdRooms = [];
 
       for (const roomData of roomsData) {
-        const availableId = await this.findAvailableId();
-        console.log(`Usando ID disponible: ${availableId}`);
-
+        // ELIMINAR findAvailableId() y dejar que PostgreSQL genere el ID automáticamente
         const query = `
           INSERT INTO sala (
-            id_sala,
             id_edificio,
             nombre_sala, 
             piso, 
             tipo_sala,
             accesible_silla_ruedas,
-            ubicacion  -- NUEVO NOMBRE: ubicacion (tipo geometry)
-          ) VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326))
+            ubicacion
+          ) VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($6, $7), 4326))
           RETURNING 
             id_sala as id,
             id_edificio,
@@ -72,12 +29,11 @@ const roomModel = {
             piso,
             tipo_sala,
             accesible_silla_ruedas,
-            ST_X(ubicacion) as longitud,  -- Usar ST_X con geometry
-            ST_Y(ubicacion) as latitud    -- Usar ST_Y con geometry
+            ST_X(ubicacion) as longitud,
+            ST_Y(ubicacion) as latitud
         `;
 
         const values = [
-          availableId,
           roomData.id_edificio,
           roomData.nombre_sala,
           roomData.piso,
@@ -88,9 +44,7 @@ const roomModel = {
         ];
 
         console.log(
-          "Insertando sala con ID:",
-          availableId,
-          "y ubicación:",
+          "Insertando sala con ubicación:",
           roomData.longitud,
           roomData.latitud
         );
@@ -111,6 +65,8 @@ const roomModel = {
       client.release();
     }
   },
+
+  // ELIMINAR la función findAvailableId() completamente
 
   async getByBuildingId(buildingId) {
     try {
@@ -172,7 +128,6 @@ const roomModel = {
     }
   },
 
-  // FUNCIONES ESPACIALES AVANZADAS (ahora que tenemos geometry)
   async findNearbyRooms(lng, lat, radiusMeters) {
     try {
       const query = `
