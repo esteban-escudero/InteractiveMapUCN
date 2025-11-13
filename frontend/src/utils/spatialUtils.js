@@ -221,12 +221,9 @@ export const SpatialUtils = {
     }
   },
 
-  // Agrega esta función en spatialUtils.js
-  // En spatialUtils.js - CORREGIR la función calculateDistanceToLine
-  // En spatialUtils.js - Asegúrate de tener esta función
+  // En utils/spatialUtils.js - Verifica que esta función existe:
   calculateDistanceToLine(point, lineStart, lineEnd) {
     try {
-      // VALIDAR QUE LAS COORDENADAS SEAN NÚMEROS
       if (!point || !lineStart || !lineEnd) {
         console.warn("Puntos inválidos para calculateDistanceToLine");
         return Infinity;
@@ -244,11 +241,7 @@ export const SpatialUtils = {
         !isValidCoord(lineStart) ||
         !isValidCoord(lineEnd)
       ) {
-        console.warn("Coordenadas inválidas:", {
-          point,
-          lineStart,
-          lineEnd,
-        });
+        console.warn("Coordenadas inválidas:", { point, lineStart, lineEnd });
         return Infinity;
       }
 

@@ -1,0 +1,264 @@
+/* RouteFormPolyline.css - Estilo Anterior */
+.route-form-polyline {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 350px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  padding: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.form-header h3 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+
+.form-section {
+  margin-bottom: 15px;
+}
+
+.form-section label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #34495e;
+}
+
+.form-section input,
+.form-section select,
+.form-section textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #bdc3c7;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.drawing-section {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+  border-left: 4px solid #3498db;
+}
+
+.draw-btn {
+  width: 100%;
+  padding: 12px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.draw-btn:hover {
+  background: #2980b9;
+}
+
+.drawing-controls {
+  text-align: center;
+}
+
+.drawing-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 0;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.drawing-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.finish-btn {
+  flex: 1;
+  padding: 10px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  flex: 1;
+  padding: 10px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.route-info {
+  background: #e8f5e8;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border-left: 4px solid #27ae60;
+}
+
+.route-info h4 {
+  margin: 0 0 10px 0;
+  color: #27ae60;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.save-btn {
+  flex: 2;
+  padding: 12px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.save-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  flex: 1;
+  padding: 12px;
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Estilos específicos para el modo edición */
+.editing-active {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 2px solid #3498db;
+}
+
+.editing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.editing-indicator {
+  color: #3498db;
+  font-weight: 600;
+}
+
+.editing-instructions {
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 10px 0;
+  font-size: 0.9em;
+  color: #0c5460;
+}
+
+.editing-instructions ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.editing-instructions li {
+  margin-bottom: 4px;
+}
+
+.editing-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.action-btn {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-btn.warning {
+  background: #f39c12;
+  color: white;
+}
+
+.action-btn.warning:hover {
+  background: #e67e22;
+}
+
+.action-btn.danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.action-btn.danger:hover {
+  background: #c0392b;
+}
+
+/* Estados del formulario */
+.form-status {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.status-warning {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+}
+
+.status-success {
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+}
+
+/* Animación para indicadores */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.drawing-indicator {
+  animation: pulse 1.5s infinite;
+}

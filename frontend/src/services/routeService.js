@@ -1,13 +1,10 @@
+// services/routeService.js
 import { api } from "./api";
 
 export const routeService = {
   async getAllRoutes() {
     try {
-      console.log("Solicitando todas las rutas...");
       const response = await api.get("/routes");
-      console.log("Respuesta de rutas:", response);
-
-      // Manejo consistente de respuesta
       if (response.success !== false) {
         return response.data || response;
       } else {
@@ -21,9 +18,20 @@ export const routeService = {
 
   async createRoute(routeData) {
     try {
-      console.log("Creando nueva ruta:", routeData);
-      const response = await api.post("/routes", routeData);
-      console.log("Respuesta creación ruta:", response);
+      const routeToSave = {
+        nombre: routeData.nombre,
+        tipo: routeData.tipo,
+        descripcion: routeData.descripcion || "",
+        prioridad: routeData.prioridad || "media",
+        distancia: Math.round(routeData.distancia),
+        tiempo_estimado: Math.round(routeData.tiempo_estimado),
+        geometria: routeData.geometria,
+        origen: "Dibujado en mapa",
+        destino: "Dibujado en mapa",
+        puntos_ruta: [],
+      };
+
+      const response = await api.post("/routes", routeToSave);
 
       if (response.success !== false) {
         return response.data || response;
@@ -38,9 +46,18 @@ export const routeService = {
 
   async updateRoute(routeId, routeData) {
     try {
-      console.log(`Actualizando ruta ID: ${routeId}`, routeData);
-      const response = await api.put(`/routes/${routeId}`, routeData);
-      console.log("Respuesta actualización ruta:", response);
+      const routeToUpdate = {
+        nombre: routeData.nombre,
+        tipo: routeData.tipo,
+        descripcion: routeData.descripcion || "",
+        prioridad: routeData.prioridad || "media",
+        distancia: Math.round(routeData.distancia),
+        tiempo_estimado: Math.round(routeData.tiempo_estimado),
+        geometria: routeData.geometria,
+        puntos_ruta: [],
+      };
+
+      const response = await api.put(`/routes/${routeId}`, routeToUpdate);
 
       if (response.success !== false) {
         return response.data || response;
@@ -55,9 +72,7 @@ export const routeService = {
 
   async deleteRoute(routeId) {
     try {
-      console.log(`Eliminando ruta ID: ${routeId}`);
       const response = await api.delete(`/routes/${routeId}`);
-      console.log("Respuesta eliminación ruta:", response);
 
       if (response.success !== false) {
         return response.data || response;
@@ -66,27 +81,6 @@ export const routeService = {
       }
     } catch (error) {
       console.error("Error eliminando ruta:", error);
-      throw error;
-    }
-  },
-
-  async calculateRoute(origen, destino, tipo_ruta = "peatonal") {
-    try {
-      console.log("Calculando ruta desde:", origen, "hasta:", destino);
-      const response = await api.post("/routes/calculate", {
-        origen,
-        destino,
-        tipo_ruta,
-      });
-      console.log("Ruta calculada exitosamente:", response);
-
-      if (response.success !== false) {
-        return response.data || response;
-      } else {
-        throw new Error(response.message || "Error calculando ruta");
-      }
-    } catch (error) {
-      console.error("Error calculando ruta:", error);
       throw error;
     }
   },

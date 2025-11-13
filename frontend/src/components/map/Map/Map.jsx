@@ -28,7 +28,7 @@ import { useRouteIntelligence } from "../../../hooks/routes/useRouteIntelligence
 // Componentes
 import { ConfirmDialog, UINotification, SidePanel } from "../../ui/index.js";
 import { BuildingList, BuildingForm } from "../../buildings/index.js";
-import { RouteList, RouteForm } from "../../routes/index.js";
+import { RouteList, RouteFormPolyline } from "../../routes/index.js";
 
 import RouteLayer from "../RouteLayer/RouteLayer.jsx";
 import BuildingRenderer from "../BuildingRenderer/BuildingRenderer.jsx";
@@ -264,7 +264,7 @@ function Map() {
         }
       />
 
-      <RouteForm
+      <RouteFormPolyline
         onSave={businessHandlers.handleSaveRoute}
         onCancel={() => {
           mapState.setShowRouteForm(false);
@@ -274,7 +274,6 @@ function Map() {
         route={mapState.editingRoute}
         isEditing={!!mapState.editingRoute}
         mapInstance={mapInstance}
-        existingRoutes={routes}
       />
 
       {/* LISTAS Y GESTIÓN */}
