@@ -10,6 +10,8 @@ const RouteFormPolyline = ({
   route,
   isEditing,
   mapInstance,
+  onSelectionStart,
+  onSelectionEnd,
 }) => {
   const {
     formData,
@@ -32,27 +34,64 @@ const RouteFormPolyline = ({
     isEditing,
   });
 
-  // Agrega este useEffect para manejar ESC a nivel del componente
+  // Notificar al padre cuando empieza/termina la selección
+  useEffect(() => {
+    if (drawingMode && onSelectionStart) {
+      console.log("🟡 Notificando INICIO de selección al padre");
+      onSelectionStart();
+    }
+  }, [drawingMode, onSelectionStart]);
+
+  useEffect(() => {
+    if (!drawingMode && onSelectionEnd) {
+      console.log("🟡 Notificando FIN de selección al padre");
+      onSelectionEnd();
+    }
+  }, [drawingMode, onSelectionEnd]);
+
+  // Manejo de tecla ESC
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
       if (e.key === "Escape" && drawingMode) {
-        // Si estamos en modo dibujo, solo finaliza el dibujo, no cierres el formulario
+        console.log(
+          "⌨️ ESC detectado en componente - drawingMode:",
+          drawingMode
+        );
+        finishDrawing();
         e.preventDefault();
         e.stopPropagation();
-        return;
       }
     };
 
-    if (isVisible) {
+    if (drawingMode) {
+      console.log("🟡 Agregando listener de teclado para ESC");
       document.addEventListener("keydown", handleGlobalKeyDown);
     }
 
     return () => {
+      console.log("🟡 Removiendo listener de teclado");
       document.removeEventListener("keydown", handleGlobalKeyDown);
     };
-  }, [drawingMode, isVisible]);
+  }, [drawingMode, finishDrawing]);
 
-  if (!isVisible) return null;
+  // 🔹 OCULTAR FORMULARIO DURANTE SELECCIÓN ACTIVA
+  if (drawingMode) {
+    console.log("🔴🔴🔴 FORMULARIO OCULTO - drawingMode activo");
+    return null;
+  }
+
+  // Ocultar si no es visible
+  if (!isVisible) {
+    console.log("🔴 Formulario OCULTO - isVisible es false");
+    return null;
+  }
+
+  console.log(
+    "🟢🟢🟢 FORMULARIO VISIBLE - drawingMode:",
+    drawingMode,
+    "editingMode:",
+    editingMode
+  );
 
   return (
     <div className="route-form-overlay">
@@ -63,22 +102,12 @@ const RouteFormPolyline = ({
               {isEditing ? "edit_road" : "add_road"}
             </span>
             {isEditing ? "Editar Ruta" : "Crear Ruta"}
-            {drawingMode && (
-              <span
-                style={{
-                  color: "#e74c3c",
-                  fontSize: "0.8em",
-                  marginLeft: "10px",
-                  fontWeight: "normal",
-                }}>
-                (Modo Selección - Presiona ESC para finalizar)
-              </span>
-            )}
           </h3>
           <button
+            type="button"
             className="close-btn"
             onClick={handleCancel}
-            disabled={drawingMode}>
+            title="Cerrar formulario">
             <span className="material-icons">close</span>
           </button>
         </div>
@@ -86,24 +115,24 @@ const RouteFormPolyline = ({
         <form onSubmit={handleSubmit} className="route-form">
           {/* Información básica */}
           <div className="form-group">
-            <label>Nombre de la Ruta (opcional)</label>
+            <label htmlFor="nombre-ruta">Nombre de la Ruta (opcional)</label>
             <input
+              id="nombre-ruta"
               type="text"
               name="nombre"
               value={formData.nombre}
               onChange={handleInputChange}
               placeholder="Dejar vacío para nombre automático"
-              disabled={drawingMode}
             />
           </div>
 
           <div className="form-group">
-            <label>Tipo de Ruta</label>
+            <label htmlFor="tipo-ruta">Tipo de Ruta</label>
             <select
+              id="tipo-ruta"
               name="tipo"
               value={formData.tipo}
-              onChange={handleInputChange}
-              disabled={drawingMode}>
+              onChange={handleInputChange}>
               <option value="accesible">Accesible</option>
               <option value="emergencia">Emergencia</option>
               <option value="peatonal">Peatonal</option>
@@ -117,68 +146,46 @@ const RouteFormPolyline = ({
             <h4>
               <span className="material-icons">map</span>
               Seleccionar Puntos en el Mapa
-              {drawingMode && (
-                <span
-                  style={{
-                    color: "#e74c3c",
-                    fontSize: "0.8em",
-                    marginLeft: "10px",
-                    fontWeight: "normal",
-                  }}>
-                  (Haz clic en el mapa para agregar puntos)
-                </span>
-              )}
             </h4>
 
-            {/* Advertencia de mapa no disponible */}
             {!mapInstance && (
               <div className="map-unavailable-warning">
                 <span className="material-icons">warning</span>
-                El mapa no está disponible. Recarga la página.
+                El mapa no está disponible
               </div>
             )}
 
-            {/* Instrucciones */}
             <div className="selection-instructions">
               <p>
                 <span className="material-icons">looks_one</span>
-                <strong>Primero selecciona los puntos en el mapa</strong>
+                <strong>Haz clic en "Activar Selección"</strong>
               </p>
               <p>
                 <span className="material-icons">looks_two</span>
-                Haz clic en "Activar Selección"
-              </p>
-              <p>
-                <span className="material-icons">looks_3</span>
                 Haz varios clics en el mapa para agregar puntos
               </p>
               <p>
-                <span className="material-icons">looks_4</span>
+                <span className="material-icons">looks_3</span>
                 Presiona <strong>ESC</strong> para finalizar
+              </p>
+              <p>
+                <span className="material-icons">looks_4</span>
+                Luego guarda la ruta
               </p>
             </div>
 
-            {/* Controles de selección */}
             <div className="map-selection-controls">
-              {!drawingMode ? (
-                <button
-                  type="button"
-                  className="select-btn"
-                  onClick={activateDrawing}
-                  disabled={!mapInstance}>
-                  <span className="material-icons">my_location</span>
-                  Activar Selección en Mapa
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="select-btn"
-                  onClick={finishDrawing}
-                  style={{ backgroundColor: "#27ae60" }}>
-                  <span className="material-icons">check</span>
-                  Finalizar Selección (o presiona ESC)
-                </button>
-              )}
+              <button
+                type="button"
+                className="select-btn"
+                onClick={() => {
+                  console.log("🖱️ Botón Activar Selección clickeado");
+                  activateDrawing();
+                }}
+                disabled={!mapInstance}>
+                <span className="material-icons">my_location</span>
+                Activar Selección en Mapa
+              </button>
 
               <div className="point-actions">
                 <button
@@ -187,8 +194,7 @@ const RouteFormPolyline = ({
                   onClick={removeLastPoint}
                   disabled={
                     !polylineRef.current ||
-                    polylineRef.current.getLatLngs().length === 0 ||
-                    drawingMode
+                    polylineRef.current.getLatLngs().length === 0
                   }>
                   <span className="material-icons">undo</span>
                   Eliminar Último
@@ -200,8 +206,7 @@ const RouteFormPolyline = ({
                   onClick={clearMap}
                   disabled={
                     !polylineRef.current ||
-                    polylineRef.current.getLatLngs().length === 0 ||
-                    drawingMode
+                    polylineRef.current.getLatLngs().length === 0
                   }>
                   <span className="material-icons">clear_all</span>
                   Limpiar Todos
@@ -221,14 +226,13 @@ const RouteFormPolyline = ({
               {formData.distancia > 0 && (
                 <span style={{ color: "#27ae60", marginLeft: "10px" }}>
                   <span className="material-icons">straighten</span>
-                  {formData.distancia.toLocaleString()}m calculados
+                  {formData.distancia.toLocaleString()}m
                 </span>
               )}
             </div>
           </div>
 
-          {/* Detalles de la ruta */}
-          {formData.geometria && !drawingMode && (
+          {formData.geometria && (
             <div className="route-details-section">
               <h4>
                 <span className="material-icons">info</span>
@@ -265,21 +269,16 @@ const RouteFormPolyline = ({
             </div>
           )}
 
-          {/* Acciones del formulario */}
           <div className="form-actions">
             <button
               type="submit"
               className="save-btn"
-              disabled={!formData.geometria || drawingMode}>
+              disabled={!formData.geometria}>
               <span className="material-icons">save</span>
               {isEditing ? "Actualizar Ruta" : "Guardar Ruta"}
             </button>
 
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={handleCancel}
-              disabled={drawingMode}>
+            <button type="button" className="cancel-btn" onClick={handleCancel}>
               <span className="material-icons">cancel</span>
               Cancelar
             </button>

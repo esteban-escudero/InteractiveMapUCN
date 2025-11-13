@@ -371,3 +371,82 @@
     flex-direction: column;
   }
 }
+/* Agregar al final de RouteFormPolyline.css */
+
+.selection-active-message {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.selection-active-message .material-icons {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.selection-active-message strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 1.1em;
+}
+
+.selection-active-message p {
+  margin: 5px 0 0 0;
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+/* Estado cuando está en modo selección */
+.route-form-container:has(.selection-active-message) {
+  opacity: 0.9;
+}
+
+/* Agregar al final de RouteFormPolyline.css */
+.selection-active-message {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.selection-active-message .material-icons {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.selection-active-message strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 1.1em;
+}
+
+.selection-active-message p {
+  margin: 5px 0 0 0;
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+/* Agrega esto a RouteFormPolyline.css */
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #34495e;
+  font-size: 0.9em;
+  cursor: pointer; /* Mejora la accesibilidad */
+}
+
+/* Asegúrate que los inputs tengan los ids correspondientes */
+#nombre-ruta:focus,
+#tipo-ruta:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}

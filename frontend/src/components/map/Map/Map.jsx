@@ -1,3 +1,4 @@
+// components/map/Map/Map.jsx
 import React, { useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -39,6 +40,9 @@ function Map() {
   // ========== HOOKS PRINCIPALES ==========
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
+
+  // NUEVO ESTADO: Controla cuándo ocultar el formulario durante selección
+  const [selectionActive, setSelectionActive] = useState(false);
 
   // Notificaciones y confirmaciones
   const { notification, showUINotification, hideNotification } =
@@ -223,7 +227,6 @@ function Map() {
         filteredBuildings={filteredBuildings}
         filtersValid={mapData.filtersValid}
       />
-
       {/* NOTIFICACIONES Y DIÁLOGOS */}
       {notification.show && (
         <UINotification
@@ -234,7 +237,6 @@ function Map() {
           position="top-right"
         />
       )}
-
       <ConfirmDialog
         isOpen={confirmState.isOpen}
         title={confirmState.title}
@@ -245,7 +247,6 @@ function Map() {
         onConfirm={handleConfirm}
         onCancel={hideConfirm}
       />
-
       {/* FORMULARIOS */}
       <BuildingForm
         onSave={businessHandlers.handleSaveBuilding}
@@ -264,18 +265,24 @@ function Map() {
         }
       />
 
+      {/* FORMULARIO DE RUTA - EL COMPONENTE INTERNO MANEJA SU PROPIA VISIBILIDAD */}
       <RouteFormPolyline
         onSave={businessHandlers.handleSaveRoute}
         onCancel={() => {
           mapState.setShowRouteForm(false);
           mapState.setEditingRoute(null);
         }}
-        isVisible={mapState.showRouteForm}
+        isVisible={mapState.showRouteForm} // ← SOLO controlar si el formulario debe mostrarse
         route={mapState.editingRoute}
         isEditing={!!mapState.editingRoute}
         mapInstance={mapInstance}
+        onSelectionStart={() => {
+          console.log("🟡 Iniciando selección - notificando al padre");
+        }}
+        onSelectionEnd={() => {
+          console.log("🟢 Finalizando selección - notificando al padre");
+        }}
       />
-
       {/* LISTAS Y GESTIÓN */}
       {mapState.showBuildingList && (
         <BuildingList
@@ -293,7 +300,6 @@ function Map() {
           onReload={loadBuildings}
         />
       )}
-
       {mapState.showRoomManagement && (
         <RoomManagement
           mode={mapState.roomManagementMode}
@@ -306,7 +312,6 @@ function Map() {
           existingRooms={mapState.selectedRooms}
         />
       )}
-
       {mapState.showRouteList && (
         <RouteList
           routes={routes}
@@ -316,7 +321,6 @@ function Map() {
           onSelectRoute={handleRouteClick}
         />
       )}
-
       {/* COMPONENTES DEL MAPA */}
       <div className="Mapa">
         <div ref={mapRef} className="map-container"></div>
@@ -341,7 +345,6 @@ function Map() {
           onClearValidationErrors={coordinateManagement.clearValidationErrors}
         />
       </div>
-
       {/* CAPAS DEL MAPA */}
       <BuildingRenderer
         mapInstance={mapInstance}
@@ -349,7 +352,6 @@ function Map() {
         buildings={filteredBuildings}
         onBuildingClick={interactionHandlers.handleBuildingClickWithProximity}
       />
-
       {/* ROUTE LAYER CON RUTAS PRIORIZADAS */}
       <RouteLayer
         mapInstance={mapInstance}
@@ -359,7 +361,6 @@ function Map() {
         destinationFilter={mapState.filters.destination}
         selectedRoute={mapState.selectedRoute}
       />
-
       {mapState.showRouteNetwork && (
         <RouteNetwork
           mapInstance={mapInstance}
