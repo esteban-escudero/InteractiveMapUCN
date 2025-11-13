@@ -93,6 +93,11 @@ const RouteFormPolyline = ({
     editingMode
   );
 
+  // DEBUG: Verificar estado del botón guardar
+  console.log("🔍 ESTADO DEL BOTÓN GUARDAR:");
+  console.log("📊 formData.geometria:", formData.geometria);
+  console.log("📍 ¿Puede guardar?:", !!formData.geometria);
+
   return (
     <div className="route-form-overlay">
       <div className="route-form-container">
@@ -223,6 +228,11 @@ const RouteFormPolyline = ({
                   ? polylineRef.current.getLatLngs().length
                   : 0}
               </strong>
+              {formData.geometria && (
+                <span style={{ color: "#3498db", marginLeft: "10px" }}>
+                  (Guardados: {formData.geometria.coordinates.length})
+                </span>
+              )}
               {formData.distancia > 0 && (
                 <span style={{ color: "#27ae60", marginLeft: "10px" }}>
                   <span className="material-icons">straighten</span>

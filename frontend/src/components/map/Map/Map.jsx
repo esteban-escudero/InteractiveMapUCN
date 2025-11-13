@@ -183,6 +183,34 @@ function Map() {
     mapState
   );
 
+  // TEMPORAL: Agrega esta función en Map.jsx, justo antes del return
+  const handleSaveRouteDebug = async (routeData) => {
+    console.log("🎯 DEBUG DESDE MAP.JS - Ruta recibida:");
+    console.log("📦 Datos completos:", JSON.parse(JSON.stringify(routeData)));
+    console.log(
+      "📍 Número de puntos:",
+      routeData.geometria?.coordinates?.length || 0
+    );
+
+    // Llamar a la función original
+    await businessHandlers.handleSaveRoute(routeData);
+  };
+
+  // Y cambia temporalmente el onSave en RouteFormPolyline:
+  <RouteFormPolyline
+    onSave={handleSaveRouteDebug} // ← Cambia esto temporalmente
+    onCancel={() => {
+      mapState.setShowRouteForm(false);
+      mapState.setEditingRoute(null);
+    }}
+    isVisible={mapState.showRouteForm}
+    route={mapState.editingRoute}
+    isEditing={!!mapState.editingRoute}
+    mapInstance={mapInstance}
+    onSelectionStart={() => console.log("🟡 Iniciando selección")}
+    onSelectionEnd={() => console.log("🟢 Finalizando selección")}
+  />;
+
   // ========== RENDERIZADO ==========
   return (
     <div className="container">

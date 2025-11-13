@@ -18,6 +18,12 @@ export const routeService = {
 
   async createRoute(routeData) {
     try {
+      console.log("🚀 ENVIANDO RUTA AL BACKEND:", routeData);
+      console.log(
+        "📍 PUNTOS EN GEOMETRÍA:",
+        routeData.geometria?.coordinates?.length || 0
+      );
+
       const routeToSave = {
         nombre: routeData.nombre,
         tipo: routeData.tipo,
@@ -25,25 +31,27 @@ export const routeService = {
         prioridad: routeData.prioridad || "media",
         distancia: Math.round(routeData.distancia),
         tiempo_estimado: Math.round(routeData.tiempo_estimado),
-        geometria: routeData.geometria,
+        geometria: routeData.geometria, // ← ESTO ES LO IMPORTANTE
         origen: "Dibujado en mapa",
         destino: "Dibujado en mapa",
-        puntos_ruta: [],
+        puntos_ruta: [], // ← Las rutas polyline no usan puntos_ruta
       };
+
+      console.log("📦 DATOS ENVIADOS AL BACKEND:", routeToSave);
 
       const response = await api.post("/routes", routeToSave);
 
       if (response.success !== false) {
+        console.log("✅ Ruta guardada en backend:", response.data);
         return response.data || response;
       } else {
         throw new Error(response.message || "Error creando ruta");
       }
     } catch (error) {
-      console.error("Error creando ruta:", error);
+      console.error("❌ Error creando ruta:", error);
       throw error;
     }
   },
-
   async updateRoute(routeId, routeData) {
     try {
       const routeToUpdate = {
