@@ -1,136 +1,323 @@
-/* RouteFormPolyline.css - Estilo Anterior */
-.route-form-polyline {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  width: 350px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+/* components/routes/RouteForm/RouteFormPolyline.css */
+.route-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 1000;
-  padding: 20px;
-  max-height: 80vh;
+}
+
+.route-form-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
   overflow-y: auto;
 }
 
-.form-header h3 {
-  margin: 0 0 20px 0;
-  color: #2c3e50;
-  border-bottom: 2px solid #3498db;
-  padding-bottom: 10px;
-}
-
-.form-section {
-  margin-bottom: 15px;
-}
-
-.form-section label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #34495e;
-}
-
-.form-section input,
-.form-section select,
-.form-section textarea {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #bdc3c7;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-.drawing-section {
+.route-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
   background: #f8f9fa;
-  padding: 15px;
-  border-radius: 8px;
+  border-radius: 8px 8px 0 0;
+}
+
+.route-form-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.3em;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.close-btn:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.route-form {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #34495e;
+  font-size: 0.9em;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+/* Sección de selección en mapa */
+.route-selection-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 6px;
   margin: 20px 0;
   border-left: 4px solid #3498db;
 }
 
-.draw-btn {
-  width: 100%;
-  padding: 12px;
+.route-selection-section h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1em;
+}
+
+.map-unavailable-warning {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.selection-instructions {
+  background: white;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border: 1px solid #e9ecef;
+}
+
+.selection-instructions p {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+}
+
+.selection-instructions .material-icons {
+  color: #3498db;
+  font-size: 18px;
+}
+
+/* Controles de selección */
+.map-selection-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.select-btn {
+  padding: 12px 16px;
   background: #3498db;
   color: white;
   border: none;
-  border-radius: 5px;
-  font-size: 16px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: background-color 0.2s;
 }
 
-.draw-btn:hover {
+.select-btn:hover:not(:disabled) {
   background: #2980b9;
 }
 
-.drawing-controls {
-  text-align: center;
+.select-btn:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
 }
 
-.drawing-stats {
-  display: flex;
-  justify-content: space-around;
-  margin: 10px 0;
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.drawing-actions {
+.point-actions {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
 }
 
-.finish-btn {
+.remove-btn,
+.clear-btn {
   flex: 1;
   padding: 10px;
-  background: #27ae60;
+  background: #95a5a6;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  transition: background-color 0.2s;
 }
 
-.cancel-btn {
-  flex: 1;
+.remove-btn:hover:not(:disabled),
+.clear-btn:hover:not(:disabled) {
+  background: #7f8c8d;
+}
+
+.remove-btn:disabled,
+.clear-btn:disabled {
+  background: #d5dbdb;
+  cursor: not-allowed;
+}
+
+/* Contador de puntos */
+.points-counter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px;
-  background: #e74c3c;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+  font-size: 14px;
 }
 
-.route-info {
+.points-counter .material-icons {
+  color: #e74c3c;
+}
+
+/* Detalles de la ruta */
+.route-details-section {
   background: #e8f5e8;
-  padding: 15px;
-  border-radius: 8px;
-  margin: 15px 0;
+  padding: 20px;
+  border-radius: 6px;
+  margin: 20px 0;
   border-left: 4px solid #27ae60;
 }
 
-.route-info h4 {
-  margin: 0 0 10px 0;
+.route-details-section h4 {
+  margin: 0 0 15px 0;
   color: #27ae60;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1em;
 }
 
+.route-details {
+  display: grid;
+  gap: 10px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #d4edda;
+}
+
+.detail-label {
+  color: #555;
+  font-size: 0.9em;
+}
+
+.detail-value {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Colores para tipos de ruta */
+.route-type-accesible {
+  color: #3498db;
+}
+.route-type-emergencia {
+  color: #e74c3c;
+}
+.route-type-peatonal {
+  color: #27ae60;
+}
+.route-type-rapida {
+  color: #f39c12;
+}
+.route-type-vehicular {
+  color: #9b59b6;
+}
+
+/* Acciones del formulario */
 .form-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .save-btn {
   flex: 2;
-  padding: 12px;
+  padding: 12px 20px;
   background: #27ae60;
   color: white;
   border: none;
-  border-radius: 5px;
-  font-size: 16px;
+  border-radius: 4px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #219653;
 }
 
 .save-btn:disabled {
@@ -140,125 +327,47 @@
 
 .cancel-btn {
   flex: 1;
-  padding: 12px;
+  padding: 12px 20px;
   background: #95a5a6;
   color: white;
   border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-/* Estilos específicos para el modo edición */
-.editing-active {
-  background: white;
-  padding: 15px;
-  border-radius: 8px;
-  border: 2px solid #3498db;
-}
-
-.editing-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.editing-indicator {
-  color: #3498db;
-  font-weight: 600;
-}
-
-.editing-instructions {
-  background: #d1ecf1;
-  border: 1px solid #bee5eb;
-  border-radius: 6px;
-  padding: 12px;
-  margin: 10px 0;
-  font-size: 0.9em;
-  color: #0c5460;
-}
-
-.editing-instructions ul {
-  margin: 8px 0 0 0;
-  padding-left: 20px;
-}
-
-.editing-instructions li {
-  margin-bottom: 4px;
-}
-
-.editing-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 15px;
-}
-
-.action-btn {
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  font-weight: 600;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  font-size: 14px;
+  transition: background-color 0.2s;
 }
 
-.action-btn.warning {
-  background: #f39c12;
-  color: white;
+.cancel-btn:hover:not(:disabled) {
+  background: #7f8c8d;
 }
 
-.action-btn.warning:hover {
-  background: #e67e22;
+.cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.action-btn.danger {
-  background: #e74c3c;
-  color: white;
+/* Material Icons */
+.material-icons {
+  font-size: 20px;
+  vertical-align: middle;
 }
 
-.action-btn.danger:hover {
-  background: #c0392b;
-}
-
-/* Estados del formulario */
-.form-status {
-  margin-top: 15px;
-  padding: 10px;
-  border-radius: 5px;
-  text-align: center;
-  font-size: 0.9em;
-  font-weight: 600;
-}
-
-.status-warning {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  color: #856404;
-}
-
-.status-success {
-  background: #d1ecf1;
-  border: 1px solid #bee5eb;
-  color: #0c5460;
-}
-
-/* Animación para indicadores */
-@keyframes pulse {
-  0% {
-    opacity: 1;
+/* Responsive */
+@media (max-width: 768px) {
+  .route-form-container {
+    width: 95%;
+    margin: 10px;
   }
-  50% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-  }
-}
 
-.drawing-indicator {
-  animation: pulse 1.5s infinite;
+  .point-actions {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
 }

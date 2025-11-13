@@ -1,5 +1,5 @@
 // components/routes/RouteForm/RouteFormPolyline.jsx
-import React from "react";
+import React, { useEffect } from "react";
 import { usePolylineRoute } from "./hooks/usePolylineRoute";
 import "./RouteFormPolyline.css";
 
@@ -32,182 +32,260 @@ const RouteFormPolyline = ({
     isEditing,
   });
 
-  const getSegmentCount = () => {
-    if (!polylineRef.current) return 0;
-    const latLngs = polylineRef.current.getLatLngs();
-    return latLngs ? latLngs.length - 1 : 0;
-  };
+  // Agrega este useEffect para manejar ESC a nivel del componente
+  useEffect(() => {
+    const handleGlobalKeyDown = (e) => {
+      if (e.key === "Escape" && drawingMode) {
+        // Si estamos en modo dibujo, solo finaliza el dibujo, no cierres el formulario
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    };
+
+    if (isVisible) {
+      document.addEventListener("keydown", handleGlobalKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [drawingMode, isVisible]);
 
   if (!isVisible) return null;
 
   return (
-    <div className="route-form-polyline">
-      <div className="form-header">
-        <h3>{isEditing ? "Editar Ruta" : "Crear Nueva Ruta"}</h3>
-      </div>
-
-      <form onSubmit={handleSubmit}>
-        {/* Campos básicos */}
-        <div className="form-section">
-          <label>Nombre de la Ruta</label>
-          <input
-            type="text"
-            name="nombre"
-            value={formData.nombre}
-            onChange={handleInputChange}
-            placeholder="Ej: Ruta Peatonal Principal"
-          />
+    <div className="route-form-overlay">
+      <div className="route-form-container">
+        <div className="route-form-header">
+          <h3>
+            <span className="material-icons">
+              {isEditing ? "edit_road" : "add_road"}
+            </span>
+            {isEditing ? "Editar Ruta" : "Crear Ruta"}
+            {drawingMode && (
+              <span
+                style={{
+                  color: "#e74c3c",
+                  fontSize: "0.8em",
+                  marginLeft: "10px",
+                  fontWeight: "normal",
+                }}>
+                (Modo Selección - Presiona ESC para finalizar)
+              </span>
+            )}
+          </h3>
+          <button
+            className="close-btn"
+            onClick={handleCancel}
+            disabled={drawingMode}>
+            <span className="material-icons">close</span>
+          </button>
         </div>
 
-        <div className="form-section">
-          <label>Tipo de Ruta</label>
-          <select
-            name="tipo"
-            value={formData.tipo}
-            onChange={handleInputChange}>
-            <option value="peatonal">Peatonal</option>
-            <option value="accesible">Accesible</option>
-            <option value="vehicular">Vehicular</option>
-            <option value="emergencia">Emergencia</option>
-            <option value="rapida">Rápida</option>
-          </select>
-        </div>
+        <form onSubmit={handleSubmit} className="route-form">
+          {/* Información básica */}
+          <div className="form-group">
+            <label>Nombre de la Ruta (opcional)</label>
+            <input
+              type="text"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleInputChange}
+              placeholder="Dejar vacío para nombre automático"
+              disabled={drawingMode}
+            />
+          </div>
 
-        {/* Controles de dibujo */}
-        <div className="drawing-section">
-          <h4>Dibujar Ruta en el Mapa</h4>
+          <div className="form-group">
+            <label>Tipo de Ruta</label>
+            <select
+              name="tipo"
+              value={formData.tipo}
+              onChange={handleInputChange}
+              disabled={drawingMode}>
+              <option value="accesible">Accesible</option>
+              <option value="emergencia">Emergencia</option>
+              <option value="peatonal">Peatonal</option>
+              <option value="rapida">Rápida</option>
+              <option value="vehicular">Vehicular</option>
+            </select>
+          </div>
 
-          {!drawingMode ? (
-            <button
-              type="button"
-              onClick={activateDrawing}
-              className="draw-btn">
-              🗺️ Comenzar a Dibujar
-            </button>
-          ) : (
-            <div className="drawing-controls">
-              <p>
-                💡 Haz clic en el mapa para agregar puntos. Presiona ESC para
-                terminar.
-              </p>
-              <div className="drawing-stats">
-                <span>
-                  Puntos:{" "}
-                  {polylineRef.current
-                    ? polylineRef.current.getLatLngs().length
-                    : 0}
+          {/* Selección en mapa */}
+          <div className="route-selection-section">
+            <h4>
+              <span className="material-icons">map</span>
+              Seleccionar Puntos en el Mapa
+              {drawingMode && (
+                <span
+                  style={{
+                    color: "#e74c3c",
+                    fontSize: "0.8em",
+                    marginLeft: "10px",
+                    fontWeight: "normal",
+                  }}>
+                  (Haz clic en el mapa para agregar puntos)
                 </span>
-                {formData.distancia > 0 && (
-                  <span>Distancia: {formData.distancia}m</span>
-                )}
+              )}
+            </h4>
+
+            {/* Advertencia de mapa no disponible */}
+            {!mapInstance && (
+              <div className="map-unavailable-warning">
+                <span className="material-icons">warning</span>
+                El mapa no está disponible. Recarga la página.
               </div>
-              <div className="drawing-actions">
+            )}
+
+            {/* Instrucciones */}
+            <div className="selection-instructions">
+              <p>
+                <span className="material-icons">looks_one</span>
+                <strong>Primero selecciona los puntos en el mapa</strong>
+              </p>
+              <p>
+                <span className="material-icons">looks_two</span>
+                Haz clic en "Activar Selección"
+              </p>
+              <p>
+                <span className="material-icons">looks_3</span>
+                Haz varios clics en el mapa para agregar puntos
+              </p>
+              <p>
+                <span className="material-icons">looks_4</span>
+                Presiona <strong>ESC</strong> para finalizar
+              </p>
+            </div>
+
+            {/* Controles de selección */}
+            <div className="map-selection-controls">
+              {!drawingMode ? (
                 <button
                   type="button"
-                  onClick={finishDrawing}
-                  className="finish-btn">
-                  ✅ Terminar
+                  className="select-btn"
+                  onClick={activateDrawing}
+                  disabled={!mapInstance}>
+                  <span className="material-icons">my_location</span>
+                  Activar Selección en Mapa
                 </button>
-                <button type="button" onClick={clearMap} className="cancel-btn">
-                  ❌ Cancelar
+              ) : (
+                <button
+                  type="button"
+                  className="select-btn"
+                  onClick={finishDrawing}
+                  style={{ backgroundColor: "#27ae60" }}>
+                  <span className="material-icons">check</span>
+                  Finalizar Selección (o presiona ESC)
+                </button>
+              )}
+
+              <div className="point-actions">
+                <button
+                  type="button"
+                  className="remove-btn"
+                  onClick={removeLastPoint}
+                  disabled={
+                    !polylineRef.current ||
+                    polylineRef.current.getLatLngs().length === 0 ||
+                    drawingMode
+                  }>
+                  <span className="material-icons">undo</span>
+                  Eliminar Último
+                </button>
+
+                <button
+                  type="button"
+                  className="clear-btn"
+                  onClick={clearMap}
+                  disabled={
+                    !polylineRef.current ||
+                    polylineRef.current.getLatLngs().length === 0 ||
+                    drawingMode
+                  }>
+                  <span className="material-icons">clear_all</span>
+                  Limpiar Todos
                 </button>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Información de la ruta */}
-        {formData.distancia > 0 && (
-          <div className="route-info">
-            <h4>Información de la Ruta</h4>
-            <p>
-              <strong>Distancia:</strong> {formData.distancia}m
-            </p>
-            <p>
-              <strong>Tiempo estimado:</strong> {formData.tiempo_estimado} min
-            </p>
-            <p>
-              <strong>Puntos:</strong>{" "}
-              {polylineRef.current
-                ? polylineRef.current.getLatLngs().length
-                : 0}
-            </p>
-          </div>
-        )}
-
-        {/* Modo edición activo */}
-        {editingMode && (
-          <div className="editing-active">
-            <div className="editing-header">
-              <span className="editing-indicator">✏️ Editando...</span>
-            </div>
-
-            <div className="editing-instructions">
-              <p>
-                💡 <strong>Modo edición activo:</strong>
-              </p>
-              <ul>
-                <li>
-                  Arrastra los <strong>puntos azules</strong> para moverlos
-                </li>
-                <li>
-                  Haz clic en los <strong>segmentos de línea</strong> para
-                  agregar puntos
-                </li>
-                <li>
-                  Punto <span style={{ color: "#27ae60" }}>verde</span>: Inicio
-                </li>
-                <li>
-                  Punto <span style={{ color: "#e74c3c" }}>rojo</span>: Fin
-                </li>
-              </ul>
-            </div>
-
-            <div className="editing-actions">
-              <button
-                type="button"
-                onClick={removeLastPoint}
-                className="action-btn warning">
-                🗑️ Eliminar Último Punto
-              </button>
-              <button
-                type="button"
-                onClick={clearMap}
-                className="action-btn danger">
-                ❌ Limpiar Todo
-              </button>
+            {/* Contador de puntos */}
+            <div className="points-counter">
+              <span className="material-icons">location_on</span>
+              Puntos seleccionados:{" "}
+              <strong>
+                {polylineRef.current
+                  ? polylineRef.current.getLatLngs().length
+                  : 0}
+              </strong>
+              {formData.distancia > 0 && (
+                <span style={{ color: "#27ae60", marginLeft: "10px" }}>
+                  <span className="material-icons">straighten</span>
+                  {formData.distancia.toLocaleString()}m calculados
+                </span>
+              )}
             </div>
           </div>
-        )}
 
-        {/* Acciones del formulario */}
-        <div className="form-actions">
-          <button
-            type="submit"
-            disabled={!formData.geometria}
-            className="save-btn">
-            💾 {isEditing ? "Actualizar Ruta" : "Guardar Ruta"}
-          </button>
-
-          <button type="button" onClick={handleCancel} className="cancel-btn">
-            ❌ Cancelar
-          </button>
-        </div>
-
-        {/* Estado del formulario */}
-        <div className="form-status">
-          {!formData.geometria && (
-            <div className="status-warning">
-              ⚠️ Debes dibujar una ruta en el mapa antes de guardar
+          {/* Detalles de la ruta */}
+          {formData.geometria && !drawingMode && (
+            <div className="route-details-section">
+              <h4>
+                <span className="material-icons">info</span>
+                Detalles de la Ruta
+              </h4>
+              <div className="route-details">
+                <div className="detail-item">
+                  <span className="detail-label">Distancia total:</span>
+                  <span className="detail-value">
+                    {formData.distancia.toLocaleString()}m
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Tiempo estimado:</span>
+                  <span className="detail-value">
+                    {formData.tiempo_estimado} min
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Puntos en ruta:</span>
+                  <span className="detail-value">
+                    {polylineRef.current
+                      ? polylineRef.current.getLatLngs().length
+                      : 0}
+                  </span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Tipo:</span>
+                  <span className={`detail-value route-type-${formData.tipo}`}>
+                    {formData.tipo}
+                  </span>
+                </div>
+              </div>
             </div>
           )}
-          {formData.geometria && (
-            <div className="status-success">
-              ✅ Ruta lista para guardar - {formData.distancia}m de longitud
-            </div>
-          )}
-        </div>
-      </form>
+
+          {/* Acciones del formulario */}
+          <div className="form-actions">
+            <button
+              type="submit"
+              className="save-btn"
+              disabled={!formData.geometria || drawingMode}>
+              <span className="material-icons">save</span>
+              {isEditing ? "Actualizar Ruta" : "Guardar Ruta"}
+            </button>
+
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={handleCancel}
+              disabled={drawingMode}>
+              <span className="material-icons">cancel</span>
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

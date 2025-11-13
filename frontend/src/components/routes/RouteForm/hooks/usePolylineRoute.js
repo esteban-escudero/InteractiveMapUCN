@@ -1,7 +1,6 @@
 // components/routes/RouteForm/hooks/usePolylineRoute.js
 import { useState, useEffect, useCallback, useRef } from "react";
 import L from "leaflet";
-import { SpatialUtils } from "../../../../utils/spatialUtils";
 
 export const usePolylineRoute = ({
   mapInstance,
@@ -45,6 +44,84 @@ export const usePolylineRoute = ({
     const now = new Date();
     return `Ruta ${formData.tipo} ${now.toLocaleDateString("es-ES")}`;
   };
+
+  // Función simple para calcular distancia
+  const calculateRouteLength = (coordinates) => {
+    if (coordinates.length < 2) return 0;
+
+    let totalDistance = 0;
+    for (let i = 1; i < coordinates.length; i++) {
+      const [prevLng, prevLat] = coordinates[i - 1];
+      const [currLng, currLat] = coordinates[i];
+
+      // Cálculo simple de distancia (aproximado)
+      const dx = currLng - prevLng;
+      const dy = currLat - prevLat;
+      totalDistance += Math.sqrt(dx * dx + dy * dy) * 111320;
+    }
+
+    return totalDistance;
+  };
+
+  // ========== FUNCIONES DE LIMPIEZA ==========
+
+  const clearMap = useCallback(() => {
+    if (!mapInstance) return;
+
+    if (polylineRef.current) {
+      mapInstance.removeLayer(polylineRef.current);
+      polylineRef.current = null;
+    }
+
+    markersRef.current.forEach((marker) => {
+      if (mapInstance.hasLayer(marker)) {
+        mapInstance.removeLayer(marker);
+      }
+    });
+    markersRef.current = [];
+
+    if (mapClickHandlerRef.current) {
+      mapInstance.off("click", mapClickHandlerRef.current);
+      mapClickHandlerRef.current = null;
+    }
+
+    if (escHandlerRef.current) {
+      document.removeEventListener("keydown", escHandlerRef.current);
+      escHandlerRef.current = null;
+    }
+
+    setDrawingMode(false);
+    setEditingMode(false);
+
+    if (mapInstance?.getContainer()) {
+      mapInstance.getContainer().style.cursor = "";
+    }
+  }, [mapInstance]);
+
+  // ========== FUNCIONES DE ACTUALIZACIÓN ==========
+
+  const updateRouteData = useCallback((latLngs) => {
+    const coordinates = latLngs.map((latlng) => {
+      if (Array.isArray(latlng)) {
+        return [latlng[1], latlng[0]];
+      } else {
+        return [latlng.lng, latlng.lat];
+      }
+    });
+
+    const distancia = Math.round(calculateRouteLength(coordinates));
+    const tiempo_estimado = Math.round(distancia / 80);
+
+    setFormData((prev) => ({
+      ...prev,
+      distancia,
+      tiempo_estimado,
+      geometria: {
+        type: "LineString",
+        coordinates: coordinates,
+      },
+    }));
+  }, []);
 
   // ========== FUNCIONES DE MARKERS ==========
 
@@ -117,7 +194,6 @@ export const usePolylineRoute = ({
           createMarkers(newLatLngs);
         });
 
-        // Eliminar punto al hacer doble clic (excepto primero y último)
         marker.on("dblclick", (e) => {
           if (latLngs.length <= 2) {
             alert("La ruta debe tener al menos 2 puntos");
@@ -140,35 +216,8 @@ export const usePolylineRoute = ({
         markersRef.current.push(marker);
       });
     },
-    [mapInstance]
+    [mapInstance, updateRouteData]
   );
-
-  // ========== FUNCIONES DE ACTUALIZACIÓN ==========
-
-  const updateRouteData = useCallback((latLngs) => {
-    const coordinates = latLngs.map((latlng) => {
-      if (Array.isArray(latlng)) {
-        return [latlng[1], latlng[0]]; // [lng, lat]
-      } else {
-        return [latlng.lng, latlng.lat]; // [lng, lat]
-      }
-    });
-
-    const distancia = Math.round(
-      SpatialUtils.calculateRouteLength(coordinates)
-    );
-    const tiempo_estimado = Math.round(distancia / 80);
-
-    setFormData((prev) => ({
-      ...prev,
-      distancia,
-      tiempo_estimado,
-      geometria: {
-        type: "LineString",
-        coordinates: coordinates,
-      },
-    }));
-  }, []);
 
   // ========== FUNCIONES DE EDICIÓN ==========
 
@@ -182,7 +231,6 @@ export const usePolylineRoute = ({
         const clickLatLng = e.latlng;
         const currentLatLngs = polyline.getLatLngs();
 
-        // Encontrar segmento más cercano
         let closestSegmentIndex = -1;
         let minDistance = Infinity;
 
@@ -190,10 +238,28 @@ export const usePolylineRoute = ({
           const segmentStart = currentLatLngs[i];
           const segmentEnd = currentLatLngs[i + 1];
 
-          const distance = SpatialUtils.calculateDistanceToLine(
-            { lat: clickLatLng.lat, lng: clickLatLng.lng },
-            { lat: segmentStart.lat, lng: segmentStart.lng },
-            { lat: segmentEnd.lat, lng: segmentEnd.lng }
+          const dx = segmentEnd.lng - segmentStart.lng;
+          const dy = segmentEnd.lat - segmentStart.lat;
+          const length = Math.sqrt(dx * dx + dy * dy);
+
+          const t = Math.max(
+            0,
+            Math.min(
+              1,
+              ((clickLatLng.lng - segmentStart.lng) * dx +
+                (clickLatLng.lat - segmentStart.lat) * dy) /
+                (length * length)
+            )
+          );
+
+          const closestPoint = {
+            lng: segmentStart.lng + t * dx,
+            lat: segmentStart.lat + t * dy,
+          };
+
+          const distance = Math.sqrt(
+            Math.pow(clickLatLng.lng - closestPoint.lng, 2) +
+              Math.pow(clickLatLng.lat - closestPoint.lat, 2)
           );
 
           if (distance < minDistance) {
@@ -202,8 +268,7 @@ export const usePolylineRoute = ({
           }
         }
 
-        // Insertar punto si está cerca de un segmento
-        if (minDistance < 20) {
+        if (minDistance < 0.0005) {
           const newLatLngs = [...currentLatLngs];
           newLatLngs.splice(closestSegmentIndex + 1, 0, clickLatLng);
           polyline.setLatLngs(newLatLngs);
@@ -216,37 +281,45 @@ export const usePolylineRoute = ({
     [mapInstance, drawingMode, createMarkers, updateRouteData]
   );
 
-  // ========== FUNCIONES PRINCIPALES ==========
+  // ========== FUNCIONES DE DIBUJO ==========
 
-  const loadExistingRoute = useCallback(
-    (coordinates) => {
-      if (!mapInstance || coordinates.length < 2) return;
+  const finishDrawing = useCallback(() => {
+    if (!drawingMode) return;
 
-      clearMap();
+    if (!mapInstance || !polylineRef.current) {
+      setDrawingMode(false);
+      return;
+    }
 
-      const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
+    const latLngs = polylineRef.current.getLatLngs();
 
-      const polyline = L.polyline(latLngs, {
-        color: getRouteColor(formData.tipo),
-        weight: 8,
-        opacity: 0.8,
-        className: "editable-route",
-      }).addTo(mapInstance);
+    if (latLngs.length < 2) {
+      alert("Necesitas al menos 2 puntos para crear una ruta");
+      return;
+    }
 
-      polylineRef.current = polyline;
-      makePolylineEditable(polyline);
-      createMarkers(latLngs);
-      setEditingMode(true);
-      updateRouteData(latLngs);
-    },
-    [
-      mapInstance,
-      formData.tipo,
-      makePolylineEditable,
-      createMarkers,
-      updateRouteData,
-    ]
-  );
+    polylineRef.current.setStyle({
+      color: getRouteColor(formData.tipo),
+      weight: 8,
+      opacity: 0.8,
+      dashArray: null,
+    });
+
+    makePolylineEditable(polylineRef.current);
+    setDrawingMode(false);
+    setEditingMode(true);
+    mapInstance.getContainer().style.cursor = "";
+
+    if (mapClickHandlerRef.current) {
+      mapInstance.off("click", mapClickHandlerRef.current);
+      mapClickHandlerRef.current = null;
+    }
+
+    if (escHandlerRef.current) {
+      document.removeEventListener("keydown", escHandlerRef.current);
+      escHandlerRef.current = null;
+    }
+  }, [mapInstance, formData.tipo, makePolylineEditable, drawingMode]);
 
   const activateDrawing = useCallback(() => {
     if (!mapInstance) return;
@@ -281,50 +354,58 @@ export const usePolylineRoute = ({
     mapClickHandlerRef.current = clickHandler;
 
     const escHandler = (e) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && drawingMode) {
         finishDrawing();
+        e.preventDefault();
+        e.stopPropagation();
       }
     };
 
     document.addEventListener("keydown", escHandler);
     escHandlerRef.current = escHandler;
-  }, [mapInstance, createMarkers, updateRouteData]);
+  }, [
+    mapInstance,
+    createMarkers,
+    updateRouteData,
+    clearMap,
+    drawingMode,
+    finishDrawing,
+  ]);
 
-  const finishDrawing = useCallback(() => {
-    if (!mapInstance || !polylineRef.current) {
-      setDrawingMode(false);
-      return;
-    }
+  // ========== FUNCIONES DE RUTA EXISTENTE ==========
 
-    const latLngs = polylineRef.current.getLatLngs();
+  const loadExistingRoute = useCallback(
+    (coordinates) => {
+      if (!mapInstance || coordinates.length < 2) return;
 
-    if (latLngs.length < 2) {
-      alert("Necesitas al menos 2 puntos para crear una ruta");
-      return;
-    }
+      clearMap();
 
-    polylineRef.current.setStyle({
-      color: getRouteColor(formData.tipo),
-      weight: 8,
-      opacity: 0.8,
-      dashArray: null,
-    });
+      const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
 
-    makePolylineEditable(polylineRef.current);
-    setDrawingMode(false);
-    setEditingMode(true);
-    mapInstance.getContainer().style.cursor = "";
+      const polyline = L.polyline(latLngs, {
+        color: getRouteColor(formData.tipo),
+        weight: 8,
+        opacity: 0.8,
+        className: "editable-route",
+      }).addTo(mapInstance);
 
-    if (mapClickHandlerRef.current) {
-      mapInstance.off("click", mapClickHandlerRef.current);
-      mapClickHandlerRef.current = null;
-    }
+      polylineRef.current = polyline;
+      makePolylineEditable(polyline);
+      createMarkers(latLngs);
+      setEditingMode(true);
+      updateRouteData(latLngs);
+    },
+    [
+      mapInstance,
+      formData.tipo,
+      makePolylineEditable,
+      createMarkers,
+      updateRouteData,
+      clearMap,
+    ]
+  );
 
-    if (escHandlerRef.current) {
-      document.removeEventListener("keydown", escHandlerRef.current);
-      escHandlerRef.current = null;
-    }
-  }, [mapInstance, formData.tipo, makePolylineEditable]);
+  // ========== FUNCIONES AUXILIARES ==========
 
   const removeLastPoint = useCallback(() => {
     if (!polylineRef.current) return;
@@ -341,41 +422,6 @@ export const usePolylineRoute = ({
     updateRouteData(newLatLngs);
   }, [createMarkers, updateRouteData]);
 
-  const clearMap = useCallback(() => {
-    if (!mapInstance) return;
-
-    if (polylineRef.current) {
-      mapInstance.removeLayer(polylineRef.current);
-      polylineRef.current = null;
-    }
-
-    markersRef.current.forEach((marker) => {
-      if (mapInstance.hasLayer(marker)) {
-        mapInstance.removeLayer(marker);
-      }
-    });
-    markersRef.current = [];
-
-    if (mapClickHandlerRef.current) {
-      mapInstance.off("click", mapClickHandlerRef.current);
-      mapClickHandlerRef.current = null;
-    }
-
-    if (escHandlerRef.current) {
-      document.removeEventListener("keydown", escHandlerRef.current);
-      escHandlerRef.current = null;
-    }
-
-    setDrawingMode(false);
-    setEditingMode(false);
-
-    if (mapInstance?.getContainer()) {
-      mapInstance.getContainer().style.cursor = "";
-    }
-  }, [mapInstance]);
-
-  // ========== MANEJO DEL FORMULARIO ==========
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -385,6 +431,20 @@ export const usePolylineRoute = ({
         color: getRouteColor(value),
       });
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      nombre: "",
+      tipo: "peatonal",
+      distancia: 0,
+      tiempo_estimado: 0,
+      geometria: null,
+      descripcion: "",
+      prioridad: "media",
+    });
+    setDrawingMode(false);
+    setEditingMode(false);
   };
 
   const handleSubmit = (e) => {
@@ -408,20 +468,6 @@ export const usePolylineRoute = ({
     clearMap();
     resetForm();
     onCancel();
-  };
-
-  const resetForm = () => {
-    setFormData({
-      nombre: "",
-      tipo: "peatonal",
-      distancia: 0,
-      tiempo_estimado: 0,
-      geometria: null,
-      descripcion: "",
-      prioridad: "media",
-    });
-    setDrawingMode(false);
-    setEditingMode(false);
   };
 
   // ========== EFFECTS ==========
@@ -454,7 +500,6 @@ export const usePolylineRoute = ({
 
   return {
     formData,
-    setFormData,
     drawingMode,
     editingMode,
     activateDrawing,
