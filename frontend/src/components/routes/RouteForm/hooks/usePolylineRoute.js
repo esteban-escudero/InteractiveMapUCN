@@ -81,7 +81,10 @@ export const usePolylineRoute = ({
 
   // ========== FUNCIONES DE LIMPIEZA ==========
 
+  // EN usePolylineRoute.js - REEMPLAZA la función clearMap
   const clearMap = useCallback(() => {
+    console.log("🗑️ LIMPIANDO TODOS LOS PUNTOS");
+
     if (!mapInstance) return;
 
     if (polylineRef.current) {
@@ -110,9 +113,22 @@ export const usePolylineRoute = ({
     setEditingMode(false);
     currentPointsRef.current = [];
 
+    // RESETEAR EL FORM DATA - ESTO ES LO QUE FALTABA
+    setFormData({
+      nombre: "",
+      tipo: "peatonal",
+      distancia: 0,
+      tiempo_estimado: 0,
+      geometria: null,
+      descripcion: "",
+      prioridad: "media",
+    });
+
     if (mapInstance?.getContainer()) {
       mapInstance.getContainer().style.cursor = "";
     }
+
+    console.log("✅ Todos los puntos eliminados y formulario reseteado");
   }, [mapInstance]);
 
   // ========== FUNCIONES DE ACTUALIZACIÓN ==========
@@ -194,7 +210,7 @@ export const usePolylineRoute = ({
   };
 
   const createMarkers = useCallback(
-    (latLngs, allowDragging = false) => {
+    (latLngs) => {
       if (!mapInstance) return;
 
       // Limpiar markers existentes
@@ -205,35 +221,33 @@ export const usePolylineRoute = ({
       });
       markersRef.current = [];
 
-      // Crear nuevos markers
+      // Crear nuevos markers - SIEMPRE ARRASTRABLES
       latLngs.forEach((latLng, index) => {
         const marker = L.marker(latLng, {
           icon: createMarkerIcon(index, latLngs.length),
-          draggable: allowDragging, // Controlado por parámetro
+          draggable: true, // ← SIEMPRE ARRASTRABLE
         }).addTo(mapInstance);
 
-        if (allowDragging) {
-          marker.on("drag", (e) => {
-            const newLatLng = e.target.getLatLng();
-            const currentLatLngs = polylineRef.current.getLatLngs();
-            const newLatLngs = [...currentLatLngs];
-            newLatLngs[index] = newLatLng;
+        marker.on("drag", (e) => {
+          const newLatLng = e.target.getLatLng();
+          const currentLatLngs = polylineRef.current.getLatLngs();
+          const newLatLngs = [...currentLatLngs];
+          newLatLngs[index] = newLatLng;
 
-            if (polylineRef.current) {
-              polylineRef.current.setLatLngs(newLatLngs);
-            }
-          });
+          if (polylineRef.current) {
+            polylineRef.current.setLatLngs(newLatLngs);
+          }
+        });
 
-          marker.on("dragend", (e) => {
-            const newLatLng = e.target.getLatLng();
-            const currentLatLngs = polylineRef.current.getLatLngs();
-            const newLatLngs = [...currentLatLngs];
-            newLatLngs[index] = newLatLng;
+        marker.on("dragend", (e) => {
+          const newLatLng = e.target.getLatLng();
+          const currentLatLngs = polylineRef.current.getLatLngs();
+          const newLatLngs = [...currentLatLngs];
+          newLatLngs[index] = newLatLng;
 
-            updateRouteData(newLatLngs);
-            createMarkers(newLatLngs, allowDragging);
-          });
-        }
+          updateRouteData(newLatLngs);
+          createMarkers(newLatLngs); // ← Recrear markers con nuevas posiciones
+        });
 
         marker.on("dblclick", (e) => {
           if (latLngs.length <= 2) {
@@ -251,7 +265,7 @@ export const usePolylineRoute = ({
           polylineRef.current.setLatLngs(newLatLngs);
 
           updateRouteData(newLatLngs);
-          createMarkers(newLatLngs, allowDragging);
+          createMarkers(newLatLngs);
         });
 
         markersRef.current.push(marker);
@@ -283,9 +297,6 @@ export const usePolylineRoute = ({
     // FORZAR ACTUALIZACIÓN FINAL DE LOS DATOS
     updateRouteData(latLngs);
 
-    // RECREAR MARKERS CON ARRASTRE HABILITADO
-    createMarkers(latLngs, true);
-
     // Cambiar el estilo de la polyline
     if (polylineRef.current) {
       polylineRef.current.setStyle({
@@ -312,8 +323,8 @@ export const usePolylineRoute = ({
     setEditingMode(true);
     mapInstance.getContainer().style.cursor = "";
 
-    console.log("✅ Modo dibujo finalizado. Puntos guardados:", latLngs.length);
-  }, [mapInstance, formData.tipo, updateRouteData, createMarkers]);
+    console.log("✅ Modo dibujo finalizado. Puntos siguen siendo editables");
+  }, [mapInstance, formData.tipo, updateRouteData]);
 
   const activateDrawing = useCallback(() => {
     console.log("🔥 ACTIVANDO MODO DIBUJO");
@@ -344,7 +355,7 @@ export const usePolylineRoute = ({
     polylineRef.current = polyline;
     currentPointsRef.current = [];
 
-    // Handler para clics en el mapa - MEJORADO
+    // Handler para clics en el mapa
     const clickHandler = (e) => {
       const { lat, lng } = e.latlng;
       console.log("🖱️ Clic en mapa - Agregando punto:", { lat, lng });
@@ -356,8 +367,8 @@ export const usePolylineRoute = ({
         // ACTUALIZAR POLYLINE
         polylineRef.current.setLatLngs(newLatLngs);
 
-        // ACTUALIZAR MARKERS - SIN ARRASTRE durante creación
-        createMarkers(newLatLngs, false);
+        // ACTUALIZAR MARKERS - SIEMPRE ARRASTRABLES
+        createMarkers(newLatLngs);
 
         // ACTUALIZAR DATOS DE RUTA INMEDIATAMENTE
         updateRouteData(newLatLngs);
@@ -382,7 +393,7 @@ export const usePolylineRoute = ({
     document.addEventListener("keydown", escHandler);
     escHandlerRef.current = escHandler;
 
-    console.log("✅ Modo dibujo completamente activado");
+    console.log("✅ Modo dibujo completamente activado - Puntos ARRASTRABLES");
   }, [mapInstance, createMarkers, updateRouteData, clearMap, finishDrawing]);
 
   // ========== FUNCIONES DE RUTA EXISTENTE ==========
@@ -406,8 +417,8 @@ export const usePolylineRoute = ({
       polylineRef.current = polyline;
       currentPointsRef.current = latLngs;
 
-      // CREAR MARKERS CON ARRASTRE HABILITADO para rutas existentes
-      createMarkers(latLngs, true);
+      // CREAR MARKERS - SIEMPRE ARRASTRABLES
+      createMarkers(latLngs);
 
       setEditingMode(true);
       updateRouteData(latLngs);
@@ -434,12 +445,12 @@ export const usePolylineRoute = ({
     const newLatLngs = currentLatLngs.slice(0, -1);
     polylineRef.current.setLatLngs(newLatLngs);
 
-    // Mantener el estado de arrastre actual (usar editingMode para determinar)
-    createMarkers(newLatLngs, editingMode);
+    // RECREAR MARKERS - SIEMPRE ARRASTRABLES
+    createMarkers(newLatLngs);
     updateRouteData(newLatLngs);
 
     console.log("✅ Último punto eliminado. Nuevo total:", newLatLngs.length);
-  }, [createMarkers, updateRouteData, editingMode]);
+  }, [createMarkers, updateRouteData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
