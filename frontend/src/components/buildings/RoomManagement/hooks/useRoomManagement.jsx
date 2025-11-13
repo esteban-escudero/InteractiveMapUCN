@@ -1,4 +1,4 @@
-// components/buildings/RoomManagement/hooks/useRoomManagement.js
+// components/buildings/RoomManagement/hooks/useRoomManagement.jsx
 import { useState, useEffect } from "react";
 import { useRoomForm } from "./useRoomForm";
 
@@ -26,6 +26,7 @@ export const useRoomManagement = ({
   onClose,
   existingRooms = [],
   selectedBuilding = null,
+  showNotification, // <- Agregar esta prop
 }) => {
   const [selectedBuildingId, setSelectedBuildingId] = useState("");
   const [selectedBuildingData, setSelectedBuildingData] = useState(null);
@@ -79,19 +80,22 @@ export const useRoomManagement = ({
 
   const validateRooms = () => {
     if (!selectedBuildingId || !selectedBuildingData) {
-      alert("Selecciona un edificio primero");
+      showNotification("Selecciona un edificio primero", "warning"); // <- Cambiado
       return false;
     }
 
     const invalidRooms = rooms.filter((room) => !room.nombre_sala.trim());
     if (invalidRooms.length > 0) {
-      alert("Todas las salas deben tener un nombre");
+      showNotification("Todas las salas deben tener un nombre", "warning"); // <- Cambiado
       return false;
     }
 
     const coords = getBuildingCoordinates(selectedBuildingData);
     if (!coords.longitud || !coords.latitud) {
-      alert("El edificio seleccionado no tiene coordenadas definidas");
+      showNotification(
+        "El edificio seleccionado no tiene coordenadas definidas",
+        "warning"
+      );
       return false;
     }
 
@@ -117,10 +121,10 @@ export const useRoomManagement = ({
 
     try {
       await onSaveRooms(roomsToSave);
-      alert(`${rooms.length} salas creadas exitosamente`);
+      showNotification(`${rooms.length} salas creadas exitosamente`, "success"); // <- Cambiado
       onClose();
     } catch (error) {
-      alert("Error al guardar las salas: " + error.message);
+      showNotification("Error al guardar las salas: " + error.message, "error"); // <- Cambiado
     }
   };
 
@@ -129,7 +133,7 @@ export const useRoomManagement = ({
 
     const room = rooms[0];
     if (!room.nombre_sala.trim()) {
-      alert("La sala debe tener un nombre");
+      showNotification("La sala debe tener un nombre", "warning"); // <- Cambiado
       return;
     }
 
@@ -139,10 +143,13 @@ export const useRoomManagement = ({
 
     try {
       await onUpdateRoom(room.id, roomToUpdate);
-      alert("Sala actualizada exitosamente");
+      showNotification("Sala actualizada exitosamente", "success"); // <- Cambiado
       onClose();
     } catch (error) {
-      alert("Error al actualizar la sala: " + error.message);
+      showNotification(
+        "Error al actualizar la sala: " + error.message,
+        "error"
+      );
     }
   };
 
@@ -157,10 +164,13 @@ export const useRoomManagement = ({
     if (confirmDelete) {
       try {
         await onDeleteRoom(room.id);
-        alert("Sala eliminada exitosamente");
+        showNotification("Sala eliminada exitosamente", "success"); // <- Cambiado
         onClose();
       } catch (error) {
-        alert("Error al eliminar la sala: " + error.message);
+        showNotification(
+          "Error al eliminar la sala: " + error.message,
+          "error"
+        );
       }
     }
   };

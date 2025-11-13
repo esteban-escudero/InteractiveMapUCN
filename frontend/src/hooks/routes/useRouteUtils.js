@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import L from "leaflet";
 import { SpatialUtils } from "../../utils/spatialUtils";
 
 export const useRouteUtils = (mapInstance, mapManagement) => {
@@ -8,31 +7,10 @@ export const useRouteUtils = (mapInstance, mapManagement) => {
       console.log("Ruta seleccionada:", route);
       mapManagement.setSelectedRoute(route);
 
-      if (mapInstance && route.geometria) {
-        const coordinates = route.geometria.coordinates;
-        if (coordinates.length > 0) {
-          try {
-            const points = coordinates.map((coord) => ({
-              lng: coord[0],
-              lat: coord[1],
-            }));
-            const bbox = SpatialUtils.calculateBoundingBox(points);
-            if (bbox) {
-              const bounds = L.latLngBounds(
-                [bbox[1], bbox[0]],
-                [bbox[3], bbox[2]]
-              );
-              mapInstance.fitBounds(bounds, { padding: [20, 20] });
-            }
-          } catch (error) {
-            console.error("Error calculando bounds con Turf:", error);
-            const bounds = coordinates.map((coord) => [coord[1], coord[0]]);
-            mapInstance.fitBounds(bounds, { padding: [20, 20] });
-          }
-        }
-      }
+      // Solo selecciona la ruta sin ajustar la vista del mapa
+      // Esto elimina el cuadro negro del bounding box
     },
-    [mapInstance, mapManagement]
+    [mapManagement] // ← Quita mapInstance de las dependencias ya que no se usa
   );
 
   const validateRouteGeometry = useCallback(

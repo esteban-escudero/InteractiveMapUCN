@@ -152,6 +152,7 @@ export const useMapSelection = ({
     return marker;
   };
 
+  //Mensaje Punto Mapa
   const createPopupContent = (punto) => {
     let content = `
       <div style="text-align: center;">

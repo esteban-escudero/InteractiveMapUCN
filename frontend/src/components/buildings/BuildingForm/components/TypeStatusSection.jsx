@@ -1,4 +1,3 @@
-// components/buildings/BuildingForm/components/TypeStatusSection.jsx
 import React from "react";
 import {
   tiposEdificio,

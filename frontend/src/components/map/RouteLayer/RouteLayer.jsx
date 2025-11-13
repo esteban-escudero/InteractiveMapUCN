@@ -369,6 +369,7 @@ const RouteLayer = ({
           color: "#e67e22",
           weight: polylineOptions.weight + 2,
           opacity: 1,
+          className: "route-line route-selected",
         });
       }
 
@@ -445,18 +446,6 @@ const RouteLayer = ({
         ? "FILTRADO - MOSTRANDO TODAS LAS OPCIONES"
         : "TODAS LAS RUTAS",
     });
-
-    if (routeLayerRef.current.getLayers().length > 0) {
-      const group = new L.featureGroup(routeLayerRef.current.getLayers());
-      mapInstance.fitBounds(group.getBounds(), { padding: [20, 20] });
-      console.log(
-        `Los límites del mapa se ajustaron para mostrar ${
-          routeLayerRef.current.getLayers().length
-        } rutas`
-      );
-    } else {
-      console.warn("Sin rutas válidas añadidas al mapa");
-    }
   }, [
     mapInstance,
     routes,

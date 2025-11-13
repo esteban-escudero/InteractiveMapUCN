@@ -18,19 +18,6 @@ const MapSelectionSection = ({
         Seleccionar Puntos en el Mapa
       </h4>
 
-      {/* Info de nodos existentes */}
-      {existingNodes.length > 0 && (
-        <div className="nodes-info">
-          <p style={{ color: "#9b59b6", fontWeight: "bold" }}>
-            <span className="material-icons">account_tree</span>
-            {existingNodes.length} nodos existentes detectados
-          </p>
-          <p style={{ fontSize: "12px", color: "#7f8c8d" }}>
-            Al hacer clic cerca de un nodo existente, podrás reutilizarlo
-          </p>
-        </div>
-      )}
-
       {/* Advertencia de mapa no disponible */}
       {!mapAvailable && (
         <div className="map-unavailable-warning">
@@ -53,12 +40,12 @@ const MapSelectionSection = ({
           Haz varios clics en el mapa para agregar puntos
         </p>
         <p>
+          <span className="material-icons">looks_3</span>
+          Al hacer clic cerca de un nodo existente, podrás reutilizarlo
+        </p>
+        <p>
           <span className="material-icons">looks_4</span>
           Presiona <strong>ESC</strong> para finalizar
-        </p>
-        <p style={{ color: "#9b59b6", fontWeight: "bold" }}>
-          <span className="material-icons">new_releases</span>
-          <strong>NUEVO:</strong> Detección automática de nodos existentes
         </p>
       </div>
 
@@ -107,31 +94,6 @@ const MapSelectionSection = ({
           </span>
         )}
       </div>
-
-      {/* Lista de puntos seleccionados */}
-      {formData.puntos_ruta.length > 0 && (
-        <div className="selected-points">
-          <h5>Puntos:</h5>
-          {formData.puntos_ruta.map((p, i) => (
-            <div key={i} className="point-item">
-              <span>
-                <span className="material-icons">location_on</span>
-                {i + 1}. {p.nombre_punto}
-              </span>
-              <span>
-                ({p.coordenadas.coordinates[1].toFixed(4)},{" "}
-                {p.coordenadas.coordinates[0].toFixed(4)})
-              </span>
-              <span> - {p.tipo_punto}</span>
-              {p.es_nodo_existente && (
-                <span style={{ color: "#9b59b6" }}>
-                  <span className="material-icons">account_tree</span>
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };

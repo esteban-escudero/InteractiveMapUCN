@@ -1,10 +1,12 @@
 // components/buildings/RoomManagement/RoomManagement.jsx
 import React from "react";
 import { useRoomManagement } from "./hooks/useRoomManagement";
+import { useNotification } from "../../../hooks/common/useNotification"; // <- Importar el hook
 import RoomManagementHeader from "./components/RoomManagementHeader";
 import BuildingSelection from "./components/BuildingSelection";
 import RoomList from "./components/RoomList";
 import RoomActions from "./components/RoomActions";
+import UINotification from "../../ui/Notification/UINotification"; // <- Importar el componente
 import "./RoomManagement.css";
 
 const RoomManagement = ({
@@ -16,6 +18,10 @@ const RoomManagement = ({
   existingRooms = [],
   selectedBuilding = null,
 }) => {
+  // Usar el hook de notificaciones
+  const { notification, showUINotification, hideNotification } =
+    useNotification();
+
   const {
     selectedBuildingId,
     setSelectedBuildingId,
@@ -37,6 +43,7 @@ const RoomManagement = ({
     onClose,
     existingRooms,
     selectedBuilding,
+    showNotification: showUINotification, // <- Pasar la función al hook
   });
 
   return (
@@ -70,6 +77,17 @@ const RoomManagement = ({
           onDelete={handleDelete}
           onClose={onClose}
         />
+
+        {/* Componente de notificación */}
+        {notification.show && (
+          <UINotification
+            message={notification.message}
+            type={notification.type}
+            onClose={hideNotification}
+            duration={4000}
+            position="top-right"
+          />
+        )}
       </div>
     </div>
   );
