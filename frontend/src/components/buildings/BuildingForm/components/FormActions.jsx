@@ -1,4 +1,3 @@
-// components/buildings/BuildingForm/components/FormActions.jsx
 import React from "react";
 
 const FormActions = ({ formData, isEditing, onCancel, onSubmit }) => {

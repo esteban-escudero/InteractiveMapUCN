@@ -1,4 +1,3 @@
-// components/buildings/BuildingForm/components/BuildingFormUI.jsx
 import React from "react";
 import BuildingDetailsSection from "./BuildingDetailsSection";
 import CoordinateSection from "./CoordinateSection";

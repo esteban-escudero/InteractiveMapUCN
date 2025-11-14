@@ -1,4 +1,3 @@
-// components/buildings/BuildingForm/components/BuildingDetailsSection.jsx
 import React from "react";
 
 const BuildingDetailsSection = ({ formData, onInputChange }) => {

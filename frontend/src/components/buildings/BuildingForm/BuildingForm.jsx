@@ -1,4 +1,3 @@
-// components/buildings/BuildingForm/BuildingForm.jsx
 import React from "react";
 import "./BuildingForm.css";
 import { useBuildingForm } from "./hooks/useBuildingForm";

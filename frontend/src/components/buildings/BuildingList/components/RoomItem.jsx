@@ -16,7 +16,6 @@ const RoomItem = ({ room, isDeleting, onEditRoom, onDeleteRoom }) => {
             </span>
           )}
         </span>
-        <span className="room-id">ID: {room.id}</span>
       </div>
       <div className="room-actions">
         <button

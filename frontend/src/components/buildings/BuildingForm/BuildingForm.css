@@ -1,4 +1,4 @@
-/* BuildingForm.css */
+/* Overlay de fondo oscuro para el formulario */
 .building-form-overlay {
   position: fixed;
   top: 0;
@@ -12,6 +12,7 @@
   z-index: 1000;
 }
 
+/* Contenedor principal del formulario */
 .building-form-container {
   background: white;
   border-radius: 12px;
@@ -23,6 +24,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+/* Encabezado con título y botón cerrar */
 .building-form-header {
   display: flex;
   justify-content: space-between;
@@ -41,15 +43,16 @@
   align-items: center;
 }
 
+/* Botón de cerrar con efecto hover de rotación */
 .close-btn {
   background: none;
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #7f8c8d;
+  color: #37009e; /* Color inicial del icono */
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,19 +60,28 @@
   transition: all 0.3s ease;
 }
 
+/* Efecto hover: fondo rojo, icono blanco y rotación */
 .close-btn:hover {
-  background: #e74c3c;
-  color: white;
+  background: #e74c3c !important; /* Fondo rojo */
+  color: white !important; /* Cruz blanca */
   transform: rotate(90deg);
 }
+
+.close-btn .material-icons {
+  font-size: 20px;
+  margin-right: 0;
+  transition: color 0.3s ease; /* Transición suave para el color del icono */
+}
+
+/* ===== FORMULARIO PRINCIPAL ===== */
 
 .building-form {
   padding: 24px;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
+/* ===== GRUPOS DE FORMULARIO ===== */
+
+/* Estilos para cada grupo de campos del formulario */
 
 .form-group label {
   display: block;
@@ -79,6 +91,7 @@
   font-size: 14px;
 }
 
+/* Campos de formulario (inputs, textareas, selects) */
 .form-group input,
 .form-group textarea,
 .form-group select {
@@ -91,6 +104,7 @@
   box-sizing: border-box;
 }
 
+/* Efecto focus para campos */
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
@@ -98,7 +112,9 @@
   border-color: #3498db;
 }
 
-/* Sección de Coordenadas */
+/* ===== SECCIÓN DE COORDENADAS ===== */
+
+/* Contenedor de la sección de coordenadas */
 .coordinates-section {
   margin-bottom: 20px;
   padding: 15px;
@@ -107,6 +123,7 @@
   border: 1px solid #e9ecef;
 }
 
+/* Header de sección con título y botón */
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -121,6 +138,7 @@
   align-items: center;
 }
 
+/* Botón para capturar coordenadas */
 .capture-btn {
   padding: 8px 16px;
   border: 2px solid #3498db;
@@ -143,6 +161,9 @@
   box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
 }
 
+/* ===== INFORMACIÓN DE COORDENADAS CAPTURADAS ===== */
+
+/* Mensaje de coordenadas capturadas exitosamente */
 .captured-coords-info {
   display: flex;
   justify-content: space-between;
@@ -157,6 +178,7 @@
   font-weight: 500;
 }
 
+/* Botón para limpiar coordenadas capturadas */
 .clear-capture-btn {
   background: none;
   border: none;
@@ -178,13 +200,16 @@
   transform: scale(1.2);
 }
 
+/* Grid para inputs de coordenadas (latitud y longitud) */
 .coordinates-inputs {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 }
 
-/* Validación */
+/* ===== VALIDACIÓN DE FORMULARIO ===== */
+
+/* Contenedor de mensajes de validación */
 .validation-info {
   display: flex;
   align-items: flex-start;
@@ -194,12 +219,14 @@
   gap: 12px;
 }
 
+/* Estado válido (verde) */
 .validation-info.valid {
   background: #d4edda;
   border: 1px solid #c3e6cb;
   color: #155724;
 }
 
+/* Estado inválido (rojo) */
 .validation-info.invalid {
   background: #f8d7da;
   border: 1px solid #f5c6cb;
@@ -210,6 +237,7 @@
   flex: 1;
 }
 
+/* Detalles de coordenadas en validación */
 .validation-coords {
   font-size: 12px;
   opacity: 0.8;
@@ -225,20 +253,26 @@
   font-weight: 600;
 }
 
-/* Inputs con validación */
+/* ===== ESTADOS DE VALIDACIÓN PARA INPUTS ===== */
+
+/* Borde verde para inputs válidos */
 .input-valid {
   border-color: #27ae60 !important;
 }
 
+/* Borde amarillo para advertencias */
 .input-warning {
   border-color: #f39c12 !important;
 }
 
+/* Borde rojo para errores */
 .input-error {
   border-color: #e74c3c !important;
 }
 
-/* Fila de formulario */
+/* ===== DISPOSICIÓN DE FORMULARIO ===== */
+
+/* Fila con dos columnas para formularios */
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -246,7 +280,9 @@
   align-items: start;
 }
 
-/* Información Turf */
+/* ===== INFORMACIÓN TURF (GEOESPACIAL) ===== */
+
+/* Sección de información geospacial */
 .turf-info-section {
   margin: 20px 0;
   padding: 15px;
@@ -282,16 +318,17 @@
   color: #004085;
 }
 
-/* Acciones del formulario */
+/* ===== ACCIONES DEL FORMULARIO ===== */
+
+/* Contenedor de botones de acción */
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: none;
 }
 
+/* Botón Cancelar */
 .cancel-btn {
   padding: 10px 20px;
   border: 2px solid #95a5a6;
@@ -314,6 +351,7 @@
   box-shadow: 0 4px 8px rgba(149, 165, 166, 0.3);
 }
 
+/* Botón Guardar/Enviar */
 .save-btn {
   padding: 10px 20px;
   border: 2px solid #27ae60;
@@ -343,18 +381,22 @@
   transform: none;
 }
 
-/* Estilos para Material Icons */
+/* ===== ESTILOS PARA MATERIAL ICONS ===== */
+
+/* Estilos base para iconos de Material Design */
 .material-icons {
   vertical-align: middle;
   font-size: 18px;
   margin-right: 8px;
 }
 
+/* Iconos específicos para el header */
 .building-form-header h3 .material-icons {
   font-size: 20px;
   margin-right: 10px;
 }
 
+/* Iconos en botones */
 .capture-btn .material-icons,
 .close-btn .material-icons {
   margin-right: 6px;
@@ -366,12 +408,14 @@
   font-size: 20px;
 }
 
+/* Iconos en información de coordenadas */
 .captured-coords-info .material-icons {
   font-size: 16px;
   margin-right: 6px;
   color: #28a745;
 }
 
+/* Iconos en validación */
 .validation-info .material-icons {
   margin-right: 0;
   font-size: 20px;
@@ -390,7 +434,9 @@
   margin-right: 4px;
 }
 
-/* Estados de hover para iconos */
+/* ===== EFECTOS HOVER PARA ICONOS ===== */
+
+/* Efectos hover para iconos en botones */
 .capture-btn:hover .material-icons,
 .save-btn:hover .material-icons {
   transform: scale(1.1);
@@ -402,13 +448,16 @@
   transition: transform 0.3s ease;
 }
 
-/* Responsive */
+/* ===== DISEÑO RESPONSIVE ===== */
+
+/* Tablets y pantallas medianas */
 @media (max-width: 768px) {
   .building-form-container {
     width: 95%;
     margin: 20px;
   }
 
+  /* Cambiar a una columna en móviles */
   .coordinates-inputs,
   .form-row {
     grid-template-columns: 1fr;
@@ -453,6 +502,7 @@
   }
 }
 
+/* Móviles pequeños */
 @media (max-width: 480px) {
   .building-form {
     padding: 16px;
@@ -464,9 +514,5 @@
 
   .coordinates-section {
     padding: 12px;
-  }
-
-  .form-group {
-    margin-bottom: 16px;
   }
 }
