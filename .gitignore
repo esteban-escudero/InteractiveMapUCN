@@ -1,13 +1,8 @@
 # Ignorar dependencias de Node.js
-<<<<<<< HEAD
-node_modules/
+**/node_modules/
 .npm
 .yarn-integrity
-=======
-**/node_modules/
-**/node_modules/
 **/package-lock.json
->>>>>>> origin/main
 
 # Ignorar archivos de cache
 .cache/
@@ -18,11 +13,14 @@ node_modules/
 # Ignorar variables de entorno
 .env
 .env.local
+.env.*.local
 
 # Ignorar archivos del sistema
 .DS_Store
-<<<<<<< HEAD
 Thumbs.db
+*.swp
+*.swo
+*~
 
 # Ignorar logs
 npm-debug.log*
@@ -39,7 +37,16 @@ build/
 # Ignorar coverage
 coverage/
 .nyc_output/
-=======
 
+# Ignorar datos de PostgreSQL
 postgres_data/
->>>>>>> origin/main
+
+# Ignorar archivos de IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Ignorar archivos temporales
+*.tmp
+*.temp

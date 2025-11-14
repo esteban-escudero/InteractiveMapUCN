@@ -1,16 +1,9 @@
-export const UCN_COQUIMBO_BOUNDS = [
-  [-29.967316, -71.355622], //Coordenadas funcionales, no cambiar
-  [-29.963208, -71.346738], //Estas tampoco
-];
+// Este archivo se mantiene para compatibilidad hacia atrás
+// Se recomienda usar frontend/src/config/app.js para nuevas implementaciones
+import { MAP_CONFIG, GEO_SERVER_CONFIG as GEO_CONFIG } from '../config/app';
 
-export const MAP_ZOOM_LIMITS = {
-  min: 17, //Evita alejar demasiado.
-  max: 19, //Evita acercar demasiado
-  default: 17, //Zoom inicial
-};
+export const UCN_COQUIMBO_BOUNDS = MAP_CONFIG.bounds;
 
-export const GEO_SERVER_CONFIG = {
-  baseUrl: "http://localhost:8080/geoserver",
-  workspace: "InteractiveMap",
-  layerName: "edificio",
-};
+export const MAP_ZOOM_LIMITS = MAP_CONFIG.zoom;
+
+export const GEO_SERVER_CONFIG = GEO_CONFIG;

@@ -1,32 +1,39 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-require("dotenv").config();
+const config = require("./config/app");
 require("./config/database");
 
 const buildingsRoutes = require("./routes/buildings");
 const roomsRoutes = require("./routes/rooms");
 const routesRoutes = require("./routes/routes");
-const errorHandler = require("./middleware/errorHandler");
-
 const routeNodesRoutes = require("./routes/routeNodes");
 const spatialRoutes = require("./routes/spatial");
+const proximityRoutes = require("./routes/proximity");
+const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 // Middlewares
-app.use(cors());
-app.use(bodyParser.json({ limit: "10mb" }));
+// CORS más permisivo en desarrollo
+if (config.server.env === 'development') {
+  app.use(cors({
+    origin: true, // Permitir cualquier origen en desarrollo
+    credentials: true,
+  }));
+} else {
+  app.use(cors({ origin: config.cors.origin }));
+}
+app.use(bodyParser.json({ limit: config.limits.json }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/buildings", buildingsRoutes);
 app.use("/api/rooms", roomsRoutes);
 app.use("/api/routes", routesRoutes);
-
 app.use("/api/route-nodes", routeNodesRoutes);
 app.use("/api/spatial", spatialRoutes);
+app.use("/api/proximity", proximityRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -41,20 +48,12 @@ app.get("/api/health", (req, res) => {
 app.use(errorHandler);
 
 // Iniciar servidor
+const PORT = config.server.port;
 app.listen(PORT, () => {
-  console.log(`Servidor backend ejecutándose en http://localhost:${PORT}`);
-  console.log(`Health check disponible en http://localhost:${PORT}/api/health`);
-  console.log(`Rutas API disponible en http://localhost:${PORT}/api/routes`);
-  console.log(
-    `Nodos compartidos disponible en http://localhost:${PORT}/api/route-nodes`
-  );
-  console.log(
-    `Análisis espacial disponible en http://localhost:${PORT}/api/spatial`
-  );
+  console.log(`🚀 Servidor backend ejecutándose en http://localhost:${PORT}`);
+  console.log(`📊 Entorno: ${config.server.env}`);
+  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`📚 API disponible en: http://localhost:${PORT}/api`);
 });
-
-// Después de las otras rutas
-const proximityRoutes = require("./routes/proximity");
-app.use("/api/proximity", proximityRoutes);
 
 module.exports = app;

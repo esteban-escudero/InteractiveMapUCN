@@ -1,5 +1,5 @@
 // frontend/src/hooks/map/useMapEffects.js
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import L from "leaflet";
 import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig.js";
 
@@ -14,12 +14,7 @@ export const useMapEffects = (
   loadBuildings,
   loadRoutes,
   geoServerStatus,
-  loadWFSData,
-  buildings,
-  routes,
-  mapState,
-  mapData,
-  buildingGraphs
+  loadWFSData
 ) => {
   // ========== CONFIGURACIÓN DE LEAFLET ==========
   useEffect(() => {
@@ -36,65 +31,95 @@ export const useMapEffects = (
   }, []);
 
   // ========== INICIALIZACIÓN DEL MAPA ==========
+  const hasInitialized = React.useRef(false);
+  
+  // Efecto que se ejecuta al montar y verifica si el contenedor está disponible
   useEffect(() => {
-    if (!mapInitialized && mapRef.current && !mapInstance) {
-      console.log("Inicializando mapa...");
+    // Si ya está inicializado, no hacer nada
+    if (hasInitialized.current || mapInitialized || mapInstance) {
+      return;
+    }
 
-      const initialize = () => {
-        try {
-          const initializedMap = initializeMap(UCN_COQUIMBO_BOUNDS);
-          if (initializedMap) {
-            setMapInitialized(true);
-            console.log("Mapa inicializado exitosamente");
+    // Función para intentar inicializar
+    const tryInitialize = () => {
+      if (mapRef.current && !hasInitialized.current) {
+        hasInitialized.current = true;
+        console.log("Inicializando mapa...");
+
+        const initialize = () => {
+          try {
+            const initializedMap = initializeMap(UCN_COQUIMBO_BOUNDS);
+            if (initializedMap) {
+              setMapInitialized(true);
+              console.log("Mapa inicializado exitosamente");
+            } else {
+              hasInitialized.current = false; // Permitir reintento si falla
+            }
+          } catch (error) {
+            console.error("Error inicializando mapa:", error);
+            showUINotification("Error al inicializar el mapa", "error");
+            hasInitialized.current = false; // Permitir reintento
           }
-        } catch (error) {
-          console.error("Error inicializando mapa:", error);
-          showUINotification("Error al inicializar el mapa", "error");
-        }
-      };
+        };
 
-      const timer = setTimeout(initialize, 100);
+        setTimeout(initialize, 100);
+      }
+    };
+
+    // Intentar inmediatamente
+    tryInitialize();
+
+    // Si no está disponible, intentar después de un breve delay
+    if (!mapRef.current) {
+      const timer = setTimeout(() => {
+        tryInitialize();
+      }, 200);
       return () => clearTimeout(timer);
     }
-  }, [mapInitialized, mapRef, initializeMap, mapInstance, showUINotification]);
+  }, []); // Solo ejecutar al montar
 
   // ========== CARGA DE DATOS ==========
+  // Usar useRef para evitar loops infinitos
+  const hasLoadedData = React.useRef(false);
+  const loadBuildingsRef = React.useRef(loadBuildings);
+  const loadRoutesRef = React.useRef(loadRoutes);
+  const loadWFSDataRef = React.useRef(loadWFSData);
+  const showUINotificationDataRef = React.useRef(showUINotification);
+  
+  // Actualizar refs cuando cambian las funciones
   useEffect(() => {
-    if (isMapReady && mapInstance) {
+    loadBuildingsRef.current = loadBuildings;
+    loadRoutesRef.current = loadRoutes;
+    loadWFSDataRef.current = loadWFSData;
+    showUINotificationDataRef.current = showUINotification;
+  }, [loadBuildings, loadRoutes, loadWFSData, showUINotification]);
+  
+  useEffect(() => {
+    // Solo cargar datos una vez cuando el mapa esté listo
+    if (isMapReady && mapInstance && !hasLoadedData.current) {
       console.log("Mapa listo, cargando datos...");
+      hasLoadedData.current = true;
 
       const loadData = async () => {
         try {
-          await loadBuildings();
-          await loadRoutes();
+          await loadBuildingsRef.current();
+          await loadRoutesRef.current();
 
           if (geoServerStatus === "checking") {
-            await loadWFSData(mapInstance, "edificio");
+            await loadWFSDataRef.current(mapInstance, "edificio");
           }
 
-          console.log("Datos cargados exitosamente:", {
-            edificios: buildings.length,
-            rutas: routes.length,
-          });
+          console.log("Datos cargados exitosamente");
         } catch (error) {
           console.error("Error cargando datos:", error);
-          showUINotification("Error cargando datos del mapa", "error");
+          showUINotificationDataRef.current("Error cargando datos del mapa", "error");
+          hasLoadedData.current = false; // Permitir reintento en caso de error
         }
       };
 
       loadData();
     }
-  }, [
-    isMapReady,
-    mapInstance,
-    geoServerStatus,
-    loadWFSData,
-    loadBuildings,
-    loadRoutes,
-    showUINotification,
-    buildings.length,
-    routes.length,
-  ]);
+  }, [isMapReady, mapInstance, geoServerStatus]); // Dependencias correctas
 
   // ========== EFECTOS PARA ACTUALIZACIÓN DE UI ==========
 
@@ -120,79 +145,8 @@ export const useMapEffects = (
   */
 
   // ========== EFECTOS PARA DEBUG ==========
-
-  // Debug detallado de rutas priorizadas cuando los filtros cambian
-  useEffect(() => {
-    if (mapState.filters.origin && mapState.filters.destination) {
-      console.log("RUTAS PRIORITARIAS POR TIPO:", {
-        origen: mapState.filters.origin,
-        destino: mapState.filters.destination,
-        totalRutas: mapData.prioritizedRoutes.length,
-        tiposEncontrados: [
-          ...new Set(mapData.prioritizedRoutes.map((r) => r.tipo)),
-        ],
-        detalles: mapData.prioritizedRoutes.map((r) => ({
-          tipo: r.tipo,
-          nombre: r.nombre,
-          distancia: r.distancia,
-          segmentos: r.segmentos_originales,
-          prioridad: r.prioridad,
-        })),
-      });
-
-      // Ejecutar diagnóstico después de un delay
-      setTimeout(mapData.diagnoseRouteIssues, 1000);
-    }
-  }, [
-    mapData.prioritizedRoutes,
-    mapState.filters,
-    mapData.diagnoseRouteIssues,
-  ]);
-
-  // DEBUG DEL GRAFO
-  useEffect(() => {
-    if (
-      buildingGraphs &&
-      mapState.filters.origin &&
-      mapState.filters.destination
-    ) {
-      console.log("DEBUG COMPLETO DEL BUILDING GRAPH:", {
-        totalGraphs: Object.keys(buildingGraphs).length,
-        graphTypes: Object.keys(buildingGraphs),
-        currentFilters: {
-          origin: mapState.filters.origin,
-          destination: mapState.filters.destination,
-        },
-        connectionStatus: Object.keys(buildingGraphs).map((graphType) => ({
-          type: graphType,
-          hasOrigin: !!buildingGraphs[graphType]?.[mapState.filters.origin],
-          hasDestination:
-            !!buildingGraphs[graphType]?.[mapState.filters.destination],
-          originConnections: buildingGraphs[graphType]?.[
-            mapState.filters.origin
-          ]
-            ? Object.keys(
-                buildingGraphs[graphType][mapState.filters.origin]
-                  .connections || {}
-              )
-            : [],
-          destinationConnections: buildingGraphs[graphType]?.[
-            mapState.filters.destination
-          ]
-            ? Object.keys(
-                buildingGraphs[graphType][mapState.filters.destination]
-                  .connections || {}
-              )
-            : [],
-        })),
-      });
-    }
-  }, [buildingGraphs, mapState.filters]);
-
-  // VERIFICACIÓN DE DATOS
-  useEffect(() => {
-    mapData.verifyData();
-  }, [mapData.verifyData]);
+  // Removidos para evitar loops infinitos
+  // Los logs de debug se pueden hacer directamente en los componentes cuando sea necesario
 
   return {};
 };

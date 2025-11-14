@@ -6,6 +6,7 @@ export const useMap = () => {
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [isMapReady, setIsMapReady] = useState(false);
+  const [mapInstance, setMapInstance] = useState(null);
 
   const initializeMap = (bounds) => {
     if (!mapRef.current) {
@@ -80,6 +81,7 @@ export const useMap = () => {
       });
 
       mapInstanceRef.current = map;
+      setMapInstance(map);
       setIsMapReady(true);
 
       // FORZAR REDIMENSIONADO (con más delay)
@@ -104,6 +106,7 @@ export const useMap = () => {
         mapRef.current.innerHTML = "";
       }
       mapInstanceRef.current = null;
+      setMapInstance(null);
       setIsMapReady(false);
 
       return null;
@@ -144,6 +147,7 @@ export const useMap = () => {
       mapRef.current.innerHTML = "";
     }
 
+    setMapInstance(null);
     setIsMapReady(false);
   };
 
@@ -156,7 +160,7 @@ export const useMap = () => {
   return {
     mapRef,
     initializeMap,
-    mapInstance: mapInstanceRef.current,
+    mapInstance,
     isMapReady,
     fitToBounds,
     cleanupMap,

@@ -19,7 +19,7 @@ import { useCoordinateManagement } from "../../../hooks/map/useCoordinateManagem
 import { useRouteUtils } from "../../../hooks/routes/useRouteUtils.js";
 import { useBuildingFilters } from "../../../hooks/buildings/useBuildingFilters.js";
 import useBuildings from "../../../hooks/buildings/useBuildings.js";
-import useGeoServer from "../../../hooks/useGeoServer.js";
+import useGeoServer from "../../../hooks/geoserver/useGeoServer.js";
 import useRoutes from "../../../hooks/routes/useRoutes.js";
 import { useNotification } from "../../../hooks/common/useNotification.js";
 import { useConfirm } from "../../../hooks/common/useConfirm.js";
@@ -31,10 +31,11 @@ import { ConfirmDialog, UINotification, SidePanel } from "../../ui/index.js";
 import { BuildingList, BuildingForm } from "../../buildings/index.js";
 import { RouteList, RouteFormPolyline } from "../../routes/index.js";
 
-import RouteLayer from "../RouteLayer/RouteLayer.jsx";
-import BuildingRenderer from "../BuildingRenderer/BuildingRenderer.jsx";
 import MapIndicators from "../MapIndicators/MapIndicators.jsx";
-import RoomManagement from "../../buildings/RoomManagement/RoomManagement.jsx";
+import { MapContainer } from "./components/MapContainer.jsx";
+import { MapForms } from "./components/MapForms.jsx";
+import { MapLists } from "./components/MapLists.jsx";
+import { MapLayers } from "./components/MapLayers.jsx";
 
 function Map() {
   // ========== HOOKS PRINCIPALES ==========
@@ -167,12 +168,7 @@ function Map() {
     loadBuildings,
     loadRoutes,
     geoServerStatus,
-    loadWFSData,
-    buildings,
-    routes,
-    mapState,
-    mapData,
-    buildingGraphs
+    loadWFSData
   );
 
   // ========== MANEJO DE INTERACCIONES DEL MAPA ==========
@@ -279,98 +275,28 @@ function Map() {
         onCancel={hideConfirm}
       />
       {/* FORMULARIOS */}
-      <BuildingForm
-        onSave={businessHandlers.handleSaveBuilding}
-        onCancel={() => {
-          mapState.setShowBuildingForm(false);
-          mapState.setEditingBuilding(null);
-          coordinateManagement.clearCapturedCoords();
-        }}
-        isVisible={mapState.showBuildingForm}
-        building={mapState.editingBuilding}
-        isEditing={!!mapState.editingBuilding}
-        capturedCoordinates={coordinateManagement.capturedCoords}
-        onClearCoordinates={coordinateManagement.clearCapturedCoords}
-        onToggleCoordinateDetection={
-          coordinateManagement.toggleCoordinateDetection
-        }
-      />
-
-      {/* FORMULARIO DE RUTA - EL COMPONENTE INTERNO MANEJA SU PROPIA VISIBILIDAD */}
-      <RouteFormPolyline
-        onSave={businessHandlers.handleSaveRoute}
-        onCancel={() => {
-          mapState.setShowRouteForm(false);
-          mapState.setEditingRoute(null);
-        }}
-        isVisible={mapState.showRouteForm}
-        route={mapState.editingRoute}
-        isEditing={!!mapState.editingRoute}
+      <MapForms
+        mapState={mapState}
+        businessHandlers={businessHandlers}
+        coordinateManagement={coordinateManagement}
         mapInstance={mapInstance}
-        onSelectionStart={() => {
-          console.log(
-            "🟡 Iniciando selección - DESACTIVANDO useMapClickHandler"
-          );
-          setIsRouteDrawingActive(true); // 🆕 ACTIVAR MODO DIBUJO
-        }}
-        onSelectionEnd={() => {
-          console.log(
-            "🟢 Finalizando selección - REACTIVANDO useMapClickHandler"
-          );
-          setIsRouteDrawingActive(false); // 🆕 DESACTIVAR MODO DIBUJO
-        }}
+        isRouteDrawingActive={isRouteDrawingActive}
+        setIsRouteDrawingActive={setIsRouteDrawingActive}
       />
+
       {/* LISTAS Y GESTIÓN */}
-      {mapState.showBuildingList && (
-        <BuildingList
-          key={`building-list-${JSON.stringify(
-            mapState.filters
-          )}-${Date.now()}`}
-          buildings={filteredBuildings}
-          onEditBuilding={mapState.handleEditBuilding}
-          onDeleteBuilding={businessHandlers.handleDeleteBuilding}
-          onClose={mapState.handleCloseBuildingList}
-          onEditRoom={mapState.handleOpenEditRoom}
-          onCreateRooms={mapState.handleCreateRoomsForBuilding}
-          onAddRooms={() => mapState.handleCreateRoomsForBuilding(null)}
-          onDeleteRoom={businessHandlers.handleDeleteRoom}
-          onReload={loadBuildings}
-        />
-      )}
-      {mapState.showRoomManagement && (
-        <RoomManagement
-          mode={mapState.roomManagementMode}
-          buildings={buildings}
-          selectedBuilding={mapState.selectedBuildingForRooms}
-          onSaveRooms={businessHandlers.handleSaveRooms}
-          onUpdateRoom={businessHandlers.handleUpdateRoom}
-          onDeleteRoom={businessHandlers.handleDeleteRoom}
-          onClose={mapState.handleCloseRoomManagement}
-          existingRooms={mapState.selectedRooms}
-        />
-      )}
-      {mapState.showRouteList && (
-        <RouteList
-          routes={routes}
-          onEditRoute={mapState.handleEditRoute}
-          onDeleteRoute={businessHandlers.handleDeleteRoute}
-          onClose={mapState.handleCloseRouteList}
-          onSelectRoute={handleRouteClick}
-        />
-      )}
+      <MapLists
+        mapState={mapState}
+        businessHandlers={businessHandlers}
+        filteredBuildings={filteredBuildings}
+        routes={routes}
+        buildings={buildings}
+        loadBuildings={loadBuildings}
+        handleRouteClick={handleRouteClick}
+      />
+
       {/* COMPONENTES DEL MAPA */}
-      <div className="Mapa">
-        <div ref={mapRef} className="map-container"></div>
-
-        {!isMapReady && (
-          <div className="loading-overlay">
-            <div className="loading-message">
-              <div>Cargando mapa...</div>
-              <div className="loading-spinner"></div>
-            </div>
-          </div>
-        )}
-
+      <MapContainer mapRef={mapRef} isMapReady={isMapReady}>
         <MapIndicators
           coordinateDetection={coordinateManagement.coordinateDetection}
           validationErrors={coordinateManagement.validationErrors}
@@ -381,43 +307,19 @@ function Map() {
           proximityError={proximityError}
           onClearValidationErrors={coordinateManagement.clearValidationErrors}
         />
-      </div>
+      </MapContainer>
+
       {/* CAPAS DEL MAPA */}
-      <BuildingRenderer
+      <MapLayers
         mapInstance={mapInstance}
         isMapReady={isMapReady}
-        buildings={filteredBuildings}
-        onBuildingClick={interactionHandlers.handleBuildingClickWithProximity}
+        filteredBuildings={filteredBuildings}
+        prioritizedRoutes={mapData.prioritizedRoutes}
+        mapState={mapState}
+        routes={routes}
+        handleRouteClick={handleRouteClick}
+        interactionHandlers={interactionHandlers}
       />
-      {/* ROUTE LAYER CON RUTAS PRIORIZADAS */}
-      <RouteLayer
-        mapInstance={mapInstance}
-        routes={mapData.prioritizedRoutes}
-        onRouteClick={handleRouteClick}
-        originFilter={mapState.filters.origin}
-        destinationFilter={mapState.filters.destination}
-        selectedRoute={mapState.selectedRoute}
-      />
-      {mapState.showRouteNetwork && (
-        <RouteNetwork
-          mapInstance={mapInstance}
-          onNodeClick={(node) => {
-            if (mapInstance) {
-              mapInstance.setView(
-                [node.coordenadas.lat, node.coordenadas.lng],
-                18
-              );
-            }
-          }}
-          onRouteClick={(routeInfo) => {
-            const fullRoute = routes.find((r) => r.id === routeInfo.routeId);
-            if (fullRoute) {
-              mapState.setSelectedRoute(fullRoute);
-              handleRouteClick(fullRoute);
-            }
-          }}
-        />
-      )}
     </div>
   );
 }

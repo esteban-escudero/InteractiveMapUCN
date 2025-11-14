@@ -475,7 +475,7 @@ export const useBuildings = () => {
     return stats;
   }, [buildings, buildingAnalytics]);
 
-  // CARGAR EDIFICIOS AL INICIALIZAR
+  // CARGAR EDIFICIOS AL INICIALIZAR (solo una vez)
   useEffect(() => {
     loadBuildings();
 
@@ -485,7 +485,8 @@ export const useBuildings = () => {
     }, 30000); // Cada 30 segundos
 
     return () => clearInterval(healthCheckInterval);
-  }, [loadBuildings, checkBackendHealth]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo ejecutar al montar el componente
 
   return {
     // Estado

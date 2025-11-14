@@ -1,17 +1,31 @@
+version: '3.8'
+
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:15-alpine
     container_name: interactive_map_postgres
+    restart: unless-stopped
     ports:
-      - "5433:5432"
+      - "${DB_PORT:-5433}:5432"
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: InteractiveMapDB
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+      POSTGRES_DB: ${DB_NAME:-InteractiveMapDB}
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+
 networks:
   app-network:
     driver: bridge

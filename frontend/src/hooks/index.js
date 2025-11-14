@@ -1,11 +1,19 @@
-export { useMap } from "./map/useMap.js";
-export { useMapActions } from "./map/useMapActions.js";
-export { useMapHandlers } from "./map/useMapHandlers.js";
-export { useMapClickHandler } from "./map/useMapClickHandler.js";
-export { useMapManagement } from "./map/useMapManagement.js";
-export { useMapOperations } from "./map/useMapOperations.js";
-export { useCoordinateManagement } from "./map/useCoordinateManagement.js";
-export { useGeoServer } from "./useGeoServer.js";
-export { useConfirm } from "./common/useConfirm.js";
-export { useNotification } from "./common/useNotification.js";
-export { useProximity } from "./common/useProximity.js";
+/**
+ * Exportaciones centralizadas de todos los hooks
+ */
+export * from "./routes";
+export * from "./buildings";
+export * from "./geoserver";
+export * from "./common/useNotification";
+export * from "./common/useConfirm";
+export { default as useProximity } from "./common/useProximity";
+export * from "./map/useMap";
+export * from "./map/useMapState";
+export * from "./map/useMapData";
+export * from "./map/useMapEffects";
+export * from "./map/useMapHandlers";
+export * from "./map/useMapActions";
+export * from "./map/useMapClickHandler";
+export * from "./map/useBusinessHandlers";
+export * from "./map/useMapOperations";
+export * from "./map/useCoordinateManagement";
