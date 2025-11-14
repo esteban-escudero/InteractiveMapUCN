@@ -27,6 +27,7 @@ export const usePolylineRoute = ({
   const mapClickHandlerRef = useRef(null);
   const escHandlerRef = useRef(null);
   const currentPointsRef = useRef([]);
+  const ghostMarkerRef = useRef(null); // 🆕 Marcador fantasma
 
   // ========== FUNCIONES BÁSICAS ==========
 
@@ -79,6 +80,45 @@ export const usePolylineRoute = ({
     return Math.round(totalDistance);
   };
 
+  // 🆕 CREAR ÍCONO DEL MARCADOR FANTASMA
+  const createGhostMarkerIcon = () => {
+    return L.divIcon({
+      html: `
+        <div style="
+          background: rgba(52, 152, 219, 0.4);
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          border: 2px dashed #3498db;
+          box-shadow: 0 0 10px rgba(52, 152, 219, 0.6);
+          animation: pulse-ghost 1.5s infinite;
+        "></div>
+        <style>
+          @keyframes pulse-ghost {
+            0%, 100% { 
+              transform: scale(1);
+              opacity: 0.6;
+            }
+            50% { 
+              transform: scale(1.2);
+              opacity: 0.8;
+            }
+          }
+        </style>
+      `,
+      iconSize: [18, 18],
+      className: "ghost-marker",
+    });
+  };
+
+  // 🆕 REMOVER MARCADOR FANTASMA
+  const removeGhostMarker = useCallback(() => {
+    if (ghostMarkerRef.current && mapInstance) {
+      mapInstance.removeLayer(ghostMarkerRef.current);
+      ghostMarkerRef.current = null;
+    }
+  }, [mapInstance]);
+
   // ========== LIMPIEZA ==========
 
   const clearMap = useCallback(() => {
@@ -87,8 +127,8 @@ export const usePolylineRoute = ({
     if (!mapInstance) return;
 
     if (polylineRef.current) {
-      // 🆕 Remover el evento click de la polyline antes de eliminarla
       polylineRef.current.off("click");
+      polylineRef.current.off("mousemove"); // 🆕 Remover evento mousemove
       mapInstance.removeLayer(polylineRef.current);
       polylineRef.current = null;
     }
@@ -99,6 +139,9 @@ export const usePolylineRoute = ({
       }
     });
     markersRef.current = [];
+
+    // 🆕 Limpiar marcador fantasma
+    removeGhostMarker();
 
     if (mapClickHandlerRef.current) {
       mapInstance.off("click", mapClickHandlerRef.current);
@@ -129,7 +172,7 @@ export const usePolylineRoute = ({
     }
 
     console.log("✅ Mapa limpiado completamente");
-  }, [mapInstance]);
+  }, [mapInstance, removeGhostMarker]);
 
   // ========== ACTUALIZACIÓN DE DATOS ==========
 
@@ -280,8 +323,63 @@ export const usePolylineRoute = ({
 
     console.log("🎯 Activando modo: Click en arista para agregar vértice");
 
-    // 🆕 Remover listener previo si existe
+    // Remover listener previo si existe
     polylineRef.current.off("click");
+    polylineRef.current.off("mousemove"); // 🆕
+
+    // 🆕 EVENTO MOUSEMOVE - Mostrar marcador fantasma
+    polylineRef.current.on("mousemove", (e) => {
+      L.DomEvent.stopPropagation(e);
+
+      const mouseLatLng = e.latlng;
+      const currentLatLngs = polylineRef.current.getLatLngs();
+
+      // Encontrar el segmento más cercano
+      let minDistance = Infinity;
+      let closestPoint = null;
+
+      for (let i = 0; i < currentLatLngs.length - 1; i++) {
+        const start = currentLatLngs[i];
+        const end = currentLatLngs[i + 1];
+
+        const distance = getDistanceToSegment(mouseLatLng, start, end);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestPoint = getClosestPointOnSegment(mouseLatLng, start, end);
+        }
+      }
+
+      // Mostrar marcador fantasma en el punto más cercano
+      if (closestPoint && minDistance < 0.0005) {
+        // Umbral de proximidad
+        // Remover marcador anterior
+        removeGhostMarker();
+
+        // Crear nuevo marcador fantasma
+        const ghostMarker = L.marker(closestPoint, {
+          icon: createGhostMarkerIcon(),
+          interactive: false,
+          zIndexOffset: -1,
+        }).addTo(mapInstance);
+
+        ghostMarkerRef.current = ghostMarker;
+
+        // Cambiar cursor
+        mapInstance.getContainer().style.cursor = "copy";
+      } else {
+        removeGhostMarker();
+        mapInstance.getContainer().style.cursor = drawingMode
+          ? "crosshair"
+          : "";
+      }
+    });
+
+    // 🆕 EVENTO MOUSEOUT - Remover marcador fantasma
+    polylineRef.current.on("mouseout", () => {
+      removeGhostMarker();
+      mapInstance.getContainer().style.cursor = drawingMode ? "crosshair" : "";
+    });
 
     // Hacer la polilínea clickeable
     polylineRef.current.on("click", (e) => {
@@ -300,7 +398,6 @@ export const usePolylineRoute = ({
         const start = currentLatLngs[i];
         const end = currentLatLngs[i + 1];
 
-        // Calcular distancia perpendicular al segmento
         const distance = getDistanceToSegment(clickedLatLng, start, end);
 
         if (distance < minDistance) {
@@ -311,6 +408,9 @@ export const usePolylineRoute = ({
 
       if (insertIndex !== -1) {
         console.log(`✅ Insertando vértice en posición ${insertIndex}`);
+
+        // Remover marcador fantasma
+        removeGhostMarker();
 
         // Insertar el nuevo punto
         const newLatLngs = [
@@ -328,11 +428,53 @@ export const usePolylineRoute = ({
         // Actualizar datos
         updateRouteData(newLatLngs);
 
-        // 🆕 RE-ACTIVAR el click en la polyline después de agregar el vértice
+        // RE-ACTIVAR el click en la polyline después de agregar el vértice
         addVertexOnPolyline();
       }
     });
-  }, [mapInstance, createMarkers, updateRouteData]);
+  }, [
+    mapInstance,
+    createMarkers,
+    updateRouteData,
+    drawingMode,
+    removeGhostMarker,
+  ]);
+
+  // 🆕 Función auxiliar: obtener el punto más cercano en un segmento
+  const getClosestPointOnSegment = (point, lineStart, lineEnd) => {
+    const x = point.lat;
+    const y = point.lng;
+    const x1 = lineStart.lat;
+    const y1 = lineStart.lng;
+    const x2 = lineEnd.lat;
+    const y2 = lineEnd.lng;
+
+    const A = x - x1;
+    const B = y - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
+
+    if (lenSq !== 0) param = dot / lenSq;
+
+    let lat, lng;
+
+    if (param < 0) {
+      lat = x1;
+      lng = y1;
+    } else if (param > 1) {
+      lat = x2;
+      lng = y2;
+    } else {
+      lat = x1 + param * C;
+      lng = y1 + param * D;
+    }
+
+    return L.latLng(lat, lng);
+  };
 
   // Función auxiliar: calcular distancia de un punto a un segmento
   const getDistanceToSegment = (point, lineStart, lineEnd) => {
@@ -392,6 +534,9 @@ export const usePolylineRoute = ({
 
     updateRouteData(latLngs);
 
+    // 🆕 Remover marcador fantasma
+    removeGhostMarker();
+
     if (polylineRef.current) {
       polylineRef.current.setStyle({
         color: getRouteColor(formData.tipo),
@@ -400,7 +545,7 @@ export const usePolylineRoute = ({
         dashArray: null,
       });
 
-      // 🆕 ACTIVAR CLICK EN ARISTA (ya estaba activado, pero lo reforzamos)
+      // ACTIVAR CLICK EN ARISTA
       addVertexOnPolyline();
     }
 
@@ -419,7 +564,13 @@ export const usePolylineRoute = ({
     mapInstance.getContainer().style.cursor = "";
 
     console.log("✅ Modo dibujo finalizado. Click en arista ACTIVADO");
-  }, [mapInstance, formData.tipo, updateRouteData, addVertexOnPolyline]);
+  }, [
+    mapInstance,
+    formData.tipo,
+    updateRouteData,
+    addVertexOnPolyline,
+    removeGhostMarker,
+  ]);
 
   // ========== ACTIVAR DIBUJO ==========
 
@@ -446,7 +597,7 @@ export const usePolylineRoute = ({
     polylineRef.current = polyline;
     currentPointsRef.current = [];
 
-    // 🆕 ACTIVAR CLICK EN ARISTA DESDE EL INICIO
+    // ACTIVAR CLICK EN ARISTA DESDE EL INICIO
     addVertexOnPolyline();
 
     const clickHandler = (e) => {
@@ -460,7 +611,7 @@ export const usePolylineRoute = ({
         createMarkers(newLatLngs);
         updateRouteData(newLatLngs);
 
-        // 🆕 RE-ACTIVAR click en arista después de cada punto nuevo
+        // RE-ACTIVAR click en arista después de cada punto nuevo
         addVertexOnPolyline();
       }
     };
@@ -511,7 +662,7 @@ export const usePolylineRoute = ({
 
       createMarkers(latLngs);
 
-      // 🆕 ACTIVAR CLICK EN ARISTA
+      // ACTIVAR CLICK EN ARISTA
       addVertexOnPolyline();
 
       setEditingMode(true);
@@ -545,7 +696,7 @@ export const usePolylineRoute = ({
     createMarkers(newLatLngs);
     updateRouteData(newLatLngs);
 
-    // 🆕 RE-ACTIVAR click en arista
+    // RE-ACTIVAR click en arista
     addVertexOnPolyline();
   }, [createMarkers, updateRouteData, addVertexOnPolyline]);
 
