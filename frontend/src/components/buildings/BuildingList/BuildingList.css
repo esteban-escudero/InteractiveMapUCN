@@ -173,10 +173,10 @@
   font-weight: 500;
 }
 
-/* Sección de Salas */
+/* Sección de Salas - NUEVO DISEÑO */
 .rooms-section {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid #e0e0e0;
 }
 
@@ -185,6 +185,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .rooms-header h4 {
@@ -194,6 +196,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 600;
 }
 
 .add-room-btn {
@@ -203,12 +206,14 @@
   padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   gap: 6px;
+  height: 36px;
+  white-space: nowrap;
 }
 
 .add-room-btn:hover {
@@ -217,29 +222,91 @@
   box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
 }
 
-.empty-rooms {
-  text-align: center;
-  padding: 30px;
-  color: #7f8c8d;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border: 1px dashed #bdc3c7;
+/* Contenedor para las salas a agregar */
+.rooms-to-add-container {
+  margin-bottom: 16px;
 }
 
-.empty-rooms p {
-  margin: 0 0 8px 0;
+.rooms-to-add-title {
   font-size: 14px;
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.empty-rooms small {
-  font-size: 12px;
-  color: #95a5a6;
+/* Grid de salas a agregar - 2 columnas */
+.rooms-to-add-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
 }
 
-.rooms-list {
+.room-to-add-item {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px dashed #bdc3c7;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+}
+
+.room-to-add-item:hover {
+  border-color: #3498db;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.room-to-add-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.room-to-add-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: #546e7a;
+}
+
+.room-to-add-detail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+
+/* Lista de salas existentes */
+.existing-rooms-section {
+  margin-top: 20px;
+}
+
+.existing-rooms-title {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Lista de salas existentes EN GRID - DOS COLUMNAS */
+.rooms-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
 }
 
 .room-item {
@@ -251,11 +318,12 @@
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   transition: all 0.2s ease;
+  min-height: 48px;
 }
 
 .room-item:hover {
   border-color: #3498db;
-  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.15);
 }
 
 .room-info {
@@ -263,31 +331,50 @@
   flex-direction: column;
   gap: 4px;
   flex: 1;
+  min-width: 0;
 }
 
 .room-info strong {
   color: #2c3e50;
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .room-details {
-  font-size: 13px;
+  font-size: 12px;
   color: #666;
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.room-detail-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #f8f9fa;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
 }
 
 .room-id {
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
   font-family: monospace;
+  background: #f1f3f4;
+  padding: 2px 6px;
+  border-radius: 3px;
 }
 
 .room-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  margin-left: 12px;
 }
 
 .edit-room-btn,
@@ -295,15 +382,15 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 6px 8px;
   border-radius: 4px;
   font-size: 13px;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
 }
 
 .edit-room-btn {
@@ -313,7 +400,7 @@
 
 .edit-room-btn:hover:not(:disabled) {
   background: #2980b9;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(52, 152, 219, 0.3);
 }
 
@@ -324,7 +411,7 @@
 
 .delete-room-btn:hover:not(:disabled) {
   background: #c0392b;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
 }
 
@@ -333,6 +420,26 @@
   background: #bdc3c7;
   cursor: not-allowed;
   transform: none;
+}
+
+.empty-rooms {
+  text-align: center;
+  padding: 30px;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 2px dashed #bdc3c7;
+  grid-column: 1 / -1;
+}
+
+.empty-rooms p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.empty-rooms small {
+  font-size: 12px;
+  color: #95a5a6;
 }
 
 /* Acciones del edificio */
@@ -434,14 +541,26 @@
 
 .rooms-header h4 .material-icons {
   font-size: 18px;
+  color: #3498db;
 }
 
 .add-room-btn .material-icons {
   font-size: 16px;
 }
 
-.room-details .material-icons {
+.rooms-to-add-title .material-icons,
+.existing-rooms-title .material-icons {
   font-size: 16px;
+  color: #27ae60;
+}
+
+.room-to-add-detail .material-icons {
+  font-size: 14px;
+  color: #3498db;
+}
+
+.room-details .material-icons {
+  font-size: 14px;
   color: #27ae60;
   margin-right: 0;
 }
@@ -511,18 +630,30 @@
 
   .rooms-header {
     flex-direction: column;
-    gap: 12px;
     align-items: flex-start;
+    gap: 12px;
+  }
+
+  .rooms-to-add-grid,
+  .rooms-list {
+    grid-template-columns: 1fr;
+  }
+
+  .add-room-btn {
+    align-self: flex-start;
   }
 
   .room-item {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 8px;
+    padding: 10px;
+    min-height: 44px;
   }
 
   .room-actions {
     align-self: flex-end;
+    margin-left: 0;
   }
 
   .building-actions {
@@ -535,6 +666,22 @@
 
   .building-list-header h2 .material-icons {
     font-size: 20px;
+  }
+
+  .room-info strong {
+    font-size: 13px;
+  }
+
+  .room-details {
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .edit-room-btn,
+  .delete-room-btn {
+    width: 30px;
+    height: 30px;
+    padding: 5px 7px;
   }
 }
 
@@ -560,11 +707,24 @@
   }
 
   .room-info strong {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .room-details {
+    font-size: 10px;
+  }
+
+  .room-to-add-item {
+    padding: 12px;
+  }
+
+  .room-to-add-name {
+    font-size: 14px;
+  }
+
+  .room-to-add-details {
     font-size: 12px;
+    gap: 8px;
   }
 }
 

@@ -1,4 +1,6 @@
-/* RoomManagement.css - mejoras adicionales */
+/* RoomManagement.css - CSS MEJORADO CON GRID 2x2 */
+
+/* ===== CONTENEDORES PRINCIPALES ===== */
 .room-management-overlay {
   position: fixed;
   top: 0;
@@ -16,17 +18,18 @@
   background: white;
   border-radius: 12px;
   width: 90%;
-  max-width: 800px;
+  max-width: 1000px; /* ← Aumentado para 2 columnas */
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
+/* ===== HEADER ===== */
 .room-management-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 24px;
   border-bottom: 1px solid #e0e0e0;
   background: #f8f9fa;
   border-radius: 12px 12px 0 0;
@@ -35,6 +38,8 @@
 .room-management-header h3 {
   margin: 0;
   color: #2c3e50;
+  font-size: 1.4em;
+  font-weight: 600;
 }
 
 .close-btn {
@@ -44,10 +49,10 @@
   cursor: pointer;
   color: #7f8c8d;
   transition: all 0.3s ease;
-  padding: 5px;
+  padding: 6px;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,101 +64,146 @@
   transform: rotate(90deg);
 }
 
+/* ===== SELECCIÓN DE EDIFICIO ===== */
 .building-selection {
-  padding: 20px;
+  padding: 24px;
   border-bottom: 1px solid #e0e0e0;
+  background: #ffffff;
 }
 
 .building-selection label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   font-weight: 600;
   color: #2c3e50;
+  font-size: 14px;
 }
 
 .building-selection select {
   width: 100%;
-  padding: 10px;
+  padding: 12px 16px;
   border: 1px solid #bdc3c7;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.building-selection select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .building-info {
-  margin-top: 8px;
-  padding: 8px;
+  margin-top: 12px;
+  padding: 12px;
   background: #e8f4fd;
-  border-radius: 4px;
+  border-radius: 6px;
   border-left: 4px solid #3498db;
 }
 
 .building-info small {
   color: #2c3e50;
   font-weight: 500;
+  font-size: 13px;
 }
 
-.rooms-list {
-  padding: 20px;
+/* ===== GRID DE SALAS - CONTENEDOR PRINCIPAL ===== */
+.rooms-grid-container {
+  padding: 24px;
+  background: #ffffff;
 }
 
-.rooms-header {
+.rooms-grid-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.rooms-header h4 {
+.rooms-grid-title {
   margin: 0;
   color: #2c3e50;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
 }
 
 .add-room-btn {
-  background: #3498db;
+  background: #27ae60;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 20px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  white-space: nowrap;
 }
 
 .add-room-btn:hover {
-  background: #2980b9;
+  background: #219a52;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+  box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3);
 }
 
-.room-form {
+/* ===== GRID 2x2 FIJO PARA SALAS ===== */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* ← 2 COLUMNAS FIJAS */
+  gap: 20px;
+  padding: 8px;
+}
+
+/* ===== FORMULARIO INDIVIDUAL DE CADA SALA ===== */
+.room-form-container {
+  background: #ffffff;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: relative; /* ← PARA POSICIONAR EL BOTÓN DE ELIMINAR */
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
 }
 
-.room-header {
+.room-form-container:hover {
+  border-color: #3498db;
+  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.15);
+  transform: translateY(-2px);
+}
+
+/* HEADER DE LA SALA CON BOTÓN DE ELIMINAR DENTRO DE LA TARJETA */
+.room-form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f3f4;
 }
 
-.room-header h5 {
+.room-form-title {
   margin: 0;
   color: #2c3e50;
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
 }
 
-.room-id {
-  font-size: 0.8em;
-  color: #666;
-  margin-left: 8px;
-  font-weight: normal;
-}
-
+/* BOTÓN DE ELIMINAR SALA DENTRO DE LA TARJETA */
 .remove-room-btn {
   background: #e74c3c;
   color: white;
@@ -166,68 +216,101 @@
   align-items: center;
   justify-content: center;
   font-size: 12px;
+  font-weight: bold;
   transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-left: 10px;
 }
 
 .remove-room-btn:hover {
   background: #c0392b;
   transform: rotate(90deg) scale(1.1);
-  box-shadow: 0 2px 6px rgba(231, 76, 60, 0.4);
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
 }
 
-.room-fields {
+.room-id {
+  font-size: 0.8em;
+  color: #666;
+  margin-left: 8px;
+  font-weight: normal;
+}
+
+/* ===== GRID DE CAMPOS DEL FORMULARIO ===== */
+.room-fields-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 15px;
+  gap: 16px;
+  flex: 1;
 }
 
-.form-group {
+/* ===== GRUPOS DE CAMPOS ===== */
+.form-field-group {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
-.form-group label {
-  margin-bottom: 5px;
+.field-label {
   font-weight: 600;
   color: #2c3e50;
   font-size: 13px;
+  margin-bottom: 0;
 }
 
-.form-group input,
-.form-group select {
-  padding: 8px 12px;
+.field-input,
+.field-select {
+  padding: 10px 12px;
   border: 1px solid #bdc3c7;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
-  transition: border-color 0.3s;
+  transition: all 0.3s ease;
+  background: white;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.field-input:focus,
+.field-select:focus {
   outline: none;
   border-color: #3498db;
-  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
 }
 
-.checkbox-group {
+.field-input::placeholder {
+  color: #95a5a6;
+}
+
+/* ===== CHECKBOX ===== */
+.checkbox-field-group {
   grid-column: 1 / -1;
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
 }
 
-.checkbox-group label {
+.checkbox-label {
   display: flex;
   align-items: center;
-  font-weight: normal;
+  gap: 10px;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 14px;
   cursor: pointer;
   margin-bottom: 0;
 }
 
-.checkbox-group input {
-  margin-right: 8px;
-  transform: scale(1.1);
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  accent-color: #27ae60;
+  cursor: pointer;
 }
 
+/* ===== BOTONES DE ACCIÓN ===== */
 .room-actions {
-  padding: 20px;
+  padding: 24px;
   border-top: 1px solid #e0e0e0;
   display: flex;
   justify-content: space-between;
@@ -238,40 +321,43 @@
 
 .edit-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   margin-left: auto;
 }
 
 .delete-btn {
-  background-color: #dc3545;
+  background-color: #e74c3c;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 
-.delete-btn:hover {
-  background-color: #c82333;
+.delete-btn:hover:not(:disabled) {
+  background-color: #c0392b;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }
 
 .delete-btn:disabled {
-  background-color: #6c757d;
+  background-color: #bdc3c7;
   cursor: not-allowed;
+  transform: none;
 }
 
 .cancel-btn {
   background: #95a5a6;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 
@@ -285,10 +371,11 @@
   background: #27ae60;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 500;
   transition: all 0.3s ease;
 }
 
@@ -301,25 +388,78 @@
 .save-btn:hover:not(:disabled) {
   background: #219a52;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+  box-shadow: 0 6px 12px rgba(39, 174, 96, 0.4);
 }
 
-/* Estilos para modo edición */
-.room-management-container .building-selection select:disabled {
+/* ===== ESTILOS PARA MODO EDICIÓN ===== */
+.building-selection select:disabled {
   background-color: #f8f9fa;
-  color: #6c757d;
-  cursor: not-allowed;
+  color: #2c3e50;
+  border-color: #27ae60;
+  font-weight: 600;
+  opacity: 1;
+  cursor: default;
 }
 
-/* Responsive */
+.building-info small[style*="color: #27ae60"] {
+  font-weight: 600;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .rooms-grid {
+    grid-template-columns: repeat(2, 1fr); /* ← MANTENER 2 COLUMNAS */
+    gap: 16px;
+  }
+}
+
 @media (max-width: 768px) {
-  .room-fields {
+  .room-management-container {
+    width: 95%;
+    margin: 10px;
+    max-width: 95%;
+  }
+
+  .room-management-header {
+    padding: 20px;
+  }
+
+  .building-selection {
+    padding: 20px;
+  }
+
+  .rooms-grid-container {
+    padding: 20px;
+  }
+
+  .rooms-grid-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  /* EN MÓVIL CAMBIAR A 1 COLUMNA */
+  .rooms-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 4px;
+  }
+
+  .room-form-container {
+    padding: 18px;
+    margin: 2px;
+    min-height: auto;
+  }
+
+  .room-fields-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .room-actions {
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+    padding: 20px;
   }
 
   .edit-actions {
@@ -333,21 +473,75 @@
   .save-btn {
     flex: 1;
     text-align: center;
+    padding: 10px 20px;
   }
 }
 
-.building-selection select:disabled {
-  background-color: #f8f9fa;
-  color: #2c3e50;
-  border-color: #27ae60;
-  font-weight: 600;
-  opacity: 1;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  cursor: default;
+@media (max-width: 480px) {
+  .room-management-container {
+    width: 98%;
+    margin: 5px;
+  }
+
+  .room-management-header {
+    padding: 16px;
+  }
+
+  .building-selection {
+    padding: 16px;
+  }
+
+  .rooms-grid-container {
+    padding: 16px;
+  }
+
+  .rooms-grid {
+    padding: 2px;
+  }
+
+  .room-form-container {
+    padding: 16px;
+    margin: 1px;
+  }
+
+  .room-fields-grid {
+    gap: 12px;
+  }
+
+  .field-input,
+  .field-select {
+    padding: 8px 12px;
+  }
 }
 
-.building-info small[style*="color: #27ae60"] {
-  font-weight: 600;
+/* ===== ICONOS ===== */
+.material-icons {
+  vertical-align: middle;
+}
+
+.rooms-grid-title .material-icons {
+  font-size: 20px;
+  color: #3498db;
+}
+
+.add-room-btn .material-icons {
+  font-size: 18px;
+}
+
+.close-btn .material-icons {
+  font-size: 20px;
+}
+
+/* ===== ESTADO VACÍO ===== */
+.rooms-grid:empty::before {
+  content: "No hay salas agregadas";
+  display: block;
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #bdc3c7;
+  grid-column: 1 / -1;
+  font-size: 14px;
 }

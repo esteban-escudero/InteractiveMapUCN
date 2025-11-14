@@ -13,26 +13,15 @@ const RoomForm = ({
 }) => {
   return (
     <div key={room.id || index} className="room-form">
-      <div className="room-header">
-        <h5>
-          {isEditing ? `Editando: ${room.nombre_sala}` : `Sala ${index + 1}`}
-          {room.id && <span className="room-id"> (ID: {room.id})</span>}
-        </h5>
-        {!isEditing && roomsCount > 1 && (
-          <button
-            type="button"
-            onClick={() => onRemoveRoom(index)}
-            className="remove-room-btn">
-            ✕
-          </button>
-        )}
-      </div>
-
+      {/* Eliminamos el header externo ya que RoomFields tiene su propio header interno */}
       <RoomFields
         room={room}
         index={index}
         TIPOS_SALA={TIPOS_SALA}
         onUpdateRoom={onUpdateRoom}
+        isEditing={isEditing}
+        roomsCount={roomsCount}
+        onRemoveRoom={onRemoveRoom}
       />
     </div>
   );

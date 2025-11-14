@@ -171,7 +171,7 @@ const buildingModel = {
           tipo,
           estado,
           ubicacion
-        ) VALUES ($1, $2, $3, $4, ST_SetSRID(ST_GeomFromGeoJSON($5), 4326))
+        ) VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
         RETURNING 
           id_edificio as id,
           nombre,
