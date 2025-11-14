@@ -9,6 +9,14 @@ export const buildingService = {
 
       // Asegurarnos de que cada edificio tenga un array de salas
       const buildingsData = response.data.data || response.data;
+
+      // ← AGREGAR AQUÍ LOS CONSOLE.LOG
+      console.log("Estructura completa del primer edificio:", buildingsData[0]);
+      console.log(
+        "Todos los campos disponibles:",
+        Object.keys(buildingsData[0] || {})
+      );
+
       const buildingsWithRooms = Array.isArray(buildingsData)
         ? buildingsData.map((building) => ({
             ...building,

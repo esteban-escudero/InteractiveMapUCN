@@ -11,6 +11,7 @@ const buildingModel = {
           e.nombre,
           e.descripcion,
           e.tipo,
+          e.estado,
           ST_AsGeoJSON(e.ubicacion) as ubicacion_geojson,
           COALESCE(
             json_agg(
@@ -27,7 +28,7 @@ const buildingModel = {
           ) as salas
         FROM edificio e
         LEFT JOIN sala s ON e.id_edificio = s.id_edificio
-        GROUP BY e.id_edificio, e.nombre, e.descripcion, e.tipo, e.ubicacion
+        GROUP BY e.id_edificio, e.nombre, e.descripcion, e.tipo, e.estado, e.ubicacion
         ORDER BY e.id_edificio
       `;
 
@@ -41,10 +42,11 @@ const buildingModel = {
           nombre: row.nombre,
           descripcion: row.descripcion,
           tipo: row.tipo,
+          estado: row.estado, // ← ¡FALTA ESTA LÍNEA!
           ubicacion: row.ubicacion_geojson
             ? JSON.parse(row.ubicacion_geojson)
             : null,
-          salas: row.salas || [], // INCLUIR SALAS
+          salas: row.salas || [],
         };
 
         // Debug: mostrar cuántas salas tiene cada edificio
@@ -75,6 +77,7 @@ const buildingModel = {
           nombre,
           descripcion,
           tipo,
+          estado,
           ST_AsGeoJSON(ubicacion) as ubicacion_geojson
         FROM edificio 
         ORDER BY id_edificio
@@ -87,6 +90,7 @@ const buildingModel = {
         nombre: row.nombre,
         descripcion: row.descripcion,
         tipo: row.tipo,
+        estado: row.estado, // ← ¡FALTA ESTA LÍNEA!
         ubicacion: row.ubicacion_geojson
           ? JSON.parse(row.ubicacion_geojson)
           : null,
@@ -165,6 +169,7 @@ const buildingModel = {
           nombre, 
           descripcion, 
           tipo,
+          estado,
           ubicacion
         ) VALUES ($1, $2, $3, $4, ST_SetSRID(ST_GeomFromGeoJSON($5), 4326))
         RETURNING 
@@ -172,6 +177,7 @@ const buildingModel = {
           nombre,
           descripcion,
           tipo,
+          estado,
           ST_AsGeoJSON(ubicacion) as ubicacion_geojson
       `;
 
@@ -180,6 +186,7 @@ const buildingModel = {
         buildingData.nombre,
         buildingData.descripcion || "",
         buildingData.tipo || "Oficina Profesor",
+        buildingData.estado || "activo",
         JSON.stringify(buildingData.ubicacion),
       ];
 
