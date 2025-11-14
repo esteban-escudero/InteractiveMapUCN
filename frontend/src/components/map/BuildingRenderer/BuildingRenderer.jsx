@@ -91,115 +91,75 @@ const BuildingRenderer = ({
 
           const popup = `
         <div style="
-          min-width: 220px;
-          max-width: 240px;
-          padding: 16px;
-          background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-          border-radius: 12px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-          border: 1px solid #e9ecef;
-          border-top: 4px solid #3498db;
+          min-width: 200px;
+          max-width: 220px;
+          padding: 0;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          border-top: 3px solid #3498db;
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          backdrop-filter: blur(10px);
+          overflow: hidden;
         ">
           <h4 style="
-            margin: 0 0 12px 0;
-            color: #2c3e50;
-            font-size: 1.2em;
-            font-weight: 700;
+            margin: 0;
+            padding: 10px 12px;
+            background: #3498db;
+            color: white;
+            font-size: 1em;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f1f3f4;
+            gap: 6px;
           ">
-            <span style="font-size: 1.1em;">🏢</span>
+            <span style="font-size: 1em;">🏢</span>
             ${building.nombre || "Sin nombre"}
           </h4>
           
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="
-                background: #e3f2fd;
-                border-radius: 6px;
-                padding: 6px;
-                color: #1976d2;
-                font-size: 13px;
-                min-width: 22px;
-                text-align: center;
-              ">📝</span>
-              <div>
-                <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Descripción:</strong>
-                <span style="color: #546e7a; font-size: 13px; line-height: 1.3;">${
+          <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 14px;">📝</span>
+              <div style="flex: 1;">
+                <strong style="color: #34495e; font-size: 11px;">Descripción:</strong>
+                <div style="color: #546e7a; font-size: 12px;">${
                   building.descripcion || "Sin descripción"
-                }</span>
+                }</div>
               </div>
             </div>
             
-            <div style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="
-                background: #e8f5e9;
-                border-radius: 6px;
-                padding: 6px;
-                color: #388e3c;
-                font-size: 13px;
-                min-width: 22px;
-                text-align: center;
-              ">🏷️</span>
-              <div>
-                <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Categoría:</strong>
-                <span style="color: #546e7a; font-size: 13px; line-height: 1.3;">${
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 14px;">🏷️</span>
+              <div style="flex: 1;">
+                <strong style="color: #34495e; font-size: 11px;">Categoría:</strong>
+                <div style="color: #546e7a; font-size: 12px;">${
                   building.categoria || building.tipo || "No especificada"
-                }</span>
+                }</div>
               </div>
             </div>
 
-            <div style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="
-                background: ${estadoColor}20;
-                border-radius: 6px;
-                padding: 6px;
-                color: ${estadoColor};
-                font-size: 13px;
-                min-width: 22px;
-                text-align: center;
-              ">${estadoIcon}</span>
-              <div>
-                <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Estado:</strong>
-                <span style="color: ${estadoColor}; font-size: 13px; line-height: 1.3; font-weight: 500;">${estadoText}</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 14px;">${estadoIcon}</span>
+              <div style="flex: 1;">
+                <strong style="color: #34495e; font-size: 11px;">Estado:</strong>
+                <div style="color: ${estadoColor}; font-size: 12px; font-weight: 500;">${estadoText}</div>
               </div>
             </div>
       
       ${
         areaInfo
           ? `
-      <div style="display: flex; align-items: flex-start; gap: 8px;">
-        <span style="
-          background: #fff3e0;
-          border-radius: 6px;
-          padding: 6px;
-          color: #f57c00;
-          font-size: 13px;
-          min-width: 22px;
-          text-align: center;
-        ">📐</span>
-        <div>
-          <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Área:</strong>
-          <span style="color: #546e7a; font-size: 13px; line-height: 1.3;">${areaInfo}</span>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 14px;">📐</span>
+        <div style="flex: 1;">
+          <strong style="color: #34495e; font-size: 11px;">Área:</strong>
+          <div style="color: #546e7a; font-size: 12px;">${Math.round(
+            SpatialUtils.calculatePolygonArea(building.ubicacion.coordinates[0])
+          )} m²</div>
         </div>
       </div>
       `
           : ""
       }
-    </div>
-    
-    <div style="
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px dashed #e0e0e0;
-      text-align: center;
-    ">
-      
     </div>
   </div>
 `;
