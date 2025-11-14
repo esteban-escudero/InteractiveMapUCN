@@ -40,6 +40,7 @@ function Map() {
   // ========== HOOKS PRINCIPALES ==========
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
+  const [isRouteDrawingActive, setIsRouteDrawingActive] = useState(false);
 
   // NUEVO ESTADO: Controla cuándo ocultar el formulario durante selección
   const [selectionActive, setSelectionActive] = useState(false);
@@ -180,7 +181,8 @@ function Map() {
     coordinateManagement,
     validateCoordinates,
     findNearestBuilding,
-    mapState
+    mapState,
+    isRouteDrawingActive
   );
 
   // TEMPORAL: Agrega esta función en Map.jsx, justo antes del return
@@ -202,6 +204,7 @@ function Map() {
     onCancel={() => {
       mapState.setShowRouteForm(false);
       mapState.setEditingRoute(null);
+      setIsRouteDrawingActive(false);
     }}
     isVisible={mapState.showRouteForm}
     route={mapState.editingRoute}
@@ -300,15 +303,21 @@ function Map() {
           mapState.setShowRouteForm(false);
           mapState.setEditingRoute(null);
         }}
-        isVisible={mapState.showRouteForm} // ← SOLO controlar si el formulario debe mostrarse
+        isVisible={mapState.showRouteForm}
         route={mapState.editingRoute}
         isEditing={!!mapState.editingRoute}
         mapInstance={mapInstance}
         onSelectionStart={() => {
-          console.log("🟡 Iniciando selección - notificando al padre");
+          console.log(
+            "🟡 Iniciando selección - DESACTIVANDO useMapClickHandler"
+          );
+          setIsRouteDrawingActive(true); // 🆕 ACTIVAR MODO DIBUJO
         }}
         onSelectionEnd={() => {
-          console.log("🟢 Finalizando selección - notificando al padre");
+          console.log(
+            "🟢 Finalizando selección - REACTIVANDO useMapClickHandler"
+          );
+          setIsRouteDrawingActive(false); // 🆕 DESACTIVAR MODO DIBUJO
         }}
       />
       {/* LISTAS Y GESTIÓN */}

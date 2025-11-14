@@ -1,3 +1,4 @@
+// hooks/map/useMapClickHandler.js
 import { useCallback, useEffect } from "react";
 import L from "leaflet";
 import { SpatialUtils } from "../../utils/spatialUtils";
@@ -7,10 +8,19 @@ export const useMapClickHandler = (
   coordinateManagement,
   validateCoordinates,
   findNearestBuilding,
-  mapManagement
+  mapManagement,
+  isRouteDrawing = false // 🆕 NUEVO PARÁMETRO
 ) => {
   const handleMapClick = useCallback(
     (e) => {
+      // 🆕 IGNORAR CLICKS SI ESTAMOS DIBUJANDO RUTAS
+      if (isRouteDrawing) {
+        console.log(
+          "🚫 useMapClickHandler: Ignorando click (modo dibujo de ruta activo)"
+        );
+        return;
+      }
+
       const { lat, lng } = e.latlng;
       console.log("Coordenadas capturadas:", { lat, lng });
 
@@ -98,6 +108,7 @@ export const useMapClickHandler = (
       coordinateManagement,
       validateCoordinates,
       findNearestBuilding,
+      isRouteDrawing, // 🆕 Agregar a dependencias
     ]
   );
 
@@ -120,7 +131,17 @@ export const useMapClickHandler = (
   );
 
   useEffect(() => {
-    if (!mapInstance || !coordinateManagement.coordinateDetection) return;
+    // 🆕 NO ACTIVAR EL HANDLER SI ESTAMOS DIBUJANDO RUTAS
+    if (
+      !mapInstance ||
+      !coordinateManagement.coordinateDetection ||
+      isRouteDrawing
+    ) {
+      if (isRouteDrawing) {
+        console.log("🎯 useMapClickHandler: Desactivado (modo dibujo de ruta)");
+      }
+      return;
+    }
 
     // Configurar función global
     window.useCapturedCoords = handleUseCapturedCoords;
@@ -145,6 +166,7 @@ export const useMapClickHandler = (
     handleMapClick,
     handleUseCapturedCoords,
     coordinateManagement,
+    isRouteDrawing, // 🆕 Agregar a dependencias
   ]);
 
   return {

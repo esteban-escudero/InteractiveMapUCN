@@ -46,7 +46,7 @@ export const usePolylineRoute = ({
     return `Ruta ${formData.tipo} ${now.toLocaleDateString("es-ES")}`;
   };
 
-  // CÁLCULO DE DISTANCIA MEJORADO
+  // CÁLCULO DE DISTANCIA
   const calculateRouteLength = (latLngs) => {
     if (latLngs.length < 2) return 0;
 
@@ -79,15 +79,16 @@ export const usePolylineRoute = ({
     return Math.round(totalDistance);
   };
 
-  // ========== FUNCIONES DE LIMPIEZA ==========
+  // ========== LIMPIEZA ==========
 
-  // EN usePolylineRoute.js - REEMPLAZA la función clearMap
   const clearMap = useCallback(() => {
     console.log("🗑️ LIMPIANDO TODOS LOS PUNTOS");
 
     if (!mapInstance) return;
 
     if (polylineRef.current) {
+      // 🆕 Remover el evento click de la polyline antes de eliminarla
+      polylineRef.current.off("click");
       mapInstance.removeLayer(polylineRef.current);
       polylineRef.current = null;
     }
@@ -113,7 +114,6 @@ export const usePolylineRoute = ({
     setEditingMode(false);
     currentPointsRef.current = [];
 
-    // RESETEAR EL FORM DATA - ESTO ES LO QUE FALTABA
     setFormData({
       nombre: "",
       tipo: "peatonal",
@@ -128,15 +128,14 @@ export const usePolylineRoute = ({
       mapInstance.getContainer().style.cursor = "";
     }
 
-    console.log("✅ Todos los puntos eliminados y formulario reseteado");
+    console.log("✅ Mapa limpiado completamente");
   }, [mapInstance]);
 
-  // ========== FUNCIONES DE ACTUALIZACIÓN ==========
+  // ========== ACTUALIZACIÓN DE DATOS ==========
 
   const updateRouteData = useCallback((latLngs) => {
-    console.log("📍 Actualizando datos de ruta con puntos:", latLngs);
+    console.log("📊 Actualizando datos de ruta con puntos:", latLngs.length);
 
-    // ACTUALIZAR LA REFERENCIA DE PUNTOS ACTUALES
     currentPointsRef.current = latLngs;
 
     if (latLngs.length < 2) {
@@ -149,12 +148,11 @@ export const usePolylineRoute = ({
       return;
     }
 
-    // Convertir a formato GeoJSON correcto [lng, lat]
     const coordinates = latLngs.map((latlng) => {
       if (Array.isArray(latlng)) {
-        return [latlng[1], latlng[0]]; // [lng, lat]
+        return [latlng[1], latlng[0]];
       } else {
-        return [latlng.lng, latlng.lat]; // [lng, lat]
+        return [latlng.lng, latlng.lat];
       }
     });
 
@@ -166,10 +164,6 @@ export const usePolylineRoute = ({
       coordinates: coordinates,
     };
 
-    console.log("📐 Geometría generada:", geometria);
-    console.log("📏 Distancia calculada:", distancia, "metros");
-    console.log("🔢 Número de puntos guardados:", coordinates.length);
-
     setFormData((prev) => ({
       ...prev,
       distancia,
@@ -178,7 +172,7 @@ export const usePolylineRoute = ({
     }));
   }, []);
 
-  // ========== FUNCIONES DE MARKERS ==========
+  // ========== MARCADORES ==========
 
   const createMarkerIcon = (index, total) => {
     const isFirst = index === 0;
@@ -221,13 +215,14 @@ export const usePolylineRoute = ({
       });
       markersRef.current = [];
 
-      // Crear nuevos markers - SIEMPRE ARRASTRABLES
+      // Crear nuevos markers
       latLngs.forEach((latLng, index) => {
         const marker = L.marker(latLng, {
           icon: createMarkerIcon(index, latLngs.length),
-          draggable: true, // ← SIEMPRE ARRASTRABLE
+          draggable: true,
         }).addTo(mapInstance);
 
+        // Evento drag
         marker.on("drag", (e) => {
           const newLatLng = e.target.getLatLng();
           const currentLatLngs = polylineRef.current.getLatLngs();
@@ -239,6 +234,7 @@ export const usePolylineRoute = ({
           }
         });
 
+        // Evento dragend
         marker.on("dragend", (e) => {
           const newLatLng = e.target.getLatLng();
           const currentLatLngs = polylineRef.current.getLatLngs();
@@ -246,10 +242,13 @@ export const usePolylineRoute = ({
           newLatLngs[index] = newLatLng;
 
           updateRouteData(newLatLngs);
-          createMarkers(newLatLngs); // ← Recrear markers con nuevas posiciones
+          createMarkers(newLatLngs);
         });
 
+        // Evento dblclick para eliminar
         marker.on("dblclick", (e) => {
+          L.DomEvent.stopPropagation(e);
+
           if (latLngs.length <= 2) {
             alert("La ruta debe tener al menos 2 puntos");
             return;
@@ -274,30 +273,125 @@ export const usePolylineRoute = ({
     [mapInstance, updateRouteData]
   );
 
-  // ========== FUNCIONES DE DIBUJO ==========
+  // ========== 🆕 FUNCIÓN PARA AGREGAR VÉRTICE EN ARISTA ==========
+
+  const addVertexOnPolyline = useCallback(() => {
+    if (!polylineRef.current || !mapInstance) return;
+
+    console.log("🎯 Activando modo: Click en arista para agregar vértice");
+
+    // 🆕 Remover listener previo si existe
+    polylineRef.current.off("click");
+
+    // Hacer la polilínea clickeable
+    polylineRef.current.on("click", (e) => {
+      L.DomEvent.stopPropagation(e);
+
+      const clickedLatLng = e.latlng;
+      const currentLatLngs = polylineRef.current.getLatLngs();
+
+      console.log("📍 Click en arista. Buscando segmento más cercano...");
+
+      // Encontrar el segmento más cercano
+      let minDistance = Infinity;
+      let insertIndex = -1;
+
+      for (let i = 0; i < currentLatLngs.length - 1; i++) {
+        const start = currentLatLngs[i];
+        const end = currentLatLngs[i + 1];
+
+        // Calcular distancia perpendicular al segmento
+        const distance = getDistanceToSegment(clickedLatLng, start, end);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          insertIndex = i + 1;
+        }
+      }
+
+      if (insertIndex !== -1) {
+        console.log(`✅ Insertando vértice en posición ${insertIndex}`);
+
+        // Insertar el nuevo punto
+        const newLatLngs = [
+          ...currentLatLngs.slice(0, insertIndex),
+          clickedLatLng,
+          ...currentLatLngs.slice(insertIndex),
+        ];
+
+        // Actualizar polyline
+        polylineRef.current.setLatLngs(newLatLngs);
+
+        // Recrear markers
+        createMarkers(newLatLngs);
+
+        // Actualizar datos
+        updateRouteData(newLatLngs);
+
+        // 🆕 RE-ACTIVAR el click en la polyline después de agregar el vértice
+        addVertexOnPolyline();
+      }
+    });
+  }, [mapInstance, createMarkers, updateRouteData]);
+
+  // Función auxiliar: calcular distancia de un punto a un segmento
+  const getDistanceToSegment = (point, lineStart, lineEnd) => {
+    const x = point.lat;
+    const y = point.lng;
+    const x1 = lineStart.lat;
+    const y1 = lineStart.lng;
+    const x2 = lineEnd.lat;
+    const y2 = lineEnd.lng;
+
+    const A = x - x1;
+    const B = y - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
+
+    if (lenSq !== 0) param = dot / lenSq;
+
+    let xx, yy;
+
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    } else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    } else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+
+    const dx = x - xx;
+    const dy = y - yy;
+
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // ========== FINALIZAR DIBUJO ==========
 
   const finishDrawing = useCallback(() => {
     console.log("🎯 FINALIZANDO DIBUJO");
 
     if (!mapInstance) {
-      console.log("❌ Mapa no disponible");
       setDrawingMode(false);
       return;
     }
 
     const latLngs = polylineRef.current ? polylineRef.current.getLatLngs() : [];
-    console.log("📍 Puntos en la ruta al finalizar:", latLngs.length);
 
-    // VERIFICAR QUE LOS PUNTOS SE GUARDEN CORRECTAMENTE
     if (latLngs.length < 2) {
       alert("Necesitas al menos 2 puntos para crear una ruta");
       return;
     }
 
-    // FORZAR ACTUALIZACIÓN FINAL DE LOS DATOS
     updateRouteData(latLngs);
 
-    // Cambiar el estilo de la polyline
     if (polylineRef.current) {
       polylineRef.current.setStyle({
         color: getRouteColor(formData.tipo),
@@ -305,9 +399,11 @@ export const usePolylineRoute = ({
         opacity: 0.8,
         dashArray: null,
       });
+
+      // 🆕 ACTIVAR CLICK EN ARISTA (ya estaba activado, pero lo reforzamos)
+      addVertexOnPolyline();
     }
 
-    // Limpiar eventos
     if (mapClickHandlerRef.current) {
       mapInstance.off("click", mapClickHandlerRef.current);
       mapClickHandlerRef.current = null;
@@ -318,30 +414,25 @@ export const usePolylineRoute = ({
       escHandlerRef.current = null;
     }
 
-    // Cambiar estados
     setDrawingMode(false);
     setEditingMode(true);
     mapInstance.getContainer().style.cursor = "";
 
-    console.log("✅ Modo dibujo finalizado. Puntos siguen siendo editables");
-  }, [mapInstance, formData.tipo, updateRouteData]);
+    console.log("✅ Modo dibujo finalizado. Click en arista ACTIVADO");
+  }, [mapInstance, formData.tipo, updateRouteData, addVertexOnPolyline]);
+
+  // ========== ACTIVAR DIBUJO ==========
 
   const activateDrawing = useCallback(() => {
     console.log("🔥 ACTIVANDO MODO DIBUJO");
 
-    if (!mapInstance) {
-      console.log("❌ Mapa no disponible");
-      return;
-    }
+    if (!mapInstance) return;
 
-    // Limpiar primero
     clearMap();
 
-    // Establecer modo dibujo
     setDrawingMode(true);
     setEditingMode(false);
 
-    // Configurar el mapa
     mapInstance.getContainer().style.cursor = "crosshair";
 
     const polyline = L.polyline([], {
@@ -355,35 +446,30 @@ export const usePolylineRoute = ({
     polylineRef.current = polyline;
     currentPointsRef.current = [];
 
-    // Handler para clics en el mapa
+    // 🆕 ACTIVAR CLICK EN ARISTA DESDE EL INICIO
+    addVertexOnPolyline();
+
     const clickHandler = (e) => {
       const { lat, lng } = e.latlng;
-      console.log("🖱️ Clic en mapa - Agregando punto:", { lat, lng });
 
       if (polylineRef.current) {
         const currentLatLngs = polylineRef.current.getLatLngs();
         const newLatLngs = [...currentLatLngs, [lat, lng]];
 
-        // ACTUALIZAR POLYLINE
         polylineRef.current.setLatLngs(newLatLngs);
-
-        // ACTUALIZAR MARKERS - SIEMPRE ARRASTRABLES
         createMarkers(newLatLngs);
-
-        // ACTUALIZAR DATOS DE RUTA INMEDIATAMENTE
         updateRouteData(newLatLngs);
 
-        console.log("✅ Punto agregado. Total:", newLatLngs.length);
+        // 🆕 RE-ACTIVAR click en arista después de cada punto nuevo
+        addVertexOnPolyline();
       }
     };
 
     mapInstance.on("click", clickHandler);
     mapClickHandlerRef.current = clickHandler;
 
-    // Handler para tecla ESC
     const escHandler = (e) => {
       if (e.key === "Escape") {
-        console.log("⌨️ Tecla ESC presionada - Finalizando dibujo");
         finishDrawing();
         e.preventDefault();
         e.stopPropagation();
@@ -393,10 +479,17 @@ export const usePolylineRoute = ({
     document.addEventListener("keydown", escHandler);
     escHandlerRef.current = escHandler;
 
-    console.log("✅ Modo dibujo completamente activado - Puntos ARRASTRABLES");
-  }, [mapInstance, createMarkers, updateRouteData, clearMap, finishDrawing]);
+    console.log("✅ Modo dibujo activado - Click en arista HABILITADO");
+  }, [
+    mapInstance,
+    createMarkers,
+    updateRouteData,
+    clearMap,
+    finishDrawing,
+    addVertexOnPolyline,
+  ]);
 
-  // ========== FUNCIONES DE RUTA EXISTENTE ==========
+  // ========== CARGAR RUTA EXISTENTE ==========
 
   const loadExistingRoute = useCallback(
     (coordinates) => {
@@ -404,7 +497,6 @@ export const usePolylineRoute = ({
 
       clearMap();
 
-      // Convertir de [lng, lat] (GeoJSON) a [lat, lng] (Leaflet)
       const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
 
       const polyline = L.polyline(latLngs, {
@@ -417,13 +509,22 @@ export const usePolylineRoute = ({
       polylineRef.current = polyline;
       currentPointsRef.current = latLngs;
 
-      // CREAR MARKERS - SIEMPRE ARRASTRABLES
       createMarkers(latLngs);
+
+      // 🆕 ACTIVAR CLICK EN ARISTA
+      addVertexOnPolyline();
 
       setEditingMode(true);
       updateRouteData(latLngs);
     },
-    [mapInstance, formData.tipo, createMarkers, updateRouteData, clearMap]
+    [
+      mapInstance,
+      formData.tipo,
+      createMarkers,
+      updateRouteData,
+      clearMap,
+      addVertexOnPolyline,
+    ]
   );
 
   // ========== FUNCIONES AUXILIARES ==========
@@ -432,10 +533,6 @@ export const usePolylineRoute = ({
     if (!polylineRef.current) return;
 
     const currentLatLngs = polylineRef.current.getLatLngs();
-    console.log(
-      "🗑️ Eliminando último punto. Puntos actuales:",
-      currentLatLngs.length
-    );
 
     if (currentLatLngs.length <= 2) {
       alert("La ruta debe tener al menos 2 puntos");
@@ -445,12 +542,12 @@ export const usePolylineRoute = ({
     const newLatLngs = currentLatLngs.slice(0, -1);
     polylineRef.current.setLatLngs(newLatLngs);
 
-    // RECREAR MARKERS - SIEMPRE ARRASTRABLES
     createMarkers(newLatLngs);
     updateRouteData(newLatLngs);
 
-    console.log("✅ Último punto eliminado. Nuevo total:", newLatLngs.length);
-  }, [createMarkers, updateRouteData]);
+    // 🆕 RE-ACTIVAR click en arista
+    addVertexOnPolyline();
+  }, [createMarkers, updateRouteData, addVertexOnPolyline]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -464,11 +561,6 @@ export const usePolylineRoute = ({
   };
 
   const resetForm = useCallback(() => {
-    console.log(
-      "🔄 Reseteando formulario - PERO MANTENIENDO GEOMETRÍA SI EXISTE"
-    );
-
-    // Mantener la geometría si existe, solo resetear otros campos
     const geometriaToKeep = formData.geometria;
 
     setFormData({
@@ -484,101 +576,50 @@ export const usePolylineRoute = ({
     setDrawingMode(false);
     setEditingMode(!!geometriaToKeep);
     currentPointsRef.current = geometriaToKeep ? currentPointsRef.current : [];
-
-    console.log(
-      "✅ Formulario reseteado. Geometría mantenida:",
-      !!geometriaToKeep
-    );
   }, [formData.geometria, formData.distancia, formData.tiempo_estimado]);
 
   const validateRouteData = () => {
-    console.log("🔍 Validando datos de ruta...");
-    console.log("📊 Geometría:", formData.geometria);
-    console.log("🔢 Puntos actuales en ref:", currentPointsRef.current.length);
-
     if (!formData.geometria) {
-      console.log("❌ No hay geometría");
       alert("Debes dibujar una ruta en el mapa primero");
       return false;
     }
 
-    if (
-      !formData.geometria.coordinates ||
-      formData.geometria.coordinates.length < 2
-    ) {
-      console.log("❌ Menos de 2 puntos en geometría");
+    if (formData.geometria.coordinates.length < 2) {
       alert("La ruta debe tener al menos 2 puntos");
       return false;
     }
 
     if (formData.distancia === 0) {
-      console.log("❌ Distancia cero");
       alert("La distancia de la ruta no puede ser cero");
       return false;
     }
 
-    console.log(
-      "✅ Validación exitosa. Puntos a guardar:",
-      formData.geometria.coordinates.length
-    );
     return true;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("💾 INTENTANDO GUARDAR RUTA...");
-    console.log("📊 Estado actual del formulario:", formData);
-    console.log(
-      "📍 Puntos en polyline:",
-      polylineRef.current ? polylineRef.current.getLatLngs().length : 0
-    );
-    console.log(
-      "📍 Puntos en currentPointsRef:",
-      currentPointsRef.current.length
-    );
-
-    if (!validateRouteData()) {
-      return;
-    }
-
-    // VERIFICACIÓN FINAL - Asegurar que tenemos los datos correctos
-    const finalPoints = polylineRef.current
-      ? polylineRef.current.getLatLngs()
-      : currentPointsRef.current;
-    if (finalPoints.length !== formData.geometria.coordinates.length) {
-      console.warn("⚠️ Discrepancia en número de puntos. Recalculando...");
-      updateRouteData(finalPoints);
-    }
+    if (!validateRouteData()) return;
 
     const routeData = {
       ...formData,
       nombre: formData.nombre.trim() || generateDefaultName(),
-      // Asegurar que la geometría esté en formato correcto
       geometria: {
         type: "LineString",
         coordinates: formData.geometria.coordinates,
       },
-      // Asegurar que los valores numéricos sean correctos
       distancia: Math.max(1, formData.distancia),
       tiempo_estimado: Math.max(1, formData.tiempo_estimado),
-      // Timestamps para tracking
       creado: isEditing && route ? route.creado : new Date().toISOString(),
       actualizado: new Date().toISOString(),
     };
-
-    console.log("✅ DATOS FINALES A GUARDAR:", routeData);
-    console.log(
-      "🔢 NÚMERO DE PUNTOS EN GEOMETRÍA:",
-      routeData.geometria.coordinates.length
-    );
 
     onSave(routeData);
     resetForm();
   };
 
   const handleCancel = () => {
-    console.log("❌ Cancelando formulario");
     clearMap();
     resetForm();
     onCancel();
@@ -588,8 +629,6 @@ export const usePolylineRoute = ({
 
   useEffect(() => {
     if (isVisible && route && isEditing) {
-      console.log("📥 Cargando ruta existente para edición:", route);
-
       setFormData({
         nombre: route.nombre || "",
         tipo: route.tipo || "peatonal",
@@ -601,29 +640,12 @@ export const usePolylineRoute = ({
       });
 
       if (route.geometria && route.geometria.coordinates) {
-        console.log(
-          "📍 Cargando geometría existente con puntos:",
-          route.geometria.coordinates.length
-        );
         loadExistingRoute(route.geometria.coordinates);
       }
-    } else if (isVisible && !route) {
-      // SOLO resetear si es una nueva ruta y no tenemos geometría
-      if (!formData.geometria) {
-        console.log("🆕 Inicializando formulario para nueva ruta");
-        resetForm();
-      } else {
-        console.log("📊 Manteniendo datos existentes en formulario");
-      }
+    } else if (isVisible && !route && !formData.geometria) {
+      resetForm();
     }
-  }, [
-    isVisible,
-    route,
-    isEditing,
-    loadExistingRoute,
-    resetForm,
-    formData.geometria,
-  ]);
+  }, [isVisible, route, isEditing]);
 
   useEffect(() => {
     return () => {
@@ -631,12 +653,8 @@ export const usePolylineRoute = ({
     };
   }, [clearMap]);
 
-  // Cleanup cuando el componente se desmonta o se oculta
   useEffect(() => {
     if (!isVisible) {
-      console.log(
-        "👋 Ocultando formulario - limpiando mapa pero manteniendo estado"
-      );
       clearMap();
     }
   }, [isVisible, clearMap]);
