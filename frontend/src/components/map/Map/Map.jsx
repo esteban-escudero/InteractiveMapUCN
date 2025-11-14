@@ -134,7 +134,10 @@ function Map() {
   );
 
   // Utilidades de rutas
-  const { handleRouteClick } = useRouteUtils(mapInstance, mapState);
+  const { handleRouteClick, handleEditRoute } = useRouteUtils(
+    mapInstance,
+    mapState
+  );
 
   // Acciones del mapa
   const { handleLogout, handleSyncData, handleResetView } = useMapActions(
@@ -293,6 +296,7 @@ function Map() {
         buildings={buildings}
         loadBuildings={loadBuildings}
         handleRouteClick={handleRouteClick}
+        handleEditRoute={handleEditRoute}
       />
 
       {/* COMPONENTES DEL MAPA */}

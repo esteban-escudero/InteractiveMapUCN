@@ -14,6 +14,7 @@ export const MapLists = ({
   buildings,
   loadBuildings,
   handleRouteClick,
+  handleEditRoute,
 }) => {
   return (
     <>
@@ -53,7 +54,7 @@ export const MapLists = ({
       {mapState.showRouteList && (
         <RouteList
           routes={routes}
-          onEditRoute={mapState.handleEditRoute}
+          onEditRoute={handleEditRoute}
           onDeleteRoute={businessHandlers.handleDeleteRoute}
           onClose={mapState.handleCloseRouteList}
           onSelectRoute={handleRouteClick}
@@ -62,4 +63,3 @@ export const MapLists = ({
     </>
   );
 };
-
