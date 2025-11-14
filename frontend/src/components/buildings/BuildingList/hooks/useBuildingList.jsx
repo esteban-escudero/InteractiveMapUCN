@@ -6,6 +6,7 @@ export const useBuildingList = ({
   buildings,
   onDeleteBuilding,
   onEditRoom,
+  onEditBuilding,
   onCreateRooms,
   onDeleteRoom,
   onReload,
@@ -65,6 +66,13 @@ export const useBuildingList = ({
     }
   };
 
+  const handleEditBuilding = (building) => {
+    if (onEditBuilding) {
+      onEditBuilding(building);
+      onClose(); // ← Esto cierra el menú de gestión
+    }
+  };
+
   return {
     deletingId,
     expandedBuilding,
@@ -76,5 +84,6 @@ export const useBuildingList = ({
     handleCreateRooms,
     handleEditRoom,
     handleDeleteRoom,
+    handleEditBuilding,
   };
 };

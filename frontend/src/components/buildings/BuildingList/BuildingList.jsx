@@ -31,10 +31,12 @@ function BuildingList({
     handleCreateRooms,
     handleEditRoom,
     handleDeleteRoom,
+    handleEditBuilding,
   } = useBuildingList({
     buildings,
     onDeleteBuilding,
     onEditRoom,
+    onEditBuilding,
     onCreateRooms,
     onDeleteRoom,
     onReload,
@@ -75,7 +77,7 @@ function BuildingList({
                     (building.id || building._id || building.id_edificio)
                   }
                   deletingRoomId={deletingRoomId}
-                  onEditBuilding={onEditBuilding}
+                  onEditBuilding={handleEditBuilding}
                   onDeleteBuilding={handleDeleteBuilding}
                   onToggleExpansion={toggleBuildingExpansion}
                   onCreateRooms={handleCreateRooms}
