@@ -1,6 +1,3 @@
-/**
- * Componente que agrupa todos los formularios del mapa
- */
 import React from "react";
 import { BuildingForm } from "../../../buildings/index.js";
 import { RouteFormPolyline } from "../../../routes/index.js";
@@ -12,6 +9,7 @@ export const MapForms = ({
   mapInstance,
   isRouteDrawingActive,
   setIsRouteDrawingActive,
+  showUINotification, // ⭐ AGREGAR AQUÍ
 }) => {
   return (
     <>
@@ -44,6 +42,7 @@ export const MapForms = ({
         route={mapState.editingRoute}
         isEditing={!!mapState.editingRoute}
         mapInstance={mapInstance}
+        showUINotification={showUINotification} // ⭐ PASAR AQUÍ
         onSelectionStart={() => {
           console.log(
             "🟡 Iniciando selección - DESACTIVANDO useMapClickHandler"
@@ -60,4 +59,3 @@ export const MapForms = ({
     </>
   );
 };
-

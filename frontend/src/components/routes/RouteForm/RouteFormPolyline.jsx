@@ -12,6 +12,7 @@ const RouteFormPolyline = ({
   mapInstance,
   onSelectionStart,
   onSelectionEnd,
+  showUINotification,
 }) => {
   const {
     formData,
@@ -32,6 +33,7 @@ const RouteFormPolyline = ({
     isVisible,
     route,
     isEditing,
+    showUINotification,
   });
 
   // Notificar al padre cuando empieza/termina la selección

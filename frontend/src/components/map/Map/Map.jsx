@@ -285,6 +285,7 @@ function Map() {
         mapInstance={mapInstance}
         isRouteDrawingActive={isRouteDrawingActive}
         setIsRouteDrawingActive={setIsRouteDrawingActive}
+        showUINotification={showUINotification}
       />
 
       {/* LISTAS Y GESTIÓN */}

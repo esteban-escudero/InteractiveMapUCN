@@ -9,7 +9,13 @@ export const usePolylineRoute = ({
   isVisible,
   route,
   isEditing,
+  showUINotification, // ⭐ AGREGAR
 }) => {
+  console.log("🔍 showUINotification disponible:", typeof showUINotification);
+  console.log(
+    "🔍 showUINotification es función:",
+    typeof showUINotification === "function"
+  );
   const [formData, setFormData] = useState({
     nombre: "",
     tipo: "peatonal",
@@ -47,7 +53,6 @@ export const usePolylineRoute = ({
     return `Ruta ${formData.tipo} ${now.toLocaleDateString("es-ES")}`;
   };
 
-  // CÁLCULO DE DISTANCIA
   const calculateRouteLength = (latLngs) => {
     if (latLngs.length < 2) return 0;
 
@@ -117,8 +122,6 @@ export const usePolylineRoute = ({
     }
   }, [mapInstance]);
 
-  // ========== LIMPIEZA ==========
-
   const clearMap = useCallback(() => {
     console.log("🗑️ LIMPIANDO MAPA");
 
@@ -161,8 +164,6 @@ export const usePolylineRoute = ({
     console.log("✅ Mapa limpiado");
   }, [mapInstance, removeGhostMarker]);
 
-  // ========== ACTUALIZACIÓN DE DATOS ==========
-
   const updateRouteData = useCallback((latLngs) => {
     console.log("📊 Actualizando datos con", latLngs.length, "puntos");
 
@@ -202,8 +203,6 @@ export const usePolylineRoute = ({
     }));
   }, []);
 
-  // ========== MARCADORES ==========
-
   const createMarkerIcon = (index, total) => {
     const isFirst = index === 0;
     const isLast = index === total - 1;
@@ -233,18 +232,10 @@ export const usePolylineRoute = ({
     });
   };
 
-  // ========== BUSCA LA FUNCIÓN createMarkers EN usePolylineRoute.js ==========
-  // Aproximadamente línea 250-330
-  // REEMPLAZA LA FUNCIÓN COMPLETA con esta versión mejorada:
-
-  // ========== SOLUCIÓN: Remover addVertexOnPolyline de createMarkers ==========
-  // En usePolylineRoute.js, REEMPLAZA la función createMarkers con esta versión:
-
   const createMarkers = useCallback(
     (latLngs) => {
       if (!mapInstance) return;
 
-      // Limpiar markers existentes
       markersRef.current.forEach((marker) => {
         if (mapInstance.hasLayer(marker)) {
           mapInstance.removeLayer(marker);
@@ -252,14 +243,12 @@ export const usePolylineRoute = ({
       });
       markersRef.current = [];
 
-      // Crear nuevos markers
       latLngs.forEach((latLng, index) => {
         const marker = L.marker(latLng, {
           icon: createMarkerIcon(index, latLngs.length),
           draggable: true,
         }).addTo(mapInstance);
 
-        // Evento drag
         marker.on("drag", (e) => {
           const newLatLng = e.target.getLatLng();
           const currentLatLngs = polylineRef.current.getLatLngs();
@@ -271,7 +260,6 @@ export const usePolylineRoute = ({
           }
         });
 
-        // Evento dragend
         marker.on("dragend", (e) => {
           const newLatLng = e.target.getLatLng();
           const currentLatLngs = polylineRef.current.getLatLngs();
@@ -282,7 +270,6 @@ export const usePolylineRoute = ({
           createMarkers(newLatLngs);
         });
 
-        // ⭐⭐⭐ DOBLE CLICK PARA ELIMINAR
         marker.on("dblclick", (e) => {
           L.DomEvent.stopPropagation(e);
 
@@ -290,64 +277,68 @@ export const usePolylineRoute = ({
 
           const currentLatLngs = polylineRef.current.getLatLngs();
 
-          // Validar que haya al menos 2 puntos después de eliminar
           if (currentLatLngs.length <= 2) {
-            alert(
-              "⚠️ La ruta debe tener al menos 2 puntos.\n\nNo puedes eliminar más puntos."
-            );
-            console.log(
-              "❌ No se puede eliminar: se necesitan mínimo 2 puntos"
-            );
+            if (showUINotification) {
+              showUINotification(
+                "La ruta debe tener al menos 2 puntos. No puedes eliminar más puntos.",
+                "warning"
+              );
+            }
             return;
           }
 
-          // Prevenir eliminar primer o último punto
           if (index === 0) {
-            alert(
-              "⚠️ No puedes eliminar el punto de inicio.\n\nArrástalo para cambiar su posición."
-            );
-            console.log("❌ No se puede eliminar el punto de inicio");
+            if (showUINotification) {
+              showUINotification(
+                "No puedes eliminar el punto de inicio. Arrástalo para cambiar su posición.",
+                "warning"
+              );
+            }
             return;
           }
 
           if (index === currentLatLngs.length - 1) {
-            alert(
-              "⚠️ No puedes eliminar el punto de fin.\n\nArrástalo para cambiar su posición."
-            );
-            console.log("❌ No se puede eliminar el punto de fin");
+            if (showUINotification) {
+              showUINotification(
+                "No puedes eliminar el punto de fin. Arrástalo para cambiar su posición.",
+                "warning"
+              );
+            }
             return;
           }
 
-          // Eliminar el punto
-          console.log(
-            `✅ Eliminando punto ${index + 1} de ${currentLatLngs.length}`
-          );
           const newLatLngs = currentLatLngs.filter((_, i) => i !== index);
 
           polylineRef.current.setLatLngs(newLatLngs);
           updateRouteData(newLatLngs);
           createMarkers(newLatLngs);
 
+          if (showUINotification) {
+            showUINotification(
+              `Punto eliminado correctamente. Quedan ${newLatLngs.length} puntos`,
+              "success"
+            );
+          }
+
           console.log(`✅ Punto eliminado. Quedan ${newLatLngs.length} puntos`);
         });
 
-        // Tooltip informativo
         marker.bindTooltip(
           `<div style="text-align: center;">
-      <strong>${
-        index === 0
-          ? "🚩 Inicio"
-          : index === latLngs.length - 1 // ✅ CORREGIDO
-          ? "🎯 Fin"
-          : `📍 Punto ${index + 1}`
-      }</strong><br/>
-<small>Arrastra para mover</small><br/>
-<small>Doble click para ${
-            index === 0 || index === latLngs.length - 1 // ✅ CORREGIDO
-              ? '<span style="color: #e74c3c;">NO</span> eliminar'
-              : "eliminar"
-          }</small>
-        </div>`,
+            <strong>${
+              index === 0
+                ? "🚩 Inicio"
+                : index === latLngs.length - 1
+                ? "🎯 Fin"
+                : `📍 Punto ${index + 1}`
+            }</strong><br/>
+            <small>Arrastra para mover</small><br/>
+            <small>Doble click para ${
+              index === 0 || index === latLngs.length - 1
+                ? '<span style="color: #e74c3c;">NO</span> eliminar'
+                : "eliminar"
+            }</small>
+          </div>`,
           {
             permanent: false,
             direction: "top",
@@ -361,10 +352,8 @@ export const usePolylineRoute = ({
 
       console.log(`✅ ${latLngs.length} marcadores creados`);
     },
-    [mapInstance, updateRouteData] // ⭐ Removido addVertexOnPolyline de las dependencias
+    [mapInstance, updateRouteData, showUINotification]
   );
-
-  // ========== AGREGAR VÉRTICE EN ARISTA ==========
 
   const addVertexOnPolyline = useCallback(() => {
     if (!polylineRef.current || !mapInstance) return;
@@ -538,8 +527,6 @@ export const usePolylineRoute = ({
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  // ========== FINALIZAR DIBUJO ==========
-
   const finishDrawing = useCallback(() => {
     console.log("🎯 FINALIZANDO DIBUJO");
 
@@ -551,7 +538,12 @@ export const usePolylineRoute = ({
     const latLngs = polylineRef.current ? polylineRef.current.getLatLngs() : [];
 
     if (latLngs.length < 2) {
-      alert("Necesitas al menos 2 puntos para crear una ruta");
+      if (showUINotification) {
+        showUINotification(
+          "Necesitas al menos 2 puntos para crear una ruta",
+          "warning"
+        );
+      }
       return;
     }
 
@@ -590,16 +582,14 @@ export const usePolylineRoute = ({
     updateRouteData,
     addVertexOnPolyline,
     removeGhostMarker,
+    showUINotification,
   ]);
-
-  // ========== ⭐ ACTIVAR DIBUJO (MEJORADO PARA EDICIÓN) ==========
 
   const activateDrawing = useCallback(() => {
     console.log("🔥 ACTIVANDO MODO DIBUJO");
 
     if (!mapInstance) return;
 
-    // ⭐ SI ESTAMOS EN MODO EDICIÓN Y YA HAY PUNTOS, NO LIMPIAR
     const existingLatLngs = polylineRef.current
       ? polylineRef.current.getLatLngs()
       : [];
@@ -612,7 +602,6 @@ export const usePolylineRoute = ({
         "puntos existentes"
       );
 
-      // Solo cambiar el estilo a modo dibujo
       if (polylineRef.current) {
         polylineRef.current.setStyle({
           color: "#3388ff",
@@ -642,7 +631,6 @@ export const usePolylineRoute = ({
 
     mapInstance.getContainer().style.cursor = "crosshair";
 
-    // ACTIVAR CLICK EN ARISTA
     addVertexOnPolyline();
 
     const clickHandler = (e) => {
@@ -684,15 +672,12 @@ export const usePolylineRoute = ({
     addVertexOnPolyline,
   ]);
 
-  // ========== CARGAR RUTA EXISTENTE ==========
-
   const loadExistingRoute = useCallback(
     (coordinates) => {
       console.log("📍 Cargando ruta existente:", coordinates.length, "puntos");
 
       if (!mapInstance || coordinates.length < 2) return;
 
-      // ⭐ NO LIMPIAR EL MAPA - solo actualizar la polyline
       if (polylineRef.current) {
         mapInstance.removeLayer(polylineRef.current);
       }
@@ -726,15 +711,15 @@ export const usePolylineRoute = ({
     ]
   );
 
-  // ========== FUNCIONES AUXILIARES ==========
-
   const removeLastPoint = useCallback(() => {
     if (!polylineRef.current) return;
 
     const currentLatLngs = polylineRef.current.getLatLngs();
 
     if (currentLatLngs.length <= 2) {
-      alert("La ruta debe tener al menos 2 puntos");
+      if (showUINotification) {
+        showUINotification("La ruta debe tener al menos 2 puntos", "warning");
+      }
       return;
     }
 
@@ -743,9 +728,15 @@ export const usePolylineRoute = ({
 
     createMarkers(newLatLngs);
     updateRouteData(newLatLngs);
-
     addVertexOnPolyline();
-  }, [createMarkers, updateRouteData, addVertexOnPolyline]);
+
+    if (showUINotification) {
+      showUINotification(
+        `Último punto eliminado. Quedan ${newLatLngs.length} puntos`,
+        "success"
+      );
+    }
+  }, [createMarkers, updateRouteData, addVertexOnPolyline, showUINotification]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -776,17 +767,29 @@ export const usePolylineRoute = ({
 
   const validateRouteData = () => {
     if (!formData.geometria) {
-      alert("Debes dibujar una ruta en el mapa primero");
+      if (showUINotification) {
+        showUINotification(
+          "Debes dibujar una ruta en el mapa primero",
+          "warning"
+        );
+      }
       return false;
     }
 
     if (formData.geometria.coordinates.length < 2) {
-      alert("La ruta debe tener al menos 2 puntos");
+      if (showUINotification) {
+        showUINotification("La ruta debe tener al menos 2 puntos", "warning");
+      }
       return false;
     }
 
     if (formData.distancia === 0) {
-      alert("La distancia de la ruta no puede ser cero");
+      if (showUINotification) {
+        showUINotification(
+          "La distancia de la ruta no puede ser cero",
+          "warning"
+        );
+      }
       return false;
     }
 
@@ -822,14 +825,10 @@ export const usePolylineRoute = ({
     onCancel();
   };
 
-  // ========== EFFECTS ==========
-
-  // ⭐ EFFECT PRINCIPAL - CARGAR RUTA EN EDICIÓN
   useEffect(() => {
     if (isVisible && route && isEditing) {
       console.log("📝 MODO EDICIÓN:", route.nombre);
 
-      // ⭐ CARGAR TODOS LOS DATOS
       setFormData({
         nombre: route.nombre || "",
         tipo: route.tipo || "peatonal",
@@ -840,14 +839,12 @@ export const usePolylineRoute = ({
         prioridad: route.prioridad || "media",
       });
 
-      // ⭐ CARGAR GEOMETRÍA EN EL MAPA
       if (route.geometria?.coordinates?.length >= 2) {
         console.log(
           "🗺️ Cargando geometría:",
           route.geometria.coordinates.length,
           "puntos"
         );
-        // Pequeño delay para asegurar que el mapa esté listo
         setTimeout(() => {
           loadExistingRoute(route.geometria.coordinates);
         }, 100);
@@ -858,14 +855,12 @@ export const usePolylineRoute = ({
     }
   }, [isVisible, route, isEditing]);
 
-  // Cleanup al desmontar
   useEffect(() => {
     return () => {
       clearMap();
     };
   }, []);
 
-  // Cleanup al ocultar
   useEffect(() => {
     if (!isVisible) {
       clearMap();
