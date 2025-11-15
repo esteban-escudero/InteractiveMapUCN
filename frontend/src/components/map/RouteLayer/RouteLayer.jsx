@@ -10,12 +10,11 @@ const RouteLayer = ({
   originFilter,
   destinationFilter,
   selectedRoute,
-  editingRoute, // ⭐ NUEVO: Recibir la ruta que se está editando
+  editingRoute,
 }) => {
   const routeLayerRef = useRef(null);
   const markersLayerRef = useRef(null);
 
-  // Función para obtener estilos según tipo de ruta
   const getRouteStyle = (route) => {
     const hasFilters = originFilter && destinationFilter;
 
@@ -59,7 +58,6 @@ const RouteLayer = ({
     };
   };
 
-  // Función para generar contenido del tooltip
   const getTooltipContent = (route) => {
     let content = `
       <div class="route-tooltip">
@@ -83,25 +81,18 @@ const RouteLayer = ({
     return content;
   };
 
-  // USEFFECT PRINCIPAL
   useEffect(() => {
-    console.log("RouteLayer - Mostrando rutas:", routes?.length || 0);
+    console.log("RouteLayer - Total rutas:", routes?.length || 0);
 
-    // ⭐ Log para debugging
     if (editingRoute) {
-      console.log(
-        "🔧 Ruta en edición:",
-        editingRoute.nombre,
-        "ID:",
-        editingRoute.id
-      );
+      console.log("🔧 Modo edición activo - Ocultando TODAS las rutas");
+      console.log("✏️ Editando:", editingRoute.nombre, "ID:", editingRoute.id);
     }
 
     if (!routes || !Array.isArray(routes) || !mapInstance) {
       return;
     }
 
-    // Inicializar capas
     if (!routeLayerRef.current) {
       routeLayerRef.current = L.layerGroup().addTo(mapInstance);
     }
@@ -109,31 +100,28 @@ const RouteLayer = ({
       markersLayerRef.current = L.layerGroup().addTo(mapInstance);
     }
 
-    // Limpiar capas anteriores
     routeLayerRef.current.clearLayers();
     markersLayerRef.current.clearLayers();
+
+    // ⭐ SI ESTAMOS EDITANDO, NO MOSTRAR NINGUNA RUTA
+    if (editingRoute) {
+      console.log("🚫 Ocultando todas las rutas durante edición");
+      return;
+    }
 
     if (routes.length === 0) {
       console.log("No hay rutas para mostrar");
       return;
     }
 
-    // Procesar cada ruta
+    // Procesar cada ruta (solo cuando NO estamos editando)
     routes.forEach((route) => {
-      // ⭐ OCULTAR LA RUTA QUE SE ESTÁ EDITANDO
-      if (editingRoute && route.id === editingRoute.id) {
-        console.log("⏭️ Saltando ruta en edición:", route.nombre);
-        return; // Saltar esta ruta
-      }
-
       if (!route || !route.geometria || !route.geometria.coordinates) {
         console.warn("Ruta sin geometría válida:", route);
         return;
       }
 
       const coordinates = route.geometria.coordinates;
-
-      // Convertir coordenadas [lng, lat] a [lat, lng] para Leaflet
       const latLngs = coordinates.map((coord) => [coord[1], coord[0]]);
 
       if (latLngs.length < 2) {
@@ -141,11 +129,9 @@ const RouteLayer = ({
         return;
       }
 
-      // Crear polyline
       const polylineOptions = getRouteStyle(route);
       const polyline = L.polyline(latLngs, polylineOptions);
 
-      // Tooltip
       const tooltipContent = getTooltipContent(route);
       polyline.bindTooltip(tooltipContent, {
         permanent: false,
@@ -153,7 +139,6 @@ const RouteLayer = ({
         className: "custom-tooltip",
       });
 
-      // Evento click
       polyline.on("click", (e) => {
         L.DomEvent.stopPropagation(e);
         console.log("Ruta clickeada:", route.nombre);
@@ -162,7 +147,6 @@ const RouteLayer = ({
         }
       });
 
-      // Resaltar ruta seleccionada
       if (selectedRoute && selectedRoute.id === route.id) {
         polyline.setStyle({
           color: "#e67e22",
@@ -172,10 +156,8 @@ const RouteLayer = ({
         });
       }
 
-      // Agregar al mapa
       routeLayerRef.current.addLayer(polyline);
 
-      // Agregar marcadores de inicio/fin si hay filtros
       if (originFilter && destinationFilter) {
         const startCoords = latLngs[0];
         const startMarker = L.marker(startCoords, {
@@ -206,15 +188,7 @@ const RouteLayer = ({
       }
     });
 
-    // ⭐ Contar rutas mostradas excluyendo la que está en edición
-    const routesShown = routes.filter(
-      (r) => !editingRoute || r.id !== editingRoute.id
-    ).length;
-    console.log(
-      `RouteLayer - ${routesShown} rutas mostradas (${
-        editingRoute ? "1 oculta por edición" : "0 ocultas"
-      })`
-    );
+    console.log(`✅ ${routes.length} rutas mostradas`);
   }, [
     mapInstance,
     routes,
@@ -222,10 +196,9 @@ const RouteLayer = ({
     selectedRoute,
     originFilter,
     destinationFilter,
-    editingRoute, // ⭐ AGREGAR DEPENDENCIA
+    editingRoute,
   ]);
 
-  // Cleanup
   useEffect(() => {
     return () => {
       if (routeLayerRef.current && mapInstance) {
