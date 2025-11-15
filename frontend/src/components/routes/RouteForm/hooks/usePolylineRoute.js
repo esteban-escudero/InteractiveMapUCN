@@ -233,6 +233,13 @@ export const usePolylineRoute = ({
     });
   };
 
+  // ========== BUSCA LA FUNCIÓN createMarkers EN usePolylineRoute.js ==========
+  // Aproximadamente línea 250-330
+  // REEMPLAZA LA FUNCIÓN COMPLETA con esta versión mejorada:
+
+  // ========== SOLUCIÓN: Remover addVertexOnPolyline de createMarkers ==========
+  // En usePolylineRoute.js, REEMPLAZA la función createMarkers con esta versión:
+
   const createMarkers = useCallback(
     (latLngs) => {
       if (!mapInstance) return;
@@ -275,32 +282,86 @@ export const usePolylineRoute = ({
           createMarkers(newLatLngs);
         });
 
-        // Evento dblclick para eliminar
+        // ⭐⭐⭐ DOBLE CLICK PARA ELIMINAR
         marker.on("dblclick", (e) => {
           L.DomEvent.stopPropagation(e);
 
-          if (latLngs.length <= 2) {
-            alert("La ruta debe tener al menos 2 puntos");
-            return;
-          }
-
-          if (index === 0 || index === latLngs.length - 1) {
-            alert("No puedes eliminar el punto de inicio o fin");
-            return;
-          }
+          console.log(`🗑️ Doble click en punto ${index + 1}`);
 
           const currentLatLngs = polylineRef.current.getLatLngs();
-          const newLatLngs = currentLatLngs.filter((_, i) => i !== index);
-          polylineRef.current.setLatLngs(newLatLngs);
 
+          // Validar que haya al menos 2 puntos después de eliminar
+          if (currentLatLngs.length <= 2) {
+            alert(
+              "⚠️ La ruta debe tener al menos 2 puntos.\n\nNo puedes eliminar más puntos."
+            );
+            console.log(
+              "❌ No se puede eliminar: se necesitan mínimo 2 puntos"
+            );
+            return;
+          }
+
+          // Prevenir eliminar primer o último punto
+          if (index === 0) {
+            alert(
+              "⚠️ No puedes eliminar el punto de inicio.\n\nArrástalo para cambiar su posición."
+            );
+            console.log("❌ No se puede eliminar el punto de inicio");
+            return;
+          }
+
+          if (index === currentLatLngs.length - 1) {
+            alert(
+              "⚠️ No puedes eliminar el punto de fin.\n\nArrástalo para cambiar su posición."
+            );
+            console.log("❌ No se puede eliminar el punto de fin");
+            return;
+          }
+
+          // Eliminar el punto
+          console.log(
+            `✅ Eliminando punto ${index + 1} de ${currentLatLngs.length}`
+          );
+          const newLatLngs = currentLatLngs.filter((_, i) => i !== index);
+
+          polylineRef.current.setLatLngs(newLatLngs);
           updateRouteData(newLatLngs);
           createMarkers(newLatLngs);
+
+          console.log(`✅ Punto eliminado. Quedan ${newLatLngs.length} puntos`);
         });
+
+        // Tooltip informativo
+        marker.bindTooltip(
+          `<div style="text-align: center;">
+      <strong>${
+        index === 0
+          ? "🚩 Inicio"
+          : index === latLngs.length - 1 // ✅ CORREGIDO
+          ? "🎯 Fin"
+          : `📍 Punto ${index + 1}`
+      }</strong><br/>
+<small>Arrastra para mover</small><br/>
+<small>Doble click para ${
+            index === 0 || index === latLngs.length - 1 // ✅ CORREGIDO
+              ? '<span style="color: #e74c3c;">NO</span> eliminar'
+              : "eliminar"
+          }</small>
+        </div>`,
+          {
+            permanent: false,
+            direction: "top",
+            className: "custom-tooltip",
+            offset: [0, -15],
+          }
+        );
 
         markersRef.current.push(marker);
       });
+
+      console.log(`✅ ${latLngs.length} marcadores creados`);
     },
-    [mapInstance, updateRouteData]
+    [mapInstance, updateRouteData] // ⭐ Removido addVertexOnPolyline de las dependencias
   );
 
   // ========== AGREGAR VÉRTICE EN ARISTA ==========
