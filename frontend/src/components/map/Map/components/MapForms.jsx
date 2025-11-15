@@ -44,15 +44,11 @@ export const MapForms = ({
         mapInstance={mapInstance}
         showUINotification={showUINotification} // ⭐ PASAR AQUÍ
         onSelectionStart={() => {
-          console.log(
-            "🟡 Iniciando selección - DESACTIVANDO useMapClickHandler"
-          );
+          console.log("Iniciando selección - DESACTIVANDO useMapClickHandler");
           setIsRouteDrawingActive(true);
         }}
         onSelectionEnd={() => {
-          console.log(
-            "🟢 Finalizando selección - REACTIVANDO useMapClickHandler"
-          );
+          console.log("Finalizando selección - REACTIVANDO useMapClickHandler");
           setIsRouteDrawingActive(false);
         }}
       />

@@ -2,15 +2,15 @@ import { useMemo } from "react";
 
 export const useBuildingFilters = (buildings, filters) => {
   const filteredBuildings = useMemo(() => {
-    console.log("🔍 Aplicando filtros:", filters);
-    console.log("🏢 Edificios disponibles:", buildings.length);
+    console.log("Aplicando filtros:", filters);
+    console.log("Edificios disponibles:", buildings.length);
 
     // Mostrar tipos de edificios disponibles para debug
     const tiposDisponibles = [...new Set(buildings.map((b) => b.tipo))];
-    console.log("📋 Tipos de edificios disponibles:", tiposDisponibles);
+    console.log("Tipos de edificios disponibles:", tiposDisponibles);
 
     if (!filters.category && !filters.origin && !filters.destination) {
-      console.log("✅ Sin filtros - mostrando todos los edificios");
+      console.log("Sin filtros - mostrando todos los edificios");
       return buildings;
     }
 
@@ -39,7 +39,7 @@ export const useBuildingFilters = (buildings, filters) => {
 
       if (matches && filters.category) {
         console.log(
-          `✅ "${building.nombre}" (tipo: ${building.tipo}) coincide con categoría: ${filters.category}`
+          `"${building.nombre}" (tipo: ${building.tipo}) coincide con categoría: ${filters.category}`
         );
       }
 

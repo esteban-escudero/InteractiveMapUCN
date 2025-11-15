@@ -58,7 +58,7 @@ const RouteList = ({
         break;
       case "delete":
         if (onDeleteRoute) {
-          console.log("🗑️ Llamando a onDeleteRoute");
+          console.log("Llamando a onDeleteRoute");
           onDeleteRoute(route);
         }
         break;

@@ -79,7 +79,7 @@ const BuildingRenderer = ({
           ) {
             estadoColor = "#e74c3c";
             estadoText = "Inactivo";
-            estadoIcon = "🔴";
+            estadoIcon = "";
           } else if (
             building.estado === "mantenimiento" ||
             building.estado === "Mantenimiento"

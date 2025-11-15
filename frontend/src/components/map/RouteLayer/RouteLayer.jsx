@@ -18,24 +18,7 @@ const RouteLayer = ({
   const getRouteStyle = (route) => {
     const hasFilters = originFilter && destinationFilter;
 
-    const baseStyle = {
-      opacity: 0.9,
-      lineCap: "round",
-      lineJoin: "round",
-      className: "route-line",
-    };
-
-    if (!hasFilters) {
-      return {
-        ...baseStyle,
-        color: "#9b59b6",
-        weight: 4,
-        opacity: 0.7,
-        dashArray: null,
-        className: "route-no-filter route-line",
-      };
-    }
-
+    // Definir colores por tipo de ruta
     const typeColors = {
       peatonal: "#27ae60",
       accesible: "#3498db",
@@ -46,11 +29,31 @@ const RouteLayer = ({
     };
 
     const routeType = route.tipo?.toLowerCase() || "default";
-    const baseColor = typeColors[routeType] || typeColors.default;
+    const routeColor = typeColors[routeType] || typeColors.default;
 
+    const baseStyle = {
+      opacity: 0.9,
+      lineCap: "round",
+      lineJoin: "round",
+      className: "route-line",
+    };
+
+    // Ajustar estilo según si hay filtros o no
+    if (!hasFilters) {
+      return {
+        ...baseStyle,
+        color: routeColor,
+        weight: 4,
+        opacity: 0.7,
+        dashArray: null,
+        className: `route-${routeType} route-line`,
+      };
+    }
+
+    // Con filtros activos, líneas más gruesas
     return {
       ...baseStyle,
-      color: baseColor,
+      color: routeColor,
       weight: 6,
       opacity: 0.8,
       dashArray: null,
@@ -188,7 +191,7 @@ const RouteLayer = ({
       }
     });
 
-    console.log(`✅ ${routes.length} rutas mostradas`);
+    console.log(`${routes.length} rutas mostradas con sus colores`);
   }, [
     mapInstance,
     routes,

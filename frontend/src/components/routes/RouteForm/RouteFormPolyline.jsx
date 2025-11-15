@@ -39,14 +39,14 @@ const RouteFormPolyline = ({
   // Notificar al padre cuando empieza/termina la selección
   useEffect(() => {
     if (drawingMode && onSelectionStart) {
-      console.log("🟡 Notificando INICIO de selección al padre");
+      console.log(" Notificando INICIO de selección al padre");
       onSelectionStart();
     }
   }, [drawingMode, onSelectionStart]);
 
   useEffect(() => {
     if (!drawingMode && onSelectionEnd) {
-      console.log("🟡 Notificando FIN de selección al padre");
+      console.log(" Notificando FIN de selección al padre");
       onSelectionEnd();
     }
   }, [drawingMode, onSelectionEnd]);
@@ -66,39 +66,35 @@ const RouteFormPolyline = ({
     };
 
     if (drawingMode) {
-      console.log("🟡 Agregando listener de teclado para ESC");
+      console.log(" Agregando listener de teclado para ESC");
       document.addEventListener("keydown", handleGlobalKeyDown);
     }
 
     return () => {
-      console.log("🟡 Removiendo listener de teclado");
+      console.log(" Removiendo listener de teclado");
       document.removeEventListener("keydown", handleGlobalKeyDown);
     };
   }, [drawingMode, finishDrawing]);
 
   // 🔹 OCULTAR FORMULARIO DURANTE SELECCIÓN ACTIVA
   if (drawingMode) {
-    console.log("🔴🔴🔴 FORMULARIO OCULTO - drawingMode activo");
+    console.log("FORMULARIO OCULTO - drawingMode activo");
     return null;
   }
 
   // Ocultar si no es visible
   if (!isVisible) {
-    console.log("🔴 Formulario OCULTO - isVisible es false");
+    console.log("Formulario OCULTO - isVisible es false");
     return null;
   }
 
+  //
   console.log(
-    "🟢🟢🟢 FORMULARIO VISIBLE - drawingMode:",
+    "FORMULARIO VISIBLE - drawingMode:",
     drawingMode,
     "editingMode:",
     editingMode
   );
-
-  // DEBUG: Verificar estado del botón guardar
-  console.log("🔍 ESTADO DEL BOTÓN GUARDAR:");
-  console.log("📊 formData.geometria:", formData.geometria);
-  console.log("📍 ¿Puede guardar?:", !!formData.geometria);
 
   return (
     <div className="route-form-overlay">

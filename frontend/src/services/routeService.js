@@ -42,7 +42,7 @@ export const routeService = {
       const response = await api.post("/routes", routeToSave);
 
       if (response.success !== false) {
-        console.log("✅ Ruta guardada en backend:", response.data);
+        console.log("Ruta guardada en backend:", response.data);
         return response.data || response;
       } else {
         throw new Error(response.message || "Error creando ruta");

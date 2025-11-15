@@ -55,7 +55,7 @@ else
     echo -e "\n${YELLOW}⚠${NC} Docker no encontrado. Necesitarás PostgreSQL instalado localmente."
 fi
 
-echo -e "\n${GREEN}✅ Configuración completada!${NC}"
+echo -e "\n${GREEN}Configuración completada!${NC}"
 echo -e "\n${YELLOW}Próximos pasos:${NC}"
 echo "1. Configura las variables de entorno en backend/.env"
 echo "2. Inicia PostgreSQL (docker-compose up -d o local)"

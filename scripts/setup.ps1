@@ -51,7 +51,7 @@ try {
     Write-Host "`n⚠ Docker no encontrado. Necesitarás PostgreSQL instalado localmente." -ForegroundColor Yellow
 }
 
-Write-Host "`n✅ Configuración completada!" -ForegroundColor Green
+Write-Host "`nConfiguración completada!" -ForegroundColor Green
 Write-Host "`nPróximos pasos:" -ForegroundColor Yellow
 Write-Host "1. Configura las variables de entorno en backend/.env"
 Write-Host "2. Inicia PostgreSQL (docker-compose up -d o local)"

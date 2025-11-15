@@ -20,18 +20,18 @@ export const useRouteHandlers = (
   const handleSaveRoute = useCallback(
     async (routeData) => {
       try {
-        console.log("🔍 INICIANDO GUARDADO DE RUTA - DEBUG:");
-        console.log("📊 Datos recibidos:", routeData);
-        console.log("📍 Geometría:", routeData.geometria);
+        console.log("INICIANDO GUARDADO DE RUTA - DEBUG:");
+        console.log("Datos recibidos:", routeData);
+        console.log("Geometría:", routeData.geometria);
         console.log(
-          "🔢 Puntos en geometría:",
+          "Puntos en geometría:",
           routeData.geometria?.coordinates?.length || 0
         );
-        console.log("🗂️ Puntos_ruta:", routeData.puntos_ruta?.length || 0);
+        console.log("Puntos_ruta:", routeData.puntos_ruta?.length || 0);
 
         // Validación simplificada - solo verificar que tenemos geometría con puntos
         if (!routeData.geometria || !routeData.geometria.coordinates) {
-          console.log("❌ FALTA GEOMETRÍA - Bloqueando guardado");
+          console.log("FALTA GEOMETRÍA - Bloqueando guardado");
           showUINotification(
             "Error: La ruta no tiene geometría válida",
             "error"
@@ -69,7 +69,7 @@ export const useRouteHandlers = (
         let isValidGeometry = true;
         try {
           isValidGeometry = SpatialUtils.isValidLineString(coordinates);
-          console.log("✅ Validación SpatialUtils:", isValidGeometry);
+          console.log("Validación SpatialUtils:", isValidGeometry);
         } catch (error) {
           console.warn("⚠️ Error en validación SpatialUtils:", error);
           isValidGeometry = false;
@@ -86,7 +86,7 @@ export const useRouteHandlers = (
         }
 
         console.log(
-          "✅ TODAS LAS VALIDACIONES PASARON - Procediendo a guardar..."
+          "TODAS LAS VALIDACIONES PASARON - Procediendo a guardar..."
         );
 
         // Guardar ruta
@@ -100,7 +100,7 @@ export const useRouteHandlers = (
           showUINotification("Ruta creada correctamente", "success");
         }
 
-        console.log("✅ RUTA GUARDADA EXITOSAMENTE");
+        console.log("RUTA GUARDADA EXITOSAMENTE");
         mapState.setEditingRoute(null);
         mapState.setShowRouteForm(false);
         await loadRoutes();
@@ -157,4 +157,3 @@ export const useRouteHandlers = (
     handleDeleteRoute,
   };
 };
-

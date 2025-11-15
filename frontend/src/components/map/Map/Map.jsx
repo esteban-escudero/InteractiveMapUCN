@@ -209,8 +209,8 @@ function Map() {
     route={mapState.editingRoute}
     isEditing={!!mapState.editingRoute}
     mapInstance={mapInstance}
-    onSelectionStart={() => console.log("🟡 Iniciando selección")}
-    onSelectionEnd={() => console.log("🟢 Finalizando selección")}
+    onSelectionStart={() => console.log("Iniciando selección")}
+    onSelectionEnd={() => console.log("Finalizando selección")}
   />;
 
   // ========== RENDERIZADO ==========

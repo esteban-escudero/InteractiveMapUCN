@@ -16,11 +16,13 @@ const app = express();
 
 // Middlewares
 // CORS más permisivo en desarrollo
-if (config.server.env === 'development') {
-  app.use(cors({
-    origin: true, // Permitir cualquier origen en desarrollo
-    credentials: true,
-  }));
+if (config.server.env === "development") {
+  app.use(
+    cors({
+      origin: true, // Permitir cualquier origen en desarrollo
+      credentials: true,
+    })
+  );
 } else {
   app.use(cors({ origin: config.cors.origin }));
 }
@@ -50,10 +52,10 @@ app.use(errorHandler);
 // Iniciar servidor
 const PORT = config.server.port;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor backend ejecutándose en http://localhost:${PORT}`);
-  console.log(`📊 Entorno: ${config.server.env}`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`📚 API disponible en: http://localhost:${PORT}/api`);
+  console.log(`Servidor backend ejecutándose en http://localhost:${PORT}`);
+  console.log(`Entorno: ${config.server.env}`);
+  console.log(`Health check: http://localhost:${PORT}/api/health`);
+  console.log(`API disponible en: http://localhost:${PORT}/api`);
 });
 
 module.exports = app;

@@ -559,9 +559,7 @@ export const useRouteIntelligence = (routes, buildings) => {
           return;
         }
 
-        console.log(
-          `✅ ${routeType} has ${validSegments.length} valid segments`
-        );
+        console.log(`${routeType} has ${validSegments.length} valid segments`);
 
         // Estrategia: Crear multiples opciones de ruta.
 

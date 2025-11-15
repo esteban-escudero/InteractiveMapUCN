@@ -116,7 +116,7 @@ export const usePolylineRoute = ({
   }, [mapInstance]);
 
   const clearMap = useCallback(() => {
-    console.log("🗑️ LIMPIANDO MAPA");
+    console.log("LIMPIANDO MAPA");
 
     if (!mapInstance) return;
 
@@ -155,7 +155,7 @@ export const usePolylineRoute = ({
       mapInstance.getContainer().classList.remove("route-drawing-mode");
     }
 
-    console.log("✅ Mapa limpiado");
+    console.log("Mapa limpiado");
   }, [mapInstance, removeGhostMarker]);
 
   const updateRouteData = useCallback((latLngs) => {
@@ -267,7 +267,7 @@ export const usePolylineRoute = ({
         marker.on("dblclick", (e) => {
           L.DomEvent.stopPropagation(e);
 
-          console.log(`🗑️ Doble click en punto ${index + 1}`);
+          console.log(`Doble click en punto ${index + 1}`);
 
           const currentLatLngs = polylineRef.current.getLatLngs();
 
@@ -314,7 +314,7 @@ export const usePolylineRoute = ({
             );
           }
 
-          console.log(`✅ Punto eliminado. Quedan ${newLatLngs.length} puntos`);
+          console.log(`Punto eliminado. Quedan ${newLatLngs.length} puntos`);
         });
 
         marker.bindTooltip(
@@ -346,7 +346,7 @@ export const usePolylineRoute = ({
         markersRef.current.push(marker);
       });
 
-      console.log(`✅ ${latLngs.length} marcadores creados`);
+      console.log(`${latLngs.length} marcadores creados`);
     },
     [mapInstance, updateRouteData, showUINotification]
   );
@@ -426,7 +426,7 @@ export const usePolylineRoute = ({
       }
 
       if (insertIndex !== -1) {
-        console.log(`✅ Insertando vértice en posición ${insertIndex}`);
+        console.log(`Insertando vértice en posición ${insertIndex}`);
 
         removeGhostMarker();
 
@@ -572,7 +572,7 @@ export const usePolylineRoute = ({
     mapInstance.getContainer().style.cursor = "";
     mapInstance.getContainer().classList.remove("route-drawing-mode");
 
-    console.log("✅ Modo dibujo finalizado");
+    console.log("Modo dibujo finalizado");
   }, [
     mapInstance,
     formData.tipo,
@@ -594,7 +594,7 @@ export const usePolylineRoute = ({
 
     if (hasExistingPoints) {
       console.log(
-        "✅ Modo edición: Conservando",
+        "Modo edición: Conservando",
         existingLatLngs.length,
         "puntos existentes"
       );
@@ -660,7 +660,7 @@ export const usePolylineRoute = ({
     document.addEventListener("keydown", escHandler);
     escHandlerRef.current = escHandler;
 
-    console.log("✅ Modo dibujo activado");
+    console.log("Modo dibujo activado");
   }, [
     mapInstance,
     createMarkers,
@@ -703,7 +703,7 @@ export const usePolylineRoute = ({
         mapInstance.getContainer().classList.add("route-drawing-mode");
       }
 
-      console.log("✅ Ruta cargada exitosamente");
+      console.log("Ruta cargada exitosamente");
     },
     [
       mapInstance,
