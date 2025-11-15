@@ -34,6 +34,7 @@ export const MapLayers = ({
         originFilter={mapState.filters.origin}
         destinationFilter={mapState.filters.destination}
         selectedRoute={mapState.selectedRoute}
+        editingRoute={mapState.editingRoute}
       />
 
       {/* Red de Rutas */}
@@ -60,4 +61,3 @@ export const MapLayers = ({
     </>
   );
 };
-

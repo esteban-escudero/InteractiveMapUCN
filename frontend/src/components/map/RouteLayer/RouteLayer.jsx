@@ -1,4 +1,4 @@
-// components/map/RouteLayer/RouteLayer.jsx (VERSIÓN OPTIMIZADA)
+// components/map/RouteLayer/RouteLayer.jsx
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
 import "./RouteLayer.css";
@@ -10,6 +10,7 @@ const RouteLayer = ({
   originFilter,
   destinationFilter,
   selectedRoute,
+  editingRoute, // ⭐ NUEVO: Recibir la ruta que se está editando
 }) => {
   const routeLayerRef = useRef(null);
   const markersLayerRef = useRef(null);
@@ -82,9 +83,19 @@ const RouteLayer = ({
     return content;
   };
 
-  // USEFFECT PRINCIPAL - SIMPLIFICADO
+  // USEFFECT PRINCIPAL
   useEffect(() => {
     console.log("RouteLayer - Mostrando rutas:", routes?.length || 0);
+
+    // ⭐ Log para debugging
+    if (editingRoute) {
+      console.log(
+        "🔧 Ruta en edición:",
+        editingRoute.nombre,
+        "ID:",
+        editingRoute.id
+      );
+    }
 
     if (!routes || !Array.isArray(routes) || !mapInstance) {
       return;
@@ -109,6 +120,12 @@ const RouteLayer = ({
 
     // Procesar cada ruta
     routes.forEach((route) => {
+      // ⭐ OCULTAR LA RUTA QUE SE ESTÁ EDITANDO
+      if (editingRoute && route.id === editingRoute.id) {
+        console.log("⏭️ Saltando ruta en edición:", route.nombre);
+        return; // Saltar esta ruta
+      }
+
       if (!route || !route.geometria || !route.geometria.coordinates) {
         console.warn("Ruta sin geometría válida:", route);
         return;
@@ -163,7 +180,7 @@ const RouteLayer = ({
         const startCoords = latLngs[0];
         const startMarker = L.marker(startCoords, {
           icon: L.divIcon({
-            html: '<div class="route-marker origin">🏁</div>',
+            html: '<div class="route-marker origin">🚩</div>',
             className: "route-marker-icon",
             iconSize: [30, 30],
           }),
@@ -189,7 +206,15 @@ const RouteLayer = ({
       }
     });
 
-    console.log(`RouteLayer - ${routes.length} rutas mostradas`);
+    // ⭐ Contar rutas mostradas excluyendo la que está en edición
+    const routesShown = routes.filter(
+      (r) => !editingRoute || r.id !== editingRoute.id
+    ).length;
+    console.log(
+      `RouteLayer - ${routesShown} rutas mostradas (${
+        editingRoute ? "1 oculta por edición" : "0 ocultas"
+      })`
+    );
   }, [
     mapInstance,
     routes,
@@ -197,6 +222,7 @@ const RouteLayer = ({
     selectedRoute,
     originFilter,
     destinationFilter,
+    editingRoute, // ⭐ AGREGAR DEPENDENCIA
   ]);
 
   // Cleanup
