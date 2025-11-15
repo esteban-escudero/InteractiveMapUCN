@@ -323,22 +323,27 @@ export const usePolylineRoute = ({
           console.log(`✅ Punto eliminado. Quedan ${newLatLngs.length} puntos`);
         });
 
+        // En usePolylineRoute.js, dentro de createMarkers (línea ~337)
+        // BUSCA el marker.bindTooltip y REEMPLÁZALO con esto:
+
         marker.bindTooltip(
           `<div style="text-align: center;">
-            <strong>${
-              index === 0
-                ? "🚩 Inicio"
-                : index === latLngs.length - 1
-                ? "🎯 Fin"
-                : `📍 Punto ${index + 1}`
-            }</strong><br/>
-            <small>Arrastra para mover</small><br/>
-            <small>Doble click para ${
-              index === 0 || index === latLngs.length - 1
-                ? '<span style="color: #e74c3c;">NO</span> eliminar'
-                : "eliminar"
-            }</small>
-          </div>`,
+              <strong>${
+                index === 0
+                  ? "🚩 Punto Inicial"
+                  : index === latLngs.length - 1
+                  ? "🎯 Punto Final"
+                  : `📍 Punto ${index + 1}`
+              }</strong><br/>
+              <small>Arrastra para mover</small><br/>
+              <small>${
+                index === 0
+                  ? '<span style="color: #e74c3c;">No se puede eliminar punto inicial</span>'
+                  : index === latLngs.length - 1
+                  ? '<span style="color: #e74c3c;">No se puede eliminar punto final</span>'
+                  : "Doble click para eliminar"
+              }</small>
+            </div>`,
           {
             permanent: false,
             direction: "top",
