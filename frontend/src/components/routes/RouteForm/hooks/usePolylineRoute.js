@@ -9,13 +9,8 @@ export const usePolylineRoute = ({
   isVisible,
   route,
   isEditing,
-  showUINotification, // ⭐ AGREGAR
+  showUINotification,
 }) => {
-  console.log("🔍 showUINotification disponible:", typeof showUINotification);
-  console.log(
-    "🔍 showUINotification es función:",
-    typeof showUINotification === "function"
-  );
   const [formData, setFormData] = useState({
     nombre: "",
     tipo: "peatonal",
@@ -34,8 +29,6 @@ export const usePolylineRoute = ({
   const escHandlerRef = useRef(null);
   const currentPointsRef = useRef([]);
   const ghostMarkerRef = useRef(null);
-
-  // ========== FUNCIONES BÁSICAS ==========
 
   const getRouteColor = (tipo) => {
     const colors = {
@@ -159,6 +152,7 @@ export const usePolylineRoute = ({
 
     if (mapInstance?.getContainer()) {
       mapInstance.getContainer().style.cursor = "";
+      mapInstance.getContainer().classList.remove("route-drawing-mode");
     }
 
     console.log("✅ Mapa limpiado");
@@ -207,7 +201,7 @@ export const usePolylineRoute = ({
     const isFirst = index === 0;
     const isLast = index === total - 1;
     const color = isFirst ? "#27ae60" : isLast ? "#e74c3c" : "#3498db";
-    const label = isFirst ? "S" : isLast ? "E" : index + 1;
+    const label = isFirst ? "I" : isLast ? "F" : index + 1;
 
     return L.divIcon({
       html: `
@@ -224,7 +218,7 @@ export const usePolylineRoute = ({
           color: white;
           font-size: 10px;
           font-weight: bold;
-          cursor: move;
+          cursor: crosshair;
         ">${label}</div>
       `,
       iconSize: [28, 28],
@@ -290,7 +284,7 @@ export const usePolylineRoute = ({
           if (index === 0) {
             if (showUINotification) {
               showUINotification(
-                "No puedes eliminar el punto de inicio. Arrástalo para cambiar su posición.",
+                "No puedes eliminar el punto inicial. Arrástalo para cambiar su posición.",
                 "warning"
               );
             }
@@ -300,7 +294,7 @@ export const usePolylineRoute = ({
           if (index === currentLatLngs.length - 1) {
             if (showUINotification) {
               showUINotification(
-                "No puedes eliminar el punto de fin. Arrástalo para cambiar su posición.",
+                "No puedes eliminar el punto final. Arrástalo para cambiar su posición.",
                 "warning"
               );
             }
@@ -323,27 +317,24 @@ export const usePolylineRoute = ({
           console.log(`✅ Punto eliminado. Quedan ${newLatLngs.length} puntos`);
         });
 
-        // En usePolylineRoute.js, dentro de createMarkers (línea ~337)
-        // BUSCA el marker.bindTooltip y REEMPLÁZALO con esto:
-
         marker.bindTooltip(
           `<div style="text-align: center;">
-              <strong>${
-                index === 0
-                  ? "🚩 Punto Inicial"
-                  : index === latLngs.length - 1
-                  ? "🎯 Punto Final"
-                  : `📍 Punto ${index + 1}`
-              }</strong><br/>
-              <small>Arrastra para mover</small><br/>
-              <small>${
-                index === 0
-                  ? '<span style="color: #e74c3c;">No se puede eliminar punto inicial</span>'
-                  : index === latLngs.length - 1
-                  ? '<span style="color: #e74c3c;">No se puede eliminar punto final</span>'
-                  : "Doble click para eliminar"
-              }</small>
-            </div>`,
+            <strong>${
+              index === 0
+                ? "🚩 Punto Inicial"
+                : index === latLngs.length - 1
+                ? "🎯 Punto Final"
+                : `📍 Punto ${index + 1}`
+            }</strong><br/>
+            <small>Arrastra para mover</small><br/>
+            <small>${
+              index === 0
+                ? '<span style="color: #e74c3c;">No se puede eliminar punto inicial</span>'
+                : index === latLngs.length - 1
+                ? '<span style="color: #e74c3c;">No se puede eliminar punto final</span>'
+                : "Doble click para eliminar"
+            }</small>
+          </div>`,
           {
             permanent: false,
             direction: "top",
@@ -533,7 +524,7 @@ export const usePolylineRoute = ({
   };
 
   const finishDrawing = useCallback(() => {
-    console.log("🎯 FINALIZANDO DIBUJO");
+    console.log("FINALIZANDO DIBUJO");
 
     if (!mapInstance) {
       setDrawingMode(false);
@@ -579,6 +570,7 @@ export const usePolylineRoute = ({
     setDrawingMode(false);
     setEditingMode(true);
     mapInstance.getContainer().style.cursor = "";
+    mapInstance.getContainer().classList.remove("route-drawing-mode");
 
     console.log("✅ Modo dibujo finalizado");
   }, [
@@ -635,6 +627,7 @@ export const usePolylineRoute = ({
     setEditingMode(false);
 
     mapInstance.getContainer().style.cursor = "crosshair";
+    mapInstance.getContainer().classList.add("route-drawing-mode"); // ⭐ AGREGADO
 
     addVertexOnPolyline();
 
@@ -704,6 +697,11 @@ export const usePolylineRoute = ({
 
       setEditingMode(true);
       updateRouteData(latLngs);
+
+      // ⭐ AGREGADO - Mantener cursor cruz en edición
+      if (mapInstance?.getContainer()) {
+        mapInstance.getContainer().classList.add("route-drawing-mode");
+      }
 
       console.log("✅ Ruta cargada exitosamente");
     },

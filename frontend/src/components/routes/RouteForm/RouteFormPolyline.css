@@ -449,3 +449,23 @@
   outline: 2px solid #3498db;
   outline-offset: 2px;
 }
+.route-drawing-mode,
+.route-drawing-mode * {
+  cursor: crosshair !important;
+}
+
+.route-drawing-mode .leaflet-marker-icon,
+.route-drawing-mode .leaflet-marker-icon *,
+.route-drawing-mode .route-point-marker,
+.route-drawing-mode .leaflet-interactive,
+.route-drawing-mode .leaflet-container,
+.route-drawing-mode .leaflet-pane {
+  cursor: crosshair !important;
+}
+.route-point-marker {
+  cursor: crosshair !important;
+}
+
+.route-point-marker * {
+  cursor: crosshair !important;
+}
