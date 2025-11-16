@@ -1,5 +1,6 @@
 // components/routes/RouteForm/hooks/usePolylineRoute.js
 import { useState, useEffect, useCallback, useRef } from "react";
+import { SpatialUtils } from "../../../../utils/spatialUtils";
 import L from "leaflet";
 
 export const usePolylineRoute = ({
@@ -29,6 +30,13 @@ export const usePolylineRoute = ({
   const escHandlerRef = useRef(null);
   const currentPointsRef = useRef([]);
   const ghostMarkerRef = useRef(null);
+  // ESTADOS PARA SNAPPING
+  const [snapEnabled, setSnapEnabled] = useState(true);
+  const [snapThreshold, setSnapThreshold] = useState(15); // metros
+  const [minPointDistance, setMinPointDistance] = useState(5); // metros mínimos entre puntos
+  const [snappedPreview, setSnappedPreview] = useState(null);
+  const [showSnapIndicators, setShowSnapIndicators] = useState(true);
+  const snappedMarkerRef = useRef(null);
 
   const getRouteColor = (tipo) => {
     const colors = {
@@ -45,6 +53,174 @@ export const usePolylineRoute = ({
     const now = new Date();
     return `Ruta ${formData.tipo} ${now.toLocaleDateString("es-ES")}`;
   };
+
+  // 🆕 ====== FUNCIONES DE SNAPPING ======
+
+  // Crear icono de preview de snap
+  const createSnapPreviewIcon = (snapType) => {
+    const color = snapType === "node" ? "#27ae60" : "#3498db";
+    const icon = snapType === "node" ? "🎯" : "📍";
+
+    return L.divIcon({
+      html: `
+      <div style="
+        background: ${color};
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 0 20px ${color};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        animation: pulse-snap 1s infinite;
+      ">${icon}</div>
+      <style>
+        @keyframes pulse-snap {
+          0%, 100% { 
+            transform: scale(1);
+            box-shadow: 0 0 20px ${color};
+          }
+          50% { 
+            transform: scale(1.15);
+            box-shadow: 0 0 30px ${color};
+          }
+        }
+      </style>
+    `,
+      iconSize: [26, 26],
+      className: "snap-preview-marker",
+    });
+  };
+
+  // Buscar punto de snap (nodos + segmentos)
+  const findSnapPoint = useCallback(
+    (clickPoint, existingPoints) => {
+      if (!snapEnabled || !existingPoints || existingPoints.length === 0) {
+        return null;
+      }
+
+      // 1. Intentar snap a nodos existentes (prioridad)
+      const nodeSnap = SpatialUtils.snapToNearestNode(
+        clickPoint,
+        existingPoints,
+        snapThreshold
+      );
+
+      if (nodeSnap) {
+        console.log(`🎯 Snap a nodo: ${Math.round(nodeSnap.snapDistance)}m`);
+        return nodeSnap;
+      }
+
+      // 2. Si no hay nodo cercano, intentar snap a segmento
+      const segmentSnap = SpatialUtils.snapToNearestSegment(
+        clickPoint,
+        existingPoints,
+        snapThreshold
+      );
+
+      if (segmentSnap) {
+        console.log(
+          `📍 Snap a segmento: ${Math.round(segmentSnap.snapDistance)}m`
+        );
+        return segmentSnap;
+      }
+
+      return null;
+    },
+    [snapEnabled, snapThreshold]
+  );
+
+  // Actualizar preview visual de snap
+  const updateSnapPreview = useCallback(
+    (snapPoint) => {
+      if (!mapInstance) return;
+
+      // Limpiar preview anterior
+      if (snappedMarkerRef.current) {
+        mapInstance.removeLayer(snappedMarkerRef.current);
+        snappedMarkerRef.current = null;
+      }
+
+      // Crear nuevo preview si hay snap
+      if (snapPoint && showSnapIndicators) {
+        const marker = L.marker([snapPoint.lat, snapPoint.lng], {
+          icon: createSnapPreviewIcon(snapPoint.snapType),
+          interactive: false,
+          zIndexOffset: 2000,
+        }).addTo(mapInstance);
+
+        const snapTypeText =
+          snapPoint.snapType === "node" ? "Nodo existente" : "Punto en línea";
+
+        marker.bindTooltip(
+          `<div style="text-align: center; padding: 5px;">
+        <strong>🧲 ${snapTypeText}</strong><br/>
+        <small>Distancia: ${Math.round(snapPoint.snapDistance)}m</small><br/>
+        <small style="color: #27ae60;">Click para conectar</small>
+      </div>`,
+          {
+            permanent: false,
+            direction: "top",
+            className: "snap-tooltip",
+          }
+        );
+
+        snappedMarkerRef.current = marker;
+        setSnappedPreview(snapPoint);
+
+        // Cambiar cursor
+        mapInstance.getContainer().style.cursor = "copy";
+      } else {
+        setSnappedPreview(null);
+        if (drawingMode) {
+          mapInstance.getContainer().style.cursor = "crosshair";
+        }
+      }
+    },
+    [mapInstance, showSnapIndicators, drawingMode]
+  );
+
+  // Validar distancia mínima
+  const validateMinimumDistance = useCallback(
+    (newPoint, existingPoints) => {
+      if (!minPointDistance || minPointDistance <= 0) return true;
+
+      return SpatialUtils.isMinimumDistanceValid(
+        newPoint,
+        existingPoints,
+        minPointDistance
+      );
+    },
+    [minPointDistance]
+  );
+
+  // 🆕 Handler de movimiento del mouse para preview
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!drawingMode || !snapEnabled || !showSnapIndicators) return;
+
+      const clickPoint = { lat: e.latlng.lat, lng: e.latlng.lng };
+      const existingLatLngs = polylineRef.current
+        ? polylineRef.current.getLatLngs()
+        : [];
+      const existingPoints = existingLatLngs.map((ll) => ({
+        lat: ll.lat,
+        lng: ll.lng,
+      }));
+
+      const snapPoint = findSnapPoint(clickPoint, existingPoints);
+      updateSnapPreview(snapPoint);
+    },
+    [
+      drawingMode,
+      snapEnabled,
+      showSnapIndicators,
+      findSnapPoint,
+      updateSnapPreview,
+    ]
+  );
 
   const calculateRouteLength = (latLngs) => {
     if (latLngs.length < 2) return 0;
@@ -135,6 +311,12 @@ export const usePolylineRoute = ({
     markersRef.current = [];
 
     removeGhostMarker();
+
+    // 🆕 Limpiar preview de snap
+    updateSnapPreview(null);
+    if (mapInstance) {
+      mapInstance.off("mousemove", handleMouseMove);
+    }
 
     if (mapClickHandlerRef.current) {
       mapInstance.off("click", mapClickHandlerRef.current);
@@ -624,6 +806,11 @@ export const usePolylineRoute = ({
     }
 
     setDrawingMode(true);
+    // 🆕 Limpiar preview al finalizar
+    updateSnapPreview(null);
+    if (mapInstance) {
+      mapInstance.off("mousemove", handleMouseMove);
+    }
     setEditingMode(false);
 
     mapInstance.getContainer().style.cursor = "crosshair";
@@ -633,20 +820,79 @@ export const usePolylineRoute = ({
 
     const clickHandler = (e) => {
       const { lat, lng } = e.latlng;
+      const clickPoint = { lat, lng };
+
+      // 🆕 OBTENER PUNTOS EXISTENTES
+      const existingLatLngs = polylineRef.current
+        ? polylineRef.current.getLatLngs()
+        : [];
+      const existingPoints = existingLatLngs.map((ll) => ({
+        lat: ll.lat,
+        lng: ll.lng,
+      }));
+
+      // 🆕 BUSCAR PUNTO DE SNAP
+      const snapPoint = findSnapPoint(clickPoint, existingPoints);
+      const candidatePoint = snapPoint || clickPoint;
+
+      // 🆕 VALIDAR DISTANCIA MÍNIMA (solo si no es snap a nodo existente)
+      if (snapPoint?.snapType !== "node") {
+        const isValidDistance = validateMinimumDistance(
+          candidatePoint,
+          existingPoints
+        );
+
+        if (!isValidDistance) {
+          if (showUINotification) {
+            showUINotification(
+              `⚠️ Punto demasiado cercano. Mínimo: ${minPointDistance}m`,
+              "warning"
+            );
+          }
+          console.warn(`❌ Punto rechazado: distancia mínima no cumplida`);
+          return;
+        }
+      }
+
+      // 🆕 USAR COORDENADAS FINALES
+      const finalPoint = [candidatePoint.lat, candidatePoint.lng];
+
+      // Log informativo
+      if (snapPoint) {
+        const snapIcon = snapPoint.snapType === "node" ? "🎯" : "📍";
+        console.log(
+          `${snapIcon} SNAP ${snapPoint.snapType}: ${Math.round(
+            snapPoint.snapDistance
+          )}m`
+        );
+
+        if (showUINotification) {
+          showUINotification(
+            `🧲 Snap aplicado: ${Math.round(snapPoint.snapDistance)}m`,
+            "info"
+          );
+        }
+      } else {
+        console.log("📍 Click sin snap");
+      }
 
       if (polylineRef.current) {
         const currentLatLngs = polylineRef.current.getLatLngs();
-        const newLatLngs = [...currentLatLngs, [lat, lng]];
+        const newLatLngs = [...currentLatLngs, finalPoint];
 
         polylineRef.current.setLatLngs(newLatLngs);
         createMarkers(newLatLngs);
         updateRouteData(newLatLngs);
+
+        // Limpiar preview después de agregar punto
+        updateSnapPreview(null);
 
         addVertexOnPolyline();
       }
     };
 
     mapInstance.on("click", clickHandler);
+    mapInstance.on("mousemove", handleMouseMove);
     mapClickHandlerRef.current = clickHandler;
 
     const escHandler = (e) => {
@@ -882,5 +1128,14 @@ export const usePolylineRoute = ({
     handleSubmit,
     handleCancel,
     polylineRef,
+    snapEnabled,
+    setSnapEnabled,
+    snapThreshold,
+    setSnapThreshold,
+    minPointDistance,
+    setMinPointDistance,
+    showSnapIndicators,
+    setShowSnapIndicators,
+    snappedPreview,
   };
 };

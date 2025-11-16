@@ -258,6 +258,116 @@ export const SpatialUtils = {
       return Infinity;
     }
   },
+
+  // FUNCIONES PARA SNAPPING
+  snapToNearestNode(clickPoint, existingNodes, snapThreshold) {
+    if (!existingNodes || existingNodes.length === 0) return null;
+
+    let nearestNode = null;
+    let minDistance = Infinity;
+
+    existingNodes.forEach((node) => {
+      const distance = this.calculateDistance(clickPoint, node);
+
+      if (distance < snapThreshold && distance < minDistance) {
+        minDistance = distance;
+        nearestNode = {
+          ...node,
+          snapDistance: distance,
+          snapType: "node",
+        };
+      }
+    });
+
+    return nearestNode;
+  },
+
+  // SNAP A SEGMENTO DE LÍNEA
+  snapToNearestSegment(clickPoint, linePoints, snapThreshold) {
+    if (!linePoints || linePoints.length < 2) return null;
+
+    let nearestPoint = null;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < linePoints.length - 1; i++) {
+      const start = linePoints[i];
+      const end = linePoints[i + 1];
+
+      try {
+        const distance = this.calculateDistanceToLine(clickPoint, start, end);
+
+        if (distance < snapThreshold && distance < minDistance) {
+          minDistance = distance;
+
+          // Calcular punto exacto en la línea
+          const pointOnLine = this.getClosestPointOnSegment(
+            clickPoint,
+            start,
+            end
+          );
+          nearestPoint = {
+            lat: pointOnLine.lat,
+            lng: pointOnLine.lng,
+            snapDistance: distance,
+            snapType: "segment",
+            segmentIndex: i,
+          };
+        }
+      } catch (error) {
+        console.warn("Error en snap a segmento:", error);
+      }
+    }
+
+    return nearestPoint;
+  },
+
+  // ENCONTRAR PUNTO MÁS CERCANO EN UN SEGMENTO
+  getClosestPointOnSegment(point, lineStart, lineEnd) {
+    const x = point.lat;
+    const y = point.lng;
+    const x1 = lineStart.lat;
+    const y1 = lineStart.lng;
+    const x2 = lineEnd.lat;
+    const y2 = lineEnd.lng;
+
+    const A = x - x1;
+    const B = y - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = lenSq !== 0 ? dot / lenSq : -1;
+
+    let lat, lng;
+
+    if (param < 0) {
+      lat = x1;
+      lng = y1;
+    } else if (param > 1) {
+      lat = x2;
+      lng = y2;
+    } else {
+      lat = x1 + param * C;
+      lng = y1 + param * D;
+    }
+
+    return { lat, lng };
+  },
+
+  // VALIDAR DISTANCIA MÍNIMA ENTRE PUNTOS
+  isMinimumDistanceValid(newPoint, existingPoints, minDistance = 5) {
+    if (!existingPoints || existingPoints.length === 0) return true;
+
+    for (const point of existingPoints) {
+      const distance = this.calculateDistance(newPoint, point);
+      if (distance < minDistance) {
+        return false;
+      }
+    }
+
+    return true;
+  },
 };
 
 export default SpatialUtils;

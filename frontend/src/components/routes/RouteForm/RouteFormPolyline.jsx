@@ -26,6 +26,15 @@ const RouteFormPolyline = ({
     handleSubmit,
     handleCancel,
     polylineRef,
+    snapEnabled,
+    setSnapEnabled,
+    snapThreshold,
+    setSnapThreshold,
+    minPointDistance,
+    setMinPointDistance,
+    showSnapIndicators,
+    setShowSnapIndicators,
+    snappedPreview,
   } = usePolylineRoute({
     mapInstance,
     onSave,
@@ -237,6 +246,275 @@ const RouteFormPolyline = ({
                   {formData.distancia.toLocaleString()}m
                 </span>
               )}
+            </div>
+            {/* 🆕 CONTROLES DE SNAPPING */}
+            <div className="snap-controls-section">
+              <h4
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "14px",
+                  margin: "15px 0 10px 0",
+                  color: "#2c3e50",
+                }}>
+                <span className="material-icons" style={{ fontSize: "18px" }}>
+                  settings
+                </span>
+                Configuración de Snapping
+              </h4>
+
+              <div
+                className="snap-controls-grid"
+                style={{
+                  display: "grid",
+                  gap: "12px",
+                  background: "#f8f9fa",
+                  padding: "15px",
+                  borderRadius: "8px",
+                  border: "1px solid #e0e0e0",
+                }}>
+                {/* Toggle Snapping */}
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    padding: "8px",
+                    background: "white",
+                    borderRadius: "6px",
+                    border: "1px solid #ddd",
+                  }}>
+                  <input
+                    type="checkbox"
+                    checked={snapEnabled}
+                    onChange={(e) => setSnapEnabled(e.target.checked)}
+                    style={{ cursor: "pointer", width: "18px", height: "18px" }}
+                  />
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      fontSize: "13px",
+                    }}>
+                    <span
+                      className="material-icons"
+                      style={{
+                        fontSize: "16px",
+                        color: snapEnabled ? "#27ae60" : "#95a5a6",
+                      }}>
+                      {snapEnabled ? "check_circle" : "cancel"}
+                    </span>
+                    <strong>Activar Snapping Automático</strong>
+                  </span>
+                </label>
+
+                {/* Distancia de Snap */}
+                <div
+                  style={{
+                    opacity: snapEnabled ? 1 : 0.5,
+                    pointerEvents: snapEnabled ? "auto" : "none",
+                  }}>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      color: "#555",
+                      marginBottom: "6px",
+                      display: "block",
+                    }}>
+                    <span
+                      className="material-icons"
+                      style={{ fontSize: "14px", verticalAlign: "middle" }}>
+                      gps_fixed
+                    </span>{" "}
+                    Radio de captura:{" "}
+                    <strong style={{ color: "#3498db" }}>
+                      {snapThreshold}m
+                    </strong>
+                  </label>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}>
+                    <input
+                      type="range"
+                      min="5"
+                      max="50"
+                      step="5"
+                      value={snapThreshold}
+                      onChange={(e) => setSnapThreshold(Number(e.target.value))}
+                      disabled={!snapEnabled}
+                      style={{ flex: 1, cursor: "pointer" }}
+                    />
+                    <span
+                      style={{
+                        minWidth: "40px",
+                        textAlign: "center",
+                        fontSize: "13px",
+                        fontWeight: "bold",
+                        color: "#3498db",
+                        background: "#ecf0f1",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                      }}>
+                      {snapThreshold}m
+                    </span>
+                  </div>
+                  <small
+                    style={{
+                      fontSize: "11px",
+                      color: "#7f8c8d",
+                      display: "block",
+                      marginTop: "4px",
+                    }}>
+                    Distancia máxima para conectar con puntos existentes
+                  </small>
+                </div>
+
+                {/* Distancia Mínima */}
+                <div>
+                  <label
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      color: "#555",
+                      marginBottom: "6px",
+                      display: "block",
+                    }}>
+                    <span
+                      className="material-icons"
+                      style={{ fontSize: "14px", verticalAlign: "middle" }}>
+                      social_distance
+                    </span>{" "}
+                    Distancia mínima entre puntos:{" "}
+                    <strong style={{ color: "#e67e22" }}>
+                      {minPointDistance}m
+                    </strong>
+                  </label>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}>
+                    <input
+                      type="range"
+                      min="0"
+                      max="20"
+                      step="1"
+                      value={minPointDistance}
+                      onChange={(e) =>
+                        setMinPointDistance(Number(e.target.value))
+                      }
+                      style={{ flex: 1, cursor: "pointer" }}
+                    />
+                    <span
+                      style={{
+                        minWidth: "40px",
+                        textAlign: "center",
+                        fontSize: "13px",
+                        fontWeight: "bold",
+                        color: "#e67e22",
+                        background: "#ecf0f1",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                      }}>
+                      {minPointDistance}m
+                    </span>
+                  </div>
+                  <small
+                    style={{
+                      fontSize: "11px",
+                      color: "#7f8c8d",
+                      display: "block",
+                      marginTop: "4px",
+                    }}>
+                    Evita puntos demasiado juntos (0 = sin límite)
+                  </small>
+                </div>
+
+                {/* Indicadores Visuales */}
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    cursor: "pointer",
+                    padding: "8px",
+                    background: "white",
+                    borderRadius: "6px",
+                    border: "1px solid #ddd",
+                    opacity: snapEnabled ? 1 : 0.5,
+                    pointerEvents: snapEnabled ? "auto" : "none",
+                  }}>
+                  <input
+                    type="checkbox"
+                    checked={showSnapIndicators}
+                    onChange={(e) => setShowSnapIndicators(e.target.checked)}
+                    disabled={!snapEnabled}
+                    style={{ cursor: "pointer", width: "18px", height: "18px" }}
+                  />
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      fontSize: "13px",
+                    }}>
+                    <span
+                      className="material-icons"
+                      style={{
+                        fontSize: "16px",
+                        color: showSnapIndicators ? "#9b59b6" : "#95a5a6",
+                      }}>
+                      visibility
+                    </span>
+                    Mostrar indicadores visuales
+                  </span>
+                </label>
+
+                {/* Estado Actual */}
+                {snappedPreview && snapEnabled && (
+                  <div
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      color: "white",
+                      padding: "10px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      animation: "fadeIn 0.3s",
+                    }}>
+                    <span
+                      className="material-icons"
+                      style={{ fontSize: "18px" }}>
+                      {snappedPreview.snapType === "node"
+                        ? "gps_fixed"
+                        : "place"}
+                    </span>
+                    <div>
+                      <strong>
+                        {snappedPreview.snapType === "node"
+                          ? "🎯 Nodo detectado"
+                          : "📍 Línea detectada"}
+                      </strong>
+                      <br />
+                      <small>
+                        Distancia: {Math.round(snappedPreview.snapDistance)}m -
+                        Click para conectar
+                      </small>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
