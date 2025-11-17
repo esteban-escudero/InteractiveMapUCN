@@ -125,32 +125,34 @@ const RouteFormPolyline = ({
         </div>
 
         <form onSubmit={handleSubmit} className="route-form">
-          {/* Información básica */}
-          <div className="form-group">
-            <label htmlFor="nombre-ruta">Nombre de la Ruta (opcional)</label>
-            <input
-              id="nombre-ruta"
-              type="text"
-              name="nombre"
-              value={formData.nombre}
-              onChange={handleInputChange}
-              placeholder="Dejar vacío para nombre automático"
-            />
-          </div>
+          {/* Información básica - EN LÍNEA */}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="nombre-ruta">Nombre de la Ruta (opcional)</label>
+              <input
+                id="nombre-ruta"
+                type="text"
+                name="nombre"
+                value={formData.nombre}
+                onChange={handleInputChange}
+                placeholder="Dejar vacío para nombre automático"
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="tipo-ruta">Tipo de Ruta</label>
-            <select
-              id="tipo-ruta"
-              name="tipo"
-              value={formData.tipo}
-              onChange={handleInputChange}>
-              <option value="accesible">Accesible</option>
-              <option value="emergencia">Emergencia</option>
-              <option value="peatonal">Peatonal</option>
-              <option value="rapida">Rápida</option>
-              <option value="vehicular">Vehicular</option>
-            </select>
+            <div className="form-group">
+              <label htmlFor="tipo-ruta">Tipo de Ruta</label>
+              <select
+                id="tipo-ruta"
+                name="tipo"
+                value={formData.tipo}
+                onChange={handleInputChange}>
+                <option value="accesible">Accesible</option>
+                <option value="emergencia">Emergencia</option>
+                <option value="peatonal">Peatonal</option>
+                <option value="rapida">Rápida</option>
+                <option value="vehicular">Vehicular</option>
+              </select>
+            </div>
           </div>
 
           {/* Selección en mapa */}
@@ -168,22 +170,79 @@ const RouteFormPolyline = ({
             )}
 
             <div className="selection-instructions">
-              <p>
-                <span className="material-icons">looks_one</span>
-                <strong>Haz clic en "Activar Selección"</strong>
-              </p>
-              <p>
-                <span className="material-icons">looks_two</span>
-                Haz varios clics en el mapa para agregar puntos
-              </p>
-              <p>
-                <span className="material-icons">looks_3</span>
-                Presiona <strong>ESC</strong> para finalizar
-              </p>
-              <p>
-                <span className="material-icons">looks_4</span>
-                Luego guarda la ruta
-              </p>
+              <h3>Construcción de Caminos</h3>
+
+              <div className="instruction-step">
+                <span className="material-icons step-number">touch_app</span>
+                <div className="instruction-content">
+                  <strong>
+                    Haz clic en "Activar Selección" para iniciar la construcción
+                    de caminos
+                  </strong>
+                </div>
+              </div>
+
+              <div className="instruction-step">
+                <span className="material-icons step-number">edit_road</span>
+                <div className="instruction-content">
+                  <strong>
+                    Haz clic en el mapa para agregar puntos de camino
+                  </strong>
+                  <ul className="feature-list">
+                    <li>
+                      <span className="material-icons">drag_indicator</span>
+                      Los puntos son movibles. Arrastralos para reposicionarlos
+                    </li>
+                    <li>
+                      <span className="material-icons">delete</span>
+                      Doble clic en un punto para eliminarlo
+                    </li>
+                    <li>
+                      <span className="material-icons">lock</span>
+                      Los puntos inicial y final no son eliminables
+                    </li>
+                    <li>
+                      <span className="material-icons">more_vert</span>
+                      Puedes crear puntos intermedios entre segmentos
+                    </li>
+                    <li>
+                      <span className="material-icons">visibility</span>
+                      Los puntos intermedios se pueden previsualizar con una
+                      circunferencia semitransparente
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="instruction-step">
+                <span className="material-icons step-number">ads_click</span>
+                <div className="instruction-content">
+                  <strong>Snapping Automático</strong>
+                  <ul className="feature-list">
+                    <li>
+                      <span className="material-icons">attachment</span>
+                      <strong>Snapping automático:</strong> al acercarte a otro
+                      punto o camino existente
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="instruction-step">
+                <span className="material-icons step-number">exit_to_app</span>
+                <div className="instruction-content">
+                  <strong>
+                    Presiona ESC para finalizar la edición de la ruta
+                  </strong>
+                </div>
+              </div>
+
+              <div className="instruction-step">
+                <span className="material-icons step-number">check_circle</span>
+                <div className="instruction-content">
+                  <strong>Guarda la ruta con el botón correspondiente</strong>
+                </div>
+              </div>
             </div>
 
             <div className="map-selection-controls">
@@ -226,27 +285,6 @@ const RouteFormPolyline = ({
               </div>
             </div>
 
-            {/* Contador de puntos */}
-            <div className="points-counter">
-              <span className="material-icons">location_on</span>
-              Puntos seleccionados:{" "}
-              <strong>
-                {polylineRef.current
-                  ? polylineRef.current.getLatLngs().length
-                  : 0}
-              </strong>
-              {formData.geometria && (
-                <span style={{ color: "#3498db", marginLeft: "10px" }}>
-                  (Guardados: {formData.geometria.coordinates.length})
-                </span>
-              )}
-              {formData.distancia > 0 && (
-                <span style={{ color: "#27ae60", marginLeft: "10px" }}>
-                  <span className="material-icons">straighten</span>
-                  {formData.distancia.toLocaleString()}m
-                </span>
-              )}
-            </div>
             {/* 🆕 CONTROLES DE SNAPPING */}
             <div className="snap-controls-section">
               <h4
@@ -503,8 +541,8 @@ const RouteFormPolyline = ({
                     <div>
                       <strong>
                         {snappedPreview.snapType === "node"
-                          ? "Nodo detectado"
-                          : "Línea detectada"}
+                          ? "🎯 Nodo detectado"
+                          : "📍 Línea detectada"}
                       </strong>
                       <br />
                       <small>
@@ -556,17 +594,16 @@ const RouteFormPolyline = ({
           )}
 
           <div className="form-actions">
+            <button type="button" className="cancel-btn" onClick={handleCancel}>
+              <span className="material-icons">cancel</span>
+              Cancelar
+            </button>
             <button
               type="submit"
               className="save-btn"
               disabled={!formData.geometria}>
               <span className="material-icons">save</span>
               {isEditing ? "Actualizar Ruta" : "Guardar Ruta"}
-            </button>
-
-            <button type="button" className="cancel-btn" onClick={handleCancel}>
-              <span className="material-icons">cancel</span>
-              Cancelar
             </button>
           </div>
         </form>

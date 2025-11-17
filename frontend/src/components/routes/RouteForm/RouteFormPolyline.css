@@ -1,3 +1,6 @@
+/* RouteFormPolyline.css - Estilos mejorados para el formulario de rutas */
+
+/* Overlay del formulario */
 .route-form-overlay {
   position: fixed;
   top: 0;
@@ -11,16 +14,18 @@
   z-index: 1000;
 }
 
+/* Contenedor principal del formulario */
 .route-form-container {
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   width: 90%;
-  max-width: 500px;
+  max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
 }
 
+/* Cabecera del formulario */
 .route-form-header {
   display: flex;
   justify-content: space-between;
@@ -59,10 +64,24 @@
   cursor: not-allowed;
 }
 
+/* Formulario principal */
 .route-form {
   padding: 20px;
 }
 
+/* Estilos para nombre y tipo de ruta en línea */
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+/* Grupos de formulario */
 .form-group {
   margin-bottom: 20px;
 }
@@ -73,6 +92,7 @@
   font-weight: 600;
   color: #34495e;
   font-size: 0.9em;
+  cursor: pointer;
 }
 
 .form-group input,
@@ -87,7 +107,8 @@
 
 .form-group input:focus,
 .form-group select:focus {
-  outline: none;
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
   border-color: #3498db;
 }
 
@@ -115,6 +136,7 @@
   font-size: 1.1em;
 }
 
+/* Advertencia de mapa no disponible */
 .map-unavailable-warning {
   background: #fff3cd;
   border: 1px solid #ffeaa7;
@@ -129,6 +151,7 @@
   gap: 8px;
 }
 
+/* Instrucciones de selección mejoradas */
 .selection-instructions {
   background: white;
   padding: 15px;
@@ -137,17 +160,71 @@
   border: 1px solid #e9ecef;
 }
 
-.selection-instructions p {
-  margin: 8px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #555;
+.selection-instructions h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #2c3e50;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 8px;
+  font-size: 1.1em;
 }
 
-.selection-instructions .material-icons {
+.instruction-step {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.step-number {
+  background-color: #3498db;
+  color: white;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.instruction-content {
+  flex: 1;
+}
+
+.feature-list {
+  margin: 8px 0 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.feature-list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  color: #495057;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.feature-list li .material-icons {
   color: #3498db;
-  font-size: 18px;
+  font-size: 16px;
+  margin-right: 8px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* CORRECCIÓN: Iconos visibles en las instrucciones */
+.selection-instructions .material-icons {
+  color: #ffffff; /* Blanco para iconos en círculos azules */
+  font-size: 16px;
+}
+
+/* Iconos en textos normales (no en steps) */
+.selection-instructions p .material-icons {
+  color: #3498db; /* Azul para iconos en texto normal */
 }
 
 /* Controles de selección */
@@ -229,6 +306,41 @@
 
 .points-counter .material-icons {
   color: #e74c3c;
+}
+
+/* Mensaje de selección activa */
+.selection-active-message {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+  padding: 15px;
+  border-radius: 6px;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.selection-active-message .material-icons {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+  color: #856404;
+}
+
+.selection-active-message strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 1.1em;
+}
+
+.selection-active-message p {
+  margin: 5px 0 0 0;
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+/* Estado cuando está en modo selección */
+.route-form-container:has(.selection-active-message) {
+  opacity: 0.9;
 }
 
 /* Detalles de la ruta */
@@ -349,106 +461,26 @@
   cursor: not-allowed;
 }
 
-/* Material Icons */
+/* Material Icons - Configuración base */
 .material-icons {
+  font-family: "Material Icons";
+  font-weight: normal;
+  font-style: normal;
   font-size: 20px;
-  vertical-align: middle;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .route-form-container {
-    width: 95%;
-    margin: 10px;
-  }
-
-  .point-actions {
-    flex-direction: column;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-}
-/* Agregar al final de RouteFormPolyline.css */
-
-.selection-active-message {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  color: #856404;
-  padding: 15px;
-  border-radius: 6px;
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.selection-active-message .material-icons {
-  font-size: 24px;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.selection-active-message strong {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 1.1em;
-}
-
-.selection-active-message p {
-  margin: 5px 0 0 0;
-  font-size: 0.9em;
-  opacity: 0.9;
-}
-
-/* Estado cuando está en modo selección */
-.route-form-container:has(.selection-active-message) {
-  opacity: 0.9;
-}
-
-/* Agregar al final de RouteFormPolyline.css */
-.selection-active-message {
-  background: #fff3cd;
-  border: 1px solid #ffeaa7;
-  color: #856404;
-  padding: 15px;
-  border-radius: 6px;
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.selection-active-message .material-icons {
-  font-size: 24px;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.selection-active-message strong {
-  display: block;
-  margin-bottom: 5px;
-  font-size: 1.1em;
-}
-
-.selection-active-message p {
-  margin: 5px 0 0 0;
-  font-size: 0.9em;
-  opacity: 0.9;
-}
-/* Agrega esto a RouteFormPolyline.css */
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #34495e;
-  font-size: 0.9em;
-  cursor: pointer; /* Mejora la accesibilidad */
-}
-
-/* Asegúrate que los inputs tengan los ids correspondientes */
-#nombre-ruta:focus,
-#tipo-ruta:focus {
-  outline: 2px solid #3498db;
-  outline-offset: 2px;
-}
+/* Cursor para modo dibujo */
 .route-drawing-mode,
 .route-drawing-mode * {
   cursor: crosshair !important;
@@ -462,10 +494,50 @@
 .route-drawing-mode .leaflet-pane {
   cursor: crosshair !important;
 }
+
 .route-point-marker {
   cursor: crosshair !important;
 }
 
 .route-point-marker * {
   cursor: crosshair !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .route-form-container {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .point-actions {
+    flex-direction: column;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .route-form-header h3 {
+    font-size: 1.1em;
+  }
+
+  .selection-instructions h3 {
+    font-size: 1em;
+  }
+
+  .step-number {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+
+  .feature-list li .material-icons {
+    font-size: 14px;
+  }
 }
