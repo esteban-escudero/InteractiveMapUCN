@@ -489,11 +489,14 @@
 }
 
 /* ========== ACCIONES DEL EDIFICIO (PARTE INFERIOR DE LA TARJETA) ========== */
+/* ========== ACCIONES DEL EDIFICIO (PARTE INFERIOR DE LA TARJETA) ========== */
 .building-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr; /* ← 3 botones en fila */
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 0;
   border-top: 1px solid #e9ecef;
+  overflow: hidden; /* ← AGREGADO: fuerza el clip de las esquinas */
+  border-radius: 0 0 12px 12px; /* ← AGREGADO: radio para el contenedor */
 }
 
 .edit-btn,
@@ -501,7 +504,7 @@
 .delete-btn {
   padding: 14px 12px;
   border: none;
-  border-radius: 0;
+  border-radius: 0 !important; /* ← FORZAR sin radius por defecto */
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -529,7 +532,6 @@
 .edit-btn {
   background: #3498db;
   color: white;
-  border-radius: 0 0 0 12px; /* ← Esquina inferior izquierda redondeada */
 }
 
 .edit-btn:hover:not(:disabled) {
@@ -550,7 +552,6 @@
 .delete-btn {
   background: #e74c3c;
   color: white;
-  border-radius: 0 0 12px 0; /* ← Esquina inferior derecha redondeada */
 }
 
 .delete-btn:hover:not(:disabled) {
