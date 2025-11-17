@@ -1,4 +1,3 @@
-// components/map/Map/Map.jsx - MEJORADO CON NUEVO SISTEMA DE FILTROS
 import React, { useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -38,7 +37,7 @@ import { MapLists } from "./components/MapLists.jsx";
 import { MapLayers } from "./components/MapLayers.jsx";
 
 function Map() {
-  // ========== HOOKS PRINCIPALES ==========
+  // Hooks Principales
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
   const [isRouteDrawingActive, setIsRouteDrawingActive] = useState(false);
@@ -88,7 +87,7 @@ function Map() {
   const { getPrioritizedRoutes, buildingGraphs, hasData } =
     useRouteIntelligence(routes, buildings);
 
-  // ========== FILTROS MEJORADOS ==========
+  //  Filtros Mejordos
   const {
     filteredBuildings, // Solo filtrados por categoría
     highlightedBuildings, // Origen y destino destacados
@@ -99,16 +98,17 @@ function Map() {
   } = useBuildingFilters(buildings, mapState.filters);
 
   // Log de filtros activos
-  console.log("Estado de filtros:", {
+  console.log("🎯 Estado de filtros:", {
     categoría: mapState.filters.category || "ninguna",
     origen: mapState.filters.origin || "ninguno",
     destino: mapState.filters.destination || "ninguno",
+    tipoRuta: mapState.filters.routeType || "todos",
     edificiosMostrados: stats.filtered,
     edificiosDestacados: stats.highlighted,
     rutaLista: filtersState.routeCalculationReady,
   });
 
-  // ========== HOOKS FACTORIZADOS ==========
+  //Hooks Factorizados
 
   // Datos y lógica del mapa
   const mapData = useMapData(
@@ -173,7 +173,7 @@ function Map() {
     handleRouteClick
   );
 
-  // ========== EFFECTS ==========
+  // Effects
   useMapEffects(
     mapRef,
     mapInstance,
@@ -188,7 +188,7 @@ function Map() {
     loadWFSData
   );
 
-  // ========== MANEJO DE INTERACCIONES DEL MAPA ==========
+  // Manejo de Interacciones del Mapa
   useMapClickHandler(
     mapInstance,
     coordinateManagement,
@@ -198,10 +198,10 @@ function Map() {
     isRouteDrawingActive
   );
 
-  // ========== RENDERIZADO ==========
+  // Renderizado
   return (
     <div className="container">
-      {/* PANEL LATERAL */}
+      {/* Panel Lateral */}
       <SidePanel
         status={backendStatus === "connected" ? "success" : "error"}
         featuresCount={buildings.length}
@@ -228,6 +228,7 @@ function Map() {
         originFilter={mapState.filters.origin}
         destinationFilter={mapState.filters.destination}
         categoryFilter={mapState.filters.category}
+        routeTypeFilter={mapState.filters.routeType}
         onOriginFilterChange={(e) =>
           mapState.handleFilterChange("origin", e.target.value)
         }
@@ -237,13 +238,16 @@ function Map() {
         onCategoryFilterChange={(e) =>
           mapState.handleFilterChange("category", e.target.value)
         }
+        onRouteTypeFilterChange={(e) =>
+          mapState.handleFilterChange("routeType", e.target.value)
+        }
         onClearFilters={mapState.handleClearFilters}
-        allBuildings={buildings} // ← IMPORTANTE: Lista completa
+        allBuildings={buildings}
         filteredBuildings={filteredBuildings}
         filtersValid={filtersState.routeCalculationReady}
       />
 
-      {/* NOTIFICACIONES Y DIÁLOGOS */}
+      {/* Notificaciones y Diálogos */}
       {notification.show && (
         <UINotification
           message={notification.message}
@@ -264,7 +268,7 @@ function Map() {
         onCancel={hideConfirm}
       />
 
-      {/* FORMULARIOS */}
+      {/* Formularios */}
       <MapForms
         mapState={mapState}
         businessHandlers={businessHandlers}
@@ -275,7 +279,7 @@ function Map() {
         showUINotification={showUINotification}
       />
 
-      {/* LISTAS Y GESTIÓN */}
+      {/* Listas Y Gestión */}
       <MapLists
         mapState={mapState}
         businessHandlers={businessHandlers}
@@ -287,7 +291,7 @@ function Map() {
         handleEditRoute={handleEditRoute}
       />
 
-      {/* COMPONENTES DEL MAPA */}
+      {/* Componentes del Mapa */}
       <MapContainer mapRef={mapRef} isMapReady={isMapReady}>
         <MapIndicators
           coordinateDetection={coordinateManagement.coordinateDetection}
@@ -301,12 +305,12 @@ function Map() {
         />
       </MapContainer>
 
-      {/* CAPAS DEL MAPA - CON NUEVO SISTEMA */}
+      {/* Capas Del Mapa */}
       <MapLayers
         mapInstance={mapInstance}
         isMapReady={isMapReady}
-        filteredBuildings={filteredBuildings} // Solo filtrados por categoría
-        highlightedBuildings={highlightedBuildings} // Origen/destino destacados
+        filteredBuildings={filteredBuildings}
+        highlightedBuildings={highlightedBuildings}
         prioritizedRoutes={mapData.prioritizedRoutes}
         mapState={mapState}
         routes={routes}

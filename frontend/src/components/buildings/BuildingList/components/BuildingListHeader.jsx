@@ -1,4 +1,3 @@
-// components/buildings/BuildingList/components/BuildingListHeader.jsx
 import React from "react";
 
 const BuildingListHeader = ({ onClose }) => {

@@ -22,6 +22,7 @@ export const useMapState = () => {
     origin: "",
     destination: "",
     category: "",
+    routeType: "",
   });
 
   // Ruta seleccionada
@@ -99,6 +100,7 @@ export const useMapState = () => {
       origin: "",
       destination: "",
       category: "",
+      routeType: "",
     });
     setSelectedRoute(null);
   }, []);

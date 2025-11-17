@@ -1,4 +1,3 @@
-// frontend/src/hooks/map/useMapData.js
 import { useMemo, useCallback } from "react";
 
 export const useMapData = (
@@ -9,7 +8,7 @@ export const useMapData = (
   buildingGraphs,
   hasData
 ) => {
-  // ========== VALIDACIÓN DE FILTROS ==========
+  // Validación de Filtros
   const filtersValid = useMemo(() => {
     return (
       mapState.filters.origin &&
@@ -19,45 +18,82 @@ export const useMapData = (
     );
   }, [mapState.filters, buildings]);
 
-  // ========== RUTAS PRIORIZADAS ==========
+  // Rutas Priorizadas o Filtradas
   const prioritizedRoutes = useMemo(() => {
-    const getBuildingFromName = (buildingName) => {
-      return buildings.find((b) => b.nombre === buildingName);
-    };
+    // 1. Si hay origen Y destino: calcular ruta óptima
+    if (mapState.filters.origin && mapState.filters.destination) {
+      const getBuildingFromName = (buildingName) => {
+        return buildings.find((b) => b.nombre === buildingName);
+      };
 
-    const originBuilding = getBuildingFromName(mapState.filters.origin);
-    const destinationBuilding = getBuildingFromName(
-      mapState.filters.destination
-    );
+      const originBuilding = getBuildingFromName(mapState.filters.origin);
+      const destinationBuilding = getBuildingFromName(
+        mapState.filters.destination
+      );
 
-    if (originBuilding && destinationBuilding) {
-      console.log("Calculando rutas priorizadas entre:", {
-        origin: originBuilding.nombre,
-        destination: destinationBuilding.nombre,
-      });
+      if (originBuilding && destinationBuilding) {
+        console.log("Calculando rutas priorizadas entre:", {
+          origin: originBuilding.nombre,
+          destination: destinationBuilding.nombre,
+        });
 
-      try {
-        const result = getPrioritizedRoutes(
-          originBuilding.nombre,
-          destinationBuilding.nombre
-        );
-        return result || [];
-      } catch (error) {
-        console.error("Error en getPrioritizedRoutes:", error);
-        return routes;
+        try {
+          const result = getPrioritizedRoutes(
+            originBuilding.nombre,
+            destinationBuilding.nombre
+          );
+
+          // Si TAMBIÉN hay filtro de tipo de ruta, aplicarlo
+          if (mapState.filters.routeType && result) {
+            const filteredByType = result.filter(
+              (r) =>
+                r.tipo &&
+                r.tipo.toLowerCase() ===
+                  mapState.filters.routeType.toLowerCase()
+            );
+            console.log(
+              `🔍 Filtro de tipo "${mapState.filters.routeType}" aplicado: ${filteredByType.length} rutas`
+            );
+            return filteredByType;
+          }
+
+          return result || [];
+        } catch (error) {
+          console.error("Error en getPrioritizedRoutes:", error);
+          return routes;
+        }
       }
-    } else {
-      return routes;
     }
+
+    // 2. Si SOLO hay filtro de tipo de ruta: mostrar todas las rutas de ese tipo
+    if (
+      mapState.filters.routeType &&
+      !mapState.filters.origin &&
+      !mapState.filters.destination
+    ) {
+      const filteredRoutes = routes.filter(
+        (route) =>
+          route.tipo &&
+          route.tipo.toLowerCase() === mapState.filters.routeType.toLowerCase()
+      );
+      console.log(
+        `🔍 Mostrando todas las rutas tipo "${mapState.filters.routeType}": ${filteredRoutes.length} rutas`
+      );
+      return filteredRoutes;
+    }
+
+    // 3. Sin filtros: mostrar todas las rutas
+    return routes;
   }, [
     mapState.filters.origin,
     mapState.filters.destination,
+    mapState.filters.routeType,
     getPrioritizedRoutes,
     routes,
     buildings,
   ]);
 
-  // ========== DIAGNÓSTICO DEL SISTEMA ==========
+  // Diagnostico del Sistema
   const diagnoseRouteIssues = useCallback(() => {
     console.log("DIAGNÓSTICO DEL SISTEMA DE RUTAS:");
 
@@ -88,6 +124,7 @@ export const useMapData = (
     console.log("2. FILTROS ACTUALES:", {
       origin: mapState.filters.origin,
       destination: mapState.filters.destination,
+      routeType: mapState.filters.routeType,
       originExists: buildings.some((b) => b.nombre === mapState.filters.origin),
       destinationExists: buildings.some(
         (b) => b.nombre === mapState.filters.destination
@@ -136,7 +173,7 @@ export const useMapData = (
     filtersValid,
   ]);
 
-  // ========== VERIFICACIÓN DE DATOS ==========
+  // Verificacion de Datos
   const verifyData = useCallback(() => {
     console.log("VERIFICACIÓN DE DATOS EN MAP:", {
       edificios: {
@@ -158,6 +195,7 @@ export const useMapData = (
       },
       filtros: {
         activos: !!mapState.filters.origin && !!mapState.filters.destination,
+        routeType: mapState.filters.routeType,
         validos: filtersValid,
       },
     });
