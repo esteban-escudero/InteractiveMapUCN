@@ -165,7 +165,7 @@ const RouteLayer = ({
         const startCoords = latLngs[0];
         const startMarker = L.marker(startCoords, {
           icon: L.divIcon({
-            html: '<div class="route-marker origin">🚩</div>',
+            html: '<div class="route-marker origin"></div>',
             className: "route-marker-icon",
             iconSize: [30, 30],
           }),
@@ -177,7 +177,7 @@ const RouteLayer = ({
         const endCoords = latLngs[latLngs.length - 1];
         const endMarker = L.marker(endCoords, {
           icon: L.divIcon({
-            html: '<div class="route-marker destination">🎯</div>',
+            html: '<div class="route-marker destination"></div>',
             className: "route-marker-icon",
             iconSize: [30, 30],
           }),

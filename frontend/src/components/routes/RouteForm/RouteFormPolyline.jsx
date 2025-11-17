@@ -503,8 +503,8 @@ const RouteFormPolyline = ({
                     <div>
                       <strong>
                         {snappedPreview.snapType === "node"
-                          ? "🎯 Nodo detectado"
-                          : "📍 Línea detectada"}
+                          ? "Nodo detectado"
+                          : "Línea detectada"}
                       </strong>
                       <br />
                       <small>

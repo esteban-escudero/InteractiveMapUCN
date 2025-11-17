@@ -120,9 +120,7 @@ export const useRouteIntelligence = (routes, buildings) => {
       }
     });
 
-    console.log(
-      `📍 ${Object.keys(graphs.peatonal).length} edificios en grafos`
-    );
+    console.log(`${Object.keys(graphs.peatonal).length} edificios en grafos`);
 
     // 2. Crear conexiones basadas en rutas
     routes.forEach((route) => {
@@ -383,7 +381,7 @@ export const useRouteIntelligence = (routes, buildings) => {
         return routes;
       }
 
-      console.log(`🎯 Calculando rutas: ${origin} → ${destination}`);
+      console.log(`Calculando rutas: ${origin} → ${destination}`);
 
       const allCalculatedRoutes = [];
 

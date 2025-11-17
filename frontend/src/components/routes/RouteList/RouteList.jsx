@@ -43,7 +43,7 @@ const RouteList = ({
   // Y reemplázala con esta versión:
 
   const handleRouteAction = (route, action) => {
-    console.log(`🎯 Acción: ${action} en ruta:`, route.nombre);
+    console.log(`Acción: ${action} en ruta:`, route.nombre);
 
     switch (action) {
       case "edit":
@@ -64,7 +64,7 @@ const RouteList = ({
         break;
       case "select":
         if (onSelectRoute) {
-          console.log("📍 Llamando a onSelectRoute");
+          console.log("Llamando a onSelectRoute");
           onSelectRoute(route);
           // ⭐ Cerrar la lista después de seleccionar
           if (onClose) {

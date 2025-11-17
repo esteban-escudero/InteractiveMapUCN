@@ -18,11 +18,9 @@ const createBuildingIcon = (isHighlighted, highlightType) => {
     if (highlightType === "origin") {
       color = "#27ae60"; // Verde para origen
       borderColor = "#1e8449";
-      emoji = "🚩";
     } else if (highlightType === "destination") {
       color = "#e74c3c"; // Rojo para destino
       borderColor = "#c0392b";
-      emoji = "🎯";
     }
   }
 
@@ -195,7 +193,7 @@ const BuildingRenderer = ({
                 margin-bottom: 8px;
                 text-align: center;
               ">
-                🚩 PUNTO DE ORIGEN
+                PUNTO DE ORIGEN
               </div>
             `;
           } else if (isDestination) {
@@ -210,7 +208,7 @@ const BuildingRenderer = ({
                 margin-bottom: 8px;
                 text-align: center;
               ">
-                🎯 PUNTO DE DESTINO
+                PUNTO DE DESTINO
               </div>
             `;
           }

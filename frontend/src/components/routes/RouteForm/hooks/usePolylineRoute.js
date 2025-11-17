@@ -59,7 +59,7 @@ export const usePolylineRoute = ({
   // Crear icono de preview de snap
   const createSnapPreviewIcon = (snapType) => {
     const color = snapType === "node" ? "#27ae60" : "#3498db";
-    const icon = snapType === "node" ? "🎯" : "📍";
+    const icon = snapType === "node" ? "" : "";
 
     return L.divIcon({
       html: `
@@ -109,7 +109,7 @@ export const usePolylineRoute = ({
       );
 
       if (nodeSnap) {
-        console.log(`🎯 Snap a nodo: ${Math.round(nodeSnap.snapDistance)}m`);
+        console.log(`Snap a nodo: ${Math.round(nodeSnap.snapDistance)}m`);
         return nodeSnap;
       }
 
@@ -122,7 +122,7 @@ export const usePolylineRoute = ({
 
       if (segmentSnap) {
         console.log(
-          `📍 Snap a segmento: ${Math.round(segmentSnap.snapDistance)}m`
+          `Snap a segmento: ${Math.round(segmentSnap.snapDistance)}m`
         );
         return segmentSnap;
       }
@@ -503,10 +503,10 @@ export const usePolylineRoute = ({
           `<div style="text-align: center;">
             <strong>${
               index === 0
-                ? "🚩 Punto Inicial"
+                ? "Punto Inicial"
                 : index === latLngs.length - 1
-                ? "🎯 Punto Final"
-                : `📍 Punto ${index + 1}`
+                ? "Punto Final"
+                : `Punto ${index + 1}`
             }</strong><br/>
             <small>Arrastra para mover</small><br/>
             <small>${
@@ -536,7 +536,7 @@ export const usePolylineRoute = ({
   const addVertexOnPolyline = useCallback(() => {
     if (!polylineRef.current || !mapInstance) return;
 
-    console.log("🎯 Activando click en arista");
+    console.log("Activando click en arista");
 
     polylineRef.current.off("click");
     polylineRef.current.off("mousemove");
@@ -859,7 +859,7 @@ export const usePolylineRoute = ({
 
       // Log informativo
       if (snapPoint) {
-        const snapIcon = snapPoint.snapType === "node" ? "🎯" : "📍";
+        const snapIcon = snapPoint.snapType === "node" ? "" : "";
         console.log(
           `${snapIcon} SNAP ${snapPoint.snapType}: ${Math.round(
             snapPoint.snapDistance
@@ -873,7 +873,7 @@ export const usePolylineRoute = ({
           );
         }
       } else {
-        console.log("📍 Click sin snap");
+        console.log("Click sin snap");
       }
 
       if (polylineRef.current) {
@@ -918,7 +918,7 @@ export const usePolylineRoute = ({
 
   const loadExistingRoute = useCallback(
     (coordinates) => {
-      console.log("📍 Cargando ruta existente:", coordinates.length, "puntos");
+      console.log("Cargando ruta existente:", coordinates.length, "puntos");
 
       if (!mapInstance || coordinates.length < 2) return;
 

@@ -20,7 +20,7 @@ export const routeService = {
     try {
       console.log("🚀 ENVIANDO RUTA AL BACKEND:", routeData);
       console.log(
-        "📍 PUNTOS EN GEOMETRÍA:",
+        "PUNTOS EN GEOMETRÍA:",
         routeData.geometria?.coordinates?.length || 0
       );
 

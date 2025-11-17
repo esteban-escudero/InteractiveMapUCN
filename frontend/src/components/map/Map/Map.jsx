@@ -99,7 +99,7 @@ function Map() {
   } = useBuildingFilters(buildings, mapState.filters);
 
   // Log de filtros activos
-  console.log("🎯 Estado de filtros:", {
+  console.log("Estado de filtros:", {
     categoría: mapState.filters.category || "ninguna",
     origen: mapState.filters.origin || "ninguno",
     destino: mapState.filters.destination || "ninguno",

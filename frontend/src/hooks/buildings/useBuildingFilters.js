@@ -48,7 +48,7 @@ export const useBuildingFilters = (buildings, filters) => {
     }
 
     if (highlighted.origin || highlighted.destination) {
-      console.log("📍 Edificios destacados:", {
+      console.log("Edificios destacados:", {
         origin: highlighted.origin?.nombre || "ninguno",
         destination: highlighted.destination?.nombre || "ninguno",
       });

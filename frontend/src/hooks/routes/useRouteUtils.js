@@ -8,7 +8,7 @@ export const useRouteUtils = (mapInstance, mapManagement) => {
    */
   const handleRouteClick = useCallback(
     (route) => {
-      console.log("🎯 Ruta seleccionada:", route.nombre);
+      console.log("Ruta seleccionada:", route.nombre);
 
       // Marcar como seleccionada
       mapManagement.setSelectedRoute(route);

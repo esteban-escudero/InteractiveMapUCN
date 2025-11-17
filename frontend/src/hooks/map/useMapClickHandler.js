@@ -138,7 +138,7 @@ export const useMapClickHandler = (
       isRouteDrawing
     ) {
       if (isRouteDrawing) {
-        console.log("🎯 useMapClickHandler: Desactivado (modo dibujo de ruta)");
+        console.log("useMapClickHandler: Desactivado (modo dibujo de ruta)");
       }
       return;
     }
