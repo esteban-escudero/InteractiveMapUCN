@@ -64,10 +64,7 @@ const RouteFormPolyline = ({
   useEffect(() => {
     const handleGlobalKeyDown = (e) => {
       if (e.key === "Escape" && drawingMode) {
-        console.log(
-          "⌨️ ESC detectado en componente - drawingMode:",
-          drawingMode
-        );
+        console.log("ESC detectado en componente - drawingMode:", drawingMode);
         finishDrawing();
         e.preventDefault();
         e.stopPropagation();
@@ -85,7 +82,7 @@ const RouteFormPolyline = ({
     };
   }, [drawingMode, finishDrawing]);
 
-  // 🔹 OCULTAR FORMULARIO DURANTE SELECCIÓN ACTIVA
+  // OCULTAR FORMULARIO DURANTE SELECCIÓN ACTIVA
   if (drawingMode) {
     console.log("FORMULARIO OCULTO - drawingMode activo");
     return null;
@@ -555,43 +552,6 @@ const RouteFormPolyline = ({
               </div>
             </div>
           </div>
-
-          {formData.geometria && (
-            <div className="route-details-section">
-              <h4>
-                <span className="material-icons">info</span>
-                Detalles de la Ruta
-              </h4>
-              <div className="route-details">
-                <div className="detail-item">
-                  <span className="detail-label">Distancia total:</span>
-                  <span className="detail-value">
-                    {formData.distancia.toLocaleString()}m
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Tiempo estimado:</span>
-                  <span className="detail-value">
-                    {formData.tiempo_estimado} min
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Puntos en ruta:</span>
-                  <span className="detail-value">
-                    {polylineRef.current
-                      ? polylineRef.current.getLatLngs().length
-                      : 0}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Tipo:</span>
-                  <span className={`detail-value route-type-${formData.tipo}`}>
-                    {formData.tipo}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="form-actions">
             <button type="button" className="cancel-btn" onClick={handleCancel}>
