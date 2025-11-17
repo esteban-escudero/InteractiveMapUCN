@@ -398,7 +398,7 @@
 .cancel-btn {
   flex: 1;
   padding: 12px 20px;
-  background: #ff0000;
+  background: #e74c3c;
   color: white;
   border: none;
   border-radius: 4px;
@@ -412,7 +412,7 @@
 }
 
 .cancel-btn:hover:not(:disabled) {
-  background: #ff0000;
+  background: #e74c3c;
 }
 
 .cancel-btn:disabled {

@@ -1,16 +1,6 @@
-// components/routes/RouteForm/hooks/useMapSelection.js
 import { useState, useEffect, useCallback } from "react";
-import { SpatialUtils } from "../../../../utils/spatialUtils";
 
-export const useMapSelection = ({
-  mapInstance,
-  formData,
-  setFormData,
-  findNearbyNodes,
-  selectedExistingNode,
-  setSelectedExistingNode,
-  setShowNodesPanel,
-}) => {
+export const useMapSelection = ({ mapInstance, formData, setFormData }) => {
   const [tempMarkers, setTempMarkers] = useState([]);
   const [tempLine, setTempLine] = useState(null);
   const [selectionActive, setSelectionActive] = useState(false);
@@ -56,48 +46,18 @@ export const useMapSelection = ({
 
       setFormData((prev) => {
         const puntoCount = prev.puntos_ruta.length;
-        const nearbyNodes = findNearbyNodes(lat, lng);
 
-        let puntoFinal;
-        let markerColor = "#95a5a6";
-
-        // Mostrar panel de selección si hay nodos cercanos
-        if (nearbyNodes.length > 0 && !selectedExistingNode) {
-          setSelectedExistingNode({
-            coordenadas: { lat, lng },
-            nearbyNodes: nearbyNodes,
-          });
-          setShowNodesPanel(true);
-          return prev;
-        }
-
-        // Usar nodo existente seleccionado
-        if (selectedExistingNode && selectedExistingNode.selectedNode) {
-          const node = selectedExistingNode.selectedNode;
-          puntoFinal = {
-            ...node,
-            lat: node.coordenadas.lat,
-            lng: node.coordenadas.lng,
-            nombre: node.nombre,
-            tipo_punto: "intermedio",
-            es_nodo_existente: true,
-            id_punto_existente: node.puntoId,
-          };
-          markerColor = "#9b59b6";
-        } else {
-          // Crear nuevo punto
-          puntoFinal = {
-            lat,
-            lng,
-            nombre: `Punto ${puntoCount + 1}`,
-            tipo_punto: "intermedio",
-            es_nodo_existente: false,
-          };
-        }
+        // Crear nuevo punto simple
+        const puntoFinal = {
+          lat,
+          lng,
+          nombre: `Punto ${puntoCount + 1}`,
+          tipo_punto: "intermedio",
+        };
 
         // Crear marcador
-        const marker = createMarker(puntoFinal, markerColor);
-        setTempMarkers((prev) => [...prev, marker]);
+        const marker = createMarker(puntoFinal, "#95a5a6");
+        setTempMarkers((prevMarkers) => [...prevMarkers, marker]);
 
         // Preparar datos del punto
         const updatedPuntos = [
@@ -105,23 +65,13 @@ export const useMapSelection = ({
           createPuntoData(puntoFinal, puntoCount + 1),
         ];
 
-        // Limpiar selección
-        setSelectedExistingNode(null);
-        setShowNodesPanel(false);
-
         return {
           ...prev,
           puntos_ruta: updatedPuntos,
         };
       });
     },
-    [
-      mapInstance,
-      findNearbyNodes,
-      selectedExistingNode,
-      setSelectedExistingNode,
-      setShowNodesPanel,
-    ]
+    [mapInstance, setFormData]
   );
 
   const createMarker = (punto, color) => {
@@ -135,13 +85,10 @@ export const useMapSelection = ({
             border-radius: 50%; 
             border: 3px solid white; 
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            ${punto.es_nodo_existente ? "animation: pulse 2s infinite;" : ""}
           "></div>
         `,
         iconSize: [24, 24],
-        className: `temp-route-point ${
-          punto.es_nodo_existente ? "existing-node" : ""
-        }`,
+        className: "temp-route-point",
       }),
     }).addTo(mapInstance);
 
@@ -152,26 +99,15 @@ export const useMapSelection = ({
     return marker;
   };
 
-  //Mensaje Punto Mapa
   const createPopupContent = (punto) => {
-    let content = `
+    return `
       <div style="text-align: center;">
         <strong>${punto.nombre}</strong><br>
         Lat: ${punto.lat.toFixed(6)}<br>
         Lng: ${punto.lng.toFixed(6)}<br>
         <small>Punto ${formData.puntos_ruta.length + 1}</small>
+      </div>
     `;
-
-    if (punto.es_nodo_existente) {
-      content += `
-        <br><small style="color: #9b59b6; font-weight: bold;">
-          Nodo Existente
-        </small>
-      `;
-    }
-
-    content += `</div>`;
-    return content;
   };
 
   const createPuntoData = (punto, orden) => ({
@@ -185,8 +121,6 @@ export const useMapSelection = ({
       type: "Point",
       coordinates: [punto.lng, punto.lat],
     },
-    es_nodo_existente: punto.es_nodo_existente,
-    id_punto_existente: punto.id_punto_existente,
   });
 
   const handleActivateMapSelection = () => {
@@ -238,6 +172,8 @@ export const useMapSelection = ({
       puntos_ruta: updatedPuntos,
     }));
 
+    updateMarkersWithColors(updatedPuntos);
+    drawRouteLine(updatedPuntos);
     handleDeactivateMapSelection();
   };
 
@@ -315,7 +251,6 @@ export const useMapSelection = ({
   const getMarkerColor = (punto) => {
     if (punto.tipo_punto === "inicio") return "#27ae60";
     if (punto.tipo_punto === "fin") return "#e74c3c";
-    if (punto.es_nodo_existente) return "#9b59b6";
     return "#3498db";
   };
 

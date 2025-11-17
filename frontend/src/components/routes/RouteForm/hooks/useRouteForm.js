@@ -1,5 +1,6 @@
+// components/routes/RouteForm/hooks/useRouteForm.js
+// VERSIÓN LIMPIA - Sistema de polilíneas únicamente (SIN sistema de nodos)
 import { useState, useEffect } from "react";
-import { useNodeManagement } from "./useNodeManagement";
 import { useMapSelection } from "./useMapSelection";
 import { useRouteCalculations } from "./useRouteCalculations";
 
@@ -10,7 +11,6 @@ export const useRouteForm = ({
   route,
   isEditing,
   mapInstance,
-  existingRoutes,
 }) => {
   const [formData, setFormData] = useState({
     nombre: "",
@@ -20,18 +20,6 @@ export const useRouteForm = ({
     geometria: null,
     puntos_ruta: [],
   });
-
-  const {
-    existingNodes,
-    selectedExistingNode,
-    showNodesPanel,
-    setSelectedExistingNode,
-    setShowNodesPanel,
-    extractNodesFromRoutes,
-    findNearbyNodes,
-    handleSelectExistingNode,
-    handleCancelNodeSelection,
-  } = useNodeManagement({ existingRoutes });
 
   const {
     tempMarkers,
@@ -48,10 +36,6 @@ export const useRouteForm = ({
     mapInstance,
     formData,
     setFormData,
-    findNearbyNodes,
-    selectedExistingNode,
-    setSelectedExistingNode,
-    setShowNodesPanel,
   });
 
   const { calculateTotalDistance, handleFinishWithESC } = useRouteCalculations({
@@ -97,7 +81,7 @@ export const useRouteForm = ({
         tiempo_estimado: 0,
       }));
     }
-  }, [formData.puntos_ruta]);
+  }, [formData.puntos_ruta, calculateTotalDistance]);
 
   // Funciones del formulario
   const handleInputChange = (e) => {
@@ -153,8 +137,6 @@ export const useRouteForm = ({
   const handleCancel = () => {
     clearTempMarkers();
     removeMapClickListener();
-    setSelectedExistingNode(null);
-    setShowNodesPanel(false);
 
     if (!isEditing) {
       resetForm();
@@ -218,9 +200,6 @@ export const useRouteForm = ({
   return {
     // State
     formData,
-    existingNodes,
-    selectedExistingNode,
-    showNodesPanel,
     tempMarkers,
     tempLine,
     selectionActive,
@@ -234,8 +213,6 @@ export const useRouteForm = ({
     handleRemoveLastPoint,
     handleSubmit,
     handleCancel,
-    handleSelectExistingNode,
-    handleCancelNodeSelection,
     handleFinishWithESC,
   };
 };
