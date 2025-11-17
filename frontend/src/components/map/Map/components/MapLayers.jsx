@@ -1,5 +1,6 @@
 /**
- * Componente que agrupa todas las capas del mapa
+ * Componente que agrupa todas las capas del mapa - MEJORADO
+ * Ahora maneja edificios destacados y rutas calculadas
  */
 import React from "react";
 import RouteLayer from "../../RouteLayer/RouteLayer.jsx";
@@ -10,6 +11,7 @@ export const MapLayers = ({
   mapInstance,
   isMapReady,
   filteredBuildings,
+  highlightedBuildings, // ← NUEVO: edificios destacados
   prioritizedRoutes,
   mapState,
   routes,
@@ -18,18 +20,19 @@ export const MapLayers = ({
 }) => {
   return (
     <>
-      {/* Capa de Edificios */}
+      {/* Capa de Edificios - Ahora con resaltado */}
       <BuildingRenderer
         mapInstance={mapInstance}
         isMapReady={isMapReady}
-        buildings={filteredBuildings}
+        buildings={filteredBuildings} // Solo filtrados por categoría
+        highlightedBuildings={highlightedBuildings} // Origen y destino destacados
         onBuildingClick={interactionHandlers.handleBuildingClickWithProximity}
       />
 
-      {/* Capa de Rutas */}
+      {/* Capa de Rutas - Muestra rutas calculadas o todas */}
       <RouteLayer
         mapInstance={mapInstance}
-        routes={prioritizedRoutes}
+        routes={prioritizedRoutes} // Rutas priorizadas o todas
         onRouteClick={handleRouteClick}
         originFilter={mapState.filters.origin}
         destinationFilter={mapState.filters.destination}
@@ -37,7 +40,7 @@ export const MapLayers = ({
         editingRoute={mapState.editingRoute}
       />
 
-      {/* Red de Rutas */}
+      {/* Red de Rutas (opcional) */}
       {mapState.showRouteNetwork && (
         <RouteNetwork
           mapInstance={mapInstance}

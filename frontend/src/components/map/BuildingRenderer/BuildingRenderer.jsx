@@ -1,18 +1,79 @@
+// components/map/BuildingRenderer/BuildingRenderer.jsx - MEJORADO
 import { useEffect, useState } from "react";
 import L from "leaflet";
+import { SpatialUtils } from "../../../utils/spatialUtils";
 
-const createDatabaseIcon = () =>
-  L.divIcon({
-    html: `<div style="background-color: #ae279eff; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
-    iconSize: [18, 18],
-    className: "database-building-icon",
+// Iconos personalizados según tipo de edificio
+const createBuildingIcon = (isHighlighted, highlightType) => {
+  let color = "#ae279eff"; // Color por defecto
+  let size = 14;
+  let borderWidth = 2;
+  let borderColor = "white";
+  let emoji = "";
+
+  if (isHighlighted) {
+    size = 20;
+    borderWidth = 3;
+
+    if (highlightType === "origin") {
+      color = "#27ae60"; // Verde para origen
+      borderColor = "#1e8449";
+      emoji = "🚩";
+    } else if (highlightType === "destination") {
+      color = "#e74c3c"; // Rojo para destino
+      borderColor = "#c0392b";
+      emoji = "🎯";
+    }
+  }
+
+  return L.divIcon({
+    html: `
+      <div style="
+        position: relative;
+        width: ${size}px;
+        height: ${size}px;
+      ">
+        <div style="
+          background-color: ${color};
+          width: ${size}px;
+          height: ${size}px;
+          border-radius: 50%;
+          border: ${borderWidth}px solid ${borderColor};
+          box-shadow: 0 2px 8px rgba(0,0,0,${isHighlighted ? 0.5 : 0.3});
+          ${isHighlighted ? "animation: pulse 2s infinite;" : ""}
+        "></div>
+        ${
+          emoji
+            ? `<div style="
+          position: absolute;
+          top: -25px;
+          left: 50%;
+          transform: translateX(-50%);
+          font-size: 20px;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        ">${emoji}</div>`
+            : ""
+        }
+      </div>
+      <style>
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.1); opacity: 0.8; }
+        }
+      </style>
+    `,
+    iconSize: [size + 10, size + 30],
+    className: isHighlighted
+      ? "highlighted-building-icon"
+      : "database-building-icon",
   });
+};
 
 const BuildingRenderer = ({
   mapInstance,
   isMapReady,
   buildings,
-  SpatialUtils,
+  highlightedBuildings = { origin: null, destination: null },
 }) => {
   const [buildingLayers, setBuildingLayers] = useState([]);
 
@@ -31,21 +92,52 @@ const BuildingRenderer = ({
     buildings.forEach((building) => {
       if (!building.ubicacion) return;
 
+      // Determinar si este edificio está destacado
+      const isOrigin = highlightedBuildings.origin?.nombre === building.nombre;
+      const isDestination =
+        highlightedBuildings.destination?.nombre === building.nombre;
+      const isHighlighted = isOrigin || isDestination;
+      const highlightType = isOrigin
+        ? "origin"
+        : isDestination
+        ? "destination"
+        : null;
+
       let layer;
       try {
         if (building.ubicacion.type === "Point") {
           const [lng, lat] = building.ubicacion.coordinates;
-          layer = L.marker([lat, lng], { icon: createDatabaseIcon() });
+          layer = L.marker([lat, lng], {
+            icon: createBuildingIcon(isHighlighted, highlightType),
+            zIndexOffset: isHighlighted ? 1000 : 0, // Destacados al frente
+          });
         } else if (building.ubicacion.type === "Polygon") {
           const coords = building.ubicacion.coordinates[0].map((c) => [
             c[1],
             c[0],
           ]);
+
+          let fillColor = "#27ae60";
+          let fillOpacity = 0.3;
+          let weight = 3;
+
+          if (isHighlighted) {
+            fillOpacity = 0.5;
+            weight = 5;
+            if (isOrigin) {
+              fillColor = "#27ae60"; // Verde
+            } else if (isDestination) {
+              fillColor = "#e74c3c"; // Rojo
+            }
+          }
+
           layer = L.polygon(coords, {
-            color: "#27ae60",
-            weight: 3,
-            fillOpacity: 0.3,
-            className: "building-polygon",
+            color: fillColor,
+            weight: weight,
+            fillOpacity: fillOpacity,
+            className: isHighlighted
+              ? "building-polygon highlighted"
+              : "building-polygon",
           });
         }
 
@@ -64,7 +156,7 @@ const BuildingRenderer = ({
             }
           }
 
-          // Determinar color y texto del estado
+          // Color y texto del estado
           let estadoColor = "#95a5a6";
           let estadoText = "No especificado";
           let estadoIcon = "⚪";
@@ -79,7 +171,7 @@ const BuildingRenderer = ({
           ) {
             estadoColor = "#e74c3c";
             estadoText = "Inactivo";
-            estadoIcon = "";
+            estadoIcon = "🔴";
           } else if (
             building.estado === "mantenimiento" ||
             building.estado === "Mantenimiento"
@@ -87,6 +179,40 @@ const BuildingRenderer = ({
             estadoColor = "#f39c12";
             estadoText = "Mantenimiento";
             estadoIcon = "🟡";
+          }
+
+          // Badge de destacado
+          let highlightBadge = "";
+          if (isOrigin) {
+            highlightBadge = `
+              <div style="
+                background: linear-gradient(135deg, #27ae60, #229954);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                text-align: center;
+              ">
+                🚩 PUNTO DE ORIGEN
+              </div>
+            `;
+          } else if (isDestination) {
+            highlightBadge = `
+              <div style="
+                background: linear-gradient(135deg, #e74c3c, #c0392b);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                text-align: center;
+              ">
+                🎯 PUNTO DE DESTINO
+              </div>
+            `;
           }
 
           const popup = `
@@ -97,14 +223,18 @@ const BuildingRenderer = ({
           background: white;
           border-radius: 8px;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          border-top: 3px solid #3498db;
+          border-top: 3px solid ${
+            isHighlighted ? (isOrigin ? "#27ae60" : "#e74c3c") : "#3498db"
+          };
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           overflow: hidden;
         ">
           <h4 style="
             margin: 0;
             padding: 10px 12px;
-            background: #3498db;
+            background: ${
+              isHighlighted ? (isOrigin ? "#27ae60" : "#e74c3c") : "#3498db"
+            };
             color: white;
             font-size: 1em;
             font-weight: 600;
@@ -117,6 +247,8 @@ const BuildingRenderer = ({
           </h4>
           
           <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
+            ${highlightBadge}
+            
             <div style="display: flex; align-items: center; gap: 6px;">
               <span style="font-size: 14px;">📝</span>
               <div style="flex: 1;">
@@ -145,24 +277,26 @@ const BuildingRenderer = ({
               </div>
             </div>
       
-      ${
-        areaInfo
-          ? `
-      <div style="display: flex; align-items: center; gap: 6px;">
-        <span style="font-size: 14px;">📐</span>
-        <div style="flex: 1;">
-          <strong style="color: #34495e; font-size: 11px;">Área:</strong>
-          <div style="color: #546e7a; font-size: 12px;">${Math.round(
-            SpatialUtils.calculatePolygonArea(building.ubicacion.coordinates[0])
-          )} m²</div>
+            ${
+              areaInfo
+                ? `
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 14px;">📐</span>
+              <div style="flex: 1;">
+                <strong style="color: #34495e; font-size: 11px;">Área:</strong>
+                <div style="color: #546e7a; font-size: 12px;">${Math.round(
+                  SpatialUtils.calculatePolygonArea(
+                    building.ubicacion.coordinates[0]
+                  )
+                )} m²</div>
+              </div>
+            </div>
+            `
+                : ""
+            }
+          </div>
         </div>
-      </div>
-      `
-          : ""
-      }
-    </div>
-  </div>
-`;
+      `;
 
           layer.bindPopup(popup).addTo(mapInstance);
           newLayers.push(layer);
@@ -173,7 +307,13 @@ const BuildingRenderer = ({
     });
 
     setBuildingLayers(newLayers);
-  }, [mapInstance, buildings, isMapReady]);
+
+    console.log(
+      `✅ Renderizados ${newLayers.length} edificios (${
+        highlightedBuildings.origin ? 1 : 0
+      } origen, ${highlightedBuildings.destination ? 1 : 0} destino)`
+    );
+  }, [mapInstance, buildings, isMapReady, highlightedBuildings]);
 
   return null;
 };

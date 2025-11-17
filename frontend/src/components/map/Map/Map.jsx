@@ -1,4 +1,4 @@
-// components/map/Map/Map.jsx
+// components/map/Map/Map.jsx - MEJORADO CON NUEVO SISTEMA DE FILTROS
 import React, { useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -42,9 +42,6 @@ function Map() {
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
   const [isRouteDrawingActive, setIsRouteDrawingActive] = useState(false);
-
-  // NUEVO ESTADO: Controla cuándo ocultar el formulario durante selección
-  const [selectionActive, setSelectionActive] = useState(false);
 
   // Notificaciones y confirmaciones
   const { notification, showUINotification, hideNotification } =
@@ -91,6 +88,26 @@ function Map() {
   const { getPrioritizedRoutes, buildingGraphs, hasData } =
     useRouteIntelligence(routes, buildings);
 
+  // ========== FILTROS MEJORADOS ==========
+  const {
+    filteredBuildings, // Solo filtrados por categoría
+    highlightedBuildings, // Origen y destino destacados
+    filtersState, // Estado de validación
+    buildingOptions, // Opciones para selectores
+    categoryOptions, // Categorías disponibles
+    stats, // Estadísticas
+  } = useBuildingFilters(buildings, mapState.filters);
+
+  // Log de filtros activos
+  console.log("🎯 Estado de filtros:", {
+    categoría: mapState.filters.category || "ninguna",
+    origen: mapState.filters.origin || "ninguno",
+    destino: mapState.filters.destination || "ninguno",
+    edificiosMostrados: stats.filtered,
+    edificiosDestacados: stats.highlighted,
+    rutaLista: filtersState.routeCalculationReady,
+  });
+
   // ========== HOOKS FACTORIZADOS ==========
 
   // Datos y lógica del mapa
@@ -113,9 +130,6 @@ function Map() {
     validateCoordinates,
     findNearestBuilding
   );
-
-  // Filtros de edificios
-  const { filteredBuildings } = useBuildingFilters(buildings, mapState.filters);
 
   // Handlers de negocio
   const businessHandlers = useBusinessHandlers(
@@ -184,35 +198,6 @@ function Map() {
     isRouteDrawingActive
   );
 
-  // TEMPORAL: Agrega esta función en Map.jsx, justo antes del return
-  const handleSaveRouteDebug = async (routeData) => {
-    console.log("🎯 DEBUG DESDE MAP.JS - Ruta recibida:");
-    console.log("📦 Datos completos:", JSON.parse(JSON.stringify(routeData)));
-    console.log(
-      "📍 Número de puntos:",
-      routeData.geometria?.coordinates?.length || 0
-    );
-
-    // Llamar a la función original
-    await businessHandlers.handleSaveRoute(routeData);
-  };
-
-  // Y cambia temporalmente el onSave en RouteFormPolyline:
-  <RouteFormPolyline
-    onSave={handleSaveRouteDebug} // ← Cambia esto temporalmente
-    onCancel={() => {
-      mapState.setShowRouteForm(false);
-      mapState.setEditingRoute(null);
-      setIsRouteDrawingActive(false);
-    }}
-    isVisible={mapState.showRouteForm}
-    route={mapState.editingRoute}
-    isEditing={!!mapState.editingRoute}
-    mapInstance={mapInstance}
-    onSelectionStart={() => console.log("Iniciando selección")}
-    onSelectionEnd={() => console.log("Finalizando selección")}
-  />;
-
   // ========== RENDERIZADO ==========
   return (
     <div className="container">
@@ -253,10 +238,11 @@ function Map() {
           mapState.handleFilterChange("category", e.target.value)
         }
         onClearFilters={mapState.handleClearFilters}
-        allBuildings={buildings}
+        allBuildings={buildings} // ← IMPORTANTE: Lista completa
         filteredBuildings={filteredBuildings}
-        filtersValid={mapData.filtersValid}
+        filtersValid={filtersState.routeCalculationReady}
       />
+
       {/* NOTIFICACIONES Y DIÁLOGOS */}
       {notification.show && (
         <UINotification
@@ -277,6 +263,7 @@ function Map() {
         onConfirm={handleConfirm}
         onCancel={hideConfirm}
       />
+
       {/* FORMULARIOS */}
       <MapForms
         mapState={mapState}
@@ -314,11 +301,12 @@ function Map() {
         />
       </MapContainer>
 
-      {/* CAPAS DEL MAPA */}
+      {/* CAPAS DEL MAPA - CON NUEVO SISTEMA */}
       <MapLayers
         mapInstance={mapInstance}
         isMapReady={isMapReady}
-        filteredBuildings={filteredBuildings}
+        filteredBuildings={filteredBuildings} // Solo filtrados por categoría
+        highlightedBuildings={highlightedBuildings} // Origen/destino destacados
         prioritizedRoutes={mapData.prioritizedRoutes}
         mapState={mapState}
         routes={routes}

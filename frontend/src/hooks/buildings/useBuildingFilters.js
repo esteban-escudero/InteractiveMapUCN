@@ -1,84 +1,124 @@
+// hooks/buildings/useBuildingFilters.js - MEJORADO
 import { useMemo } from "react";
 
+/**
+ * Hook mejorado para filtros de edificios
+ * Separa lógica de filtrado visual (categoría) vs selección (origen/destino)
+ */
 export const useBuildingFilters = (buildings, filters) => {
+  // ========== EDIFICIOS FILTRADOS POR CATEGORÍA ==========
+  // Solo la categoría oculta edificios visualmente
   const filteredBuildings = useMemo(() => {
-    console.log("Aplicando filtros:", filters);
-    console.log("Edificios disponibles:", buildings.length);
-
-    // Mostrar tipos de edificios disponibles para debug
-    const tiposDisponibles = [...new Set(buildings.map((b) => b.tipo))];
-    console.log("Tipos de edificios disponibles:", tiposDisponibles);
-
-    if (!filters.category && !filters.origin && !filters.destination) {
-      console.log("Sin filtros - mostrando todos los edificios");
+    if (!filters.category) {
+      console.log("Sin filtro de categoría - mostrando todos los edificios");
       return buildings;
     }
 
     const filtered = buildings.filter((building) => {
-      // Filtro por categoría (tipo de edificio) - CORREGIDO
       const categoryMatch =
-        !filters.category ||
-        (building.tipo &&
-          building.tipo.toLowerCase() === filters.category.toLowerCase());
+        building.tipo &&
+        building.tipo.toLowerCase() === filters.category.toLowerCase();
 
-      // Filtro por origen (búsqueda en nombre)
-      const originMatch =
-        !filters.origin ||
-        (building.nombre &&
-          building.nombre.toLowerCase().includes(filters.origin.toLowerCase()));
-
-      // Filtro por destino (búsqueda en nombre)
-      const destinationMatch =
-        !filters.destination ||
-        (building.nombre &&
-          building.nombre
-            .toLowerCase()
-            .includes(filters.destination.toLowerCase()));
-
-      const matches = categoryMatch && originMatch && destinationMatch;
-
-      if (matches && filters.category) {
-        console.log(
-          `"${building.nombre}" (tipo: ${building.tipo}) coincide con categoría: ${filters.category}`
-        );
-      }
-
-      return matches;
+      return categoryMatch;
     });
 
     console.log(
-      `📊 Resultado del filtro: ${filtered.length} de ${buildings.length} edificios`
+      `🔍 Filtro de categoría "${filters.category}": ${filtered.length} de ${buildings.length} edificios`
     );
 
-    // Debug detallado de qué edificios coincidieron
-    if (filtered.length === 0 && filters.category) {
-      console.log("❌ Ningún edificio coincidió. Revisando...");
-      buildings.forEach((building) => {
-        console.log(
-          `   - "${building.nombre}": tipo="${building.tipo}", filtro="${filters.category}"`
-        );
-        console.log(
-          `     Coincide?: ${
-            building.tipo &&
-            building.tipo.toLowerCase() === filters.category.toLowerCase()
-          }`
-        );
+    return filtered;
+  }, [buildings, filters.category]);
+
+  // ========== EDIFICIOS DESTACADOS (ORIGEN/DESTINO) ==========
+  // Estos NO se filtran, solo se marcan para resaltado
+  const highlightedBuildings = useMemo(() => {
+    const highlighted = {
+      origin: null,
+      destination: null,
+    };
+
+    if (filters.origin) {
+      highlighted.origin = buildings.find((b) => b.nombre === filters.origin);
+    }
+
+    if (filters.destination) {
+      highlighted.destination = buildings.find(
+        (b) => b.nombre === filters.destination
+      );
+    }
+
+    if (highlighted.origin || highlighted.destination) {
+      console.log("📍 Edificios destacados:", {
+        origin: highlighted.origin?.nombre || "ninguno",
+        destination: highlighted.destination?.nombre || "ninguno",
       });
     }
 
-    return filtered;
-  }, [buildings, filters.category, filters.origin, filters.destination]);
+    return highlighted;
+  }, [buildings, filters.origin, filters.destination]);
 
+  // ========== VALIDACIÓN DE FILTROS ==========
+  const filtersState = useMemo(() => {
+    return {
+      hasCategory: !!filters.category,
+      hasOrigin: !!filters.origin,
+      hasDestination: !!filters.destination,
+      hasRouteSelection: !!filters.origin && !!filters.destination,
+      originValid: filters.origin
+        ? buildings.some((b) => b.nombre === filters.origin)
+        : false,
+      destinationValid: filters.destination
+        ? buildings.some((b) => b.nombre === filters.destination)
+        : false,
+      routeCalculationReady:
+        !!filters.origin &&
+        !!filters.destination &&
+        buildings.some((b) => b.nombre === filters.origin) &&
+        buildings.some((b) => b.nombre === filters.destination),
+    };
+  }, [buildings, filters]);
+
+  // ========== OPCIONES PARA SELECTORES ==========
   const buildingOptions = useMemo(() => {
-    return buildings.map((building) => ({
-      value: building.id || building._id || building.id_edificio,
-      label: building.nombre,
-      ...building,
-    }));
+    return buildings
+      .filter((building) => building.nombre) // Solo edificios con nombre
+      .map((building) => ({
+        value: building.nombre,
+        label: building.nombre,
+        id: building.id || building._id || building.id_edificio,
+        tipo: building.tipo,
+        coords: building.ubicacion?.coordinates,
+      }));
+  }, [buildings]);
+
+  // ========== OPCIONES DE CATEGORÍA ==========
+  const categoryOptions = useMemo(() => {
+    const tipos = [...new Set(buildings.map((b) => b.tipo).filter(Boolean))];
+    return tipos.sort();
   }, [buildings]);
 
   return {
+    // Edificios filtrados visualmente (solo por categoría)
     filteredBuildings,
+
+    // Edificios destacados (origen/destino) - NO filtrados
+    highlightedBuildings,
+
+    // Estado de filtros
+    filtersState,
+
+    // Opciones para selectores
     buildingOptions,
+    categoryOptions,
+
+    // Estadísticas
+    stats: {
+      total: buildings.length,
+      filtered: filteredBuildings.length,
+      highlighted: [
+        highlightedBuildings.origin,
+        highlightedBuildings.destination,
+      ].filter(Boolean).length,
+    },
   };
 };
