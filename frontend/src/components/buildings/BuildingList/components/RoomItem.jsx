@@ -24,7 +24,7 @@ const RoomItem = ({ room, isDeleting, onEditRoom, onDeleteRoom }) => {
       <div className="room-actions">
         <button
           className="edit-room-btn"
-          onClick={handleEditClick} // Cambiar a la nueva función
+          onClick={handleEditClick}
           title="Editar sala"
           disabled={isDeleting}>
           <span className="material-icons">edit</span>

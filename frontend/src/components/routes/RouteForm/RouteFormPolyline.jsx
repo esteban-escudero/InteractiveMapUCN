@@ -558,11 +558,16 @@ const RouteFormPolyline = ({
               <span className="material-icons">cancel</span>
               Cancelar
             </button>
+
             <button
               type="submit"
               className="save-btn"
               disabled={!formData.geometria}>
-              <span className="material-icons">add_circle</span>
+              {isEditing ? (
+                <span className="material-icons">update</span>
+              ) : (
+                <span className="material-icons">add_circle</span>
+              )}
               {isEditing ? "Actualizar Ruta" : "Crear Ruta"}
             </button>
           </div>

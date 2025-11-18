@@ -18,10 +18,12 @@ const RoomActions = ({
     return (
       <div className="room-actions">
         <button type="button" onClick={onDelete} className="delete-btn">
+          <span className="material-icons">delete</span>
           Eliminar
         </button>
         <div className="edit-actions">
           <button type="button" onClick={onClose} className="cancel-btn">
+            <span className="material-icons">cancel</span>
             Cancelar
           </button>
           <button
@@ -29,7 +31,8 @@ const RoomActions = ({
             onClick={onUpdate}
             className="save-btn"
             disabled={isSaveDisabled}>
-            💾 Actualizar
+            <span className="material-icons">save</span>
+            Actualizar
           </button>
         </div>
       </div>
@@ -39,6 +42,7 @@ const RoomActions = ({
   return (
     <div className="room-actions">
       <button type="button" onClick={onClose} className="cancel-btn">
+        <span className="material-icons">cancel</span>
         Cancelar
       </button>
       <button
@@ -46,7 +50,8 @@ const RoomActions = ({
         onClick={onSave}
         className="save-btn"
         disabled={isSaveDisabled}>
-        💾 Guardar {rooms.length} Salas
+        <span className="material-icons">save</span>
+        Guardar {rooms.length === 1 ? "1 Sala" : `${rooms.length} Salas`}
       </button>
     </div>
   );

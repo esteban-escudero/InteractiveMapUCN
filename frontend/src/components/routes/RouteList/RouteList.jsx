@@ -39,18 +39,13 @@ const RouteList = ({
     return colors[tipo] || colors.default;
   };
 
-  // En RouteList.jsx, busca la función handleRouteAction
-  // Y reemplázala con esta versión:
-
   const handleRouteAction = (route, action) => {
     console.log(`Acción: ${action} en ruta:`, route.nombre);
 
     switch (action) {
       case "edit":
         if (onEditRoute) {
-          console.log("✏️ Llamando a onEditRoute");
           onEditRoute(route);
-          // ⭐ Cerrar la lista después de editar
           if (onClose) {
             onClose();
           }

@@ -10,7 +10,9 @@ const FormActions = ({ formData, isEditing, onCancel, onSubmit }) => {
         Cancelar
       </button>
       <button type="submit" className="save-btn" disabled={!isFormValid}>
-        <span className="material-icons">add_circle</span>
+        <span className="material-icons">
+          {isEditing ? "update" : "add_circle"}
+        </span>
         {isEditing ? "Actualizar" : "Crear"} Edificio
       </button>
     </div>
