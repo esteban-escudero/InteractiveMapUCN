@@ -1,3 +1,4 @@
+// components/map/Map/Map.jsx
 import React, { useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -9,13 +10,12 @@ import { useMapState } from "../../../hooks/map/useMapState.js";
 import { useMapManagement } from "../../../hooks/map/useMapManagement.js";
 import { useMapData } from "../../../hooks/map/useMapData.js";
 import { useMapEffects } from "../../../hooks/map/useMapEffects.js";
-// ❌ ELIMINAR: import { useMapHandlers } from "../../../hooks/map/useMapHandlers.js";
 import { useMapActions } from "../../../hooks/map/useMapActions.js";
 import { useMapClickHandler } from "../../../hooks/map/useMapClickHandler.js";
 import { useBusinessHandlers } from "../../../hooks/map/useBusinessHandlers.js";
 import { useMapOperations } from "../../../hooks/map/useMapOperations.js";
 import { useCoordinateManagement } from "../../../hooks/map/useCoordinateManagement.js";
-
+import { useInteractionHandlers } from "../../../hooks/map/useInteractionHandlers.js";
 import { useRouteUtils } from "../../../hooks/routes/useRouteUtils.js";
 import { useBuildingFilters } from "../../../hooks/buildings/useBuildingFilters.js";
 import useBuildings from "../../../hooks/buildings/useBuildings.js";
@@ -99,7 +99,7 @@ function Map() {
     buildingOptions, // Opciones para selectores
     categoryOptions, // Categorías disponibles
     stats, // Estadísticas
-  } = useBuildingFilters(buildings, mapState.filters, routes); // ← AÑADIR routes como tercer parámetro
+  } = useBuildingFilters(buildings, mapState.filters, routes);
 
   // Log de filtros activos
   console.log("🎯 Estado de filtros:", {
@@ -135,6 +135,12 @@ function Map() {
     findNearestBuilding
   );
 
+  // ✅ NUEVO: Handlers de interacción especializados
+  const { interactionHandlers } = useInteractionHandlers(
+    showUINotification,
+    getProximityAnalysis
+  );
+
   // Handlers de negocio
   const businessHandlers = useBusinessHandlers(
     showUINotification,
@@ -166,18 +172,6 @@ function Map() {
     geoServerFeatures,
     loadBuildings
   );
-
-  // ❌ ELIMINAR: useMapHandlers (archivo duplicado)
-  // const interactionHandlers = useMapHandlers(...);
-
-  // ✅ CREAR interactionHandlers MANUALMENTE
-  const interactionHandlers = {
-    handleBuildingClickWithProximity: (building) => {
-      console.log("🏢 Clic en edificio:", building.nombre);
-      if (getProximityAnalysis) getProximityAnalysis(building);
-      showUINotification(`Edificio seleccionado: ${building.nombre}`, "info");
-    },
-  };
 
   // Effects
   useMapEffects(
@@ -316,10 +310,10 @@ function Map() {
         filteredBuildings={filteredBuildings}
         highlightedBuildings={highlightedBuildings}
         prioritizedRoutes={mapData.prioritizedRoutes}
-        mapState={mapState} // ← VOLVER A mapState
+        mapState={mapState}
         routes={routes}
         handleRouteClick={handleRouteClick}
-        interactionHandlers={interactionHandlers}
+        interactionHandlers={interactionHandlers} // ✅ AHORA VIENE DEL HOOK
       />
     </div>
   );
