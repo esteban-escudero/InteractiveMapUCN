@@ -6,6 +6,7 @@ import { buildingService } from "../../services/buildingService";
 
 export const useBuildingHandlers = (
   showUINotification,
+  showConfirm, // ✅ RECIBIR showConfirm
   validateCoordinates,
   loadBuildings,
   deleteBuilding,
@@ -21,28 +22,22 @@ export const useBuildingHandlers = (
         const isValid = validateCoordinates(buildingData.lat, buildingData.lng);
 
         if (!isValid) {
-          const confirmSave = window.confirm(
-            "Las coordenadas están fuera de los límites del campus. ¿Deseas guardar de todas formas?"
+          // ✅ USAR showConfirm EN LUGAR DE window.confirm
+          showConfirm(
+            "Coordenadas fuera del campus",
+            "Las coordenadas están fuera de los límites del campus. ¿Deseas guardar de todas formas?",
+            async () => {
+              await saveBuilding(buildingData);
+            },
+            {
+              type: "warning",
+              confirmText: "Guardar",
+              cancelText: "Cancelar",
+            }
           );
-          if (!confirmSave) return;
-        }
-
-        if (mapState.editingBuilding) {
-          const id =
-            mapState.editingBuilding.id ||
-            mapState.editingBuilding._id ||
-            mapState.editingBuilding.id_edificio;
-          await buildingService.updateBuilding(id, buildingData);
-          showUINotification("Edificio actualizado correctamente", "success");
         } else {
-          await buildingService.createBuilding(buildingData);
-          showUINotification("Edificio creado correctamente", "success");
+          await saveBuilding(buildingData);
         }
-
-        await loadBuildings();
-        mapState.setEditingBuilding(null);
-        mapState.setShowBuildingForm(false);
-        coordinateManagement.setCapturedCoords(null);
       } catch (error) {
         console.error("Error al guardar edificio:", error);
         showUINotification("Error al guardar edificio", "error");
@@ -50,12 +45,33 @@ export const useBuildingHandlers = (
     },
     [
       validateCoordinates,
-      mapState,
-      coordinateManagement,
+      showConfirm,
       showUINotification,
       loadBuildings,
+      mapState,
+      coordinateManagement,
     ]
   );
+
+  // Función auxiliar para guardar el edificio
+  const saveBuilding = async (buildingData) => {
+    if (mapState.editingBuilding) {
+      const id =
+        mapState.editingBuilding.id ||
+        mapState.editingBuilding._id ||
+        mapState.editingBuilding.id_edificio;
+      await buildingService.updateBuilding(id, buildingData);
+      showUINotification("Edificio actualizado correctamente", "success");
+    } else {
+      await buildingService.createBuilding(buildingData);
+      showUINotification("Edificio creado correctamente", "success");
+    }
+
+    await loadBuildings();
+    mapState.setEditingBuilding(null);
+    mapState.setShowBuildingForm(false);
+    coordinateManagement.setCapturedCoords(null);
+  };
 
   /**
    * Eliminar edificio con confirmación
@@ -90,4 +106,3 @@ export const useBuildingHandlers = (
     handleDeleteBuilding,
   };
 };
-

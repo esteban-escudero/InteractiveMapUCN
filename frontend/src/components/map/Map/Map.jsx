@@ -9,7 +9,7 @@ import { useMapState } from "../../../hooks/map/useMapState.js";
 import { useMapManagement } from "../../../hooks/map/useMapManagement.js";
 import { useMapData } from "../../../hooks/map/useMapData.js";
 import { useMapEffects } from "../../../hooks/map/useMapEffects.js";
-import { useMapHandlers } from "../../../hooks/map/useMapHandlers.js";
+// ❌ ELIMINAR: import { useMapHandlers } from "../../../hooks/map/useMapHandlers.js";
 import { useMapActions } from "../../../hooks/map/useMapActions.js";
 import { useMapClickHandler } from "../../../hooks/map/useMapClickHandler.js";
 import { useBusinessHandlers } from "../../../hooks/map/useBusinessHandlers.js";
@@ -167,15 +167,17 @@ function Map() {
     loadBuildings
   );
 
-  // Handlers de interacción
-  const interactionHandlers = useMapHandlers(
-    mapInstance,
-    showUINotification,
-    getProximityAnalysis,
-    routes,
-    mapState,
-    handleRouteClick
-  );
+  // ❌ ELIMINAR: useMapHandlers (archivo duplicado)
+  // const interactionHandlers = useMapHandlers(...);
+
+  // ✅ CREAR interactionHandlers MANUALMENTE
+  const interactionHandlers = {
+    handleBuildingClickWithProximity: (building) => {
+      console.log("🏢 Clic en edificio:", building.nombre);
+      if (getProximityAnalysis) getProximityAnalysis(building);
+      showUINotification(`Edificio seleccionado: ${building.nombre}`, "info");
+    },
+  };
 
   // Effects
   useMapEffects(

@@ -23,19 +23,19 @@ export const useBusinessHandlers = (
   mapInstance
 ) => {
   // Handlers especializados por dominio
-  const { handleSaveBuilding, handleDeleteBuilding: handleDeleteBuildingBase } = useBuildingHandlers(
-    showUINotification,
-    validateCoordinates,
-    loadBuildings,
-    deleteBuilding,
-    mapState,
-    coordinateManagement
-  );
+  const { handleSaveBuilding, handleDeleteBuilding: handleDeleteBuildingBase } =
+    useBuildingHandlers(
+      showUINotification,
+      showConfirm, // ✅ AÑADIR showConfirm
+      validateCoordinates,
+      loadBuildings,
+      deleteBuilding,
+      mapState,
+      coordinateManagement
+    );
 
-  const { handleSaveRooms, handleUpdateRoom, handleDeleteRoom } = useRoomHandlers(
-    showUINotification,
-    loadBuildings
-  );
+  const { handleSaveRooms, handleUpdateRoom, handleDeleteRoom } =
+    useRoomHandlers(showUINotification, loadBuildings);
 
   const { handleSaveRoute, handleDeleteRoute } = useRouteHandlers(
     showUINotification,

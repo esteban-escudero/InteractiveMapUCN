@@ -58,6 +58,20 @@ export const SpatialUtils = {
   // Verificar si un punto está dentro de un polígono
   isPointInPolygon(lat, lng, polygonCoords) {
     try {
+      // ✅ AÑADIR VALIDACIÓN DE NÚMEROS
+      if (
+        typeof lat !== "number" ||
+        typeof lng !== "number" ||
+        isNaN(lat) ||
+        isNaN(lng)
+      ) {
+        console.warn("Coordenadas inválidas para isPointInPolygon:", {
+          lat,
+          lng,
+        });
+        return false;
+      }
+
       const turfPolygon = turf.polygon([polygonCoords]);
       const testPoint = turf.point([lng, lat]);
       return turf.booleanPointInPolygon(testPoint, turfPolygon);
