@@ -91,7 +91,7 @@ function Map() {
   const { getPrioritizedRoutes, buildingGraphs, hasData } =
     useRouteIntelligence(routes, buildings);
 
-  //  Filtros Mejordos
+  //  Filtros
   const {
     filteredBuildings, // Solo filtrados por categoría
     highlightedBuildings, // Origen y destino destacados
@@ -99,7 +99,7 @@ function Map() {
     buildingOptions, // Opciones para selectores
     categoryOptions, // Categorías disponibles
     stats, // Estadísticas
-  } = useBuildingFilters(buildings, mapState.filters);
+  } = useBuildingFilters(buildings, mapState.filters, routes); // ← AÑADIR routes como tercer parámetro
 
   // Log de filtros activos
   console.log("🎯 Estado de filtros:", {
@@ -221,6 +221,10 @@ function Map() {
         onManageBuildings={mapManagement.handleManageBuildings}
         onAddRoute={mapManagement.handleAddRoute}
         onManageRoutes={mapManagement.handleManageRoutes}
+        originFilter={mapState.filters.origin}
+        destinationFilter={mapState.filters.destination}
+        categoryFilter={mapState.filters.category}
+        routeTypeFilter={mapState.filters.routeType}
         onOriginFilterChange={(e) =>
           mapManagement.handleFilterChange("origin", e.target.value)
         }

@@ -85,8 +85,8 @@ export const useMapManagement = (mapState) => {
   // Handlers para filtros
   const handleFilterChange = useCallback(
     (filterType, value) => {
+      console.log(`🔄 Cambiando filtro ${filterType}:`, value);
       mapState.setFilters((prev) => ({
-        // ← setFilters (con "s")
         ...prev,
         [filterType]: value,
       }));
@@ -95,12 +95,12 @@ export const useMapManagement = (mapState) => {
   );
 
   const handleClearFilters = useCallback(() => {
+    console.log("🔄 Limpiando todos los filtros");
     mapState.setFilters({
-      // ← setFilters (con "s")
       origin: "",
       destination: "",
       category: "",
-      routeType: "",
+      routeType: "", // ← AÑADIDO
     });
     mapState.setSelectedRoute(null);
   }, [mapState]);

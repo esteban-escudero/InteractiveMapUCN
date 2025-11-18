@@ -1,36 +1,49 @@
-// hooks/buildings/useBuildingFilters.js - MEJORADO
+// hooks/buildings/useBuildingFilters.js - ACTUALIZADO
 import { useMemo } from "react";
 
 /**
  * Hook mejorado para filtros de edificios
- * Separa lógica de filtrado visual (categoría) vs selección (origen/destino)
+ * Ahora incluye filtro de tipo de ruta
  */
-export const useBuildingFilters = (buildings, filters) => {
+export const useBuildingFilters = (buildings, filters, routes = []) => {
   // ========== EDIFICIOS FILTRADOS POR CATEGORÍA ==========
-  // Solo la categoría oculta edificios visualmente
   const filteredBuildings = useMemo(() => {
-    if (!filters.category) {
-      console.log("Sin filtro de categoría - mostrando todos los edificios");
+    if (!filters.category && !filters.routeType) {
+      console.log("Sin filtros - mostrando todos los edificios");
       return buildings;
     }
 
     const filtered = buildings.filter((building) => {
-      const categoryMatch =
-        building.tipo &&
-        building.tipo.toLowerCase() === filters.category.toLowerCase();
+      // Filtro por categoría
+      const categoryMatch = filters.category
+        ? building.tipo &&
+          building.tipo.toLowerCase() === filters.category.toLowerCase()
+        : true;
 
-      return categoryMatch;
+      // Filtro por tipo de ruta (si hay rutas disponibles)
+      let routeTypeMatch = true;
+      if (filters.routeType && routes.length > 0) {
+        // Verificar si el edificio tiene rutas del tipo seleccionado
+        const buildingRoutes = routes.filter(
+          (route) =>
+            (route.origen === building.nombre ||
+              route.destino === building.nombre) &&
+            route.tipo === filters.routeType
+        );
+        routeTypeMatch = buildingRoutes.length > 0;
+      }
+
+      return categoryMatch && routeTypeMatch;
     });
 
     console.log(
-      `🔍 Filtro de categoría "${filters.category}": ${filtered.length} de ${buildings.length} edificios`
+      `🔍 Filtros activos - Categoría: "${filters.category}", Tipo Ruta: "${filters.routeType}" - Resultados: ${filtered.length} de ${buildings.length} edificios`
     );
 
     return filtered;
-  }, [buildings, filters.category]);
+  }, [buildings, filters.category, filters.routeType, routes]);
 
   // ========== EDIFICIOS DESTACADOS (ORIGEN/DESTINO) ==========
-  // Estos NO se filtran, solo se marcan para resaltado
   const highlightedBuildings = useMemo(() => {
     const highlighted = {
       origin: null,
@@ -63,6 +76,7 @@ export const useBuildingFilters = (buildings, filters) => {
       hasCategory: !!filters.category,
       hasOrigin: !!filters.origin,
       hasDestination: !!filters.destination,
+      hasRouteType: !!filters.routeType,
       hasRouteSelection: !!filters.origin && !!filters.destination,
       originValid: filters.origin
         ? buildings.some((b) => b.nombre === filters.origin)
@@ -81,7 +95,7 @@ export const useBuildingFilters = (buildings, filters) => {
   // ========== OPCIONES PARA SELECTORES ==========
   const buildingOptions = useMemo(() => {
     return buildings
-      .filter((building) => building.nombre) // Solo edificios con nombre
+      .filter((building) => building.nombre)
       .map((building) => ({
         value: building.nombre,
         label: building.nombre,
@@ -97,8 +111,14 @@ export const useBuildingFilters = (buildings, filters) => {
     return tipos.sort();
   }, [buildings]);
 
+  // ========== OPCIONES DE TIPO DE RUTA ==========
+  const routeTypeOptions = useMemo(() => {
+    const tipos = [...new Set(routes.map((r) => r.tipo).filter(Boolean))];
+    return tipos.sort();
+  }, [routes]);
+
   return {
-    // Edificios filtrados visualmente (solo por categoría)
+    // Edificios filtrados visualmente (por categoría y tipo de ruta)
     filteredBuildings,
 
     // Edificios destacados (origen/destino) - NO filtrados
@@ -110,6 +130,7 @@ export const useBuildingFilters = (buildings, filters) => {
     // Opciones para selectores
     buildingOptions,
     categoryOptions,
+    routeTypeOptions,
 
     // Estadísticas
     stats: {
