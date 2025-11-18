@@ -43,9 +43,9 @@ export const useBuildingList = ({
   };
 
   const handleEditRoom = (room) => {
+    console.log("🔄 handleEditRoom llamado con:", room);
     if (onEditRoom) {
       onEditRoom(room);
-      onClose();
     }
   };
 

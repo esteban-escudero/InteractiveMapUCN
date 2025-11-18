@@ -18,6 +18,11 @@ const RoomManagement = ({
   existingRooms = [],
   selectedBuilding = null,
 }) => {
+  console.log("📋 RoomManagement recibió:", {
+    existingRooms,
+    selectedBuilding,
+    existingRoomsLength: existingRooms.length,
+  });
   // Usar el hook de notificaciones
   const { notification, showUINotification, hideNotification } =
     useNotification();

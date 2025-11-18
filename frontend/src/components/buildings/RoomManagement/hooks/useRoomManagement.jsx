@@ -26,8 +26,9 @@ export const useRoomManagement = ({
   onClose,
   existingRooms = [],
   selectedBuilding = null,
-  showNotification, // <- Agregar esta prop
+  showNotification,
 }) => {
+  console.log("🔄 useRoomManagement recibió existingRooms:", existingRooms);
   const [selectedBuildingId, setSelectedBuildingId] = useState("");
   const [selectedBuildingData, setSelectedBuildingData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);

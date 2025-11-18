@@ -7,8 +7,9 @@ import { RouteList } from "../../../routes/index.js";
 import RoomManagement from "../../../buildings/RoomManagement/RoomManagement.jsx";
 
 export const MapLists = ({
-  mapState,
-  businessHandlers,
+  mapState, // ESTADO
+  mapManagement, // GESTIÓN
+  businessHandlers, // NEGOCIO
   filteredBuildings,
   routes,
   buildings,
@@ -21,16 +22,12 @@ export const MapLists = ({
       {/* Lista de Edificios */}
       {mapState.showBuildingList && (
         <BuildingList
-          key={`building-list-${JSON.stringify(
-            mapState.filters
-          )}-${Date.now()}`}
           buildings={filteredBuildings}
-          onEditBuilding={mapState.handleEditBuilding}
+          onEditBuilding={mapManagement.handleEditBuilding}
           onDeleteBuilding={businessHandlers.handleDeleteBuilding}
-          onClose={mapState.handleCloseBuildingList}
-          onEditRoom={mapState.handleOpenEditRoom}
-          onCreateRooms={mapState.handleCreateRoomsForBuilding}
-          onAddRooms={() => mapState.handleCreateRoomsForBuilding(null)}
+          onClose={mapManagement.handleCloseBuildingList}
+          onEditRoom={mapManagement.handleOpenEditRoom}
+          onCreateRooms={mapManagement.handleCreateRoomsForBuilding}
           onDeleteRoom={businessHandlers.handleDeleteRoom}
           onReload={loadBuildings}
         />
@@ -45,7 +42,7 @@ export const MapLists = ({
           onSaveRooms={businessHandlers.handleSaveRooms}
           onUpdateRoom={businessHandlers.handleUpdateRoom}
           onDeleteRoom={businessHandlers.handleDeleteRoom}
-          onClose={mapState.handleCloseRoomManagement}
+          onClose={mapManagement.handleCloseRoomManagement}
           existingRooms={mapState.selectedRooms}
         />
       )}
@@ -54,9 +51,9 @@ export const MapLists = ({
       {mapState.showRouteList && (
         <RouteList
           routes={routes}
-          onEditRoute={handleEditRoute}
+          onEditRoute={mapManagement.handleEditRoute}
           onDeleteRoute={businessHandlers.handleDeleteRoute}
-          onClose={mapState.handleCloseRouteList}
+          onClose={mapManagement.handleCloseRouteList}
           onSelectRoute={handleRouteClick}
         />
       )}

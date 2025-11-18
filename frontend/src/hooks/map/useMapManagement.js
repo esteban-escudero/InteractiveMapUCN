@@ -1,182 +1,130 @@
-import { useState, useCallback } from "react";
+// useMapManagement.js - MANEJAR TODA LA LÓGICA
+import { useCallback } from "react";
 
-export const useMapManagement = () => {
-  const [showBuildingForm, setShowBuildingForm] = useState(false);
-  const [showBuildingList, setShowBuildingList] = useState(false);
-  const [editingBuilding, setEditingBuilding] = useState(null);
-
-  const [showRoomManagement, setShowRoomManagement] = useState(false);
-  const [roomManagementMode, setRoomManagementMode] = useState("create");
-  const [selectedRooms, setSelectedRooms] = useState([]);
-  const [selectedBuildingForRooms, setSelectedBuildingForRooms] =
-    useState(null);
-
-  const [showRouteForm, setShowRouteForm] = useState(false);
-  const [showRouteList, setShowRouteList] = useState(false);
-  const [editingRoute, setEditingRoute] = useState(null);
-  const [selectedRoute, setSelectedRoute] = useState(null);
-  const [showRouteNetwork, setShowRouteNetwork] = useState(false);
-
-  const [filters, setFilters] = useState({
-    origin: "",
-    destination: "",
-    category: "",
-  });
-
-  // Funciones para edificios
+export const useMapManagement = (mapState) => {
+  // Handlers para buildings
   const handleAddBuilding = useCallback(() => {
-    setEditingBuilding(null);
-    setShowBuildingForm(true);
-  }, []);
+    mapState.setEditingBuilding(null);
+    mapState.setShowBuildingForm(true);
+  }, [mapState]);
 
-  const handleManageBuildings = useCallback(() => {
-    setShowBuildingList(true);
-    setShowRoomManagement(false);
-    setShowRouteList(false);
-  }, []);
-
-  const handleEditBuilding = useCallback((building) => {
-    setEditingBuilding(building);
-    setShowBuildingForm(true);
-    setShowBuildingList(false);
-  }, []);
-
-  const handleCloseBuildingList = useCallback(() => {
-    setShowBuildingList(false);
-  }, []);
-
-  // Funciones para salas
-  const handleCreateRoomsForBuilding = useCallback((building) => {
-    setSelectedBuildingForRooms(building);
-    setRoomManagementMode("create");
-    setSelectedRooms([]);
-    setShowRoomManagement(true);
-    setShowBuildingList(false);
-  }, []);
-
-  const handleOpenEditRoom = useCallback((room) => {
-    setRoomManagementMode("edit");
-    setSelectedRooms([room]);
-    setShowRoomManagement(true);
-    setShowBuildingList(false);
-  }, []);
-
-  const handleCloseRoomManagement = useCallback(() => {
-    setShowRoomManagement(false);
-    setSelectedBuildingForRooms(null);
-    setSelectedRooms([]);
-  }, []);
-
-  // Funciones para rutas
-  const handleAddRoute = useCallback(() => {
-    setEditingRoute(null);
-    setShowRouteForm(true);
-    setShowRouteList(false);
-  }, []);
-
-  const handleManageRoutes = useCallback(() => {
-    setShowRouteList(true);
-    setShowBuildingList(false);
-    setShowRoomManagement(false);
-  }, []);
-
-  const handleEditRoute = useCallback((route) => {
-    setEditingRoute(route);
-    setShowRouteForm(true);
-    setShowRouteList(false);
-  }, []);
-
-  const handleCloseRouteList = useCallback(() => {
-    setShowRouteList(false);
-  }, []);
-
-  // Funciones para filtros
-  const handleFilterChange = useCallback((filterName, value) => {
-    setFilters((prev) => ({ ...prev, [filterName]: value }));
-  }, []);
-
-  const handleClearFilters = useCallback(() => {
-    setFilters({ origin: "", destination: "", category: "" });
-  }, []);
-
-  // Validar filtros contra lista de edificios
-  const validateFilters = useCallback(
-    (buildings) => {
-      return {
-        origin:
-          filters.origin && buildings.some((b) => b.nombre === filters.origin),
-        destination:
-          filters.destination &&
-          buildings.some((b) => b.nombre === filters.destination),
-        bothValid:
-          filters.origin &&
-          filters.destination &&
-          buildings.some((b) => b.nombre === filters.origin) &&
-          buildings.some((b) => b.nombre === filters.destination),
-      };
+  const handleEditBuilding = useCallback(
+    (building) => {
+      mapState.setEditingBuilding(building);
+      mapState.setShowBuildingForm(true);
     },
-    [filters]
+    [mapState]
   );
 
-  // Resetear todas las vistas
-  const resetViews = useCallback(() => {
-    setShowBuildingForm(false);
-    setShowBuildingList(false);
-    setShowRoomManagement(false);
-    setShowRouteForm(false);
-    setShowRouteList(false);
-    setShowRouteNetwork(false);
-    setEditingBuilding(null);
-    setEditingRoute(null);
-    setSelectedRoute(null);
-  }, []);
+  const handleManageBuildings = useCallback(() => {
+    mapState.setShowBuildingList(true);
+  }, [mapState]);
+
+  const handleCloseBuildingList = useCallback(() => {
+    mapState.setShowBuildingList(false);
+  }, [mapState]);
+
+  // Handlers para rooms - CORREGIDO
+  const handleOpenEditRoom = useCallback(
+    (room) => {
+      console.log("🔄 handleOpenEditRoom ejecutándose con:", room);
+
+      // Para editar una sala, necesitamos el edificio padre
+      // Asumimos que la sala tiene id_edificio
+      const buildingForRoom = {
+        id: room.id_edificio,
+      };
+
+      mapState.setSelectedBuildingForRooms(buildingForRoom);
+      mapState.setSelectedRooms([room]);
+      mapState.setRoomManagementMode("edit");
+      mapState.setShowRoomManagement(true);
+      mapState.setShowBuildingList(false);
+    },
+    [mapState]
+  );
+
+  const handleCreateRoomsForBuilding = useCallback(
+    (building) => {
+      mapState.setSelectedBuildingForRooms(building);
+      mapState.setSelectedRooms([]);
+      mapState.setRoomManagementMode("create");
+      mapState.setShowRoomManagement(true);
+    },
+    [mapState]
+  );
+
+  const handleCloseRoomManagement = useCallback(() => {
+    mapState.setShowRoomManagement(false);
+    mapState.setSelectedBuildingForRooms(null);
+    mapState.setSelectedRooms([]);
+  }, [mapState]);
+
+  // Handlers para routes
+  const handleAddRoute = useCallback(() => {
+    mapState.setEditingRoute(null);
+    mapState.setShowRouteForm(true);
+  }, [mapState]);
+
+  const handleEditRoute = useCallback(
+    (route) => {
+      mapState.setEditingRoute(route);
+      mapState.setShowRouteForm(true);
+    },
+    [mapState]
+  );
+
+  const handleManageRoutes = useCallback(() => {
+    mapState.setShowRouteList(true);
+  }, [mapState]);
+
+  const handleCloseRouteList = useCallback(() => {
+    mapState.setShowRouteList(false);
+  }, [mapState]);
+
+  // Handlers para filtros
+  const handleFilterChange = useCallback(
+    (filterType, value) => {
+      mapState.setFilters((prev) => ({
+        // ← setFilters (con "s")
+        ...prev,
+        [filterType]: value,
+      }));
+    },
+    [mapState]
+  );
+
+  const handleClearFilters = useCallback(() => {
+    mapState.setFilters({
+      // ← setFilters (con "s")
+      origin: "",
+      destination: "",
+      category: "",
+      routeType: "",
+    });
+    mapState.setSelectedRoute(null);
+  }, [mapState]);
 
   return {
-    // Estados
-    showBuildingForm,
-    showBuildingList,
-    editingBuilding,
-    showRoomManagement,
-    roomManagementMode,
-    selectedRooms,
-    selectedBuildingForRooms,
-    showRouteForm,
-    showRouteList,
-    editingRoute,
-    selectedRoute,
-    showRouteNetwork,
-    filters,
-
-    // Setters
-    setShowBuildingForm,
-    setShowBuildingList,
-    setEditingBuilding,
-    setShowRoomManagement,
-    setRoomManagementMode,
-    setSelectedRooms,
-    setSelectedBuildingForRooms,
-    setShowRouteForm,
-    setShowRouteList,
-    setEditingRoute,
-    setSelectedRoute,
-    setShowRouteNetwork,
-    setFilters,
-
-    // Funciones
+    // Handlers de Buildings
     handleAddBuilding,
-    handleManageBuildings,
     handleEditBuilding,
+    handleManageBuildings,
     handleCloseBuildingList,
-    handleCreateRoomsForBuilding,
+
+    // Handlers de Rooms
     handleOpenEditRoom,
+    handleCreateRoomsForBuilding,
     handleCloseRoomManagement,
+
+    // Handlers de Routes
     handleAddRoute,
-    handleManageRoutes,
     handleEditRoute,
+    handleManageRoutes,
     handleCloseRouteList,
+
+    // Handlers de Filtros
     handleFilterChange,
     handleClearFilters,
-    validateFilters,
-    resetViews,
   };
 };

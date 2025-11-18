@@ -1,4 +1,5 @@
-import { useState, useCallback } from "react";
+// useMapState.js - DEJAR SOLO ESTADO, SIN HANDLERS
+import { useState } from "react";
 
 export const useMapState = () => {
   // Estado de UI del mapa
@@ -27,83 +28,6 @@ export const useMapState = () => {
 
   // Ruta seleccionada
   const [selectedRoute, setSelectedRoute] = useState(null);
-
-  // Handlers para buildings
-  const handleAddBuilding = useCallback(() => {
-    setEditingBuilding(null);
-    setShowBuildingForm(true);
-  }, []);
-
-  const handleEditBuilding = useCallback((building) => {
-    setEditingBuilding(building);
-    setShowBuildingForm(true);
-  }, []);
-
-  const handleManageBuildings = useCallback(() => {
-    setShowBuildingList(true);
-  }, []);
-
-  const handleCloseBuildingList = useCallback(() => {
-    setShowBuildingList(false);
-  }, []);
-
-  // Handlers para rooms
-  const handleOpenEditRoom = useCallback((building, rooms) => {
-    setSelectedBuildingForRooms(building);
-    setSelectedRooms(rooms || []);
-    setRoomManagementMode("edit");
-    setShowRoomManagement(true);
-  }, []);
-
-  const handleCreateRoomsForBuilding = useCallback((building) => {
-    setSelectedBuildingForRooms(building);
-    setSelectedRooms([]);
-    setRoomManagementMode("create");
-    setShowRoomManagement(true);
-  }, []);
-
-  const handleCloseRoomManagement = useCallback(() => {
-    setShowRoomManagement(false);
-    setSelectedBuildingForRooms(null);
-    setSelectedRooms([]);
-  }, []);
-
-  // Handlers para routes
-  const handleAddRoute = useCallback(() => {
-    setEditingRoute(null);
-    setShowRouteForm(true);
-  }, []);
-
-  const handleEditRoute = useCallback((route) => {
-    setEditingRoute(route);
-    setShowRouteForm(true);
-  }, []);
-
-  const handleManageRoutes = useCallback(() => {
-    setShowRouteList(true);
-  }, []);
-
-  const handleCloseRouteList = useCallback(() => {
-    setShowRouteList(false);
-  }, []);
-
-  // Handlers para filtros
-  const handleFilterChange = useCallback((filterType, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [filterType]: value,
-    }));
-  }, []);
-
-  const handleClearFilters = useCallback(() => {
-    setFilters({
-      origin: "",
-      destination: "",
-      category: "",
-      routeType: "",
-    });
-    setSelectedRoute(null);
-  }, []);
 
   return {
     // Estado de UI
@@ -139,20 +63,5 @@ export const useMapState = () => {
     setRoomManagementMode,
     setFilters,
     setSelectedRoute,
-
-    // Handlers
-    handleAddBuilding,
-    handleEditBuilding,
-    handleManageBuildings,
-    handleCloseBuildingList,
-    handleOpenEditRoom,
-    handleCreateRoomsForBuilding,
-    handleCloseRoomManagement,
-    handleAddRoute,
-    handleEditRoute,
-    handleManageRoutes,
-    handleCloseRouteList,
-    handleFilterChange,
-    handleClearFilters,
   };
 };

@@ -6,6 +6,7 @@ import "./Map.css";
 // Hooks
 import { useMap } from "../../../hooks/map/useMap.js";
 import { useMapState } from "../../../hooks/map/useMapState.js";
+import { useMapManagement } from "../../../hooks/map/useMapManagement.js";
 import { useMapData } from "../../../hooks/map/useMapData.js";
 import { useMapEffects } from "../../../hooks/map/useMapEffects.js";
 import { useMapHandlers } from "../../../hooks/map/useMapHandlers.js";
@@ -48,8 +49,11 @@ function Map() {
   const { confirmState, showConfirm, hideConfirm, handleConfirm } =
     useConfirm();
 
-  // Estado del mapa
+  // Estado del mapa (SOLO ESTADO)
   const mapState = useMapState();
+
+  // Gestión del mapa (SOLO LÓGICA)
+  const mapManagement = useMapManagement(mapState);
 
   // Datos principales
   const {
@@ -142,7 +146,7 @@ function Map() {
     createRoute,
     updateRoute,
     deleteRoute,
-    mapState,
+    mapState, // Estado
     coordinateManagement,
     mapInstance
   );
@@ -213,40 +217,35 @@ function Map() {
         backendStatus={backendStatus}
         geoServerStatus={geoServerStatus}
         geoServerFeaturesCount={geoServerFeatures.length}
-        onAddBuilding={mapState.handleAddBuilding}
-        onManageBuildings={mapState.handleManageBuildings}
+        onAddBuilding={mapManagement.handleAddBuilding}
+        onManageBuildings={mapManagement.handleManageBuildings}
+        onAddRoute={mapManagement.handleAddRoute}
+        onManageRoutes={mapManagement.handleManageRoutes}
+        onOriginFilterChange={(e) =>
+          mapManagement.handleFilterChange("origin", e.target.value)
+        }
+        onDestinationFilterChange={(e) =>
+          mapManagement.handleFilterChange("destination", e.target.value)
+        }
+        onCategoryFilterChange={(e) =>
+          mapManagement.handleFilterChange("category", e.target.value)
+        }
+        onRouteTypeFilterChange={(e) =>
+          mapManagement.handleFilterChange("routeType", e.target.value)
+        }
         onToggleCoordinateDetection={
           coordinateManagement.toggleCoordinateDetection
         }
         coordinateDetectionActive={coordinateManagement.coordinateDetection}
-        onAddRoute={mapState.handleAddRoute}
-        onManageRoutes={mapState.handleManageRoutes}
         onToggleRouteNetwork={() =>
           mapState.setShowRouteNetwork(!mapState.showRouteNetwork)
         }
         routeNetworkActive={mapState.showRouteNetwork}
-        originFilter={mapState.filters.origin}
-        destinationFilter={mapState.filters.destination}
-        categoryFilter={mapState.filters.category}
-        routeTypeFilter={mapState.filters.routeType}
-        onOriginFilterChange={(e) =>
-          mapState.handleFilterChange("origin", e.target.value)
-        }
-        onDestinationFilterChange={(e) =>
-          mapState.handleFilterChange("destination", e.target.value)
-        }
-        onCategoryFilterChange={(e) =>
-          mapState.handleFilterChange("category", e.target.value)
-        }
-        onRouteTypeFilterChange={(e) =>
-          mapState.handleFilterChange("routeType", e.target.value)
-        }
-        onClearFilters={mapState.handleClearFilters}
+        onClearFilters={mapManagement.handleClearFilters}
         allBuildings={buildings}
         filteredBuildings={filteredBuildings}
         filtersValid={filtersState.routeCalculationReady}
       />
-
       {/* Notificaciones y Diálogos */}
       {notification.show && (
         <UINotification
@@ -267,22 +266,23 @@ function Map() {
         onConfirm={handleConfirm}
         onCancel={hideConfirm}
       />
-
       {/* Formularios */}
       <MapForms
-        mapState={mapState}
-        businessHandlers={businessHandlers}
+        mapState={mapState} // ESTADO
+        mapManagement={mapManagement} // GESTIÓN
+        businessHandlers={businessHandlers} // NEGOCIO
         coordinateManagement={coordinateManagement}
         mapInstance={mapInstance}
         isRouteDrawingActive={isRouteDrawingActive}
         setIsRouteDrawingActive={setIsRouteDrawingActive}
         showUINotification={showUINotification}
       />
-
       {/* Listas Y Gestión */}
+
       <MapLists
-        mapState={mapState}
-        businessHandlers={businessHandlers}
+        mapState={mapState} // ESTADO
+        mapManagement={mapManagement} // GESTIÓN
+        businessHandlers={businessHandlers} // NEGOCIO
         filteredBuildings={filteredBuildings}
         routes={routes}
         buildings={buildings}
@@ -290,7 +290,6 @@ function Map() {
         handleRouteClick={handleRouteClick}
         handleEditRoute={handleEditRoute}
       />
-
       {/* Componentes del Mapa */}
       <MapContainer mapRef={mapRef} isMapReady={isMapReady}>
         <MapIndicators
@@ -304,7 +303,6 @@ function Map() {
           onClearValidationErrors={coordinateManagement.clearValidationErrors}
         />
       </MapContainer>
-
       {/* Capas Del Mapa */}
       <MapLayers
         mapInstance={mapInstance}
@@ -312,7 +310,7 @@ function Map() {
         filteredBuildings={filteredBuildings}
         highlightedBuildings={highlightedBuildings}
         prioritizedRoutes={mapData.prioritizedRoutes}
-        mapState={mapState}
+        mapState={mapState} // ← VOLVER A mapState
         routes={routes}
         handleRouteClick={handleRouteClick}
         interactionHandlers={interactionHandlers}

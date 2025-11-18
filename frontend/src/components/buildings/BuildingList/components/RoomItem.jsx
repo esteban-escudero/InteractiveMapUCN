@@ -2,6 +2,10 @@
 import React from "react";
 
 const RoomItem = ({ room, isDeleting, onEditRoom, onDeleteRoom }) => {
+  const handleEditClick = () => {
+    console.log("✏️ RoomItem - Editando sala:", room);
+    onEditRoom(room);
+  };
   return (
     <div className="room-item">
       <div className="room-info">
@@ -20,7 +24,7 @@ const RoomItem = ({ room, isDeleting, onEditRoom, onDeleteRoom }) => {
       <div className="room-actions">
         <button
           className="edit-room-btn"
-          onClick={() => onEditRoom(room)}
+          onClick={handleEditClick} // Cambiar a la nueva función
           title="Editar sala"
           disabled={isDeleting}>
           <span className="material-icons">edit</span>
