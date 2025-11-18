@@ -48,7 +48,7 @@ export const useRouteHandlers = (
           return;
         }
 
-        // Validar coordenadas fuera de límites (pero permitir guardar con advertencia)
+        // Validar coordenadas fuera de límites (usando showConfirm)
         const invalidPoints = coordinates.filter((coord) => {
           const [lng, lat] = coord;
           return !validateCoordinates(lat, lng);
@@ -56,16 +56,23 @@ export const useRouteHandlers = (
 
         if (invalidPoints.length > 0) {
           console.log("⚠️ Puntos fuera de límites:", invalidPoints.length);
-          const confirmSave = window.confirm(
-            `${invalidPoints.length} puntos están fuera de los límites del campus. ¿Deseas guardar de todas formas?`
+
+          showConfirm(
+            "Puntos fuera de límites",
+            `${invalidPoints.length} puntos están fuera de los límites del campus. ¿Deseas guardar de todas formas?`,
+            async () => {
+              await proceedWithSave(routeData, coordinates);
+            },
+            {
+              type: "warning",
+              confirmText: "Guardar de todas formas",
+              cancelText: "Cancelar",
+            }
           );
-          if (!confirmSave) {
-            console.log("❌ USUARIO CANCELÓ POR PUNTOS FUERA DE LÍMITES");
-            return;
-          }
+          return;
         }
 
-        // Validar con SpatialUtils (pero si falla, solo mostrar advertencia)
+        // Validar con SpatialUtils
         let isValidGeometry = true;
         try {
           isValidGeometry = SpatialUtils.isValidLineString(coordinates);
@@ -76,34 +83,23 @@ export const useRouteHandlers = (
         }
 
         if (!isValidGeometry) {
-          const confirmSave = window.confirm(
-            "La geometría de la ruta podría no ser válida. ¿Deseas guardar de todas formas?"
+          showConfirm(
+            "Geometría inválida",
+            "La geometría de la ruta podría no ser válida. ¿Deseas guardar de todas formas?",
+            async () => {
+              await proceedWithSave(routeData, coordinates);
+            },
+            {
+              type: "warning",
+              confirmText: "Guardar de todas formas",
+              cancelText: "Cancelar",
+            }
           );
-          if (!confirmSave) {
-            console.log("❌ USUARIO CANCELÓ POR GEOMETRÍA INVÁLIDA");
-            return;
-          }
+          return;
         }
 
-        console.log(
-          "TODAS LAS VALIDACIONES PASARON - Procediendo a guardar..."
-        );
-
-        // Guardar ruta
-        if (mapState.editingRoute) {
-          console.log("🔄 Actualizando ruta existente...");
-          await updateRoute(mapState.editingRoute.id, routeData);
-          showUINotification("Ruta actualizada correctamente", "success");
-        } else {
-          console.log("🆕 Creando nueva ruta...");
-          await createRoute(routeData);
-          showUINotification("Ruta creada correctamente", "success");
-        }
-
-        console.log("RUTA GUARDADA EXITOSAMENTE");
-        mapState.setEditingRoute(null);
-        mapState.setShowRouteForm(false);
-        await loadRoutes();
+        // Si pasa todas las validaciones, guardar directamente
+        await proceedWithSave(routeData, coordinates);
       } catch (error) {
         console.error("❌ ERROR CRÍTICO al guardar ruta:", error);
         showUINotification(`Error al guardar ruta: ${error.message}`, "error");
@@ -116,8 +112,30 @@ export const useRouteHandlers = (
       createRoute,
       updateRoute,
       loadRoutes,
+      showConfirm,
     ]
   );
+
+  // Función auxiliar para guardar la ruta
+  const proceedWithSave = async (routeData, coordinates) => {
+    console.log("TODAS LAS VALIDACIONES PASARON - Procediendo a guardar...");
+
+    // Guardar ruta
+    if (mapState.editingRoute) {
+      console.log("🔄 Actualizando ruta existente...");
+      await updateRoute(mapState.editingRoute.id, routeData);
+      showUINotification("Ruta actualizada correctamente", "success");
+    } else {
+      console.log("🆕 Creando nueva ruta...");
+      await createRoute(routeData);
+      showUINotification("Ruta creada correctamente", "success");
+    }
+
+    console.log("RUTA GUARDADA EXITOSAMENTE");
+    mapState.setEditingRoute(null);
+    mapState.setShowRouteForm(false);
+    await loadRoutes();
+  };
 
   /**
    * Eliminar ruta con confirmación
