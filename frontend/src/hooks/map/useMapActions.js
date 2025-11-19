@@ -1,3 +1,4 @@
+// hooks/map/useMapActions.js
 import { useCallback } from "react";
 import L from "leaflet";
 import {
@@ -18,11 +19,14 @@ export const useMapActions = (
       "Cerrar Sesión",
       "¿Estás seguro de que quieres cerrar sesión?",
       () => {
-        showNotification("Sesión cerrada correctamente", "success");
+        // Esta función se ejecuta cuando el usuario confirma
+        // Pero el logout real se maneja en el Map.jsx con useAuth
+        showNotification("Cerrando sesión...", "info");
+        // El logout real se ejecutará desde Map.jsx
       },
       {
-        type: "info",
-        confirmText: "Cerrar Sesión",
+        type: "warning",
+        confirmText: "Sí, cerrar sesión",
         cancelText: "Cancelar",
       }
     );

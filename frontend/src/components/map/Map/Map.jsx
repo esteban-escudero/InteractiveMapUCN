@@ -25,6 +25,7 @@ import { useNotification } from "../../../hooks/common/useNotification.js";
 import { useConfirm } from "../../../hooks/common/useConfirm.js";
 import useProximity from "../../../hooks/common/useProximity.js";
 import { useRouteIntelligence } from "../../../hooks/routes/useRouteIntelligence.js";
+import { useAuth } from "../../../contexts/AuthContext.js";
 
 // Componentes
 import { ConfirmDialog, UINotification, SidePanel } from "../../ui/index.js";
@@ -42,6 +43,9 @@ function Map() {
   const { mapRef, initializeMap, mapInstance, isMapReady } = useMap();
   const [mapInitialized, setMapInitialized] = useState(false);
   const [isRouteDrawingActive, setIsRouteDrawingActive] = useState(false);
+
+  // Auth Context - PARA LOGOUT REAL
+  const { logout } = useAuth();
 
   // Notificaciones y confirmaciones
   const { notification, showUINotification, hideNotification } =
@@ -198,6 +202,32 @@ function Map() {
     isRouteDrawingActive
   );
 
+  // Logout real que usa AuthContext
+  const handleRealLogout = async () => {
+    try {
+      await logout();
+      showUINotification("Sesión cerrada correctamente", "success");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      showUINotification("Error al cerrar sesión", "error");
+    }
+  };
+
+  // Manejo de logout con confirmación
+  const handleLogoutWithConfirmation = () => {
+    // CORRECCIÓN: Pasar parámetros individuales en lugar de objeto
+    showConfirm(
+      "Cerrar Sesión",
+      "¿Estás seguro de que deseas cerrar la sesión?",
+      handleRealLogout, // Función a ejecutar cuando confirme
+      {
+        type: "warning",
+        confirmText: "Sí, cerrar sesión",
+        cancelText: "Cancelar",
+      }
+    );
+  };
+
   // Renderizado
   return (
     <div className="container">
@@ -206,7 +236,7 @@ function Map() {
         status={backendStatus === "connected" ? "success" : "error"}
         featuresCount={buildings.length}
         routesCount={routes.length}
-        onLogout={handleLogout}
+        onLogout={handleLogoutWithConfirmation}
         onSyncData={handleSyncData}
         onResetView={handleResetView}
         buildingsLoading={buildingsLoading}
@@ -246,6 +276,7 @@ function Map() {
         filteredBuildings={filteredBuildings}
         filtersValid={filtersState.routeCalculationReady}
       />
+
       {/* Notificaciones y Diálogos */}
       {notification.show && (
         <UINotification
@@ -266,6 +297,7 @@ function Map() {
         onConfirm={handleConfirm}
         onCancel={hideConfirm}
       />
+
       {/* Formularios */}
       <MapForms
         mapState={mapState} // ESTADO
@@ -277,8 +309,8 @@ function Map() {
         setIsRouteDrawingActive={setIsRouteDrawingActive}
         showUINotification={showUINotification}
       />
-      {/* Listas Y Gestión */}
 
+      {/* Listas Y Gestión */}
       <MapLists
         mapState={mapState} // ESTADO
         mapManagement={mapManagement} // GESTIÓN
@@ -290,6 +322,7 @@ function Map() {
         handleRouteClick={handleRouteClick}
         handleEditRoute={handleEditRoute}
       />
+
       {/* Componentes del Mapa */}
       <MapContainer mapRef={mapRef} isMapReady={isMapReady}>
         <MapIndicators
@@ -303,6 +336,7 @@ function Map() {
           onClearValidationErrors={coordinateManagement.clearValidationErrors}
         />
       </MapContainer>
+
       {/* Capas Del Mapa */}
       <MapLayers
         mapInstance={mapInstance}
