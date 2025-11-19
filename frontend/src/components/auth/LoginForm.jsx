@@ -94,13 +94,22 @@ const LoginForm = ({ onLoginSuccess }) => {
                 className="toggle-password"
                 onClick={() => setShowPassword(!showPassword)}
                 disabled={loading}>
-                {showPassword ? "👁️" : "👁️‍🗨️"}
+                <span className="material-icons text-gray-600">
+                  {showPassword ? "visibility_off" : "visibility"}
+                </span>
               </button>
             </div>
           </div>
 
           <button type="submit" className="login-button" disabled={loading}>
-            {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+            {loading ? (
+              <>
+                <span className="loading-spinner"></span>
+                Iniciando sesión...
+              </>
+            ) : (
+              "Iniciar Sesión"
+            )}
           </button>
         </form>
 
