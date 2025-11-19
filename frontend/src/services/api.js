@@ -1,42 +1,80 @@
 // src/services/api.js
-const API_BASE_URL = 'http://localhost:3001/api';
+import authService from "./authService";
+
+const API_BASE_URL = "http://localhost:3001/api";
 
 export const api = {
-  async get(endpoint) {
+  async get(endpoint, useAuth = true) {
+    if (useAuth) {
+      return authService.fetchWithAuth(`${API_BASE_URL}${endpoint}`, {
+        method: "GET",
+      });
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`);
-    if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!response.ok)
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
     return response.json();
   },
 
-  async post(endpoint, data) {
+  async post(endpoint, data, useAuth = true) {
+    if (useAuth) {
+      return authService.fetchWithAuth(`${API_BASE_URL}${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!response.ok)
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
     return response.json();
   },
 
-  async put(endpoint, data) {
+  async put(endpoint, data, useAuth = true) {
+    if (useAuth) {
+      return authService.fetchWithAuth(`${API_BASE_URL}${endpoint}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!response.ok)
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
     return response.json();
   },
 
-  async delete(endpoint) {
+  async delete(endpoint, useAuth = true) {
+    if (useAuth) {
+      return authService.fetchWithAuth(`${API_BASE_URL}${endpoint}`, {
+        method: "DELETE",
+      });
+    }
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
-    if (!response.ok) throw new Error(`Error ${response.status}: ${await response.text()}`);
+    if (!response.ok)
+      throw new Error(`Error ${response.status}: ${await response.text()}`);
     return response.json();
-  }
+  },
 };

@@ -4,22 +4,26 @@ const bodyParser = require("body-parser");
 const config = require("./config/app");
 require("./config/database");
 
+// Rutas existentes
 const buildingsRoutes = require("./routes/buildings");
 const roomsRoutes = require("./routes/rooms");
 const routesRoutes = require("./routes/routes");
 const routeNodesRoutes = require("./routes/routeNodes");
 const spatialRoutes = require("./routes/spatial");
 const proximityRoutes = require("./routes/proximity");
+
+// ⭐ NUEVA: Ruta de autenticación
+const authRoutes = require("./routes/auth");
+
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
 // Middlewares
-// CORS más permisivo en desarrollo
 if (config.server.env === "development") {
   app.use(
     cors({
-      origin: true, // Permitir cualquier origen en desarrollo
+      origin: true,
       credentials: true,
     })
   );
@@ -36,6 +40,9 @@ app.use("/api/routes", routesRoutes);
 app.use("/api/route-nodes", routeNodesRoutes);
 app.use("/api/spatial", spatialRoutes);
 app.use("/api/proximity", proximityRoutes);
+
+// ⭐ NUEVA: Ruta de autenticación
+app.use("/api/auth", authRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -56,6 +63,7 @@ app.listen(PORT, () => {
   console.log(`Entorno: ${config.server.env}`);
   console.log(`Health check: http://localhost:${PORT}/api/health`);
   console.log(`API disponible en: http://localhost:${PORT}/api`);
+  console.log(`Auth endpoints: http://localhost:${PORT}/api/auth`);
 });
 
 module.exports = app;
