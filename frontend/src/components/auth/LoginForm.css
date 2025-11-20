@@ -42,7 +42,8 @@
 
 .login-header h1 {
   /* AZUL OSCURO-MORADO */
-  color: #4a235a; /* Azul oscuro tirando a morado */
+  color: #4a235a;
+  /* Azul oscuro tirando a morado */
   margin: 0 0 12px 0;
   font-size: 28px;
   font-weight: 700;
@@ -78,8 +79,8 @@
 }
 
 .form-group label::before {
-  content: "•";
-  color: #4a235a; /* Azul oscuro-morado */
+  color: #4a235a;
+  /* Azul oscuro-morado */
   font-weight: bold;
 }
 
@@ -95,7 +96,8 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #4a235a; /* Azul oscuro-morado */
+  border-color: #4a235a;
+  /* Azul oscuro-morado */
   box-shadow: 0 0 0 3px rgba(74, 35, 90, 0.15);
   transform: translateY(-1px);
 }
@@ -117,24 +119,6 @@
   padding-right: 50px;
 }
 
-.toggle-password {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 5px;
-  transition: all 0.2s ease;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  color: #4a235a; /* Azul oscuro-morado */
-}
-
 .toggle-password:hover {
   background-color: rgba(74, 35, 90, 0.1);
   transform: scale(1.05);
@@ -148,11 +132,10 @@
 
 .login-button {
   /* AZUL OSCURO-MORADO EN GRADIENTE */
-  background: linear-gradient(
-    135deg,
-    #4a235a 0%,
-    #6c3483 100%
-  ); /* Azul oscuro a morado */
+  background: linear-gradient(135deg,
+      #4a235a 0%,
+      #6c3483 100%);
+  /* Azul oscuro a morado */
   color: white;
   border: none;
   padding: 14px 20px;
@@ -176,18 +159,17 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent);
   transition: left 0.5s;
 }
 
 .login-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(74, 35, 90, 0.4); /* Sombra azul-morado */
+  box-shadow: 0 12px 25px rgba(74, 35, 90, 0.4);
+  /* Sombra azul-morado */
   border-color: rgba(255, 255, 255, 0.3);
 }
 
@@ -217,17 +199,21 @@
   font-size: 13px;
   font-weight: 500;
   animation: shake 0.5s ease-in-out;
-  border-left: 4px solid #4a235a; /* Azul oscuro-morado como acento */
+  border-left: 4px solid #4a235a;
+  /* Azul oscuro-morado como acento */
 }
 
 @keyframes shake {
+
   0%,
   100% {
     transform: translateX(0);
   }
+
   25% {
     transform: translateX(-5px);
   }
+
   75% {
     transform: translateX(5px);
   }

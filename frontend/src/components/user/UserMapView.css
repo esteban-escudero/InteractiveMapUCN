@@ -1,0 +1,144 @@
+/* components/user/UserMapView.css */
+
+:root {
+    --primary-color: #4a235a;
+    --primary-light: #6c3483;
+    --secondary-color: #3498db;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --error-color: #e74c3c;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --bg-white: #ffffff;
+    --bg-light: #f8f9fa;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+/* Contenedor principal */
+.user-map-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Mapa */
+.user-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Overlay de carga */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    gap: 16px;
+}
+
+.loading-overlay .loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid rgba(74, 35, 90, 0.2);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-overlay p {
+    color: var(--text-dark);
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Marcador de ubicación del usuario */
+.user-location-marker {
+    background: transparent;
+    border: none;
+}
+
+.user-location-marker .pulse {
+    width: 20px;
+    height: 20px;
+    background: var(--secondary-color);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+    animation: pulse 2s infinite;
+}
+
+.user-location-marker .pulse::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: white;
+    border-radius: 50%;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 20px rgba(52, 152, 219, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+    }
+}
+
+/* Responsive - Ajustes para pantallas muy pequeñas */
+@media (max-width: 360px) {
+    .loading-overlay .loading-spinner {
+        width: 40px;
+        height: 40px;
+    }
+
+    .loading-overlay p {
+        font-size: 14px;
+    }
+}
+
+/* Ajustes para orientación horizontal */
+@media (orientation: landscape) and (max-height: 500px) {
+    .loading-overlay {
+        flex-direction: row;
+        gap: 12px;
+    }
+
+    .loading-overlay .loading-spinner {
+        width: 32px;
+        height: 32px;
+    }
+
+    .loading-overlay p {
+        font-size: 14px;
+    }
+}

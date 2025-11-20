@@ -1,0 +1,166 @@
+// components/user/MobileRoutePanel.jsx
+import React from 'react';
+import './mobile-components.css';
+import './route-panel-fix.css';
+
+/* ---- Dropdown Custom ---- */
+function CustomSelect({ value, options, onChange, placeholder }) {
+    const [open, setOpen] = React.useState(false);
+
+    const selectedLabel = options.find(o => o.value === value)?.label;
+
+    return (
+        <div className={`custom-select-wrapper ${open ? 'open' : ''}`}>
+            <div
+                className="custom-select-display"
+                onClick={() => setOpen(!open)}
+            >
+                {selectedLabel || placeholder}
+            </div>
+
+            {open && (
+                <>
+                    <div
+                        className="custom-select-overlay"
+                        onClick={() => setOpen(false)}
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 9998
+                        }}
+                    />
+                    <div className="custom-select-dropdown">
+                        {options.map(opt => (
+                            <div
+                                key={opt.value}
+                                className="custom-select-option"
+                                onClick={() => {
+                                    onChange(opt.value);
+                                    setOpen(false);
+                                }}
+                            >
+                                {opt.label}
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
+/* ---- PANEL DE RUTAS ---- */
+function MobileRoutePanel({
+    origin,
+    destination,
+    route,
+    buildings,
+    routeType = "peatonal",
+    onOriginChange,
+    onDestinationChange,
+    onRouteTypeChange,
+    onCalculate,
+    onClose
+}) {
+    return (
+        <>
+            <div className="panel-overlay" onClick={onClose} />
+
+            <div className="mobile-route-panel">
+                <div className="panel-header">
+                    <h2>Calcular Ruta</h2>
+                    <button className="close-button" onClick={onClose}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div className="route-selectors">
+
+                    {/* -------- ORIGEN -------- */}
+                    <div className="route-input-group">
+                        <div className="input-icon origin">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <circle cx="12" cy="12" r="8"></circle>
+                            </svg>
+                        </div>
+
+                        <CustomSelect
+                            value={origin?.id || ""}
+                            placeholder="Seleccionar Origen"
+                            options={buildings.map(b => ({
+                                value: b.id,
+                                label: b.nombre
+                            }))}
+                            onChange={(id) => {
+                                const b = buildings.find(x => x.id === id);
+                                onOriginChange(b);
+                            }}
+                        />
+                    </div>
+
+                    {/* -------- DESTINO -------- */}
+                    <div className="route-input-group">
+                        <div className="input-icon destination">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+
+                        <CustomSelect
+                            value={destination?.id || ""}
+                            placeholder="Seleccionar Destino"
+                            options={buildings.map(b => ({
+                                value: b.id,
+                                label: b.nombre
+                            }))}
+                            onChange={(id) => {
+                                const b = buildings.find(x => x.id === id);
+                                onDestinationChange(b);
+                            }}
+                        />
+                    </div>
+
+                    {/* -------- TIPO DE RUTA -------- */}
+                    <div className="route-input-group">
+                        <div className="input-icon route-type">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                        </div>
+
+                        <CustomSelect
+                            value={routeType}
+                            placeholder="Tipo de Ruta"
+                            options={[
+                                { value: "peatonal", label: "🚶 Peatonal" },
+                                { value: "accesible", label: "♿ Accesible" },
+                                { value: "rapida", label: "⚡ Rápida" },
+                                { value: "emergencia", label: "🚨 Emergencia" },
+                                { value: "vehicular", label: "🚗 Vehicular" },
+                            ]}
+                            onChange={(value) => onRouteTypeChange(value)}
+                        />
+                    </div>
+
+                    <button
+                        className="calculate-button"
+                        onClick={onCalculate}
+                        disabled={!origin || !destination}
+                    >
+                        Calcular Ruta
+                    </button>
+                </div>
+            </div>
+        </>
+    );
+}
+
+export default MobileRoutePanel;
