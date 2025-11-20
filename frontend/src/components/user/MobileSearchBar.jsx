@@ -4,6 +4,7 @@ import './mobile-components.css';
 
 /**
  * Barra de búsqueda flotante para móviles
+ * Busca en edificios y salas
  */
 function MobileSearchBar({
     searchQuery,
@@ -19,12 +20,51 @@ function MobileSearchBar({
     // Filtrar resultados cuando cambia la búsqueda
     useEffect(() => {
         if (searchQuery.trim().length > 0) {
-            const results = buildings.filter(building =>
-                building.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                building.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                building.description?.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-            setFilteredResults(results.slice(0, 5)); // Máximo 5 resultados
+            const query = searchQuery.toLowerCase();
+            const results = [];
+
+            // Buscar en edificios
+            buildings.forEach(building => {
+                const buildingMatches =
+                    building.nombre?.toLowerCase().includes(query) ||
+                    building.categoria?.toLowerCase().includes(query) ||
+                    building.descripcion?.toLowerCase().includes(query);
+
+                if (buildingMatches) {
+                    results.push({
+                        id: `building-${building.id}`,
+                        type: 'building',
+                        data: building,
+                        name: building.nombre,
+                        category: building.categoria || 'Edificio',
+                        floor: null
+                    });
+                }
+
+                // Buscar en salas del edificio (usando nombre_sala y tipo_sala)
+                if (building.salas && Array.isArray(building.salas)) {
+                    building.salas.forEach(sala => {
+                        const salaMatches =
+                            sala.nombre_sala?.toLowerCase().includes(query) ||
+                            sala.tipo_sala?.toLowerCase().includes(query) ||
+                            sala.capacidad?.toString().includes(query);
+
+                        if (salaMatches) {
+                            results.push({
+                                id: `sala-${sala.id}`,
+                                type: 'sala',
+                                data: sala,
+                                building: building,
+                                name: sala.nombre_sala,
+                                category: `${building.nombre} - ${sala.tipo_sala || 'Sala'}`,
+                                floor: sala.piso ? `Piso ${sala.piso}` : null
+                            });
+                        }
+                    });
+                }
+            });
+
+            setFilteredResults(results.slice(0, 8)); // Máximo 8 resultados
             setShowResults(true);
         } else {
             setFilteredResults([]);
@@ -44,8 +84,16 @@ function MobileSearchBar({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleSelectLocation = (building) => {
-        onLocationSelect(building);
+    const handleSelectLocation = (result) => {
+        if (result.type === 'building') {
+            onLocationSelect(result.data);
+        } else if (result.type === 'sala') {
+            // Para salas, seleccionar el edificio y pasar info de la sala
+            onLocationSelect({
+                ...result.building,
+                selectedSala: result.data
+            });
+        }
         onSearchChange('');
         setShowResults(false);
     };
@@ -105,23 +153,31 @@ function MobileSearchBar({
             {/* Resultados de búsqueda */}
             {showResults && filteredResults.length > 0 && (
                 <div className="search-results">
-                    {filteredResults.map((building) => (
+                    {filteredResults.map((result) => (
                         <div
-                            key={building.id}
+                            key={result.id}
                             className="search-result-item"
-                            onClick={() => handleSelectLocation(building)}
+                            onClick={() => handleSelectLocation(result)}
                         >
                             <div className="result-icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                    <circle cx="12" cy="10" r="3"></circle>
-                                </svg>
+                                {result.type === 'building' ? (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                    </svg>
+                                ) : (
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                                    </svg>
+                                )}
                             </div>
                             <div className="result-content">
-                                <div className="result-name">{building.name}</div>
-                                {building.category && (
-                                    <div className="result-category">{building.category}</div>
-                                )}
+                                <div className="result-name">{result.name}</div>
+                                <div className="result-category">
+                                    {result.category}
+                                    {result.floor && ` • ${result.floor}`}
+                                </div>
                             </div>
                             <div className="result-arrow">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -133,6 +189,7 @@ function MobileSearchBar({
                 </div>
             )}
 
+            {/* Sin resultados */}
             {showResults && filteredResults.length === 0 && searchQuery && (
                 <div className="search-results">
                     <div className="no-results">
@@ -141,6 +198,7 @@ function MobileSearchBar({
                             <path d="m21 21-4.35-4.35"></path>
                         </svg>
                         <p>No se encontraron resultados</p>
+                        <span>Intenta buscar con otros términos</span>
                     </div>
                 </div>
             )}

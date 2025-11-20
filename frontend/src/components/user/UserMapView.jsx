@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./UserMapView.css";
+import "./dark-mode.css";
 
 // Hooks
 import useBuildings from "../../hooks/buildings/useBuildings.js";
@@ -11,6 +12,7 @@ import { useRouteIntelligence } from "../../hooks/routes/useRouteIntelligence.js
 import { useNotification } from "../../hooks/common/useNotification.js";
 import { useURLParams } from "../../hooks/user/useURLParams.js";
 import { useGeolocation } from "../../hooks/user/useGeolocation.js";
+import { useTheme } from "../../hooks/user/useTheme.js";
 
 // Configuración
 import { MAP_CONFIG } from "../../config/app.js";
@@ -70,6 +72,9 @@ function UserMapView() {
 
     // Parámetros de URL (para QR codes)
     const { urlParams, navigateToLocation } = useURLParams();
+
+    // Tema (modo oscuro)
+    const { isDarkMode, toggleTheme } = useTheme();
 
     // Inicializar mapa
     useEffect(() => {
@@ -328,6 +333,8 @@ function UserMapView() {
             {showMenu && (
                 <MobileMenu
                     onClose={() => setShowMenu(false)}
+                    isDarkMode={isDarkMode}
+                    onToggleTheme={toggleTheme}
                 />
             )}
 

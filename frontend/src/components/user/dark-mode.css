@@ -1,0 +1,341 @@
+/* ========================================
+   MODO OSCURO - Variables y Estilos Globales
+   ======================================== */
+
+body.dark-mode {
+    background-color: #0f0f0f;
+    color: #e0e0e0;
+}
+
+/* ========================================
+   MAPA - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .user-map-view {
+    background-color: #0f0f0f;
+}
+
+body.dark-mode .leaflet-container {
+    background-color: #1a1a1a;
+}
+
+/* ========================================
+   BARRA DE BÚSQUEDA - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .mobile-search-bar {
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+body.dark-mode .search-input-container {
+    background: #1f1f1f;
+    border-color: #333;
+}
+
+body.dark-mode .search-input {
+    background: #1f1f1f;
+    color: #e0e0e0;
+    border-color: #333;
+}
+
+body.dark-mode .search-input::placeholder {
+    color: #888;
+}
+
+/* Iconos morados más claros */
+body.dark-mode .search-icon,
+body.dark-mode .menu-button svg,
+body.dark-mode .clear-button svg {
+    color: #b794f4;
+}
+
+body.dark-mode .menu-button:hover,
+body.dark-mode .clear-button:hover {
+    background: #2a2a2a;
+}
+
+/* Resultados de búsqueda */
+body.dark-mode .search-results {
+    background: #1f1f1f;
+    border-color: #333;
+}
+
+body.dark-mode .search-result-item {
+    border-bottom-color: #2a2a2a;
+}
+
+body.dark-mode .search-result-item:hover {
+    background: #2a2a2a;
+}
+
+body.dark-mode .result-icon svg {
+    color: #b794f4;
+}
+
+body.dark-mode .result-name {
+    color: #e0e0e0;
+}
+
+body.dark-mode .result-category {
+    color: #888;
+}
+
+body.dark-mode .no-results {
+    color: #888;
+}
+
+body.dark-mode .no-results svg {
+    color: #555;
+}
+
+/* ========================================
+   PANEL DE INFORMACIÓN - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .mobile-info-panel {
+    background: #1f1f1f;
+    border-top-color: #333;
+}
+
+body.dark-mode .panel-header h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .close-button {
+    background: #2a2a2a;
+}
+
+body.dark-mode .close-button:hover {
+    background: #333;
+}
+
+body.dark-mode .info-section h3 {
+    color: #b0b0b0;
+}
+
+body.dark-mode .info-item {
+    color: #e0e0e0;
+}
+
+body.dark-mode .info-item svg {
+    color: #b794f4;
+}
+
+body.dark-mode .action-buttons button {
+    background: #2a2a2a;
+    color: #e0e0e0;
+    border-color: #333;
+}
+
+body.dark-mode .action-buttons button:hover {
+    background: #333;
+}
+
+body.dark-mode .action-buttons button.primary {
+    background: linear-gradient(135deg, #7d3c98 0%, #b794f4 100%);
+    color: white;
+}
+
+/* ========================================
+   PANEL DE RUTAS - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .mobile-route-panel {
+    background: #1f1f1f;
+    border-top-color: #333;
+}
+
+body.dark-mode .panel-header {
+    border-bottom-color: #2a2a2a;
+}
+
+body.dark-mode .custom-select-display {
+    background: #2a2a2a;
+    border-color: #333;
+    color: #e0e0e0;
+}
+
+body.dark-mode .custom-select-display:hover {
+    border-color: #444;
+    background: #2f2f2f;
+}
+
+body.dark-mode .custom-select-wrapper.open .custom-select-display {
+    border-color: #b794f4;
+    background: #2a2a2a;
+}
+
+body.dark-mode .custom-select-dropdown {
+    background: #2a2a2a;
+    border-color: #333;
+}
+
+body.dark-mode .custom-select-option {
+    color: #e0e0e0;
+    border-bottom-color: #333;
+}
+
+body.dark-mode .custom-select-option:hover {
+    background: linear-gradient(90deg, rgba(183, 148, 244, 0.15) 0%, rgba(183, 148, 244, 0.08) 100%);
+    color: #b794f4;
+}
+
+body.dark-mode .custom-select-dropdown::-webkit-scrollbar-track {
+    background: #1f1f1f;
+}
+
+body.dark-mode .custom-select-dropdown::-webkit-scrollbar-thumb {
+    background: #444;
+}
+
+body.dark-mode .custom-select-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* ========================================
+   CONTROLES DEL MAPA - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .mobile-map-controls button {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: #333;
+}
+
+body.dark-mode .mobile-map-controls button:hover {
+    background: rgba(40, 40, 40, 0.95);
+}
+
+body.dark-mode .mobile-map-controls button.active {
+    background: linear-gradient(135deg, #7d3c98 0%, #b794f4 100%);
+}
+
+body.dark-mode .mobile-map-controls button svg {
+    color: #b794f4;
+}
+
+/* ========================================
+   MENÚ LATERAL - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .mobile-menu {
+    background: #1f1f1f;
+}
+
+body.dark-mode .menu-header {
+    border-bottom-color: #2a2a2a;
+}
+
+body.dark-mode .menu-logo svg {
+    color: #b794f4;
+}
+
+body.dark-mode .menu-logo h2 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .menu-close {
+    background: #2a2a2a;
+}
+
+body.dark-mode .menu-close:hover {
+    background: #333;
+}
+
+body.dark-mode .menu-section-title {
+    color: #888;
+}
+
+body.dark-mode .menu-item {
+    color: #e0e0e0;
+}
+
+body.dark-mode .menu-item svg {
+    color: #b794f4;
+}
+
+body.dark-mode .menu-item:hover {
+    background: #2a2a2a;
+}
+
+body.dark-mode .menu-footer {
+    border-top-color: #2a2a2a;
+    color: #888;
+}
+
+body.dark-mode .menu-footer .version {
+    color: #666;
+}
+
+/* ========================================
+   OVERLAYS - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .panel-overlay,
+body.dark-mode .menu-overlay {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+/* ========================================
+   NOTIFICACIONES - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .notification {
+    background: #2a2a2a;
+    color: #e0e0e0;
+    border-color: #333;
+}
+
+body.dark-mode .notification.success {
+    background: #1a3a1a;
+    border-color: #2d5a2d;
+    color: #90ee90;
+}
+
+body.dark-mode .notification.error {
+    background: #3a1a1a;
+    border-color: #5a2d2d;
+    color: #ff6b6b;
+}
+
+body.dark-mode .notification.warning {
+    background: #3a3a1a;
+    border-color: #5a5a2d;
+    color: #ffd700;
+}
+
+/* ========================================
+   LOADING - Modo Oscuro
+   ======================================== */
+
+body.dark-mode .loading-overlay {
+    background: rgba(15, 15, 15, 0.9);
+}
+
+body.dark-mode .loading-spinner {
+    border-color: #333;
+    border-top-color: #b794f4;
+}
+
+body.dark-mode .loading-text {
+    color: #e0e0e0;
+}
+
+/* ========================================
+   TRANSICIONES SUAVES
+   ======================================== */
+
+body,
+.mobile-search-bar,
+.search-input-container,
+.search-input,
+.search-results,
+.mobile-info-panel,
+.mobile-route-panel,
+.mobile-menu,
+.menu-item,
+.custom-select-display,
+.custom-select-dropdown,
+.mobile-map-controls button {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

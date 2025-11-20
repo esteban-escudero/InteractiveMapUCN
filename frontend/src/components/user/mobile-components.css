@@ -550,7 +550,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-dark);
+    color: var(--text-white);
     transition: var(--transition);
 }
 
