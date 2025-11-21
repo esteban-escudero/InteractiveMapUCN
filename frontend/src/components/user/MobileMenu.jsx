@@ -1,6 +1,10 @@
 // components/user/MobileMenu.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import InfoModal from './InfoModal';
+import AboutContent from './AboutContent';
+import HelpContent from './HelpContent';
+import TermsContent from './TermsContent';
 import './mobile-components.css';
 
 /**
@@ -8,9 +12,18 @@ import './mobile-components.css';
  */
 function MobileMenu({ onClose, isDarkMode, onToggleTheme }) {
     const navigate = useNavigate();
+    const [activeModal, setActiveModal] = useState(null);
 
     const handleAdminAccess = () => {
         navigate('/admin');
+    };
+
+    const openModal = (modalType) => {
+        setActiveModal(modalType);
+    };
+
+    const closeModal = () => {
+        setActiveModal(null);
     };
 
     return (
@@ -40,7 +53,7 @@ function MobileMenu({ onClose, isDarkMode, onToggleTheme }) {
                     <div className="menu-section">
                         <h3 className="menu-section-title">Información</h3>
 
-                        <button className="menu-item">
+                        <button className="menu-item" onClick={() => openModal('about')}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <path d="M12 16v-4"></path>
@@ -49,7 +62,7 @@ function MobileMenu({ onClose, isDarkMode, onToggleTheme }) {
                             <span>Acerca de</span>
                         </button>
 
-                        <button className="menu-item">
+                        <button className="menu-item" onClick={() => openModal('help')}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -58,7 +71,7 @@ function MobileMenu({ onClose, isDarkMode, onToggleTheme }) {
                             <span>Ayuda</span>
                         </button>
 
-                        <button className="menu-item">
+                        <button className="menu-item" onClick={() => openModal('terms')}>
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
@@ -116,6 +129,31 @@ function MobileMenu({ onClose, isDarkMode, onToggleTheme }) {
                     <p className="version">Versión 1.0.0</p>
                 </div>
             </div>
+
+            {/* Modales */}
+            <InfoModal
+                isOpen={activeModal === 'about'}
+                onClose={closeModal}
+                title="Acerca de"
+            >
+                <AboutContent />
+            </InfoModal>
+
+            <InfoModal
+                isOpen={activeModal === 'help'}
+                onClose={closeModal}
+                title="Ayuda"
+            >
+                <HelpContent />
+            </InfoModal>
+
+            <InfoModal
+                isOpen={activeModal === 'terms'}
+                onClose={closeModal}
+                title="Términos y Condiciones"
+            >
+                <TermsContent />
+            </InfoModal>
         </>
     );
 }

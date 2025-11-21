@@ -4,6 +4,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./UserMapView.css";
 import "./dark-mode.css";
+import "./info-modal.css";
 
 // Hooks
 import useBuildings from "../../hooks/buildings/useBuildings.js";
