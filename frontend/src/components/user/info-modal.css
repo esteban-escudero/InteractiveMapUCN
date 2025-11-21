@@ -27,7 +27,7 @@
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideUp 0.3s ease;
+    animation: slideFromLeft 0.3s ease;
 }
 
 .modal-header {
@@ -147,10 +147,10 @@
     }
 }
 
-@keyframes slideUp {
+@keyframes slideFromLeft {
     from {
         opacity: 0;
-        transform: translate(-50%, -40%);
+        transform: translate(-60%, -50%);
     }
 
     to {

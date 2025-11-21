@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import "./UserMapView.css";
 import "./dark-mode.css";
 import "./info-modal.css";
+import "./rounded-search.css";
 
 // Hooks
 import useBuildings from "../../hooks/buildings/useBuildings.js";
@@ -85,7 +86,7 @@ function UserMapView() {
                     const map = L.map(mapRef.current, {
                         minZoom: MAP_CONFIG.zoom.min,
                         maxZoom: MAP_CONFIG.zoom.max,
-                        zoomControl: true,
+                        zoomControl: false,
                         attributionControl: true,
                         maxBoundsViscosity: 1.0,
                     });

@@ -1,0 +1,46 @@
+/* Rounded corners override for search bar */
+.mobile-search-bar {
+    border-radius: 24px !important;
+    overflow: hidden !important;
+}
+
+.search-input-container {
+    border-radius: 24px !important;
+    overflow: hidden !important;
+}
+
+.menu-button {
+    border-radius: 16px !important;
+}
+
+.search-input {
+    border-radius: 16px !important;
+}
+
+/* Menu close button color */
+.menu-close {
+    color: var(--primary-color) !important;
+}
+
+/* Dark mode */
+body.dark-mode .mobile-search-bar {
+    border-radius: 24px !important;
+    overflow: hidden !important;
+}
+
+body.dark-mode .search-input-container {
+    border-radius: 24px !important;
+    overflow: hidden !important;
+}
+
+body.dark-mode .menu-button {
+    border-radius: 16px !important;
+}
+
+body.dark-mode .search-input {
+    border-radius: 16px !important;
+}
+
+body.dark-mode .menu-close {
+    color: #b794f4 !important;
+}
