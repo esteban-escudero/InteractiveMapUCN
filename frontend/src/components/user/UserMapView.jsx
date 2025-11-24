@@ -97,6 +97,7 @@ function UserMapView() {
             userPosition,
             geoError,
             getCurrentPosition,
+            buildings,
         });
 
     // Manejar parámetros de URL (QR codes)
@@ -185,6 +186,7 @@ function UserMapView() {
                     onRouteTypeChange={setRouteType}
                     onCalculate={handleCalculateRoute}
                     onClose={() => setShowRoutePanel(false)}
+                    onGPSRequest={getCurrentPosition}
                 />
             )}
 

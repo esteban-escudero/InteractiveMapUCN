@@ -63,7 +63,8 @@ function MobileRoutePanel({
     onDestinationChange,
     onRouteTypeChange,
     onCalculate,
-    onClose
+    onClose,
+    onGPSRequest
 }) {
     return (
         <>
@@ -91,15 +92,26 @@ function MobileRoutePanel({
                         </div>
 
                         <CustomSelect
-                            value={origin?.id || ""}
+                            value={origin?.id || origin === 'gps' ? (origin === 'gps' ? 'gps' : origin.id) : ""}
                             placeholder="Seleccionar Origen"
-                            options={buildings.map(b => ({
-                                value: b.id,
-                                label: b.nombre
-                            }))}
+                            options={[
+                                { value: "gps", label: "Mi ubicación" },
+                                ...buildings.map(b => ({
+                                    value: b.id,
+                                    label: b.nombre
+                                }))
+                            ]}
                             onChange={(id) => {
-                                const b = buildings.find(x => x.id === id);
-                                onOriginChange(b);
+                                if (id === 'gps') {
+                                    onOriginChange('gps');
+                                    // Obtener GPS inmediatamente
+                                    if (typeof onGPSRequest === 'function') {
+                                        onGPSRequest();
+                                    }
+                                } else {
+                                    const b = buildings.find(x => x.id === id);
+                                    onOriginChange(b);
+                                }
                             }}
                         />
                     </div>

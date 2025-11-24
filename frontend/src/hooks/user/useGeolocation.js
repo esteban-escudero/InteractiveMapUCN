@@ -1,5 +1,5 @@
 // hooks/user/useGeolocation.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 /**
  * Hook para manejar la geolocalización del usuario
