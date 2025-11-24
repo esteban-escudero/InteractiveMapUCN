@@ -16,7 +16,8 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) que p
 ### Propósito
 - Orientación en campus universitario
 - Búsqueda de ubicaciones (edificios, salas, servicios)
-- Navegación asistida con cálculo de rutas
+- Geolocalización en tiempo real
+- Navegación asistida con cálculo de rutas desde ubicación actual
 - Localización de servicios cercanos
 - Acceso instantáneo sin instalación
 
@@ -26,8 +27,10 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) que p
 - 📱 **PWA**: Funciona como app nativa, instalable, con soporte offline
 - 📲 **Acceso vía QR**: Escaneo de códigos QR para acceso instantáneo
 - 🔍 **Búsqueda de Ubicaciones**: Encuentra edificios, salas y puntos de interés
-- 🛣️ **Cálculo de Rutas**: Generación de rutas óptimas entre dos puntos
-- 📍 **Servicios de Proximidad**: Encuentra servicios cercanos a una ubicación
+- � **Geolocalización GPS**: Muestra tu ubicación actual en el mapa con marcador animado
+- 🧭 **Navegación desde Mi Ubicación**: Calcula rutas desde tu posición actual al destino
+- �🛣️ **Cálculo de Rutas Inteligente**: Generación de rutas óptimas con algoritmo de Dijkstra
+- 🎯 **Servicios de Proximidad**: Encuentra servicios cercanos a una ubicación
 - 🔐 **Sistema de Autenticación**: Login y registro de usuarios (panel admin)
 - 🏢 **Gestión de Edificios y Salas**: CRUD completo de edificios y salas
 - 📊 **API RESTful**: Backend robusto con endpoints documentados
