@@ -1,13 +1,12 @@
-// components/user/UserMapView.jsx
+// components/user/UserMapView.jsx - REFACTORIZADO
 import React, { useState, useEffect, useRef } from "react";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./UserMapView.css";
 import "./dark-mode.css";
 import "./info-modal.css";
 import "./rounded-search.css";
 
-// Hooks
+// Hooks externos
 import useBuildings from "../../hooks/buildings/useBuildings.js";
 import useRoutes from "../../hooks/routes/useRoutes.js";
 import { useRouteIntelligence } from "../../hooks/routes/useRouteIntelligence.js";
@@ -16,8 +15,9 @@ import { useURLParams } from "../../hooks/user/useURLParams.js";
 import { useGeolocation } from "../../hooks/user/useGeolocation.js";
 import { useTheme } from "../../hooks/user/useTheme.js";
 
-// Configuración
-import { MAP_CONFIG } from "../../config/app.js";
+// Hooks personalizados del componente
+import { useUserMapInit } from "./hooks/useUserMapInit.js";
+import { useUserMapHandlers } from "./hooks/useUserMapHandlers.js";
 
 // Componentes
 import { UINotification } from "../ui/index.js";
@@ -53,14 +53,6 @@ function UserMapView() {
     // Inteligencia de rutas (Dijkstra)
     const { getPrioritizedRoutes } = useRouteIntelligence(routes, buildings);
 
-    // Debug: Log routes
-    useEffect(() => {
-        console.log("📍 UserMapView - Rutas cargadas:", routes?.length || 0);
-        if (routes && routes.length > 0) {
-            console.log("📍 Primera ruta:", routes[0]);
-        }
-    }, [routes]);
-
     // Notificaciones
     const { notification, showUINotification, hideNotification } = useNotification();
 
@@ -78,45 +70,34 @@ function UserMapView() {
     // Tema (modo oscuro)
     const { isDarkMode, toggleTheme } = useTheme();
 
-    // Inicializar mapa
-    useEffect(() => {
-        if (mapRef.current && !mapInitialized) {
-            if (!mapRef.current._leaflet_id) {
-                try {
-                    const map = L.map(mapRef.current, {
-                        minZoom: MAP_CONFIG.zoom.min,
-                        maxZoom: MAP_CONFIG.zoom.max,
-                        zoomControl: false,
-                        attributionControl: false,
-                        maxBoundsViscosity: 1.0,
-                    });
+    // Inicializar mapa (hook personalizado)
+    useUserMapInit(
+        mapRef,
+        mapInitialized,
+        setMapInstance,
+        setMapInitialized,
+        loadBuildings,
+        loadRoutes,
+        showUINotification
+    );
 
-                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        minZoom: MAP_CONFIG.zoom.min,
-                        maxZoom: MAP_CONFIG.zoom.max,
-                    }).addTo(map);
-
-                    const bounds = L.latLngBounds(MAP_CONFIG.bounds);
-                    map.fitBounds(bounds, {
-                        padding: [20, 20],
-                        maxZoom: MAP_CONFIG.zoom.default,
-                    });
-                    map.setMaxBounds(bounds);
-
-                    setMapInstance(map);
-                    setMapInitialized(true);
-
-                    loadBuildings();
-                    loadRoutes();
-
-                    console.log("Mapa inicializado con bounds de UCN:", MAP_CONFIG.bounds);
-                } catch (error) {
-                    console.error("Error inicializando mapa:", error);
-                    showUINotification("Error al cargar el mapa", "error");
-                }
-            }
-        }
-    }, [mapRef, mapInitialized, loadBuildings, loadRoutes, showUINotification]);
+    // Handlers del mapa (hook personalizado)
+    const { handleLocationSelect, handleCalculateRoute, handleMyLocation } =
+        useUserMapHandlers({
+            mapInstance,
+            routeOrigin,
+            routeDestination,
+            routeType,
+            getPrioritizedRoutes,
+            showUINotification,
+            setSelectedLocation,
+            setShowInfoPanel,
+            setCalculatedRoute,
+            setShowRoutePanel,
+            userPosition,
+            geoError,
+            getCurrentPosition,
+        });
 
     // Manejar parámetros de URL (QR codes)
     useEffect(() => {
@@ -124,129 +105,6 @@ function UserMapView() {
             navigateToLocation(urlParams, buildings, mapInstance, setSelectedLocation, setShowInfoPanel);
         }
     }, [urlParams, buildings, mapInstance, navigateToLocation]);
-
-    // Manejar selección de ubicación en el mapa
-    const handleLocationSelect = (location) => {
-        setSelectedLocation(location);
-        setShowInfoPanel(true);
-
-        if (mapInstance && location.ubicacion) {
-            const coords = location.ubicacion.coordinates;
-            mapInstance.setView([coords[1], coords[0]], 18);
-        }
-    };
-
-    // Manejar cálculo de ruta
-    const handleCalculateRoute = async () => {
-        if (!routeOrigin || !routeDestination) {
-            showUINotification("Selecciona origen y destino", "warning");
-            return;
-        }
-
-        try {
-            showUINotification(`Calculando ruta ${routeType}...`, "info");
-
-            // Usar getPrioritizedRoutes para calcular ruta óptima con Dijkstra
-            const calculatedRoutes = getPrioritizedRoutes(
-                routeOrigin.nombre,
-                routeDestination.nombre
-            );
-
-            if (calculatedRoutes && calculatedRoutes.length > 0) {
-                // Filtrar por tipo de ruta seleccionado
-                let optimalRoute = calculatedRoutes.find(r => r.tipo === routeType);
-
-                // Si no hay ruta del tipo seleccionado, tomar la más corta disponible
-                if (!optimalRoute) {
-                    optimalRoute = calculatedRoutes[0];
-                    showUINotification(
-                        `No hay ruta ${routeType} disponible. Mostrando ruta ${optimalRoute.tipo}`,
-                        "warning"
-                    );
-                }
-
-                const calculatedRouteData = {
-                    origin: routeOrigin,
-                    destination: routeDestination,
-                    distance: `${optimalRoute.distancia || 0}m`,
-                    duration: `${optimalRoute.tiempo_estimado || 0} min`,
-                    path: optimalRoute.geometria.coordinates,
-                    geometria: optimalRoute.geometria,
-                    tipo: optimalRoute.tipo,
-                    segmentos: optimalRoute.segmentos
-                };
-
-                setCalculatedRoute(calculatedRouteData);
-
-                // Dibujar la ruta en el mapa
-                if (mapInstance && calculatedRouteData.path.length > 0) {
-                    // Limpiar rutas anteriores calculadas
-                    mapInstance.eachLayer((layer) => {
-                        if (layer instanceof L.Polyline && layer.options.className === 'calculated-route') {
-                            mapInstance.removeLayer(layer);
-                        }
-                    });
-
-                    // Colores según tipo de ruta
-                    const routeColors = {
-                        peatonal: '#4a235a',
-                        accesible: '#2ecc71',
-                        rapida: '#e74c3c',
-                        emergencia: '#f39c12',
-                        vehicular: '#3498db'
-                    };
-
-                    // Dibujar nueva ruta
-                    const latLngs = calculatedRouteData.path.map(coord => [coord[1], coord[0]]);
-                    L.polyline(latLngs, {
-                        color: routeColors[optimalRoute.tipo] || '#4a235a',
-                        weight: 6,
-                        opacity: 0.9,
-                        className: 'calculated-route',
-                        dashArray: '10, 5'
-                    }).addTo(mapInstance);
-
-                    // Ajustar vista
-                    const bounds = L.latLngBounds(latLngs);
-                    mapInstance.fitBounds(bounds, { padding: [50, 50] });
-                }
-
-                showUINotification(
-                    `Ruta ${optimalRoute.tipo} encontrada.`,
-                    "success"
-                );
-
-                // Cerrar el panel de rutas automáticamente
-                setShowRoutePanel(false);
-            } else {
-                showUINotification("No hay rutas disponibles entre estos edificios", "warning");
-            }
-        } catch (error) {
-            console.error("Error calculando ruta:", error);
-            showUINotification("Error al calcular ruta", "error");
-        }
-    };
-
-    // Manejar ubicación actual (GPS)
-    const handleMyLocation = () => {
-        getCurrentPosition();
-
-        if (userPosition && mapInstance) {
-            mapInstance.setView([userPosition.latitude, userPosition.longitude], 18);
-
-            L.marker([userPosition.latitude, userPosition.longitude], {
-                icon: L.divIcon({
-                    className: 'user-location-marker',
-                    html: '<div class="pulse"></div>',
-                    iconSize: [20, 20]
-                })
-            }).addTo(mapInstance);
-
-            showUINotification("Ubicación encontrada", "success");
-        } else if (geoError) {
-            showUINotification("No se pudo obtener tu ubicación", "error");
-        }
-    };
 
     return (
         <div className="user-map-container">
