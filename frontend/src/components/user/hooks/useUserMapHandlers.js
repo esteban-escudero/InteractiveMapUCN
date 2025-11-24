@@ -147,22 +147,50 @@ export const useUserMapHandlers = ({
         getCurrentPosition();
 
         if (userPosition && mapInstance) {
+            // Limpiar marcadores GPS anteriores
+            mapInstance.eachLayer((layer) => {
+                if (layer.options && layer.options.className === "gps-marker-layer") {
+                    mapInstance.removeLayer(layer);
+                }
+            });
+
+            // Crear círculo de precisión
+            L.circle(
+                [userPosition.latitude, userPosition.longitude],
+                {
+                    radius: userPosition.accuracy || 50,
+                    color: "#4285F4",
+                    fillColor: "#4285F4",
+                    fillOpacity: 0.1,
+                    weight: 1,
+                    className: "gps-marker-layer"
+                }
+            ).addTo(mapInstance);
+
+            // Crear marcador de ubicación con animación
+            L.marker([userPosition.latitude, userPosition.longitude], {
+                icon: L.divIcon({
+                    className: "user-location-marker",
+                    html: `
+                        <div class="gps-marker">
+                            <div class="gps-dot"></div>
+                            <div class="gps-pulse"></div>
+                        </div>
+                    `,
+                    iconSize: [40, 40],
+                }),
+                className: "gps-marker-layer"
+            }).addTo(mapInstance);
+
+            // Centrar mapa en ubicación
             mapInstance.setView(
                 [userPosition.latitude, userPosition.longitude],
                 18
             );
 
-            L.marker([userPosition.latitude, userPosition.longitude], {
-                icon: L.divIcon({
-                    className: "user-location-marker",
-                    html: '<div class="pulse"></div>',
-                    iconSize: [20, 20],
-                }),
-            }).addTo(mapInstance);
-
             showUINotification("Ubicación encontrada", "success");
         } else if (geoError) {
-            showUINotification("No se pudo obtener tu ubicación", "error");
+            showUINotification(geoError, "error");
         }
     }, [
         getCurrentPosition,

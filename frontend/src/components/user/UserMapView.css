@@ -72,45 +72,59 @@
     }
 }
 
-/* Marcador de ubicación del usuario */
+/* ========================================
+   MARCADOR GPS
+   ======================================== */
+
 .user-location-marker {
-    background: transparent;
-    border: none;
+    background: transparent !important;
+    border: none !important;
 }
 
-.user-location-marker .pulse {
-    width: 20px;
-    height: 20px;
-    background: var(--secondary-color);
-    border-radius: 50%;
+.gps-marker {
     position: relative;
-    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
-    animation: pulse 2s infinite;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.user-location-marker .pulse::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
-    background: white;
+.gps-dot {
+    width: 16px;
+    height: 16px;
+    background: #4285F4;
+    border: 3px solid white;
     border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+    position: relative;
 }
 
-@keyframes pulse {
+.gps-pulse {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #4285F4;
+    border-radius: 50%;
+    opacity: 0;
+    animation: gps-pulse 2s infinite;
+}
+
+@keyframes gps-pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7);
+        transform: scale(0.4);
+        opacity: 0.6;
     }
 
-    70% {
-        box-shadow: 0 0 0 20px rgba(52, 152, 219, 0);
+    50% {
+        transform: scale(1);
+        opacity: 0.3;
     }
 
     100% {
-        box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+        transform: scale(1.2);
+        opacity: 0;
     }
 }
 
