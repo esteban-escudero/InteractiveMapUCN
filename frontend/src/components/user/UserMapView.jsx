@@ -87,12 +87,11 @@ function UserMapView() {
                         minZoom: MAP_CONFIG.zoom.min,
                         maxZoom: MAP_CONFIG.zoom.max,
                         zoomControl: false,
-                        attributionControl: true,
+                        attributionControl: false,
                         maxBoundsViscosity: 1.0,
                     });
 
                     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "© OpenStreetMap contributors",
                         minZoom: MAP_CONFIG.zoom.min,
                         maxZoom: MAP_CONFIG.zoom.max,
                     }).addTo(map);

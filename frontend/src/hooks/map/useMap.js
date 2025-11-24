@@ -36,7 +36,7 @@ export const useMap = () => {
         minZoom: MAP_ZOOM_LIMITS.min,
         maxZoom: MAP_ZOOM_LIMITS.max,
         zoomControl: true, // Activar controles de zoom
-        attributionControl: true,
+        attributionControl: false,
         maxBoundsViscosity: 0.8, // Permite desplazamiento suave en bordes
         zoomSnap: 0.5, // Zooms intermedios más suaves
         zoomDelta: 0.5, // Control fino de zoom
@@ -44,7 +44,6 @@ export const useMap = () => {
       });
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
         minZoom: MAP_ZOOM_LIMITS.min,
         maxZoom: MAP_ZOOM_LIMITS.max,
       }).addTo(map);
