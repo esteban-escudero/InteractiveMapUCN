@@ -35,12 +35,16 @@ export const useMap = () => {
       const map = L.map(mapRef.current, {
         minZoom: MAP_ZOOM_LIMITS.min,
         maxZoom: MAP_ZOOM_LIMITS.max,
-        zoomControl: true, // Activar controles de zoom
+        zoomControl: false, // Desactivar controles de zoom
         attributionControl: false,
-        maxBoundsViscosity: 0.8, // Permite desplazamiento suave en bordes
-        zoomSnap: 0.5, // Zooms intermedios más suaves
-        zoomDelta: 0.5, // Control fino de zoom
-        wheelPxPerZoomLevel: 80, // Control suave con rueda del mouse
+        maxBoundsViscosity: 0.8,
+        zoomSnap: 0.5,
+        zoomDelta: 0.5,
+        wheelPxPerZoomLevel: 80,
+        scrollWheelZoom: false, // Desactivar zoom con rueda del mouse
+        doubleClickZoom: false, // Desactivar zoom con doble click
+        touchZoom: false, // Desactivar zoom táctil
+        boxZoom: false, // Desactivar zoom con selección de área
       });
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

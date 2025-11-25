@@ -32,6 +32,10 @@ export const useUserMapInit = (
                         zoomControl: false,
                         attributionControl: false,
                         maxBoundsViscosity: 1.0,
+                        scrollWheelZoom: false, // Desactivar zoom con rueda del mouse
+                        doubleClickZoom: false, // Desactivar zoom con doble click
+                        touchZoom: false, // Desactivar zoom táctil
+                        boxZoom: false, // Desactivar zoom con selección de área
                     });
 
                     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

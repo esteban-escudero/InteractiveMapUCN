@@ -19,9 +19,9 @@ export const MAP_CONFIG = {
     [-29.963208, -71.346738], // Estas tampoco
   ],
   zoom: {
-    min: parseInt(process.env.REACT_APP_MIN_ZOOM) || 17,
-    max: parseInt(process.env.REACT_APP_MAX_ZOOM) || 19,
-    default: parseInt(process.env.REACT_APP_DEFAULT_ZOOM) || 17,
+    min: 19, // Zoom fijo en 19
+    max: 19, // Zoom fijo en 19
+    default: 19, // Zoom fijo en 19
   },
 };
 

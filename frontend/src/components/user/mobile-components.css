@@ -484,7 +484,7 @@
 .mobile-map-controls {
     position: absolute;
     right: 16px;
-    bottom: 100px;
+    bottom: 200px; /* Bajado desde 100px */
     z-index: 900;
     display: flex;
     flex-direction: column;

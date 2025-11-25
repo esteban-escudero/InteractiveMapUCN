@@ -3,25 +3,13 @@ import React from 'react';
 import './mobile-components.css';
 
 /**
- * Controles flotantes del mapa (zoom, ubicación, rutas)
+ * Controles flotantes del mapa (ubicación, rutas)
  */
 function MobileMapControls({
     onMyLocation,
     onRouteToggle,
     geoLoading,
-    mapInstance
 }) {
-    const handleZoomIn = () => {
-        if (mapInstance) {
-            mapInstance.zoomIn();
-        }
-    };
-
-    const handleZoomOut = () => {
-        if (mapInstance) {
-            mapInstance.zoomOut();
-        }
-    };
 
     return (
         <div className="mobile-map-controls">
@@ -70,30 +58,6 @@ function MobileMapControls({
                     <circle cx="18" cy="5" r="3"></circle>
                 </svg>
             </button>
-
-            {/* Controles de zoom */}
-            <div className="zoom-controls">
-                <button
-                    className="zoom-button"
-                    onClick={handleZoomIn}
-                    aria-label="Acercar"
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="12" y1="5" x2="12" y2="19"></line>
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </button>
-                <div className="zoom-divider" />
-                <button
-                    className="zoom-button"
-                    onClick={handleZoomOut}
-                    aria-label="Alejar"
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                    </svg>
-                </button>
-            </div>
         </div>
     );
 }
