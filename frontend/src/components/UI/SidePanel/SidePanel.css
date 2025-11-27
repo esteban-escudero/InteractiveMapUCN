@@ -14,11 +14,6 @@
   box-shadow: 4px 0 15px rgba(0, 0, 0, 0.4);
 }
 
-/* --- Contenedor Principal --- */
-.dropdowns-container {
-  margin-bottom: 20px;
-}
-
 /* --- Dropdowns Unificados --- */
 .dropdown,
 .filters-dropdown {
@@ -206,9 +201,11 @@
   0% {
     box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
   }
+
   70% {
     box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
   }

@@ -39,6 +39,9 @@
   margin: 0;
   font-size: 24px;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .close-btn {
@@ -125,8 +128,19 @@
   font-size: 18px;
 }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
 .form-group {
   margin-bottom: 16px;
+}
+
+.form-grid .form-group {
+  margin-bottom: 0;
 }
 
 .form-group label {
@@ -137,16 +151,19 @@
   font-size: 14px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #3498db;
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
@@ -223,6 +240,10 @@
   gap: 6px;
 }
 
+.btn .material-icons {
+  font-size: 18px;
+}
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -239,15 +260,6 @@
   box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
 }
 
-.btn-secondary {
-  background: #95a5a6;
-  color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: #7f8c8d;
-}
-
 .btn-danger {
   background: #e74c3c;
   color: white;
@@ -255,6 +267,8 @@
 
 .btn-danger:hover:not(:disabled) {
   background: #c0392b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
 .btn-sm {
@@ -290,6 +304,13 @@
   margin: 0 0 16px 0;
   color: #e74c3c;
   font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-dialog h3 {
+  color: #333;
 }
 
 .confirm-dialog p {
@@ -332,6 +353,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -342,6 +364,7 @@
     transform: translateY(30px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -353,6 +376,7 @@
     transform: translateY(-10px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -364,6 +388,7 @@
     transform: scale(0.9);
     opacity: 0;
   }
+
   to {
     transform: scale(1);
     opacity: 1;
@@ -379,6 +404,10 @@
 
   .modal-header h2 {
     font-size: 20px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 
   .users-table {

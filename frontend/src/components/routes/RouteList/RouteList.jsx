@@ -21,10 +21,12 @@ const RouteList = ({
 
   const getRouteTypeIcon = (tipo) => {
     const icons = {
-      peatonal: "🚶",
-      vehicular: "🚗",
-      accesible: "♿",
-      default: "🛣️",
+      peatonal: "directions_walk",
+      vehicular: "directions_car",
+      accesible: "accessible",
+      emergencia: "emergency",
+      rapida: "bolt",
+      default: "route",
     };
     return icons[tipo] || icons.default;
   };
@@ -112,9 +114,8 @@ const RouteList = ({
               Accesibles
             </button>
             <button
-              className={`filter-btn ${
-                filter === "emergencia" ? "active" : ""
-              }`}
+              className={`filter-btn ${filter === "emergencia" ? "active" : ""
+                }`}
               onClick={() => setFilter("emergencia")}>
               <span className="material-icons">emergency</span>
               Emergencia
@@ -174,24 +175,28 @@ const RouteList = ({
                   <div className="route-content">
                     <div className="route-header">
                       <div className="route-icon">
-                        {getRouteTypeIcon(route.tipo)}
+                        <span className="material-icons">{getRouteTypeIcon(route.tipo)}</span>
                       </div>
                       <div className="route-info">
                         <h4 className="route-name">{route.nombre}</h4>
-                        <span className="route-type">{route.tipo}</span>
-                      </div>
-                    </div>
-
-                    <div className="route-stats">
-                      <div className="stat">
-                        <span className="stat-label">Distancia:</span>
-                        <span className="stat-value">{route.distancia}m</span>
-                      </div>
-                      <div className="stat">
-                        <span className="stat-label">Tiempo:</span>
-                        <span className="stat-value">
-                          {route.tiempo_estimado}min
+                        <span
+                          className="route-type"
+                          style={{ backgroundColor: getRouteTypeColor(route.tipo), color: 'white' }}
+                        >
+                          {route.tipo}
                         </span>
+                      </div>
+                      <div className="route-stats-inline">
+                        <div className="stat-inline">
+                          <span className="stat-label">DISTANCIA:</span>
+                          <span className="stat-value">{route.distancia}m</span>
+                        </div>
+                        <div className="stat-inline">
+                          <span className="stat-label">TIEMPO:</span>
+                          <span className="stat-value">
+                            {route.tiempo_estimado}min
+                          </span>
+                        </div>
                       </div>
                     </div>
 

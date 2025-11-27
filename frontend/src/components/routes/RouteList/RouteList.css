@@ -202,25 +202,34 @@
 
 .route-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
 .route-icon {
-  font-size: 28px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 8px;
-  background: #f8f9fa;
+  background: transparent;
+}
+
+.route-icon .material-icons {
+  font-size: 28px;
+  color: #2c3e50;
 }
 
 .route-info {
   flex: 1;
+  min-width: 120px;
 }
 
 .route-name {
@@ -232,8 +241,6 @@
 }
 
 .route-type {
-  background: #ecf0f1;
-  color: #7f8c8d;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 11px;
@@ -242,24 +249,18 @@
   display: inline-block;
 }
 
-.route-stats {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  margin: 0 auto 20px auto;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  width: fit-content;
-  text-align: center;
+.route-stats-inline {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+  align-items: center;
 }
 
-.stat {
-  text-align: center;
+.stat-inline {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .stat-label {
@@ -375,12 +376,6 @@
   margin-right: 0;
 }
 
-.route-icon .material-icons {
-  font-size: 20px;
-  margin-right: 0;
-  color: #2c3e50;
-}
-
 .action-btn .material-icons {
   font-size: 16px;
   margin-right: 0;
@@ -432,10 +427,16 @@
     justify-content: center;
   }
 
-  .route-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    padding: 12px;
+  .route-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .route-stats-inline {
+    width: 100%;
+    justify-content: space-around;
+    margin-left: 0;
+    margin-top: 8px;
   }
 
   .route-actions {
@@ -480,11 +481,6 @@
 
   .route-content {
     padding: 16px;
-  }
-
-  .route-stats {
-    grid-template-columns: 1fr;
-    width: 100%;
   }
 
   .action-btn {

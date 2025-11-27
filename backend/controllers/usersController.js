@@ -114,7 +114,7 @@ class UsersController {
     async deleteUser(req, res) {
         try {
             const { id } = req.params;
-            const currentUserId = req.user.id_admin; // Del middleware de autenticación
+            const currentUserId = req.admin.id; // Del middleware de autenticación
 
             // Validar que el ID sea un número
             if (isNaN(id)) {
@@ -243,6 +243,58 @@ class UsersController {
             res.status(500).json({
                 success: false,
                 message: 'Error al actualizar la contraseña',
+                error: error.message,
+            });
+        }
+    }
+
+    /**
+     * Actualizar estado activo de administrador
+     * PUT /api/users/:id/status
+     */
+    async updateUserStatus(req, res) {
+        try {
+            const { id } = req.params;
+            const { activo } = req.body;
+
+            // Validaciones
+            if (typeof activo !== 'boolean') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El estado activo debe ser un valor booleano',
+                });
+            }
+
+            // Verificar que el usuario existe
+            const user = await UserModel.findById(id);
+            if (!user) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Administrador no encontrado',
+                });
+            }
+
+            // Actualizar el estado
+            const pool = require('../config/database');
+            const updateQuery = `
+            UPDATE administrador 
+            SET activo = $1 
+            WHERE id_admin = $2
+            RETURNING email, activo
+        `;
+            const result = await pool.query(updateQuery, [activo, id]);
+
+            console.log(`🔄 Estado actualizado para: ${result.rows[0].email} - Activo: ${activo}`);
+
+            res.json({
+                success: true,
+                message: 'Estado actualizado exitosamente',
+            });
+        } catch (error) {
+            console.error('❌ Error actualizando estado:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Error al actualizar el estado',
                 error: error.message,
             });
         }

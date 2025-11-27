@@ -63,21 +63,29 @@ export const userService = {
     },
 
     /**
-     * Actualizar contraseña de administrador
+     * Actualizar contraseña de un usuario
      */
     async updatePassword(userId, newPassword) {
         try {
-            console.log("🔑 Actualizando contraseña para usuario ID:", userId);
             const response = await api.put(`/users/${userId}/password`, { newPassword });
-
-            if (response.success !== false) {
-                console.log("✅ Contraseña actualizada exitosamente");
-                return response;
-            } else {
-                throw new Error(response.message || "Error actualizando contraseña");
-            }
+            console.log(`✅ Contraseña actualizada para usuario ID: ${userId}`);
+            return response.data;
         } catch (error) {
-            console.error("❌ Error actualizando contraseña:", error);
+            console.error("❌ Error actualizando contraseña:", error.response?.data || error.message);
+            throw error;
+        }
+    },
+
+    /**
+     * Actualizar estado activo de un usuario
+     */
+    async updateUserStatus(userId, activo) {
+        try {
+            const response = await api.put(`/users/${userId}/status`, { activo });
+            console.log(`✅ Estado actualizado para usuario ID: ${userId} - Activo: ${activo}`);
+            return response.data;
+        } catch (error) {
+            console.error("❌ Error actualizando estado:", error.response?.data || error.message);
             throw error;
         }
     },

@@ -35,4 +35,11 @@ router.delete('/:id', usersController.deleteUser);
  */
 router.put('/:id/password', usersController.updatePassword);
 
+/**
+ * @route   PUT /api/users/:id/status
+ * @desc    Actualizar estado activo de administrador
+ * @access  Private (requiere autenticación)
+ */
+router.put('/:id/status', usersController.updateUserStatus);
+
 module.exports = router;
