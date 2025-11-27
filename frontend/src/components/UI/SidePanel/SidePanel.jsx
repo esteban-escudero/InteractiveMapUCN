@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./SidePanel.css";
+import UserManagement from "../../admin/UserManagement/UserManagement";
 
 const SidePanel = ({
   status,
@@ -19,6 +20,7 @@ const SidePanel = ({
   filteredBuildings = [],
 }) => {
   const [activeMenu, setActiveMenu] = useState(null);
+  const [showUserManagement, setShowUserManagement] = useState(false);
 
   const toggleMenu = (menuName) => {
     setActiveMenu(activeMenu === menuName ? null : menuName);
@@ -160,6 +162,29 @@ const SidePanel = ({
             </ul>
           )}
         </div>
+
+        {/* Dropdown para Administradores */}
+        <div className={`dropdown ${activeMenu === "Administradores" ? "active" : ""}`}>
+          <button
+            className="dropdown-toggle"
+            onClick={() => toggleMenu("Administradores")}>
+            <span className="material-icons">admin_panel_settings</span>
+            Administradores
+            <span className="material-icons">
+              {activeMenu === "Administradores" ? "expand_less" : "expand_more"}
+            </span>
+          </button>
+          {activeMenu === "Administradores" && (
+            <ul className="dropdown-menu">
+              <li>
+                <button onClick={() => setShowUserManagement(true)}>
+                  <span className="material-icons">people</span>
+                  Gestionar Administradores
+                </button>
+              </li>
+            </ul>
+          )}
+        </div>
       </div>
 
       {/* SECCIÓN DE FILTROS */}
@@ -249,6 +274,13 @@ const SidePanel = ({
       <button className="logout-btn" onClick={handleLogout}>
         Cerrar Sesión
       </button>
+
+      {/* Modal de Gestión de Usuarios */}
+      <UserManagement
+        isOpen={showUserManagement}
+        onClose={() => setShowUserManagement(false)}
+        currentUser={{ email: localStorage.getItem("userEmail") }}
+      />
     </div>
   );
 };

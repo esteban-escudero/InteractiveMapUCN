@@ -15,6 +15,9 @@ const proximityRoutes = require("./routes/proximity");
 // ⭐ NUEVA: Ruta de autenticación
 const authRoutes = require("./routes/auth");
 
+// ⭐ NUEVA: Ruta de gestión de usuarios
+const usersRoutes = require("./routes/users");
+
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
@@ -43,6 +46,9 @@ app.use("/api/proximity", proximityRoutes);
 
 // ⭐ NUEVA: Ruta de autenticación
 app.use("/api/auth", authRoutes);
+
+// ⭐ NUEVA: Ruta de gestión de usuarios
+app.use("/api/users", usersRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
