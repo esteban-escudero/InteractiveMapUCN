@@ -92,4 +92,36 @@ export const routeService = {
       throw error;
     }
   },
+
+  /**
+   * Calcular ruta óptima entre origen y destino
+   * @param {Object} origin - {lat, lng}
+   * @param {Object} destination - {lat, lng}
+   * @param {string} routeType - Tipo de ruta (peatonal, accesible, etc.)
+   * @returns {Promise<Object>} Ruta calculada con geometría y metadata
+   */
+  async calculateRoute(origin, destination, routeType) {
+    try {
+      console.log('\n🔍 Calculando ruta:');
+      console.log('  Origen:', origin);
+      console.log('  Destino:', destination);
+      console.log('  Tipo:', routeType);
+
+      const response = await api.post('/routes/calculate', {
+        origin,
+        destination,
+        routeType
+      });
+
+      if (response.success !== false) {
+        console.log('✅ Ruta calculada:', response.data);
+        return response.data || response;
+      } else {
+        throw new Error(response.message || 'Error calculando ruta');
+      }
+    } catch (error) {
+      console.error('❌ Error calculando ruta:', error);
+      throw error;
+    }
+  },
 };

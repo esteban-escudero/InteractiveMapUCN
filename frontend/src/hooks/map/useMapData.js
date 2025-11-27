@@ -20,7 +20,19 @@ export const useMapData = (
 
   // Rutas Priorizadas o Filtradas
   const prioritizedRoutes = useMemo(() => {
-    // 1. Si hay origen Y destino: calcular ruta óptima
+    // 🔥 NUEVO: Si hay origen, destino Y tipo de ruta, NO usar sistema antiguo
+    // El nuevo sistema de Dijkstra se encarga de dibujar la ruta calculada
+    if (
+      mapState.filters.origin &&
+      mapState.filters.destination &&
+      mapState.filters.routeType
+    ) {
+      console.log("🎯 Usando nuevo sistema de cálculo de rutas (Dijkstra)");
+      console.log("   No se dibujan rutas del sistema antiguo");
+      return []; // No dibujar rutas del sistema antiguo
+    }
+
+    // 1. Si hay origen Y destino (SIN tipo): calcular ruta óptima con sistema antiguo
     if (mapState.filters.origin && mapState.filters.destination) {
       const getBuildingFromName = (buildingName) => {
         return buildings.find((b) => b.nombre === buildingName);
@@ -42,20 +54,6 @@ export const useMapData = (
             originBuilding.nombre,
             destinationBuilding.nombre
           );
-
-          // Si TAMBIÉN hay filtro de tipo de ruta, aplicarlo
-          if (mapState.filters.routeType && result) {
-            const filteredByType = result.filter(
-              (r) =>
-                r.tipo &&
-                r.tipo.toLowerCase() ===
-                  mapState.filters.routeType.toLowerCase()
-            );
-            console.log(
-              `🔍 Filtro de tipo "${mapState.filters.routeType}" aplicado: ${filteredByType.length} rutas`
-            );
-            return filteredByType;
-          }
 
           return result || [];
         } catch (error) {

@@ -46,34 +46,44 @@ export const useUserMapHandlers = ({
         try {
             showUINotification(`Calculando ruta ${routeType}...`, "info");
 
-            // Usar getPrioritizedRoutes para calcular ruta óptima con Dijkstra
-            const calculatedRoutes = getPrioritizedRoutes(
-                routeOrigin.nombre,
-                routeDestination.nombre
+            // Obtener coordenadas del origen
+            let originCoords;
+            if (routeOrigin === 'gps') {
+                if (!userPosition) {
+                    showUINotification("Esperando ubicación GPS...", "warning");
+                    return;
+                }
+                originCoords = {
+                    lat: userPosition.latitude,
+                    lng: userPosition.longitude
+                };
+            } else {
+                const coords = routeOrigin.ubicacion.coordinates;
+                originCoords = { lat: coords[1], lng: coords[0] };
+            }
+
+            // Obtener coordenadas del destino
+            const destCoords = routeDestination.ubicacion.coordinates;
+            const destinationCoords = { lat: destCoords[1], lng: destCoords[0] };
+
+            // 🔥 USAR NUEVO SERVICIO DE BACKEND CON DIJKSTRA
+            const { routeService } = await import('../../../services/routeService');
+            const result = await routeService.calculateRoute(
+                originCoords,
+                destinationCoords,
+                routeType
             );
 
-            if (calculatedRoutes && calculatedRoutes.length > 0) {
-                // Filtrar por tipo de ruta seleccionado
-                let optimalRoute = calculatedRoutes.find((r) => r.tipo === routeType);
-
-                // Si no hay ruta del tipo seleccionado, tomar la más corta disponible
-                if (!optimalRoute) {
-                    optimalRoute = calculatedRoutes[0];
-                    showUINotification(
-                        `No hay ruta ${routeType} disponible. Mostrando ruta ${optimalRoute.tipo}`,
-                        "warning"
-                    );
-                }
-
+            if (result && result.geometry) {
                 const calculatedRouteData = {
                     origin: routeOrigin,
                     destination: routeDestination,
-                    distance: `${optimalRoute.distancia || 0}m`,
-                    duration: `${optimalRoute.tiempo_estimado || 0} min`,
-                    path: optimalRoute.geometria.coordinates,
-                    geometria: optimalRoute.geometria,
-                    tipo: optimalRoute.tipo,
-                    segmentos: optimalRoute.segmentos,
+                    distance: `${result.distance}m`,
+                    duration: `${result.estimatedTime} min`,
+                    path: result.geometry.coordinates,
+                    geometria: result.geometry,
+                    tipo: result.routeType,
+                    routesUsed: result.routesUsed,
                 };
 
                 setCalculatedRoute(calculatedRouteData);
@@ -105,7 +115,7 @@ export const useUserMapHandlers = ({
                         coord[0],
                     ]);
                     L.polyline(latLngs, {
-                        color: routeColors[optimalRoute.tipo] || "#4a235a",
+                        color: routeColors[result.routeType] || "#4a235a",
                         weight: 6,
                         opacity: 0.9,
                         className: "calculated-route",
@@ -117,25 +127,42 @@ export const useUserMapHandlers = ({
                     mapInstance.fitBounds(bounds, { padding: [50, 50] });
                 }
 
-                showUINotification(`Ruta ${optimalRoute.tipo} encontrada.`, "success");
+                showUINotification(
+                    `Ruta ${result.routeType} encontrada: ${result.distance}m, ${result.estimatedTime} min`,
+                    "success"
+                );
 
                 // Cerrar el panel de rutas automáticamente
                 setShowRoutePanel(false);
             } else {
                 showUINotification(
-                    "No hay rutas disponibles entre estos edificios",
+                    "No se encontró una ruta disponible",
                     "warning"
                 );
             }
         } catch (error) {
             console.error("Error calculando ruta:", error);
-            showUINotification("Error al calcular ruta", "error");
+
+            // Manejar errores específicos
+            if (error.message && error.message.includes('No hay rutas')) {
+                showUINotification(
+                    `No hay rutas ${routeType} disponibles en el sistema`,
+                    "warning"
+                );
+            } else if (error.message && error.message.includes('No se encontró un camino')) {
+                showUINotification(
+                    "No existe un camino entre origen y destino",
+                    "warning"
+                );
+            } else {
+                showUINotification("Error al calcular ruta", "error");
+            }
         }
     }, [
         routeOrigin,
         routeDestination,
         routeType,
-        getPrioritizedRoutes,
+        userPosition,
         showUINotification,
         setCalculatedRoute,
         setShowRoutePanel,

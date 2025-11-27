@@ -10,14 +10,10 @@ const SidePanel = ({
   onManageBuildings,
   onAddRoute,
   onManageRoutes,
-  originFilter,
-  destinationFilter,
   categoryFilter,
-  routeTypeFilter, // ← NUEVO
-  onOriginFilterChange,
-  onDestinationFilterChange,
+  routeTypeFilter,
   onCategoryFilterChange,
-  onRouteTypeFilterChange, // ← NUEVO
+  onRouteTypeFilterChange,
   onClearFilters,
   allBuildings = [],
   filteredBuildings = [],
@@ -168,9 +164,8 @@ const SidePanel = ({
 
       {/* SECCIÓN DE FILTROS */}
       <div
-        className={`filters-dropdown ${
-          activeMenu === "Filtros" ? "active" : ""
-        }`}>
+        className={`filters-dropdown ${activeMenu === "Filtros" ? "active" : ""
+          }`}>
         <button
           className="filters-toggle"
           onClick={() => toggleMenu("Filtros")}>
@@ -201,83 +196,6 @@ const SidePanel = ({
               </select>
             </div>
 
-            {/* Separador */}
-            <div
-              style={{
-                borderTop: "1px solid #ddd",
-                margin: "10px 0",
-                paddingTop: "10px",
-              }}>
-              <small style={{ color: "#666", fontSize: "11px" }}>
-                Navegación entre edificios
-              </small>
-            </div>
-
-            {/* Filtro por Origen */}
-            <div className="filter-group">
-              <label>
-                <span className="material-icons">trip_origin</span>
-                Origen:
-              </label>
-              <select
-                value={originFilter}
-                onChange={onOriginFilterChange}
-                className="filter-select">
-                <option value="">Seleccionar origen</option>
-                {allBuildings
-                  .filter(
-                    (building, index, self) =>
-                      self.findIndex((b) => b.nombre === building.nombre) ===
-                      index
-                  )
-                  .map((building) => (
-                    <option
-                      key={`origin-${building.id || building._id}`}
-                      value={building.nombre}>
-                      {building.nombre || "Sin nombre"}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            {/* Filtros por Destino */}
-            <div className="filter-group">
-              <label>
-                <span className="material-icons">location_on</span>
-                Destino:
-              </label>
-              <select
-                value={destinationFilter}
-                onChange={onDestinationFilterChange}
-                className="filter-select">
-                <option value="">Seleccionar destino</option>
-                {allBuildings
-                  .filter(
-                    (building, index, self) =>
-                      self.findIndex((b) => b.nombre === building.nombre) ===
-                      index
-                  )
-                  .map((building) => (
-                    <option
-                      key={`destination-${building.id || building._id}`}
-                      value={building.nombre}>
-                      {building.nombre || "Sin nombre"}
-                    </option>
-                  ))}
-              </select>
-            </div>
-
-            {/* SEPARADOR */}
-            <div
-              style={{
-                borderTop: "1px solid #ddd",
-                margin: "10px 0",
-                paddingTop: "10px",
-              }}>
-              <small style={{ color: "#666", fontSize: "11px" }}>
-                Filtro de edificios
-              </small>
-            </div>
 
             {/* Filtro por Categoria */}
             <div className="filter-group">
@@ -318,8 +236,6 @@ const SidePanel = ({
               onClick={onClearFilters}
               className="clear-filters-btn"
               disabled={
-                !originFilter &&
-                !destinationFilter &&
                 !categoryFilter &&
                 !routeTypeFilter
               }>

@@ -247,16 +247,8 @@ function Map() {
         onManageBuildings={mapManagement.handleManageBuildings}
         onAddRoute={mapManagement.handleAddRoute}
         onManageRoutes={mapManagement.handleManageRoutes}
-        originFilter={mapState.filters.origin}
-        destinationFilter={mapState.filters.destination}
         categoryFilter={mapState.filters.category}
         routeTypeFilter={mapState.filters.routeType}
-        onOriginFilterChange={(e) =>
-          mapManagement.handleFilterChange("origin", e.target.value)
-        }
-        onDestinationFilterChange={(e) =>
-          mapManagement.handleFilterChange("destination", e.target.value)
-        }
         onCategoryFilterChange={(e) =>
           mapManagement.handleFilterChange("category", e.target.value)
         }

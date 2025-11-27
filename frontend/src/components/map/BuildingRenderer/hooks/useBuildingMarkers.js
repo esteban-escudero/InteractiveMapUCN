@@ -86,7 +86,7 @@ export const useBuildingMarkers = (
 const createPointMarker = (building, isHighlighted, highlightType) => {
     const [lng, lat] = building.ubicacion.coordinates;
     return L.marker([lat, lng], {
-        icon: createBuildingIcon(isHighlighted, highlightType),
+        icon: createBuildingIcon(isHighlighted, highlightType, building.tipo),
         zIndexOffset: isHighlighted ? 1000 : 0, // Destacados al frente
     });
 };
@@ -96,6 +96,7 @@ const createPointMarker = (building, isHighlighted, highlightType) => {
  */
 const createPolygonMarker = (building, isHighlighted, isOrigin, isDestination) => {
     const coords = building.ubicacion.coordinates[0].map((c) => [c[1], c[0]]);
-    const style = getPolygonStyle(isHighlighted, isOrigin, isDestination);
+    const style = getPolygonStyle(isHighlighted, isOrigin, isDestination, building.tipo);
     return L.polygon(coords, style);
 };
+

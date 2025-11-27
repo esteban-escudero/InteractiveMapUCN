@@ -2,13 +2,46 @@
 import L from "leaflet";
 
 /**
+ * Obtiene el color según la categoría del edificio
+ * @param {string} category - Categoría del edificio
+ * @returns {string} Color hexadecimal
+ */
+export const getCategoryColor = (category) => {
+    const categoryColors = {
+        "academico": "#3498db",           // Azul
+        "administrativo": "#9b59b6",      // Morado
+        "baño": "#95a5a6",                // Gris
+        "biblioteca": "#e67e22",          // Naranja
+        "cafeteria": "#f39c12",           // Amarillo/Naranja
+        "casino": "#f39c12",              // Amarillo/Naranja
+        "centro de salud": "#e74c3c",     // Rojo
+        "cultural": "#8e44ad",            // Morado oscuro
+        "deportivo": "#27ae60",           // Verde
+        "estacionamiento": "#7f8c8d",     // Gris oscuro
+        "gimnasio": "#16a085",            // Verde azulado
+        "investigacion": "#2980b9",       // Azul oscuro
+        "laboratorio": "#c0392b",         // Rojo oscuro
+        "oficina administracion": "#8e44ad", // Morado oscuro
+        "oficina profesor": "#2c3e50",    // Azul muy oscuro
+        "sala de clase": "#3498db",       // Azul
+        "sala de estudio": "#1abc9c",     // Turquesa
+        "servicios": "#95a5a6",           // Gris
+    };
+
+    // Normalizar la categoría a minúsculas para comparación
+    const normalizedCategory = category ? category.toLowerCase() : '';
+    return categoryColors[normalizedCategory] || "#ae279eff";
+};
+
+/**
  * Crea un icono personalizado para un edificio
  * @param {boolean} isHighlighted - Si el edificio está destacado
  * @param {string} highlightType - Tipo de destacado: 'origin' o 'destination'
+ * @param {string} category - Categoría del edificio
  * @returns {L.DivIcon} Icono de Leaflet
  */
-export const createBuildingIcon = (isHighlighted, highlightType) => {
-    let color = "#ae279eff"; // Color por defecto
+export const createBuildingIcon = (isHighlighted, highlightType, category) => {
+    let color = getCategoryColor(category); // Usar color de categoría
     let size = 14;
     let borderWidth = 2;
     let borderColor = "white";
@@ -74,10 +107,11 @@ export const createBuildingIcon = (isHighlighted, highlightType) => {
  * @param {boolean} isHighlighted - Si el edificio está destacado
  * @param {boolean} isOrigin - Si es el punto de origen
  * @param {boolean} isDestination - Si es el punto de destino
+ * @param {string} category - Categoría del edificio
  * @returns {object} Configuración de estilo del polígono
  */
-export const getPolygonStyle = (isHighlighted, isOrigin, isDestination) => {
-    let fillColor = "#27ae60";
+export const getPolygonStyle = (isHighlighted, isOrigin, isDestination, category) => {
+    let fillColor = getCategoryColor(category); // Usar color de categoría
     let fillOpacity = 0.3;
     let weight = 3;
 

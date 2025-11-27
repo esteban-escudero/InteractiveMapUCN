@@ -20,8 +20,7 @@ const routesController = {
       }
 
       console.log(
-        `TOTAL: ${
-          Array.isArray(routes) ? routes.length : 0
+        `TOTAL: ${Array.isArray(routes) ? routes.length : 0
         } rutas, ${totalPuntos} puntos de ruta`
       );
 
@@ -190,66 +189,77 @@ const routesController = {
 
   async calculateRoute(req, res) {
     try {
-      const { origen, destino, tipo_ruta } = req.body;
+      const { origin, destination, routeType } = req.body;
 
-      console.log("Calculando ruta desde:", origen, "hasta:", destino);
+      console.log('\n🔍 === SOLICITUD DE CÁLCULO DE RUTA ===');
+      console.log('Origen:', origin);
+      console.log('Destino:', destination);
+      console.log('Tipo de ruta:', routeType);
 
-      if (!origen || !destino) {
+      // Validación de parámetros
+      if (!origin || !origin.lat || !origin.lng) {
         return res.status(400).json({
           success: false,
-          message: "Origen y destino son requeridos",
+          message: 'Origen inválido. Debe incluir lat y lng',
         });
       }
 
-      // Aquí implementarías la lógica de cálculo de ruta
-      // Por ahora devolvemos una ruta simulada
-      const rutaCalculada = {
-        nombre: `Ruta desde ${origen.nombre || "Origen"} hasta ${
-          destino.nombre || "Destino"
-        }`,
-        tipo: tipo_ruta || "peatonal",
-        distancia: 150, // metros
-        tiempo_estimado: 2, // minutos
-        geometria: {
-          type: "LineString",
-          coordinates: [
-            [origen.lng, origen.lat],
-            [destino.lng, destino.lat],
-          ],
-        },
-        puntos_ruta: [
-          {
-            orden: 1,
-            tipo_punto: "inicio",
-            descripcion: "Punto de inicio",
-            coordenadas: {
-              type: "Point",
-              coordinates: [origen.lng, origen.lat],
-            },
-          },
-          {
-            orden: 2,
-            tipo_punto: "fin",
-            descripcion: "Punto de destino",
-            coordenadas: {
-              type: "Point",
-              coordinates: [destino.lng, destino.lat],
-            },
-          },
-        ],
-      };
+      if (!destination || !destination.lat || !destination.lng) {
+        return res.status(400).json({
+          success: false,
+          message: 'Destino inválido. Debe incluir lat y lng',
+        });
+      }
+
+      if (!routeType) {
+        return res.status(400).json({
+          success: false,
+          message: 'El tipo de ruta es requerido',
+        });
+      }
+
+      // Validar que el tipo de ruta sea válido
+      const validTypes = ['peatonal', 'accesible', 'emergencia', 'rapida', 'vehicular'];
+      if (!validTypes.includes(routeType)) {
+        return res.status(400).json({
+          success: false,
+          message: `Tipo de ruta inválido. Debe ser uno de: ${validTypes.join(', ')}`,
+        });
+      }
+
+      // Usar el servicio de grafo para calcular la ruta óptima
+      const routeGraphService = require('../services/routeGraphService');
+      const result = await routeGraphService.findOptimalRoute(origin, destination, routeType);
+
+      console.log('✅ Ruta calculada exitosamente');
+      console.log('=====================================\n');
 
       res.json({
         success: true,
-        message: "Ruta calculada exitosamente",
-        data: rutaCalculada,
+        message: 'Ruta calculada exitosamente',
+        data: result,
       });
     } catch (error) {
-      console.error("Error calculando ruta:", error);
+      console.error('❌ Error calculando ruta:', error.message);
+
+      // Manejar errores específicos
+      if (error.message.includes('No hay rutas')) {
+        return res.status(404).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
+      if (error.message.includes('No se encontró un camino')) {
+        return res.status(404).json({
+          success: false,
+          message: error.message,
+        });
+      }
+
       res.status(500).json({
         success: false,
-        message:
-          "Error interno del servidor al calcular la ruta: " + error.message,
+        message: 'Error interno del servidor al calcular la ruta: ' + error.message,
       });
     }
   },
