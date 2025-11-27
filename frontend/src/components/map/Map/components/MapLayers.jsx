@@ -27,6 +27,7 @@ export const MapLayers = ({
         buildings={filteredBuildings} // Solo filtrados por categoría
         highlightedBuildings={highlightedBuildings} // Origen y destino destacados
         onBuildingClick={interactionHandlers.handleBuildingClickWithProximity}
+        isAdminView={true} // Vista de administrador - muestra todos los datos
       />
 
       {/* Capa de Rutas - Muestra rutas calculadas o todas */}

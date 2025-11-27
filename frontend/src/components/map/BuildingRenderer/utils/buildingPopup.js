@@ -8,42 +8,44 @@ import { SpatialUtils } from "../../../../utils/spatialUtils";
  * @param {boolean} isOrigin - Si es el punto de origen
  * @param {boolean} isDestination - Si es el punto de destino
  * @param {object} estadoInfo - Información del estado (color, texto, icono)
+ * @param {boolean} isAdminView - Si es vista de administrador (muestra todos los datos)
  * @returns {string} HTML del popup
  */
 export const createBuildingPopup = (
-    building,
-    isHighlighted,
-    isOrigin,
-    isDestination,
-    estadoInfo
+  building,
+  isHighlighted,
+  isOrigin,
+  isDestination,
+  estadoInfo,
+  isAdminView = false
 ) => {
-    const { estadoColor, estadoText, estadoIcon } = estadoInfo;
+  const { estadoColor, estadoText, estadoIcon } = estadoInfo;
 
-    // Calcular área si es polígono
-    let areaHTML = "";
-    if (building.ubicacion.type === "Polygon") {
-        try {
-            const area = SpatialUtils.calculatePolygonArea(
-                building.ubicacion.coordinates[0]
-            );
-            areaHTML = `
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="font-size: 14px;">📐</span>
+  // Calcular área si es polígono
+  let areaHTML = "";
+  if (building.ubicacion.type === "Polygon") {
+    try {
+      const area = SpatialUtils.calculatePolygonArea(
+        building.ubicacion.coordinates[0]
+      );
+      areaHTML = `
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <span style="font-size: 16px; margin-top: 2px;">📐</span>
           <div style="flex: 1;">
-            <strong style="color: #34495e; font-size: 11px;">Área:</strong>
-            <div style="color: #546e7a; font-size: 12px;">${Math.round(area)} m²</div>
+            <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Área:</strong>
+            <div style="color: #546e7a; font-size: 13px;">${Math.round(area)} m²</div>
           </div>
         </div>
       `;
-        } catch (error) {
-            console.error("Error calculando área:", error);
-        }
+    } catch (error) {
+      console.error("Error calculando área:", error);
     }
+  }
 
-    // Badge de destacado
-    let highlightBadge = "";
-    if (isOrigin) {
-        highlightBadge = `
+  // Badge de destacado
+  let highlightBadge = "";
+  if (isOrigin) {
+    highlightBadge = `
       <div style="
         background: linear-gradient(135deg, #27ae60, #229954);
         color: white;
@@ -57,8 +59,8 @@ export const createBuildingPopup = (
         PUNTO DE ORIGEN
       </div>
     `;
-    } else if (isDestination) {
-        highlightBadge = `
+  } else if (isDestination) {
+    highlightBadge = `
       <div style="
         background: linear-gradient(135deg, #e74c3c, #c0392b);
         color: white;
@@ -72,67 +74,102 @@ export const createBuildingPopup = (
         PUNTO DE DESTINO
       </div>
     `;
-    }
+  }
 
-    const headerColor = isHighlighted
-        ? isOrigin
-            ? "#27ae60"
-            : "#e74c3c"
-        : "#3498db";
+  const headerColor = isHighlighted
+    ? isOrigin
+      ? "#27ae60"
+      : "#e74c3c"
+    : "#3498db";
 
+  // Vista simplificada para usuarios (solo nombre y descripción)
+  if (!isAdminView) {
     return `
+        <div style="
+          min-width: 220px;
+          max-width: 240px;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        ">
+          <h4 style="
+            margin: 0 0 12px 0;
+            padding: 0;
+            color: ${headerColor};
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-bottom: 2px solid ${headerColor};
+            padding-bottom: 8px;
+          ">
+            <span style="font-size: 16px;">🏢</span>
+            ${building.nombre || "Sin nombre"}
+          </h4>
+          
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            ${highlightBadge}
+            
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="font-size: 16px; margin-top: 2px;">📝</span>
+              <div style="flex: 1;">
+                <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Descripción:</strong>
+                <div style="color: #546e7a; font-size: 13px;">${building.descripcion || "Sin descripción"}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+  }
+
+  // Vista completa para administradores
+  return `
     <div style="
-      min-width: 200px;
-      max-width: 220px;
-      padding: 0;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      border-top: 3px solid ${headerColor};
+      min-width: 220px;
+      max-width: 240px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      overflow: hidden;
     ">
       <h4 style="
-        margin: 0;
-        padding: 10px 12px;
-        background: ${headerColor};
-        color: white;
-        font-size: 1em;
+        margin: 0 0 12px 0;
+        padding: 0;
+        color: ${headerColor};
+        font-size: 16px;
         font-weight: 600;
         display: flex;
         align-items: center;
         gap: 6px;
+        border-bottom: 2px solid ${headerColor};
+        padding-bottom: 8px;
       ">
-        <span style="font-size: 1em;">🏢</span>
+        <span style="font-size: 16px;">🏢</span>
         ${building.nombre || "Sin nombre"}
       </h4>
       
-      <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
         ${highlightBadge}
         
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="font-size: 14px;">📝</span>
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <span style="font-size: 16px; margin-top: 2px;">📝</span>
           <div style="flex: 1;">
-            <strong style="color: #34495e; font-size: 11px;">Descripción:</strong>
-            <div style="color: #546e7a; font-size: 12px;">${building.descripcion || "Sin descripción"
-        }</div>
+            <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Descripción:</strong>
+            <div style="color: #546e7a; font-size: 13px;">${building.descripcion || "Sin descripción"
+    }</div>
           </div>
         </div>
         
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="font-size: 14px;">🏷️</span>
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <span style="font-size: 16px; margin-top: 2px;">🏷️</span>
           <div style="flex: 1;">
-            <strong style="color: #34495e; font-size: 11px;">Categoría:</strong>
-            <div style="color: #546e7a; font-size: 12px;">${building.categoria || building.tipo || "No especificada"
-        }</div>
+            <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Categoría:</strong>
+            <div style="color: #546e7a; font-size: 13px;">${building.categoria || building.tipo || "No especificada"
+    }</div>
           </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="font-size: 14px;">${estadoIcon}</span>
+        <div style="display: flex; align-items: flex-start; gap: 8px;">
+          <span style="font-size: 16px; margin-top: 2px;">${estadoIcon}</span>
           <div style="flex: 1;">
-            <strong style="color: #34495e; font-size: 11px;">Estado:</strong>
-            <div style="color: ${estadoColor}; font-size: 12px; font-weight: 500;">${estadoText}</div>
+            <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Estado:</strong>
+            <div style="color: ${estadoColor}; font-size: 13px; font-weight: 500;">${estadoText}</div>
           </div>
         </div>
   

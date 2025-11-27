@@ -131,6 +131,7 @@ function UserMapView() {
                         origin: routeOrigin,
                         destination: routeDestination
                     }}
+                    isAdminView={false} // Vista de usuario - solo nombre y descripción
                 />
             )}
 

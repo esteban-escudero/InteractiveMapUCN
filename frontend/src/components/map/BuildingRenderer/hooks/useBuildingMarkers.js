@@ -10,13 +10,15 @@ import { createBuildingPopup } from "../utils/buildingPopup";
  * @param {boolean} isMapReady - Si el mapa está listo
  * @param {Array} buildings - Lista de edificios
  * @param {object} highlightedBuildings - Edificios destacados {origin, destination}
+ * @param {boolean} isAdminView - Si es vista de administrador
  * @returns {Array} Lista de capas renderizadas
  */
 export const useBuildingMarkers = (
     mapInstance,
     isMapReady,
     buildings,
-    highlightedBuildings
+    highlightedBuildings,
+    isAdminView = false
 ) => {
     const [buildingLayers, setBuildingLayers] = useState([]);
 
@@ -63,7 +65,8 @@ export const useBuildingMarkers = (
                         isHighlighted,
                         isOrigin,
                         isDestination,
-                        estadoInfo
+                        estadoInfo,
+                        isAdminView
                     );
 
                     layer.bindPopup(popup).addTo(mapInstance);
@@ -75,7 +78,7 @@ export const useBuildingMarkers = (
         });
 
         setBuildingLayers(newLayers);
-    }, [mapInstance, buildings, isMapReady, highlightedBuildings]);
+    }, [mapInstance, buildings, isMapReady, highlightedBuildings, isAdminView]);
 
     return buildingLayers;
 };
