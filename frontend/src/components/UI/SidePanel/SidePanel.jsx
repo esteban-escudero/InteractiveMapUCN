@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./SidePanel.css";
+import { tiposRuta, tiposEdificio } from "../../shared/constants/constants.ts";
 import UserManagement from "../../admin/UserManagement/UserManagement";
 
 const SidePanel = ({
@@ -212,11 +213,11 @@ const SidePanel = ({
                   onChange={onRouteTypeFilterChange}
                   className="filter-select">
                   <option value="">Todos los tipos</option>
-                  <option value="accesible">♿ Accesible</option>
-                  <option value="emergencia">🚨 Emergencia</option>
-                  <option value="rapida">⚡ Rápida</option>
-                  <option value="peatonal">🚶 Peatonal</option>
-                  <option value="vehicular">🚗 Vehicular</option>
+                  {tiposRuta.map((tipo) => (
+                    <option key={tipo.value} value={tipo.value}>
+                      {tipo.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -232,26 +233,11 @@ const SidePanel = ({
                   onChange={onCategoryFilterChange}
                   className="filter-select">
                   <option value="">Todas las categorías</option>
-                  <option value="Académico">Académico</option>
-                  <option value="Administrativo">Administrativo</option>
-                  <option value="Baño">Baño</option>
-                  <option value="Biblioteca">Biblioteca</option>
-                  <option value="Cafeteria">Cafetería</option>
-                  <option value="Casino">Casino</option>
-                  <option value="Centro de Salud">Centro de Salud</option>
-                  <option value="Cultural">Cultural</option>
-                  <option value="Deportivo">Deportivo</option>
-                  <option value="Estacionamiento">Estacionamiento</option>
-                  <option value="Gimnasio">Gimnasio</option>
-                  <option value="Investigación">Investigación</option>
-                  <option value="Laboratorio">Laboratorio</option>
-                  <option value="Oficina Administracion">
-                    Oficina Administración
-                  </option>
-                  <option value="Oficina Profesor">Oficina Profesor</option>
-                  <option value="Sala de Clase">Sala de Clase</option>
-                  <option value="Sala de Estudio">Sala de Estudio</option>
-                  <option value="Servicios">Servicios</option>
+                  {tiposEdificio.map((tipo) => (
+                    <option key={tipo.value} value={tipo.value}>
+                      {tipo.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 

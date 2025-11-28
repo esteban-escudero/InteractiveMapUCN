@@ -25,3 +25,12 @@ export const estadosEdificio = [
   { value: "cerrado", label: "Cerrado", icon: "block" },
   { value: "construccion", label: "En Construcción", icon: "engineering" },
 ];
+
+export const tiposRuta = [
+  { value: "accesible", label: "Accesible", icon: "accessible" },
+  { value: "emergencia", label: "Emergencia", icon: "emergency" },
+  { value: "peatonal", label: "Peatonal", icon: "directions_walk" },
+  { value: "rapida", label: "Rápida", icon: "bolt" },
+  { value: "vehicular", label: "Vehicular", icon: "directions_car" },
+];
+

@@ -30,7 +30,7 @@ export const createBuildingPopup = (
       );
       areaHTML = `
         <div style="display: flex; align-items: flex-start; gap: 8px;">
-          <span style="font-size: 16px; margin-top: 2px;">📐</span>
+          <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: #4a235a;">square_foot</span>
           <div style="flex: 1;">
             <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Área:</strong>
             <div style="color: #546e7a; font-size: 13px;">${Math.round(area)} m²</div>
@@ -102,7 +102,7 @@ export const createBuildingPopup = (
             border-bottom: 2px solid ${headerColor};
             padding-bottom: 8px;
           ">
-            <span style="font-size: 16px;">🏢</span>
+            <span class="material-icons" style="font-size: 20px; color: ${headerColor};">business</span>
             ${building.nombre || "Sin nombre"}
           </h4>
           
@@ -110,10 +110,10 @@ export const createBuildingPopup = (
             ${highlightBadge}
             
             <div style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="font-size: 16px; margin-top: 2px;">📝</span>
+              <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: #4a235a;">description</span>
               <div style="flex: 1;">
                 <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Descripción:</strong>
-                <div style="color: #546e7a; font-size: 13px;">${building.descripcion || "Sin descripción"}</div>
+                <div style="color: #546e7a; font-size: 13px; white-space: pre-wrap;">${building.descripcion || "Sin descripción"}</div>
               </div>
             </div>
           </div>
@@ -140,7 +140,7 @@ export const createBuildingPopup = (
         border-bottom: 2px solid ${headerColor};
         padding-bottom: 8px;
       ">
-        <span style="font-size: 16px;">🏢</span>
+        <span class="material-icons" style="font-size: 20px; color: ${headerColor};">business</span>
         ${building.nombre || "Sin nombre"}
       </h4>
       
@@ -148,16 +148,16 @@ export const createBuildingPopup = (
         ${highlightBadge}
         
         <div style="display: flex; align-items: flex-start; gap: 8px;">
-          <span style="font-size: 16px; margin-top: 2px;">📝</span>
+          <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: #4a235a;">description</span>
           <div style="flex: 1;">
             <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Descripción:</strong>
-            <div style="color: #546e7a; font-size: 13px;">${building.descripcion || "Sin descripción"
+            <div style="color: #546e7a; font-size: 13px; white-space: pre-wrap;">${building.descripcion || "Sin descripción"
     }</div>
           </div>
         </div>
         
         <div style="display: flex; align-items: flex-start; gap: 8px;">
-          <span style="font-size: 16px; margin-top: 2px;">🏷️</span>
+          <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: #4a235a;">label</span>
           <div style="flex: 1;">
             <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Categoría:</strong>
             <div style="color: #546e7a; font-size: 13px;">${building.categoria || building.tipo || "No especificada"
@@ -166,7 +166,7 @@ export const createBuildingPopup = (
         </div>
 
         <div style="display: flex; align-items: flex-start; gap: 8px;">
-          <span style="font-size: 16px; margin-top: 2px;">${estadoIcon}</span>
+          <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: ${estadoColor};">${estadoIcon}</span>
           <div style="flex: 1;">
             <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Estado:</strong>
             <div style="color: ${estadoColor}; font-size: 13px; font-weight: 500;">${estadoText}</div>

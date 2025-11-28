@@ -1,7 +1,7 @@
-// components/routes/RouteForm/RouteFormPolyline.jsx
 import React, { useEffect } from "react";
 import { usePolylineRoute } from "./hooks/usePolylineRoute";
 import "./RouteFormPolyline.css";
+import { tiposRuta } from "../../shared/constants/constants.ts";
 
 const RouteFormPolyline = ({
   onSave,
@@ -143,12 +143,22 @@ const RouteFormPolyline = ({
                 name="tipo"
                 value={formData.tipo}
                 onChange={handleInputChange}>
-                <option value="accesible">Accesible</option>
-                <option value="emergencia">Emergencia</option>
-                <option value="peatonal">Peatonal</option>
-                <option value="rapida">Rápida</option>
-                <option value="vehicular">Vehicular</option>
+                {tiposRuta.map((tipo) => (
+                  <option key={tipo.value} value={tipo.value}>
+                    {tipo.label}
+                  </option>
+                ))}
               </select>
+              {formData.tipo && (
+                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'rgba(74, 35, 90, 0.05)', borderRadius: '6px', borderLeft: '3px solid #4a235a' }}>
+                  <span className="material-icons" style={{ fontSize: '20px', color: '#4a235a' }}>
+                    {tiposRuta.find(t => t.value === formData.tipo)?.icon}
+                  </span>
+                  <span style={{ fontSize: '14px', fontWeight: '500', color: '#2c3e50' }}>
+                    {tiposRuta.find(t => t.value === formData.tipo)?.label}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

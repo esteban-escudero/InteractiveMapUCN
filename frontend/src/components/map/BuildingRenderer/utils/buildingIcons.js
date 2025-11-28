@@ -141,20 +141,24 @@ export const getPolygonStyle = (isHighlighted, isOrigin, isDestination, category
 export const getBuildingStatus = (estado) => {
     let estadoColor = "#95a5a6";
     let estadoText = "No especificado";
-    let estadoIcon = "⚪";
+    let estadoIcon = "help_outline";
 
     if (estado === "activo" || estado === "Activo") {
         estadoColor = "#27ae60";
         estadoText = "Activo";
-        estadoIcon = "🟢";
-    } else if (estado === "inactivo" || estado === "Inactivo") {
+        estadoIcon = "check_circle";
+    } else if (estado === "inactivo" || estado === "Inactivo" || estado === "cerrado" || estado === "Cerrado") {
         estadoColor = "#e74c3c";
-        estadoText = "Inactivo";
-        estadoIcon = "🔴";
+        estadoText = "Cerrado";
+        estadoIcon = "block";
     } else if (estado === "mantenimiento" || estado === "Mantenimiento") {
         estadoColor = "#f39c12";
-        estadoText = "Mantenimiento";
-        estadoIcon = "🟡";
+        estadoText = "En Mantenimiento";
+        estadoIcon = "construction";
+    } else if (estado === "construccion" || estado === "Construcción" || estado === "En Construcción") {
+        estadoColor = "#9b59b6";
+        estadoText = "En Construcción";
+        estadoIcon = "engineering";
     }
 
     return { estadoColor, estadoText, estadoIcon };

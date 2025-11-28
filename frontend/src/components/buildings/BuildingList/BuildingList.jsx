@@ -18,7 +18,7 @@ function BuildingList({
   onDeleteRoom,
   onReload,
 }) {
-  console.log("🏢 BuildingList recibió:", buildings.length, "edificios");
+  console.log("BuildingList recibió:", buildings.length, "edificios");
 
   const {
     deletingId,

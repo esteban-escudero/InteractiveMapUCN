@@ -218,13 +218,15 @@
 
 /* CORRECCIÓN: Iconos visibles en las instrucciones */
 .selection-instructions .material-icons {
-  color: #ffffff; /* Blanco para iconos en círculos azules */
+  color: #ffffff;
+  /* Blanco para iconos en círculos azules */
   font-size: 16px;
 }
 
 /* Iconos en textos normales (no en steps) */
 .selection-instructions p .material-icons {
-  color: #3498db; /* Azul para iconos en texto normal */
+  color: #3498db;
+  /* Azul para iconos en texto normal */
 }
 
 /* Controles de selección */
@@ -347,15 +349,19 @@
 .route-type-accesible {
   color: #3498db;
 }
+
 .route-type-emergencia {
   color: #e74c3c;
 }
+
 .route-type-peatonal {
   color: #27ae60;
 }
+
 .route-type-rapida {
   color: #f39c12;
 }
+
 .route-type-vehicular {
   color: #9b59b6;
 }
@@ -499,4 +505,9 @@
   .feature-list li .material-icons {
     font-size: 14px;
   }
+}
+
+/* Ocultar configuración de snapping (configuración fija) */
+.snap-controls-section {
+  display: none !important;
 }

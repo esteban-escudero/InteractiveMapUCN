@@ -12,7 +12,7 @@ export const useInteractionHandlers = (
   // Handler para clic en edificios
   const handleBuildingClickWithProximity = useCallback(
     (building) => {
-      console.log("🏢 Clic en edificio:", building.nombre);
+      console.log("Clic en edificio:", building.nombre);
       if (getProximityAnalysis) {
         getProximityAnalysis(building);
       }
@@ -23,7 +23,7 @@ export const useInteractionHandlers = (
 
   // Handler para clic en el mapa (puede expandirse)
   const handleMapClick = useCallback((e) => {
-    console.log("🗺️ Clic en mapa:", e.latlng);
+    console.log("Clic en mapa:", e.latlng);
     // Aquí puedes añadir más lógica para clicks en el mapa
     // como captura de coordenadas, creación de rutas, etc.
   }, []);
@@ -31,7 +31,7 @@ export const useInteractionHandlers = (
   // Handler para clic en rutas (si es necesario)
   const handleRouteClick = useCallback(
     (route) => {
-      console.log("🛣️ Clic en ruta:", route.nombre);
+      console.log("Clic en ruta:", route.nombre);
       showUINotification(`Ruta seleccionada: ${route.nombre}`, "info");
       // Lógica adicional para selección de rutas
     },
@@ -41,7 +41,7 @@ export const useInteractionHandlers = (
   // Handler para hover en edificios (para futuras mejoras)
   const handleBuildingHover = useCallback((building, isHovering) => {
     if (isHovering) {
-      console.log("👆 Hover sobre edificio:", building.nombre);
+      console.log("Hover sobre edificio:", building.nombre);
       // Podría mostrar tooltip o información adicional
     }
   }, []);

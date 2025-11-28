@@ -8,40 +8,24 @@ import { useMemo } from "react";
 export const useBuildingFilters = (buildings, filters, routes = []) => {
   // ========== EDIFICIOS FILTRADOS POR CATEGORÍA ==========
   const filteredBuildings = useMemo(() => {
-    if (!filters.category && !filters.routeType) {
+    // Solo filtrar por categoría, NO por tipo de ruta
+    if (!filters.category) {
       console.log("Sin filtros - mostrando todos los edificios");
       return buildings;
     }
 
     const filtered = buildings.filter((building) => {
-      // Filtro por categoría
-      const categoryMatch = filters.category
-        ? building.tipo &&
-          building.tipo.toLowerCase() === filters.category.toLowerCase()
-        : true;
-
-      // Filtro por tipo de ruta (si hay rutas disponibles)
-      let routeTypeMatch = true;
-      if (filters.routeType && routes.length > 0) {
-        // Verificar si el edificio tiene rutas del tipo seleccionado
-        const buildingRoutes = routes.filter(
-          (route) =>
-            (route.origen === building.nombre ||
-              route.destino === building.nombre) &&
-            route.tipo === filters.routeType
-        );
-        routeTypeMatch = buildingRoutes.length > 0;
-      }
-
-      return categoryMatch && routeTypeMatch;
+      // Filtro por categoría solamente
+      return building.tipo &&
+        building.tipo.toLowerCase() === filters.category.toLowerCase();
     });
 
     console.log(
-      `🔍 Filtros activos - Categoría: "${filters.category}", Tipo Ruta: "${filters.routeType}" - Resultados: ${filtered.length} de ${buildings.length} edificios`
+      `🔍 Filtro de categoría activo: "${filters.category}" - Resultados: ${filtered.length} de ${buildings.length} edificios`
     );
 
     return filtered;
-  }, [buildings, filters.category, filters.routeType, routes]);
+  }, [buildings, filters.category]);
 
   // ========== EDIFICIOS DESTACADOS (ORIGEN/DESTINO) ==========
   const highlightedBuildings = useMemo(() => {
