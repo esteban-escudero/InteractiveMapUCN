@@ -2,7 +2,7 @@ import React from "react";
 import {
   tiposEdificio,
   estadosEdificio,
-} from "../../../shared/constants/constants.ts";
+} from "../../../../constants/constants.ts";
 import "./TypeStatusSection.css";
 
 const TypeStatusSection = ({ formData, onInputChange }) => {

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { usePolylineRoute } from "./hooks/usePolylineRoute";
 import "./RouteFormPolyline.css";
-import { tiposRuta } from "../../shared/constants/constants.ts";
+import { tiposRuta } from "../../../constants/constants.ts";
 
 const RouteFormPolyline = ({
   onSave,
