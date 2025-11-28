@@ -9,7 +9,7 @@ export const MapForms = ({
   mapInstance,
   isRouteDrawingActive,
   setIsRouteDrawingActive,
-  showUINotification, // ⭐ AGREGAR AQUÍ
+  showUINotification
 }) => {
   return (
     <>
@@ -42,7 +42,7 @@ export const MapForms = ({
         route={mapState.editingRoute}
         isEditing={!!mapState.editingRoute}
         mapInstance={mapInstance}
-        showUINotification={showUINotification} // ⭐ PASAR AQUÍ
+        showUINotification={showUINotification}
         onSelectionStart={() => {
           console.log("Iniciando selección - DESACTIVANDO useMapClickHandler");
           setIsRouteDrawingActive(true);

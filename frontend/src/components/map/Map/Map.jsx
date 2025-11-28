@@ -44,7 +44,7 @@ function Map() {
   const [mapInitialized, setMapInitialized] = useState(false);
   const [isRouteDrawingActive, setIsRouteDrawingActive] = useState(false);
 
-  // Auth Context - PARA LOGOUT REAL
+  // Auth Context
   const { logout } = useAuth();
 
   // Notificaciones y confirmaciones
@@ -139,7 +139,7 @@ function Map() {
     findNearestBuilding
   );
 
-  // ✅ NUEVO: Handlers de interacción especializados
+  // Handlers de interacción especializados
   const { interactionHandlers } = useInteractionHandlers(
     showUINotification,
     getProximityAnalysis

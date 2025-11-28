@@ -49,7 +49,8 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #37009e; /* Color inicial del icono */
+  color: #37009e;
+  /* Color inicial del icono */
   padding: 0;
   width: 36px;
   height: 36px;
@@ -62,15 +63,18 @@
 
 /* Efecto hover: fondo rojo, icono blanco y rotación */
 .close-btn:hover {
-  background: #e74c3c !important; /* Fondo rojo */
-  color: white !important; /* Cruz blanca */
+  background: #e74c3c !important;
+  /* Fondo rojo */
+  color: white !important;
+  /* Cruz blanca */
   transform: rotate(90deg);
 }
 
 .close-btn .material-icons {
   font-size: 20px;
   margin-right: 0;
-  transition: color 0.3s ease; /* Transición suave para el color del icono */
+  transition: color 0.3s ease;
+  /* Transición suave para el color del icono */
 }
 
 /* ===== FORMULARIO PRINCIPAL ===== */
@@ -116,8 +120,8 @@
 
 /* Contenedor de la sección de coordenadas */
 .coordinates-section {
-  margin-bottom: 20px;
-  padding: 15px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
   background: #f8f9fa;
   border-radius: 8px;
   border: 1px solid #e9ecef;
@@ -128,7 +132,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 0;
 }
 
 .section-header h4 {
@@ -136,6 +140,7 @@
   color: #2c3e50;
   display: flex;
   align-items: center;
+  font-size: 14px;
 }
 
 /* Botón para capturar coordenadas */

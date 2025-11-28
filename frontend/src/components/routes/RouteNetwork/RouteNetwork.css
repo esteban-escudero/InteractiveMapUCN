@@ -7,10 +7,8 @@
   max-height: 80vh;
   background: white;
   border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   overflow-y: auto;
   padding: 15px;
 }
-
-/* ... (todo el CSS que está en el style inline) */
