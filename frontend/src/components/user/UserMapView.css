@@ -34,12 +34,6 @@
     z-index: 1;
 }
 
-/* Fix para bordes de tiles visibles (efecto cuadriculado) */
-.leaflet-tile-container img {
-    box-shadow: 0 0 1px rgba(0, 0, 0, 0.05);
-    outline: 1px solid transparent;
-}
-
 /* Overlay de carga */
 .loading-overlay {
     position: absolute;

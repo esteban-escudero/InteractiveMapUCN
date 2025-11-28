@@ -3,22 +3,67 @@ import React from 'react';
 import './mobile-components.css';
 import './route-panel-fix.css';
 
-/* ---- Dropdown Custom ---- */
-function CustomSelect({ value, options, onChange, placeholder }) {
+/* ---- Dropdown con Autocomplete ---- */
+function AutocompleteSelect({ value, options, onChange, placeholder }) {
     const [open, setOpen] = React.useState(false);
+    const [searchText, setSearchText] = React.useState('');
+    const [isFocused, setIsFocused] = React.useState(false);
+    const inputRef = React.useRef(null);
 
-    const selectedLabel = options.find(o => o.value === value)?.label;
+    const selectedOption = options.find(o => o.value === value);
+    const displayText = isFocused ? searchText : (selectedOption?.label || '');
+
+    // Filtrar opciones basándose en el texto de búsqueda
+    const filteredOptions = searchText
+        ? options.filter(opt =>
+            opt.label.toLowerCase().includes(searchText.toLowerCase())
+        )
+        : options;
+
+    const handleInputChange = (e) => {
+        setSearchText(e.target.value);
+        setOpen(true);
+    };
+
+    const handleInputFocus = () => {
+        setIsFocused(true);
+        setSearchText('');
+        setOpen(true);
+    };
+
+    const handleInputBlur = () => {
+        // Delay para permitir que el click en una opción se registre
+        setTimeout(() => {
+            setIsFocused(false);
+            setSearchText('');
+            setOpen(false);
+        }, 200);
+    };
+
+    const handleOptionClick = (optValue) => {
+        onChange(optValue);
+        setOpen(false);
+        setIsFocused(false);
+        setSearchText('');
+        if (inputRef.current) {
+            inputRef.current.blur();
+        }
+    };
 
     return (
         <div className={`custom-select-wrapper ${open ? 'open' : ''}`}>
-            <div
-                className="custom-select-display"
-                onClick={() => setOpen(!open)}
-            >
-                {selectedLabel || placeholder}
-            </div>
+            <input
+                ref={inputRef}
+                type="text"
+                className="custom-select-input"
+                value={displayText}
+                onChange={handleInputChange}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                placeholder={placeholder}
+            />
 
-            {open && (
+            {open && filteredOptions.length > 0 && (
                 <>
                     <div
                         className="custom-select-overlay"
@@ -33,20 +78,25 @@ function CustomSelect({ value, options, onChange, placeholder }) {
                         }}
                     />
                     <div className="custom-select-dropdown">
-                        {options.map(opt => (
+                        {filteredOptions.map(opt => (
                             <div
                                 key={opt.value}
-                                className="custom-select-option"
-                                onClick={() => {
-                                    onChange(opt.value);
-                                    setOpen(false);
-                                }}
+                                className={`custom-select-option ${opt.value === value ? 'selected' : ''}`}
+                                onClick={() => handleOptionClick(opt.value)}
                             >
                                 {opt.label}
                             </div>
                         ))}
                     </div>
                 </>
+            )}
+
+            {open && filteredOptions.length === 0 && searchText && (
+                <div className="custom-select-dropdown">
+                    <div className="custom-select-option no-results">
+                        No se encontraron resultados
+                    </div>
+                </div>
             )}
         </div>
     );
@@ -91,7 +141,7 @@ function MobileRoutePanel({
                             </svg>
                         </div>
 
-                        <CustomSelect
+                        <AutocompleteSelect
                             value={origin?.id || origin === 'gps' ? (origin === 'gps' ? 'gps' : origin.id) : ""}
                             placeholder="Seleccionar Origen"
                             options={[
@@ -125,7 +175,7 @@ function MobileRoutePanel({
                             </svg>
                         </div>
 
-                        <CustomSelect
+                        <AutocompleteSelect
                             value={destination?.id || ""}
                             placeholder="Seleccionar Destino"
                             options={buildings.map(b => ({
@@ -148,7 +198,7 @@ function MobileRoutePanel({
                             </svg>
                         </div>
 
-                        <CustomSelect
+                        <AutocompleteSelect
                             value={routeType}
                             placeholder="Tipo de Ruta"
                             options={[

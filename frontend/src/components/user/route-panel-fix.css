@@ -71,6 +71,39 @@
     box-sizing: border-box;
 }
 
+/* Nuevo estilo para el input de autocomplete */
+.custom-select-input {
+    width: 100%;
+    height: 56px;
+    border: 2px solid #e8e8e8;
+    border-radius: 14px;
+    padding: 0 44px 0 50px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #2c3e50;
+    background: #ffffff;
+    cursor: text;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+    outline: none;
+}
+
+.custom-select-input:hover {
+    border-color: #d0d0d0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.custom-select-input:focus {
+    border-color: #4a235a;
+    box-shadow: 0 0 0 4px rgba(74, 35, 90, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.custom-select-input::placeholder {
+    color: #95a5a6;
+    font-weight: 400;
+}
+
 .custom-select-display::after {
     content: '';
     position: absolute;
@@ -140,6 +173,12 @@
     border-bottom: none;
 }
 
+.custom-select-option.selected {
+    background: rgba(74, 35, 90, 0.06);
+    color: #4a235a;
+    font-weight: 600;
+}
+
 .custom-select-option:hover {
     background: linear-gradient(90deg, rgba(74, 35, 90, 0.08) 0%, rgba(74, 35, 90, 0.04) 100%);
     color: #4a235a;
@@ -147,6 +186,17 @@
 
 .custom-select-option:active {
     background: rgba(74, 35, 90, 0.12);
+}
+
+.custom-select-option.no-results {
+    color: #95a5a6;
+    cursor: default;
+    text-align: center;
+}
+
+.custom-select-option.no-results:hover {
+    background: transparent;
+    color: #95a5a6;
 }
 
 /* Scrollbar personalizado para el dropdown */
