@@ -16,7 +16,8 @@
   background: white;
   border-radius: 12px;
   width: 95%;
-  max-width: 1400px; /* ← Aumentado para 3 columnas */
+  max-width: 1400px;
+  /* ← Aumentado para 3 columnas */
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -101,10 +102,9 @@
 /* ========== GRID DE EDIFICIOS (2-3 COLUMNAS) ========== */
 .buildings-grid {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fill,
-    minmax(380px, 1fr)
-  ); /* ← 2-3 por fila automático */
+  grid-template-columns: repeat(auto-fill,
+      minmax(380px, 1fr));
+  /* ← 2-3 por fila automático */
   gap: 20px;
   padding: 4px;
 }
@@ -357,14 +357,16 @@
 
 .room-item {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
+  align-items: stretch;
+  padding: 0;
   background: white;
   border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: all 0.2s ease;
-  min-height: 44px;
+  min-height: 100px;
+  overflow: hidden;
 }
 
 .room-item:hover {
@@ -376,9 +378,10 @@
 .room-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   flex: 1;
   min-width: 0;
+  padding: 16px;
 }
 
 .room-info strong {
@@ -420,8 +423,12 @@
 
 .room-actions {
   display: flex;
-  gap: 6px;
-  margin-left: 8px;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: 0;
+  padding: 10px 16px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
 }
 
 .edit-room-btn,
@@ -436,8 +443,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
 }
 
 .edit-room-btn {
@@ -495,8 +502,10 @@
   grid-template-columns: 1fr 1fr 1fr;
   gap: 0;
   border-top: 1px solid #e9ecef;
-  overflow: hidden; /* ← AGREGADO: fuerza el clip de las esquinas */
-  border-radius: 0 0 12px 12px; /* ← AGREGADO: radio para el contenedor */
+  overflow: hidden;
+  /* ← AGREGADO: fuerza el clip de las esquinas */
+  border-radius: 0 0 12px 12px;
+  /* ← AGREGADO: radio para el contenedor */
 }
 
 .edit-btn,
@@ -504,7 +513,8 @@
 .delete-btn {
   padding: 14px 12px;
   border: none;
-  border-radius: 0 !important; /* ← FORZAR sin radius por defecto */
+  border-radius: 0 !important;
+  /* ← FORZAR sin radius por defecto */
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -688,7 +698,8 @@
   }
 
   .buildings-grid {
-    grid-template-columns: 1fr; /* ← 1 columna en móvil */
+    grid-template-columns: 1fr;
+    /* ← 1 columna en móvil */
     gap: 16px;
   }
 
@@ -697,7 +708,8 @@
   }
 
   .building-actions {
-    grid-template-columns: 1fr; /* ← Botones en columna en móvil */
+    grid-template-columns: 1fr;
+    /* ← Botones en columna en móvil */
   }
 
   .edit-btn,
@@ -787,6 +799,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -802,6 +815,7 @@
     transform: translateX(100%);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -813,6 +827,7 @@
     transform: translateX(0);
     opacity: 1;
   }
+
   to {
     transform: translateX(100%);
     opacity: 0;

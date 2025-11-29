@@ -58,11 +58,11 @@ function TermsContent() {
             <p>
                 Para consultas legales o relacionadas con estos términos:<br />
                 <strong>Email:</strong> legal@ucn.cl<br />
-                <strong>Dirección:</strong> Av. Angamos 0610, Antofagasta, Chile
+                <strong>Dirección:</strong> Larrondo 1281, Coquimbo, Chile
             </p>
 
             <p style={{ marginTop: '24px', fontSize: '0.9rem', color: '#888' }}>
-                Última actualización: Noviembre 2025
+                Última actualización: Diciembre 2025
             </p>
         </div>
     );

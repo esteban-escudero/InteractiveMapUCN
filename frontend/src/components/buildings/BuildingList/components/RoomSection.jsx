@@ -35,7 +35,7 @@ const RoomSection = ({
           className="rooms-list"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+            gridTemplateColumns: "repeat(3, 1fr)",
             gap: "1rem",
           }}>
           {salas.map((room) => (

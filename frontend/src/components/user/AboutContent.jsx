@@ -24,7 +24,7 @@ function AboutContent() {
             <p>
                 <strong>Versión:</strong> 1.0.0<br />
                 <strong>Universidad:</strong> Universidad Católica del Norte<br />
-                <strong>Campus:</strong> Antofagasta, Chile
+                <strong>Campus:</strong> Coquimbo, Chile
             </p>
 
             <h3>Contacto</h3>
