@@ -1,11 +1,12 @@
 // components/buildings/BuildingList/BuildingList.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useBuildingList } from "./hooks/useBuildingList";
 import Notification from "../../ui/Notification/UINotification";
 import BuildingListHeader from "./components/BuildingListHeader";
 import BuildingListFooter from "./components/BuildingListFooter";
 import EmptyState from "./components/EmptyState";
 import BuildingCard from "./components/BuildingCard";
+import SearchBar from "./components/SearchBar";
 import "./BuildingList.css";
 
 function BuildingList({
@@ -19,6 +20,9 @@ function BuildingList({
   onReload,
 }) {
   console.log("BuildingList recibió:", buildings.length, "edificios");
+
+  // Estado para la búsqueda
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     deletingId,
@@ -43,6 +47,16 @@ function BuildingList({
     onClose,
   });
 
+  // Filtrar edificios basándose en el término de búsqueda
+  const filteredBuildings = buildings.filter((building) => {
+    const buildingName = building.nombre || building.name || "";
+    return buildingName.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
+  const handleSearchChange = (value) => {
+    setSearchTerm(value);
+  };
+
   return (
     <div className="building-list-overlay">
       {/* Notificación Global */}
@@ -57,14 +71,26 @@ function BuildingList({
       )}
 
       <div className="building-list-modal">
-        <BuildingListHeader onClose={onClose} />
+        <BuildingListHeader onClose={onClose}>
+          <SearchBar
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+          />
+        </BuildingListHeader>
 
         <div className="building-list-content">
-          {buildings.length === 0 ? (
-            <EmptyState />
+          {filteredBuildings.length === 0 ? (
+            searchTerm ? (
+              <div className="empty-state">
+                <span className="material-icons empty-icon">search_off</span>
+                <p>No se encontraron edificios que coincidan con "{searchTerm}"</p>
+              </div>
+            ) : (
+              <EmptyState />
+            )
           ) : (
             <div className="buildings-grid">
-              {buildings.map((building) => (
+              {filteredBuildings.map((building) => (
                 <BuildingCard
                   key={building.id || building._id || building.id_edificio}
                   building={building}
@@ -89,7 +115,7 @@ function BuildingList({
           )}
         </div>
 
-        <BuildingListFooter buildingCount={buildings.length} />
+        <BuildingListFooter buildingCount={filteredBuildings.length} />
       </div>
     </div>
   );
