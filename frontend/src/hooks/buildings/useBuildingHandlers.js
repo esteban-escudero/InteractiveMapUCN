@@ -6,7 +6,7 @@ import { buildingService } from "../../services/buildingService";
 
 export const useBuildingHandlers = (
   showUINotification,
-  showConfirm, // ✅ RECIBIR showConfirm
+  showConfirm,
   validateCoordinates,
   loadBuildings,
   deleteBuilding,
@@ -22,7 +22,6 @@ export const useBuildingHandlers = (
         const isValid = validateCoordinates(buildingData.lat, buildingData.lng);
 
         if (!isValid) {
-          // ✅ USAR showConfirm EN LUGAR DE window.confirm
           showConfirm(
             "Coordenadas fuera del campus",
             "Las coordenadas están fuera de los límites del campus. ¿Deseas guardar de todas formas?",
@@ -55,7 +54,9 @@ export const useBuildingHandlers = (
 
   // Función auxiliar para guardar el edificio
   const saveBuilding = async (buildingData) => {
-    if (mapState.editingBuilding) {
+    const isEditing = !!mapState.editingBuilding;
+
+    if (isEditing) {
       const id =
         mapState.editingBuilding.id ||
         mapState.editingBuilding._id ||
@@ -71,8 +72,11 @@ export const useBuildingHandlers = (
     mapState.setEditingBuilding(null);
     mapState.setShowBuildingForm(false);
     coordinateManagement.setCapturedCoords(null);
-    // Abrir BuildingList después de guardar
-    mapState.setShowBuildingList(true);
+
+    // Solo abrir BuildingList si se estaba editando
+    if (isEditing) {
+      mapState.setShowBuildingList(true);
+    }
   };
 
   /**
