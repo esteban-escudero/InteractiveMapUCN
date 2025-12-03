@@ -227,6 +227,9 @@
 
 .room-accessibility-field {
   min-width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .field-label-inline {
@@ -280,8 +283,16 @@
 }
 
 .accessibility-icon-inline {
-  font-size: 20px;
+  font-size: 18px;
   color: #27ae60;
+  background: #e8f5e9;
+  border-radius: 50%;
+  padding: 6px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .room-item-actions-inline {
@@ -292,7 +303,8 @@
 }
 
 .action-btn-small {
-  padding: 8px;
+  padding: 0;
+  margin: 0;
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -302,10 +314,16 @@
   justify-content: center;
   width: 36px;
   height: 36px;
+  min-width: 36px;
+  min-height: 36px;
 }
 
 .action-btn-small .material-icons {
   font-size: 18px;
+  line-height: 1;
+  display: block;
+  margin: 0;
+  padding: 0;
 }
 
 .delete-btn-small {
