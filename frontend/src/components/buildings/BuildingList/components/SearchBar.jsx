@@ -11,15 +11,6 @@ const SearchBar = ({ searchTerm, onSearchChange }) => {
                 value={searchTerm}
                 onChange={(e) => onSearchChange(e.target.value)}
             />
-            {searchTerm && (
-                <button
-                    className="clear-search-btn"
-                    onClick={() => onSearchChange("")}
-                    aria-label="Limpiar búsqueda"
-                >
-                    <span className="material-icons">close</span>
-                </button>
-            )}
         </div>
     );
 };
