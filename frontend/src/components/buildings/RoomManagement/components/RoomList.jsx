@@ -25,7 +25,7 @@ const RoomList = ({
         )}
       </div>
 
-      <div className="rooms-grid">
+      <div className="rooms-list-container">
         {rooms.map((room, index) => (
           <RoomForm
             key={room.id || index}

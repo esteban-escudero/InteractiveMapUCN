@@ -31,13 +31,7 @@ const RoomSection = ({
           <small>Usa el botón "Agregar Sala" para crear la primera</small>
         </div>
       ) : (
-        <div
-          className="rooms-list"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "1rem",
-          }}>
+        <div className="rooms-list">
           {salas.map((room) => (
             <RoomItem
               key={room.id}

@@ -1,4 +1,4 @@
-/* RoomManagement.css - CSS MEJORADO CON GRID 2x2 */
+/* RoomManagement.css */
 
 /* ===== CONTENEDORES PRINCIPALES ===== */
 .room-management-overlay {
@@ -18,7 +18,7 @@
   background: white;
   border-radius: 12px;
   width: 90%;
-  max-width: 1000px; /* ← Aumentado para 2 columnas */
+  max-width: 1000px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -64,6 +64,10 @@
   transform: rotate(90deg);
 }
 
+.close-btn .material-icons {
+  font-size: 20px;
+}
+
 /* ===== SELECCIÓN DE EDIFICIO ===== */
 .building-selection {
   padding: 24px;
@@ -95,6 +99,15 @@
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
+.building-selection select:disabled {
+  background-color: #f8f9fa;
+  color: #2c3e50;
+  border-color: #27ae60;
+  font-weight: 600;
+  opacity: 1;
+  cursor: default;
+}
+
 .building-info {
   margin-top: 12px;
   padding: 12px;
@@ -109,7 +122,7 @@
   font-size: 13px;
 }
 
-/* ===== GRID DE SALAS - CONTENEDOR PRINCIPAL ===== */
+/* ===== CONTENEDOR DE SALAS ===== */
 .rooms-grid-container {
   padding: 24px;
   background: #ffffff;
@@ -132,6 +145,11 @@
   align-items: center;
   gap: 10px;
   font-weight: 600;
+}
+
+.rooms-grid-title .material-icons {
+  font-size: 20px;
+  color: #3498db;
 }
 
 .add-room-btn {
@@ -157,158 +175,151 @@
   box-shadow: 0 6px 12px rgba(39, 174, 96, 0.3);
 }
 
-/* ===== GRID 2x2 FIJO PARA SALAS ===== */
-.rooms-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* ← 2 COLUMNAS FIJAS */
-  gap: 20px;
+.add-room-btn .material-icons {
+  font-size: 18px;
+}
+
+/* ===== LISTA HORIZONTAL DE SALAS ===== */
+.rooms-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding: 8px;
 }
 
-/* ===== FORMULARIO INDIVIDUAL DE CADA SALA ===== */
-.room-form-container {
+/* ===== ITEM EDITABLE HORIZONTAL ===== */
+.room-list-item-editable {
   background: #ffffff;
   border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 12px 16px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  position: relative; /* ← PARA POSICIONAR EL BOTÓN DE ELIMINAR */
-  min-height: 280px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
 }
 
-.room-form-container:hover {
+.room-list-item-editable:hover {
   border-color: #3498db;
-  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.15);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
 }
 
-/* HEADER DE LA SALA CON BOTÓN DE ELIMINAR DENTRO DE LA TARJETA */
-.room-form-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f1f3f4;
-}
-
-.room-form-title {
-  margin: 0;
-  color: #2c3e50;
-  font-size: 16px;
-  font-weight: 600;
-  flex: 1;
-}
-
-/* BOTÓN DE ELIMINAR SALA DENTRO DE LA TARJETA */
-.remove-room-btn {
-  background: #e74c3c;
-  color: white;
-  border: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  cursor: pointer;
+.room-field-inline {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-  margin-left: 10px;
-}
-
-.remove-room-btn:hover {
-  background: #c0392b;
-  transform: rotate(90deg) scale(1.1);
-  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
-}
-
-.room-id {
-  font-size: 0.8em;
-  color: #666;
-  margin-left: 8px;
-  font-weight: normal;
-}
-
-/* ===== GRID DE CAMPOS DEL FORMULARIO ===== */
-.room-fields-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  flex: 1;
-}
-
-/* ===== GRUPOS DE CAMPOS ===== */
-.form-field-group {
-  display: flex;
-  flex-direction: column;
   gap: 8px;
 }
 
-.field-label {
-  font-weight: 600;
-  color: #2c3e50;
-  font-size: 13px;
-  margin-bottom: 0;
+.room-name-field {
+  flex: 1;
+  min-width: 200px;
 }
 
-.field-input,
-.field-select {
-  padding: 10px 12px;
+.room-floor-field {
+  min-width: 100px;
+}
+
+.room-type-field {
+  min-width: 150px;
+}
+
+.room-accessibility-field {
+  min-width: 50px;
+}
+
+.field-label-inline {
+  font-size: 12px;
+  color: #7f8c8d;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.field-input-inline,
+.field-select-inline {
+  padding: 8px 12px;
   border: 1px solid #bdc3c7;
   border-radius: 6px;
-  font-size: 14px;
+  font-size: 13px;
   transition: all 0.3s ease;
   background: white;
-  width: 100%;
-  box-sizing: border-box;
+  flex: 1;
 }
 
-.field-input:focus,
-.field-select:focus {
+.field-input-small {
+  max-width: 60px;
+  text-align: center;
+}
+
+.field-input-inline:focus,
+.field-select-inline:focus {
   outline: none;
   border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
 }
 
-.field-input::placeholder {
+.field-input-inline::placeholder {
   color: #95a5a6;
+  font-size: 13px;
 }
 
-/* ===== CHECKBOX ===== */
-.checkbox-field-group {
-  grid-column: 1 / -1;
-  margin-top: 12px;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
-}
-
-.checkbox-label {
+.checkbox-label-inline {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-weight: 500;
-  color: #2c3e50;
-  font-size: 14px;
+  gap: 6px;
   cursor: pointer;
-  margin-bottom: 0;
+  margin: 0;
 }
 
-.checkbox-input {
-  width: 18px;
-  height: 18px;
+.checkbox-input-inline {
+  width: 16px;
+  height: 16px;
   accent-color: #27ae60;
   cursor: pointer;
 }
 
-/* ===== BOTONES DE ACCIÓN ===== */
+.accessibility-icon-inline {
+  font-size: 20px;
+  color: #27ae60;
+}
+
+.room-item-actions-inline {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.action-btn-small {
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.action-btn-small .material-icons {
+  font-size: 18px;
+}
+
+.delete-btn-small {
+  background: #e74c3c;
+  color: white;
+}
+
+.delete-btn-small:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+}
+
+/* ===== BOTONES DE ACCIÓN DEL FOOTER ===== */
 .room-actions {
   padding: 24px;
   border-top: 1px solid #e0e0e0;
@@ -391,75 +402,38 @@
   box-shadow: 0 6px 12px rgba(39, 174, 96, 0.4);
 }
 
-/* ===== ESTILOS PARA MODO EDICIÓN ===== */
-.building-selection select:disabled {
-  background-color: #f8f9fa;
-  color: #2c3e50;
-  border-color: #27ae60;
-  font-weight: 600;
-  opacity: 1;
-  cursor: default;
-}
-
-.building-info small[style*="color: #27ae60"] {
-  font-weight: 600;
-}
-
 /* ===== RESPONSIVE ===== */
-@media (max-width: 1024px) {
-  .rooms-grid {
-    grid-template-columns: repeat(2, 1fr); /* ← MANTENER 2 COLUMNAS */
-    gap: 16px;
-  }
-}
-
 @media (max-width: 768px) {
   .room-management-container {
     width: 95%;
     margin: 10px;
-    max-width: 95%;
   }
 
-  .room-management-header {
-    padding: 20px;
+  .room-list-item-editable {
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
-  .building-selection {
-    padding: 20px;
+  .room-name-field {
+    width: 100%;
+    min-width: auto;
   }
 
-  .rooms-grid-container {
-    padding: 20px;
+  .room-floor-field,
+  .room-type-field {
+    flex: 1;
+    min-width: auto;
   }
 
-  .rooms-grid-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  /* EN MÓVIL CAMBIAR A 1 COLUMNA */
-  .rooms-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    padding: 4px;
-  }
-
-  .room-form-container {
-    padding: 18px;
-    margin: 2px;
-    min-height: auto;
-  }
-
-  .room-fields-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
+  .room-item-actions-inline {
+    width: 100%;
+    justify-content: flex-end;
+    margin-left: 0;
   }
 
   .room-actions {
     flex-direction: column;
     gap: 12px;
-    padding: 20px;
   }
 
   .edit-actions {
@@ -472,8 +446,6 @@
   .cancel-btn,
   .save-btn {
     flex: 1;
-    text-align: center;
-    padding: 10px 20px;
   }
 }
 
@@ -483,65 +455,13 @@
     margin: 5px;
   }
 
-  .room-management-header {
-    padding: 16px;
+  .room-list-item-editable {
+    padding: 10px 12px;
   }
 
-  .building-selection {
-    padding: 16px;
+  .field-input-inline,
+  .field-select-inline {
+    padding: 6px 10px;
+    font-size: 12px;
   }
-
-  .rooms-grid-container {
-    padding: 16px;
-  }
-
-  .rooms-grid {
-    padding: 2px;
-  }
-
-  .room-form-container {
-    padding: 16px;
-    margin: 1px;
-  }
-
-  .room-fields-grid {
-    gap: 12px;
-  }
-
-  .field-input,
-  .field-select {
-    padding: 8px 12px;
-  }
-}
-
-/* ===== ICONOS ===== */
-.material-icons {
-  vertical-align: middle;
-}
-
-.rooms-grid-title .material-icons {
-  font-size: 20px;
-  color: #3498db;
-}
-
-.add-room-btn .material-icons {
-  font-size: 18px;
-}
-
-.close-btn .material-icons {
-  font-size: 20px;
-}
-
-/* ===== ESTADO VACÍO ===== */
-.rooms-grid:empty::before {
-  content: "No hay salas agregadas";
-  display: block;
-  text-align: center;
-  padding: 40px;
-  color: #7f8c8d;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 2px dashed #bdc3c7;
-  grid-column: 1 / -1;
-  font-size: 14px;
 }

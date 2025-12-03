@@ -11,84 +11,75 @@ const RoomFields = ({
   onRemoveRoom,
 }) => {
   return (
-    <div className="room-form-container">
-      {/* HEADER CON BOTÓN DE ELIMINAR DENTRO DE LA TARJETA */}
-      <div className="room-form-header">
-        <h2 className="room-form-title">
-          {isEditing ? `Editando: ${room.nombre_sala}` : `Sala ${index + 1}`}
-          {room.id && <span className="room-id"> (ID: {room.id})</span>}
-        </h2>
-        {!isEditing && roomsCount > 1 && (
+    <div className="room-list-item-editable">
+      {/* Nombre de la Sala */}
+      <div className="room-field-inline room-name-field">
+        <input
+          type="text"
+          value={room.nombre_sala}
+          onChange={(e) => onUpdateRoom(index, "nombre_sala", e.target.value)}
+          placeholder="Nombre de la sala"
+          className="field-input-inline"
+          required
+        />
+      </div>
+
+      {/* Piso */}
+      <div className="room-field-inline room-floor-field">
+        <label className="field-label-inline">Piso</label>
+        <input
+          type="number"
+          min="1"
+          max="20"
+          value={room.piso}
+          onChange={(e) => onUpdateRoom(index, "piso", e.target.value)}
+          className="field-input-inline field-input-small"
+          required
+        />
+      </div>
+
+      {/* Tipo de Sala */}
+      <div className="room-field-inline room-type-field">
+        <select
+          value={room.tipo_sala}
+          onChange={(e) => onUpdateRoom(index, "tipo_sala", e.target.value)}
+          className="field-select-inline"
+          required>
+          {TIPOS_SALA.map((tipo) => (
+            <option key={tipo} value={tipo}>
+              {tipo}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Accesible */}
+      <div className="room-field-inline room-accessibility-field">
+        <label className="checkbox-label-inline" title="Accesible para silla de ruedas">
+          <input
+            type="checkbox"
+            checked={room.accesible_silla_ruedas}
+            onChange={(e) =>
+              onUpdateRoom(index, "accesible_silla_ruedas", e.target.checked)
+            }
+            className="checkbox-input-inline"
+          />
+          <span className="material-icons accessibility-icon-inline">accessible</span>
+        </label>
+      </div>
+
+      {/* Botones de acción */}
+      {!isEditing && roomsCount > 1 && (
+        <div className="room-item-actions-inline">
           <button
             type="button"
             onClick={() => onRemoveRoom(index)}
-            className="remove-room-btn"
+            className="action-btn-small delete-btn-small"
             title="Eliminar sala">
-            ✕
+            <span className="material-icons">delete</span>
           </button>
-        )}
-      </div>
-
-      {/* GRID DE CAMPOS */}
-      <div className="room-fields-grid">
-        {/* Nombre de la Sala */}
-        <div className="form-field-group">
-          <label className="field-label">Nombre de la Sala *</label>
-          <input
-            type="text"
-            value={room.nombre_sala}
-            onChange={(e) => onUpdateRoom(index, "nombre_sala", e.target.value)}
-            placeholder="Ej: Aula 101, Laboratorio Física"
-            className="field-input"
-            required
-          />
         </div>
-
-        {/* Piso */}
-        <div className="form-field-group">
-          <label className="field-label">Piso *</label>
-          <input
-            type="number"
-            min="1"
-            max="20"
-            value={room.piso}
-            onChange={(e) => onUpdateRoom(index, "piso", e.target.value)}
-            className="field-input"
-            required
-          />
-        </div>
-
-        {/* Tipo de Sala */}
-        <div className="form-field-group">
-          <label className="field-label">Tipo de Sala *</label>
-          <select
-            value={room.tipo_sala}
-            onChange={(e) => onUpdateRoom(index, "tipo_sala", e.target.value)}
-            className="field-select"
-            required>
-            {TIPOS_SALA.map((tipo) => (
-              <option key={tipo} value={tipo}>
-                {tipo}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Accesible */}
-        <div className="checkbox-field-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={room.accesible_silla_ruedas}
-              onChange={(e) =>
-                onUpdateRoom(index, "accesible_silla_ruedas", e.target.checked)
-              }
-              className="checkbox-input"
-            />
-            Accesible para silla de ruedas
-          </label>
-        </div>
-      </div>
+      )}
     </div>
   );
 };
