@@ -82,8 +82,19 @@ export const createBuildingPopup = (
       : "#e74c3c"
     : "#3498db";
 
-  // Vista simplificada para usuarios (solo nombre y descripción)
+  // Vista simplificada para usuarios (solo nombre y descripción si existe)
   if (!isAdminView) {
+    // Solo mostrar descripción si existe
+    const descriptionHTML = building.descripcion ? `
+      <div style="display: flex; align-items: flex-start; gap: 8px;">
+        <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: #4a235a;">description</span>
+        <div style="flex: 1;">
+          <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Descripción:</strong>
+          <div style="color: #546e7a; font-size: 13px; white-space: pre-wrap;">${building.descripcion}</div>
+        </div>
+      </div>
+    ` : '';
+
     return `
         <div style="
           min-width: 220px;
@@ -108,14 +119,7 @@ export const createBuildingPopup = (
           
           <div style="display: flex; flex-direction: column; gap: 10px;">
             ${highlightBadge}
-            
-            <div style="display: flex; align-items: flex-start; gap: 8px;">
-              <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: #4a235a;">description</span>
-              <div style="flex: 1;">
-                <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Descripción:</strong>
-                <div style="color: #546e7a; font-size: 13px; white-space: pre-wrap;">${building.descripcion || "Sin descripción"}</div>
-              </div>
-            </div>
+            ${descriptionHTML}
           </div>
         </div>
       `;
@@ -151,8 +155,7 @@ export const createBuildingPopup = (
           <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: #4a235a;">description</span>
           <div style="flex: 1;">
             <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Descripción:</strong>
-            <div style="color: #546e7a; font-size: 13px; white-space: pre-wrap;">${building.descripcion || "Sin descripción"
-    }</div>
+            <div style="color: #546e7a; font-size: 13px; white-space: pre-wrap;">${building.descripcion || "Sin descripción"}</div>
           </div>
         </div>
         
@@ -160,8 +163,7 @@ export const createBuildingPopup = (
           <span class="material-icons" style="font-size: 20px; margin-top: 2px; color: #4a235a;">label</span>
           <div style="flex: 1;">
             <strong style="color: #34495e; font-size: 12px; display: block; margin-bottom: 2px;">Categoría:</strong>
-            <div style="color: #546e7a; font-size: 13px;">${building.categoria || building.tipo || "No especificada"
-    }</div>
+            <div style="color: #546e7a; font-size: 13px;">${building.categoria || building.tipo || "No especificada"}</div>
           </div>
         </div>
 
