@@ -20,6 +20,8 @@ export const MapForms = ({
           mapState.setShowBuildingForm(false);
           mapState.setEditingBuilding(null);
           coordinateManagement.clearCapturedCoords();
+          // Abrir BuildingList al cancelar
+          mapState.setShowBuildingList(true);
         }}
         isVisible={mapState.showBuildingForm}
         building={mapState.editingBuilding}

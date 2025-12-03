@@ -71,6 +71,8 @@ export const useBuildingHandlers = (
     mapState.setEditingBuilding(null);
     mapState.setShowBuildingForm(false);
     coordinateManagement.setCapturedCoords(null);
+    // Abrir BuildingList después de guardar
+    mapState.setShowBuildingList(true);
   };
 
   /**

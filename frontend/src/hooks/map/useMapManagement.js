@@ -58,6 +58,8 @@ export const useMapManagement = (mapState) => {
     mapState.setShowRoomManagement(false);
     mapState.setSelectedBuildingForRooms(null);
     mapState.setSelectedRooms([]);
+    // Abrir BuildingList después de cerrar RoomManagement
+    mapState.setShowBuildingList(true);
   }, [mapState]);
 
   // Handlers para routes
