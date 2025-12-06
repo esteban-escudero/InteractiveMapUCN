@@ -2,6 +2,7 @@
 import React from 'react';
 import './mobile-components.css';
 import './route-panel-fix.css';
+import { tiposRuta } from '../../constants/constants.ts';
 
 /* ---- Dropdown con Autocomplete ---- */
 function AutocompleteSelect({ value, options, onChange, placeholder }) {
@@ -201,13 +202,10 @@ function MobileRoutePanel({
                         <AutocompleteSelect
                             value={routeType}
                             placeholder="Tipo de Ruta"
-                            options={[
-                                { value: "peatonal", label: "🚶 Peatonal" },
-                                { value: "accesible", label: "♿ Accesible" },
-                                { value: "rapida", label: "⚡ Rápida" },
-                                { value: "emergencia", label: "🚨 Emergencia" },
-                                { value: "vehicular", label: "🚗 Vehicular" },
-                            ]}
+                            options={tiposRuta.map(tipo => ({
+                                value: tipo.value,
+                                label: `${tipo.icon === 'accessible' ? '♿' : '🚶'} ${tipo.label}`
+                            }))}
                             onChange={(value) => onRouteTypeChange(value)}
                         />
                     </div>
