@@ -39,9 +39,6 @@ function HelpContent() {
             <ul>
                 <li><strong>Peatonal:</strong> Ruta estándar para caminar</li>
                 <li><strong>Accesible:</strong> Ruta adaptada para personas con movilidad reducida</li>
-                <li><strong>Rápida:</strong> El camino más corto disponible</li>
-                <li><strong>Emergencia:</strong> Rutas de evacuación y emergencia</li>
-                <li><strong>Vehicular:</strong> Rutas para vehículos autorizados</li>
             </ul>
 
             <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

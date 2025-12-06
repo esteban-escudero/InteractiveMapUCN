@@ -7,14 +7,11 @@ import L from "leaflet";
  * @returns {string} Color hexadecimal
  */
 export const getRouteColor = (tipo) => {
-    const colors = {
-        peatonal: "#4a235a",
-        accesible: "#2ecc71",
-        rapida: "#e74c3c",
-        emergencia: "#f39c12",
-        vehicular: "#3498db",
-    };
-    return colors[tipo?.toLowerCase()] || "#4a235a";
+  const colors = {
+    peatonal: "#4a235a",
+    accesible: "#2ecc71",
+  };
+  return colors[tipo?.toLowerCase()] || "#4a235a";
 };
 
 /**
@@ -23,9 +20,9 @@ export const getRouteColor = (tipo) => {
  * @returns {L.DivIcon} Icono de Leaflet
  */
 export const createSnapPreviewIcon = (snapType) => {
-    const isNode = snapType === "node";
-    return L.divIcon({
-        html: `
+  const isNode = snapType === "node";
+  return L.divIcon({
+    html: `
       <div style="
         width: 12px;
         height: 12px;
@@ -42,9 +39,9 @@ export const createSnapPreviewIcon = (snapType) => {
         }
       </style>
     `,
-        iconSize: [12, 12],
-        className: "snap-preview-icon",
-    });
+    iconSize: [12, 12],
+    className: "snap-preview-icon",
+  });
 };
 
 /**
@@ -52,8 +49,8 @@ export const createSnapPreviewIcon = (snapType) => {
  * @returns {L.DivIcon} Icono de Leaflet
  */
 export const createGhostMarkerIcon = () => {
-    return L.divIcon({
-        html: `
+  return L.divIcon({
+    html: `
       <div style="
         width: 10px;
         height: 10px;
@@ -63,9 +60,9 @@ export const createGhostMarkerIcon = () => {
         box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       "></div>
     `,
-        iconSize: [10, 10],
-        className: "ghost-marker-icon",
-    });
+    iconSize: [10, 10],
+    className: "ghost-marker-icon",
+  });
 };
 
 /**
@@ -75,22 +72,22 @@ export const createGhostMarkerIcon = () => {
  * @returns {L.DivIcon} Icono de Leaflet
  */
 export const createMarkerIcon = (index, total) => {
-    const isFirst = index === 0;
-    const isLast = index === total - 1;
+  const isFirst = index === 0;
+  const isLast = index === total - 1;
 
-    let backgroundColor = "#3498db";
-    let label = index + 1;
+  let backgroundColor = "#3498db";
+  let label = index + 1;
 
-    if (isFirst) {
-        backgroundColor = "#27ae60";
-        label = "A";
-    } else if (isLast) {
-        backgroundColor = "#e74c3c";
-        label = "B";
-    }
+  if (isFirst) {
+    backgroundColor = "#27ae60";
+    label = "A";
+  } else if (isLast) {
+    backgroundColor = "#e74c3c";
+    label = "B";
+  }
 
-    return L.divIcon({
-        html: `
+  return L.divIcon({
+    html: `
       <div style="
         width: 28px;
         height: 28px;
@@ -107,9 +104,9 @@ export const createMarkerIcon = (index, total) => {
         cursor: move;
       ">${label}</div>
     `,
-        iconSize: [28, 28],
-        className: "route-marker-icon",
-    });
+    iconSize: [28, 28],
+    className: "route-marker-icon",
+  });
 };
 
 /**
@@ -117,9 +114,9 @@ export const createMarkerIcon = (index, total) => {
  * @returns {string} Nombre generado
  */
 export const generateDefaultName = () => {
-    const timestamp = new Date().toLocaleTimeString("es-CL", {
-        hour: "2-digit",
-        minute: "2-digit",
-    });
-    return `Ruta ${timestamp}`;
+  const timestamp = new Date().toLocaleTimeString("es-CL", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `Ruta ${timestamp}`;
 };

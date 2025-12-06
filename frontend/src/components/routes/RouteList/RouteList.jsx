@@ -22,10 +22,7 @@ const RouteList = ({
   const getRouteTypeIcon = (tipo) => {
     const icons = {
       peatonal: "directions_walk",
-      vehicular: "directions_car",
       accesible: "accessible",
-      emergencia: "emergency",
-      rapida: "bolt",
       default: "route",
     };
     return icons[tipo] || icons.default;
@@ -34,7 +31,6 @@ const RouteList = ({
   const getRouteTypeColor = (tipo) => {
     const colors = {
       peatonal: "#27ae60",
-      vehicular: "#e74c3c",
       accesible: "#3498db",
       default: "#f39c12",
     };
@@ -114,29 +110,10 @@ const RouteList = ({
               Accesibles
             </button>
             <button
-              className={`filter-btn ${filter === "emergencia" ? "active" : ""
-                }`}
-              onClick={() => setFilter("emergencia")}>
-              <span className="material-icons">emergency</span>
-              Emergencia
-            </button>
-            <button
               className={`filter-btn ${filter === "peatonal" ? "active" : ""}`}
               onClick={() => setFilter("peatonal")}>
               <span className="material-icons">directions_walk</span>
               Peatonales
-            </button>
-            <button
-              className={`filter-btn ${filter === "rapida" ? "active" : ""}`}
-              onClick={() => setFilter("rapida")}>
-              <span className="material-icons">bolt</span>
-              Rápidas
-            </button>
-            <button
-              className={`filter-btn ${filter === "vehicular" ? "active" : ""}`}
-              onClick={() => setFilter("vehicular")}>
-              <span className="material-icons">directions_car</span>
-              Vehiculares
             </button>
           </div>
         </div>

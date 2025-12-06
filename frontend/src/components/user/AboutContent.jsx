@@ -15,7 +15,7 @@ function AboutContent() {
             <ul>
                 <li><strong>Búsqueda Inteligente:</strong> Encuentra edificios y salas por nombre o tipo</li>
                 <li><strong>Cálculo de Rutas:</strong> Obtén la mejor ruta entre dos puntos</li>
-                <li><strong>Múltiples Tipos de Ruta:</strong> Peatonal, accesible, rápida y más</li>
+                <li><strong>Tipos de Ruta:</strong> Peatonal y accesible para diferentes necesidades</li>
                 <li><strong>Geolocalización:</strong> Encuentra tu ubicación actual en el campus</li>
                 <li><strong>Modo Oscuro:</strong> Interfaz adaptable para mayor comodidad</li>
             </ul>

@@ -22,9 +22,6 @@ const RouteLayer = ({
     const typeColors = {
       peatonal: "#27ae60",
       accesible: "#3498db",
-      emergencia: "#e74c3c",
-      rapida: "#f39c12",
-      vehicular: "#9b59b6",
       default: "#95a5a6",
     };
 

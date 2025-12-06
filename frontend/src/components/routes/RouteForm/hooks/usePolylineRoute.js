@@ -42,9 +42,6 @@ export const usePolylineRoute = ({
     const colors = {
       peatonal: "#27ae60",
       accesible: "#3498db",
-      emergencia: "#e74c3c",
-      rapida: "#f39c12",
-      vehicular: "#9b59b6",
     };
     return colors[tipo] || "#95a5a6";
   };
@@ -242,9 +239,9 @@ export const usePolylineRoute = ({
       const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
         Math.cos((prevLat * Math.PI) / 180) *
-          Math.cos((currLat * Math.PI) / 180) *
-          Math.sin(dLng / 2) *
-          Math.sin(dLng / 2);
+        Math.cos((currLat * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       const distance = R * c;
 
@@ -501,21 +498,19 @@ export const usePolylineRoute = ({
 
         marker.bindTooltip(
           `<div style="text-align: center;">
-            <strong>${
-              index === 0
-                ? "Punto Inicial"
-                : index === latLngs.length - 1
-                ? "Punto Final"
-                : `Punto ${index + 1}`
-            }</strong><br/>
+            <strong>${index === 0
+            ? "Punto Inicial"
+            : index === latLngs.length - 1
+              ? "Punto Final"
+              : `Punto ${index + 1}`
+          }</strong><br/>
             <small>Arrastra para mover</small><br/>
-            <small>${
-              index === 0
-                ? '<span style="color: #e74c3c;">No se puede eliminar punto inicial</span>'
-                : index === latLngs.length - 1
-                ? '<span style="color: #e74c3c;">No se puede eliminar punto final</span>'
-                : "Doble click para eliminar"
-            }</small>
+            <small>${index === 0
+            ? '<span style="color: #e74c3c;">No se puede eliminar punto inicial</span>'
+            : index === latLngs.length - 1
+              ? '<span style="color: #e74c3c;">No se puede eliminar punto final</span>'
+              : "Doble click para eliminar"
+          }</small>
           </div>`,
           {
             permanent: false,

@@ -23,9 +23,6 @@ export const useRouteIntelligence = (routes, buildings) => {
     const graphs = {
       peatonal: {},
       accesible: {},
-      emergencia: {},
-      rapida: {},
-      vehicular: {},
       default: {},
     };
 

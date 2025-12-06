@@ -104,9 +104,6 @@ export const useUserMapHandlers = ({
                     const routeColors = {
                         peatonal: "#4a235a",
                         accesible: "#2ecc71",
-                        rapida: "#e74c3c",
-                        emergencia: "#f39c12",
-                        vehicular: "#3498db",
                     };
 
                     // Dibujar nueva ruta
