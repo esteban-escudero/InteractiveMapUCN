@@ -1,5 +1,5 @@
 // components/routes/RouteForm/utils/polylineGeometry.js
-import { SpatialUtils } from "../../../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 
 /**
  * Calcula la longitud total de una ruta

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { proximityService } from "../../services/proximityService";
+import { proximityService } from "services/proximityService";
 
 export const useProximity = () => {
   const [loading, setLoading] = useState(false);

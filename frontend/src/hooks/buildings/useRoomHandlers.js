@@ -2,7 +2,7 @@
  * Handlers específicos para salas
  */
 import { useCallback } from "react";
-import { roomService } from "../../services/roomService";
+import { roomService } from "services/roomService";
 
 export const useRoomHandlers = (showUINotification, loadBuildings) => {
   /**

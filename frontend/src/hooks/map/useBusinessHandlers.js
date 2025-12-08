@@ -4,9 +4,9 @@
  * Refactorizado para usar hooks especializados por dominio
  */
 import { useCallback } from "react";
-import { useBuildingHandlers } from "../buildings/useBuildingHandlers";
-import { useRoomHandlers } from "../buildings/useRoomHandlers";
-import { useRouteHandlers } from "../routes/useRouteHandlers";
+import { useBuildingHandlers } from "hooks/buildings/useBuildingHandlers";
+import { useRoomHandlers } from "hooks/buildings/useRoomHandlers";
+import { useRouteHandlers } from "hooks/routes/useRouteHandlers";
 
 export const useBusinessHandlers = (
   showUINotification,

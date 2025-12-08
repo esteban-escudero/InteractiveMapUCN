@@ -1,7 +1,7 @@
 // hooks/map/useMapClickHandler.js
 import { useCallback, useEffect } from "react";
 import L from "leaflet";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 
 export const useMapClickHandler = (
   mapInstance,
@@ -91,9 +91,8 @@ export const useMapClickHandler = (
 
       popupContent += `
         <button onclick="window.useCapturedCoords(${lat}, ${lng})" 
-          style="background: ${
-            isValid ? "#27ae60" : "#e74c3c"
-          }; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
+          style="background: ${isValid ? "#27ae60" : "#e74c3c"
+        }; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 5px;">
           ${isValid ? "Usar estas coordenadas" : "Usar de todas formas"}
         </button>
       </div>

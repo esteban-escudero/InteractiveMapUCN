@@ -1,7 +1,7 @@
 // components/user/hooks/useUserMapInit.js
 import { useEffect } from "react";
 import L from "leaflet";
-import { MAP_CONFIG } from "../../../config/app.js";
+import { MAP_CONFIG } from "config/app.js";
 
 /**
  * Hook para inicializar el mapa de usuario

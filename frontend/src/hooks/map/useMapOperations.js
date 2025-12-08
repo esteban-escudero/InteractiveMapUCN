@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect } from "react";
-import { SpatialUtils } from "../../utils/spatialUtils";
-import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig";
+import { SpatialUtils } from "utils/spatialUtils";
+import { UCN_COQUIMBO_BOUNDS } from "constants/mapConfig";
 
 export const useMapOperations = (buildings) => {
   const [campusBoundsPolygon, setCampusBoundsPolygon] = useState(null);

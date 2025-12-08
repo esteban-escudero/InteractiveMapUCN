@@ -1,5 +1,5 @@
 // components/map/BuildingRenderer/utils/buildingPopup.js
-import { SpatialUtils } from "../../../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 
 /**
  * Crea el HTML del popup para un edificio

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./SidePanel.css";
-import { tiposRuta, tiposEdificio } from "../../../constants/constants.ts";
-import UserManagement from "../../admin/UserManagement/UserManagement";
+import { tiposRuta, tiposEdificio } from "constants/constants.ts";
+import UserManagement from "components/admin/UserManagement/UserManagement";
 
 const SidePanel = ({
   status,

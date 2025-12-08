@@ -1,7 +1,7 @@
 // src/components/RouteNetwork/RouteNetwork.js
 import React, { useState, useEffect } from "react";
-import { routeService } from "../../../services/routeService"; //  CORRECTO
-import { SpatialUtils } from "../../../utils/spatialUtils"; //  CORRECTO
+import { routeService } from "services/routeService"; //  CORRECTO
+import { SpatialUtils } from "utils/spatialUtils"; //  CORRECTO
 import "./RouteNetwork.css"; //  Este archivo no existe - vamos a crearlo
 
 const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
@@ -207,11 +207,11 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
               <strong>Rutas:</strong>
               <ul>
                 ${node.rutas
-                  .map(
-                    (route) =>
-                      `<li>${route.routeName} (${route.tipo_punto})</li>`
-                  )
-                  .join("")}
+            .map(
+              (route) =>
+                `<li>${route.routeName} (${route.tipo_punto})</li>`
+            )
+            .join("")}
               </ul>
             </div>
             <div class="node-actions">
@@ -397,9 +397,8 @@ const RouteNetwork = ({ mapInstance, onNodeClick, onRouteClick }) => {
           {sharedNodes.map((node) => (
             <div
               key={node.id}
-              className={`node-item ${
-                selectedNode?.id === node.id ? "selected" : ""
-              }`}
+              className={`node-item ${selectedNode?.id === node.id ? "selected" : ""
+                }`}
               onClick={() => {
                 setSelectedNode(node);
                 onNodeClick?.(node);

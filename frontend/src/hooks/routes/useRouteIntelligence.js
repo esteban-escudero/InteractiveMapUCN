@@ -3,15 +3,15 @@
  * Implementa Dijkstra optimizado para redes de rutas por tipo
  */
 import { useCallback, useMemo } from "react";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 import {
   calculateAngle,
   findClosestPointOnRoute,
   extractRouteSegment,
   validateAndCleanCoordinates,
   findClosestBuilding,
-} from "../../utils/routing/routeGeometry";
-import { findShortestPath } from "../../utils/routing/graphAlgorithms";
+} from "utils/routing/routeGeometry";
+import { findShortestPath } from "utils/routing/graphAlgorithms";
 
 export const useRouteIntelligence = (routes, buildings) => {
   // ========== CONSTRUCCIÓN DE GRAFOS POR TIPO ==========

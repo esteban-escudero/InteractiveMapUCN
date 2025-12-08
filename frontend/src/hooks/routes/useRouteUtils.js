@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 
 export const useRouteUtils = (mapInstance, mapManagement) => {
   /**

@@ -7,22 +7,22 @@ import "./info-modal.css";
 import "./rounded-search.css";
 
 // Hooks externos
-import useBuildings from "../../hooks/buildings/useBuildings.js";
-import useRoutes from "../../hooks/routes/useRoutes.js";
-import { useRouteIntelligence } from "../../hooks/routes/useRouteIntelligence.js";
-import { useNotification } from "../../hooks/common/useNotification.js";
-import { useURLParams } from "../../hooks/user/useURLParams.js";
-import { useGeolocation } from "../../hooks/user/useGeolocation.js";
-import { useTheme } from "../../hooks/user/useTheme.js";
+import useBuildings from "hooks/buildings/useBuildings.js";
+import useRoutes from "hooks/routes/useRoutes.js";
+import { useRouteIntelligence } from "hooks/routes/useRouteIntelligence.js";
+import { useNotification } from "hooks/common/useNotification.js";
+import { useURLParams } from "hooks/user/useURLParams.js";
+import { useGeolocation } from "hooks/user/useGeolocation.js";
+import { useTheme } from "hooks/user/useTheme.js";
 
 // Hooks personalizados del componente
 import { useUserMapInit } from "./hooks/useUserMapInit.js";
 import { useUserMapHandlers } from "./hooks/useUserMapHandlers.js";
 
 // Componentes
-import { UINotification } from "../ui/index.js";
-import BuildingRenderer from "../map/BuildingRenderer/BuildingRenderer";
-import RouteLayer from "../map/RouteLayer/RouteLayer";
+import { UINotification } from "components/ui/index.js";
+import BuildingRenderer from "components/map/BuildingRenderer/BuildingRenderer";
+import RouteLayer from "components/map/RouteLayer/RouteLayer";
 import MobileSearchBar from "./MobileSearchBar";
 import MobileInfoPanel from "./MobileInfoPanel";
 import MobileRoutePanel from "./MobileRoutePanel";

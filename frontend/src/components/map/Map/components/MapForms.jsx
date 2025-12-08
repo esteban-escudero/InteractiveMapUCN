@@ -1,6 +1,6 @@
 import React from "react";
-import { BuildingForm } from "../../../buildings/index.js";
-import { RouteFormPolyline } from "../../../routes/index.js";
+import { BuildingForm } from "components/buildings/index.js";
+import { RouteFormPolyline } from "components/routes/index.js";
 
 export const MapForms = ({
   mapState,

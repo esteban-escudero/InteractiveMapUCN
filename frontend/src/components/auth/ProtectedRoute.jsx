@@ -1,6 +1,6 @@
 // src/components/auth/ProtectedRoute.jsx
 import React from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "contexts/AuthContext";
 import LoginForm from "./LoginForm";
 
 const ProtectedRoute = ({ children }) => {

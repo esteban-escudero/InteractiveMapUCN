@@ -2,7 +2,7 @@
  * Hook para carga y procesamiento de datos WFS de GeoServer
  */
 import { useState, useCallback } from "react";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 
 export const useGeoServerData = () => {
   const [status, setStatus] = useState("idle");

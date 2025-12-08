@@ -2,8 +2,8 @@
  * Hook para búsquedas y consultas de rutas
  */
 import { useCallback } from "react";
-import { routeService } from "../../services/routeService";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { routeService } from "services/routeService";
+import { SpatialUtils } from "utils/spatialUtils";
 
 export const useRouteQueries = (routes) => {
   /**

@@ -2,7 +2,7 @@
  * Handlers específicos para rutas
  */
 import { useCallback } from "react";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 
 export const useRouteHandlers = (
   showUINotification,

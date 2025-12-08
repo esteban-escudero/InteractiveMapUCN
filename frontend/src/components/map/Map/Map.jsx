@@ -5,38 +5,38 @@ import "leaflet/dist/leaflet.css";
 import "./Map.css";
 
 // Hooks
-import { useMap } from "../../../hooks/map/useMap.js";
-import { useMapState } from "../../../hooks/map/useMapState.js";
-import { useMapManagement } from "../../../hooks/map/useMapManagement.js";
-import { useMapData } from "../../../hooks/map/useMapData.js";
-import { useMapEffects } from "../../../hooks/map/useMapEffects.js";
-import { useMapActions } from "../../../hooks/map/useMapActions.js";
-import { useMapClickHandler } from "../../../hooks/map/useMapClickHandler.js";
-import { useBusinessHandlers } from "../../../hooks/map/useBusinessHandlers.js";
-import { useMapOperations } from "../../../hooks/map/useMapOperations.js";
-import { useCoordinateManagement } from "../../../hooks/map/useCoordinateManagement.js";
-import { useInteractionHandlers } from "../../../hooks/map/useInteractionHandlers.js";
-import { useRouteUtils } from "../../../hooks/routes/useRouteUtils.js";
-import { useBuildingFilters } from "../../../hooks/buildings/useBuildingFilters.js";
-import useBuildings from "../../../hooks/buildings/useBuildings.js";
-import useGeoServer from "../../../hooks/geoserver/useGeoServer.js";
-import useRoutes from "../../../hooks/routes/useRoutes.js";
-import { useNotification } from "../../../hooks/common/useNotification.js";
-import { useConfirm } from "../../../hooks/common/useConfirm.js";
-import useProximity from "../../../hooks/common/useProximity.js";
-import { useRouteIntelligence } from "../../../hooks/routes/useRouteIntelligence.js";
-import { useAuth } from "../../../contexts/AuthContext.js";
+import { useMap } from "hooks/map/useMap.js";
+import { useMapState } from "hooks/map/useMapState.js";
+import { useMapManagement } from "hooks/map/useMapManagement.js";
+import { useMapData } from "hooks/map/useMapData.js";
+import { useMapEffects } from "hooks/map/useMapEffects.js";
+import { useMapActions } from "hooks/map/useMapActions.js";
+import { useMapClickHandler } from "hooks/map/useMapClickHandler.js";
+import { useBusinessHandlers } from "hooks/map/useBusinessHandlers.js";
+import { useMapOperations } from "hooks/map/useMapOperations.js";
+import { useCoordinateManagement } from "hooks/map/useCoordinateManagement.js";
+import { useInteractionHandlers } from "hooks/map/useInteractionHandlers.js";
+import { useRouteUtils } from "hooks/routes/useRouteUtils.js";
+import { useBuildingFilters } from "hooks/buildings/useBuildingFilters.js";
+import useBuildings from "hooks/buildings/useBuildings.js";
+import useGeoServer from "hooks/geoserver/useGeoServer.js";
+import useRoutes from "hooks/routes/useRoutes.js";
+import { useNotification } from "hooks/common/useNotification.js";
+import { useConfirm } from "hooks/common/useConfirm.js";
+import useProximity from "hooks/common/useProximity.js";
+import { useRouteIntelligence } from "hooks/routes/useRouteIntelligence.js";
+import { useAuth } from "contexts/AuthContext.js";
 
 // Componentes
-import { ConfirmDialog, UINotification, SidePanel } from "../../ui/index.js";
-import { BuildingList, BuildingForm } from "../../buildings/index.js";
-import { RouteList, RouteFormPolyline } from "../../routes/index.js";
+import { ConfirmDialog, UINotification, SidePanel } from "components/ui/index.js";
+import { BuildingList, BuildingForm } from "components/buildings/index.js";
+import { RouteList, RouteFormPolyline } from "components/routes/index.js";
 
-import MapIndicators from "../MapIndicators/MapIndicators.jsx";
-import { MapContainer } from "./components/MapContainer.jsx";
-import { MapForms } from "./components/MapForms.jsx";
-import { MapLists } from "./components/MapLists.jsx";
-import { MapLayers } from "./components/MapLayers.jsx";
+import MapIndicators from "components/map/MapIndicators/MapIndicators.jsx";
+import { MapContainer } from "components/map/Map/components/MapContainer.jsx";
+import { MapForms } from "components/map/Map/components/MapForms.jsx";
+import { MapLists } from "components/map/Map/components/MapLists.jsx";
+import { MapLayers } from "components/map/Map/components/MapLayers.jsx";
 
 function Map() {
   // Hooks Principales

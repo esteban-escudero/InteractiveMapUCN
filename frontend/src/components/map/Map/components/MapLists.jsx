@@ -2,9 +2,9 @@
  * Componente que agrupa todas las listas del mapa
  */
 import React from "react";
-import { BuildingList } from "../../../buildings/index.js";
-import { RouteList } from "../../../routes/index.js";
-import RoomManagement from "../../../buildings/RoomManagement/RoomManagement.jsx";
+import { BuildingList } from "components/buildings/index.js";
+import { RouteList } from "components/routes/index.js";
+import RoomManagement from "components/buildings/RoomManagement/RoomManagement.jsx";
 
 export const MapLists = ({
   mapState, // ESTADO

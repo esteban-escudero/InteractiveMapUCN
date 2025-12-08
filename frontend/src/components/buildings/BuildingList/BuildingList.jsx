@@ -1,7 +1,7 @@
 // components/buildings/BuildingList/BuildingList.jsx
 import React, { useState } from "react";
 import { useBuildingList } from "./hooks/useBuildingList";
-import Notification from "../../ui/Notification/UINotification";
+import Notification from "components/ui/Notification/UINotification";
 import BuildingListHeader from "./components/BuildingListHeader";
 import BuildingListFooter from "./components/BuildingListFooter";
 import EmptyState from "./components/EmptyState";

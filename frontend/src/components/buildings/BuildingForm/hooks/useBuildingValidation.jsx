@@ -1,6 +1,6 @@
 // components/buildings/BuildingForm/hooks/useBuildingValidation.js
 import { useState } from "react";
-import { SpatialUtils } from "../../../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 
 export const useBuildingValidation = () => {
   const [validation, setValidation] = useState({

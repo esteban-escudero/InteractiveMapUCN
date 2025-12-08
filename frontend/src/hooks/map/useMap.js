@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import L from "leaflet";
-import { MAP_ZOOM_LIMITS } from "../../constants/mapConfig";
+import { MAP_ZOOM_LIMITS } from "constants/mapConfig";
 
 export const useMap = () => {
   const mapRef = useRef(null);

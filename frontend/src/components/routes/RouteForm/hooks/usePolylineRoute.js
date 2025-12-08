@@ -1,6 +1,6 @@
 // components/routes/RouteForm/hooks/usePolylineRoute.js
 import { useState, useEffect, useCallback, useRef } from "react";
-import { SpatialUtils } from "../../../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 import L from "leaflet";
 
 export const usePolylineRoute = ({

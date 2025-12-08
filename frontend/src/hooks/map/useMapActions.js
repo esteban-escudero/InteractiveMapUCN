@@ -4,7 +4,7 @@ import L from "leaflet";
 import {
   UCN_COQUIMBO_BOUNDS,
   MAP_ZOOM_LIMITS,
-} from "../../constants/mapConfig";
+} from "constants/mapConfig";
 
 export const useMapActions = (
   mapInstance,

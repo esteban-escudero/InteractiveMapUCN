@@ -3,10 +3,10 @@
  * Combina CRUD, Analytics y Queries
  */
 import { useState, useEffect, useCallback } from "react";
-import { routeService } from "../../services/routeService";
-import { useRouteCRUD } from "./useRouteCRUD";
-import { useRouteAnalytics } from "./useRouteAnalytics";
-import { useRouteQueries } from "./useRouteQueries";
+import { routeService } from "services/routeService";
+import { useRouteCRUD } from "hooks/routes/useRouteCRUD";
+import { useRouteAnalytics } from "hooks/routes/useRouteAnalytics";
+import { useRouteQueries } from "hooks/routes/useRouteQueries";
 
 export const useRoutes = () => {
   const [routes, setRoutes] = useState([]);
@@ -34,8 +34,8 @@ export const useRoutes = () => {
       const routesArray = Array.isArray(response)
         ? response
         : response.data
-        ? response.data
-        : [];
+          ? response.data
+          : [];
 
       console.log(`${routesArray.length} rutas recibidas del backend`);
 

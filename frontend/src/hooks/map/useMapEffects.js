@@ -1,7 +1,7 @@
 // frontend/src/hooks/map/useMapEffects.js
 import React, { useEffect } from "react";
 import L from "leaflet";
-import { UCN_COQUIMBO_BOUNDS } from "../../constants/mapConfig.js";
+import { UCN_COQUIMBO_BOUNDS } from "constants/mapConfig.js";
 
 export const useMapEffects = (
   mapRef,
@@ -32,7 +32,7 @@ export const useMapEffects = (
 
   // ========== INICIALIZACIÓN DEL MAPA ==========
   const hasInitialized = React.useRef(false);
-  
+
   // Efecto que se ejecuta al montar y verifica si el contenedor está disponible
   useEffect(() => {
     // Si ya está inicializado, no hacer nada
@@ -85,7 +85,7 @@ export const useMapEffects = (
   const loadRoutesRef = React.useRef(loadRoutes);
   const loadWFSDataRef = React.useRef(loadWFSData);
   const showUINotificationDataRef = React.useRef(showUINotification);
-  
+
   // Actualizar refs cuando cambian las funciones
   useEffect(() => {
     loadBuildingsRef.current = loadBuildings;
@@ -93,7 +93,7 @@ export const useMapEffects = (
     loadWFSDataRef.current = loadWFSData;
     showUINotificationDataRef.current = showUINotification;
   }, [loadBuildings, loadRoutes, loadWFSData, showUINotification]);
-  
+
   useEffect(() => {
     // Solo cargar datos una vez cuando el mapa esté listo
     if (isMapReady && mapInstance && !hasLoadedData.current) {

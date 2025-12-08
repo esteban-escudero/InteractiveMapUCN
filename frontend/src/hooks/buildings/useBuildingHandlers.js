@@ -2,7 +2,7 @@
  * Handlers específicos para edificios
  */
 import { useCallback } from "react";
-import { buildingService } from "../../services/buildingService";
+import { buildingService } from "services/buildingService";
 
 export const useBuildingHandlers = (
   showUINotification,

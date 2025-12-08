@@ -1,17 +1,17 @@
 // hooks/buildings/useBuildings.js - REFACTORIZADO
 import { useState, useEffect, useCallback } from "react";
-import { buildingService } from "../../services/buildingService";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { buildingService } from "services/buildingService";
+import { SpatialUtils } from "utils/spatialUtils";
 import {
   enrichBuildingWithTurf,
   calculateBuildingAnalytics,
   calculateDensityStats,
-} from "../../utils/buildings/buildingAnalytics";
+} from "utils/buildings/buildingAnalytics";
 import {
   findBuildingsNearPoint,
   isValidBuilding,
   getBuildingById,
-} from "../../utils/buildings/buildingQueries";
+} from "utils/buildings/buildingQueries";
 
 export const useBuildings = () => {
   const [buildings, setBuildings] = useState([]);

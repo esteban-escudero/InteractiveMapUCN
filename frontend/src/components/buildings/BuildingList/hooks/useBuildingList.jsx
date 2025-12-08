@@ -1,6 +1,6 @@
 // components/buildings/BuildingList/hooks/useBuildingList.js
 import { useState } from "react";
-import { useNotification } from "../../../../hooks/common/useNotification";
+import { useNotification } from "hooks/common/useNotification";
 
 export const useBuildingList = ({
   buildings,

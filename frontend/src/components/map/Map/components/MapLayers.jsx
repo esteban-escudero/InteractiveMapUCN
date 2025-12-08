@@ -3,9 +3,9 @@
  * Ahora maneja edificios destacados y rutas calculadas
  */
 import React from "react";
-import RouteLayer from "../../RouteLayer/RouteLayer.jsx";
-import BuildingRenderer from "../../BuildingRenderer/BuildingRenderer.jsx";
-import RouteNetwork from "../../../routes/RouteNetwork/RouteNetwork.jsx";
+import RouteLayer from "components/map/RouteLayer/RouteLayer.jsx";
+import BuildingRenderer from "components/map/BuildingRenderer/BuildingRenderer.jsx";
+import RouteNetwork from "components/routes/RouteNetwork/RouteNetwork.jsx";
 
 export const MapLayers = ({
   mapInstance,

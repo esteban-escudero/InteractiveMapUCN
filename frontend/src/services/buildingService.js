@@ -1,5 +1,5 @@
 // services/buildingService.js
-import { api } from "./api";
+import { api } from "services/api";
 
 export const buildingService = {
   async getAllBuildings() {
@@ -19,9 +19,9 @@ export const buildingService = {
 
       const buildingsWithRooms = Array.isArray(buildingsData)
         ? buildingsData.map((building) => ({
-            ...building,
-            salas: building.salas || [], // INCLUIR SALAS
-          }))
+          ...building,
+          salas: building.salas || [], // INCLUIR SALAS
+        }))
         : [];
 
       console.log(

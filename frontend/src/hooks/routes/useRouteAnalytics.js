@@ -2,7 +2,7 @@
  * Hook para analytics y métricas de rutas
  */
 import { useState, useCallback } from "react";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { SpatialUtils } from "utils/spatialUtils";
 
 export const useRouteAnalytics = () => {
   const [routeAnalytics, setRouteAnalytics] = useState(null);

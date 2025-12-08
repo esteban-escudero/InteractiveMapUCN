@@ -2,8 +2,8 @@
  * Hook para operaciones CRUD de rutas
  */
 import { useState, useCallback } from "react";
-import { routeService } from "../../services/routeService";
-import { SpatialUtils } from "../../utils/spatialUtils";
+import { routeService } from "services/routeService";
+import { SpatialUtils } from "utils/spatialUtils";
 
 export const useRouteCRUD = () => {
   const [loading, setLoading] = useState(false);

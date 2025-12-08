@@ -1,12 +1,12 @@
 // components/buildings/RoomManagement/RoomManagement.jsx
 import React from "react";
 import { useRoomManagement } from "./hooks/useRoomManagement";
-import { useNotification } from "../../../hooks/common/useNotification"; // <- Importar el hook
+import { useNotification } from "hooks/common/useNotification"; // <- Importar el hook
 import RoomManagementHeader from "./components/RoomManagementHeader";
 import BuildingSelection from "./components/BuildingSelection";
 import RoomList from "./components/RoomList";
 import RoomActions from "./components/RoomActions";
-import UINotification from "../../ui/Notification/UINotification"; // <- Importar el componente
+import UINotification from "components/ui/Notification/UINotification"; // <- Importar el componente
 import "./RoomManagement.css";
 
 const RoomManagement = ({

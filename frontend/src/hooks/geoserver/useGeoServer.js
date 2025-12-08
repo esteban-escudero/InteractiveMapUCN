@@ -2,9 +2,9 @@
  * Hook principal para GeoServer
  * Combina data, map y analytics
  */
-import { useGeoServerData } from "./useGeoServerData";
-import { useGeoServerMap } from "./useGeoServerMap";
-import { useGeoServerAnalytics } from "./useGeoServerAnalytics";
+import { useGeoServerData } from "hooks/geoserver/useGeoServerData";
+import { useGeoServerMap } from "hooks/geoserver/useGeoServerMap";
+import { useGeoServerAnalytics } from "hooks/geoserver/useGeoServerAnalytics";
 
 export const useGeoServer = () => {
   const {
