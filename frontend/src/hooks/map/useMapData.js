@@ -80,8 +80,10 @@ export const useMapData = (
       return filteredRoutes;
     }
 
-    // 3. Sin filtros: mostrar todas las rutas
-    return routes;
+    // 3. Sin filtros: NO MOSTRAR RUTAS (default)
+    // El usuario solicitó que solo sean visibles cuando estén seleccionadas
+    console.log("👻 Sin filtros activos: Ocultando todas las rutas");
+    return [];
   }, [
     mapState.filters.origin,
     mapState.filters.destination,
