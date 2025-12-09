@@ -77,7 +77,7 @@
 .search-box {
   position: relative;
   flex: 0 0 auto;
-  min-width: 475px;
+  min-width: 860px;
 }
 
 .search-box .material-icons {

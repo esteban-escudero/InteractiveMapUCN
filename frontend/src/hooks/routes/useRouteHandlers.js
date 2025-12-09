@@ -134,6 +134,7 @@ export const useRouteHandlers = (
     console.log("RUTA GUARDADA EXITOSAMENTE");
     mapState.setEditingRoute(null);
     mapState.setShowRouteForm(false);
+    mapState.setShowRouteList(true);
     await loadRoutes();
   };
 
