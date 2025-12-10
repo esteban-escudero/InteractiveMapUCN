@@ -123,7 +123,9 @@ const RouteFormPolyline = ({
 
         <form onSubmit={handleSubmit} className="route-form">
           {/* Información básica - EN LÍNEA */}
+          {/* Información básica */}
           <div className="form-row">
+            {/* ROW 1: Nombre y Tipo */}
             <div className="form-group">
               <label htmlFor="nombre-ruta">Nombre de la Ruta (opcional)</label>
               <input
@@ -149,8 +151,42 @@ const RouteFormPolyline = ({
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          <div className="form-row" style={{ marginTop: "15px" }}>
+            {/* ROW 2: Estado e Icono */}
+            <div className="form-group">
+              <label htmlFor="estado-ruta">Estado de Ruta</label>
+              <select
+                id="estado-ruta"
+                name="activo"
+                value={formData.activo}
+                onChange={handleInputChange}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  borderRadius: "4px",
+                  border: "1px solid #ddd",
+                }}>
+                <option value={true}>Activa</option>
+                <option value={false}>Inactiva</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Icono Visual</label>
               {formData.tipo && (
-                <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: 'rgba(74, 35, 90, 0.05)', borderRadius: '6px', borderLeft: '3px solid #4a235a' }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 12px',
+                  background: 'rgba(74, 35, 90, 0.05)',
+                  borderRadius: '6px',
+                  borderLeft: '3px solid #4a235a',
+                  height: '38px' // Match input height roughly
+                }}>
                   <span className="material-icons" style={{ fontSize: '20px', color: '#4a235a' }}>
                     {tiposRuta.find(t => t.value === formData.tipo)?.icon}
                   </span>
@@ -161,6 +197,7 @@ const RouteFormPolyline = ({
               )}
             </div>
           </div>
+
 
           {/* Selección en mapa */}
           <div className="route-selection-section">
@@ -582,8 +619,8 @@ const RouteFormPolyline = ({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

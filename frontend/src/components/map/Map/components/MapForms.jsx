@@ -37,6 +37,8 @@ export const MapForms = ({
         onCancel={() => {
           mapState.setShowRouteForm(false);
           mapState.setEditingRoute(null);
+          // Al cancelar, mostrar la lista de rutas para mantener el flujo
+          mapState.setShowRouteList(true);
         }}
         isVisible={mapState.showRouteForm}
         route={mapState.editingRoute}

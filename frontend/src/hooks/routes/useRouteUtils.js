@@ -12,6 +12,7 @@ export const useRouteUtils = (mapInstance, mapManagement) => {
 
       // Marcar como seleccionada
       mapManagement.setSelectedRoute(route);
+      mapManagement.setShowRouteList(true);
 
       // Si hay geometría válida, hacer zoom a la ruta
       if (route.geometria && route.geometria.coordinates && mapInstance) {

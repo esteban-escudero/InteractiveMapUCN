@@ -20,6 +20,7 @@ export const usePolylineRoute = ({
     geometria: null,
     descripcion: "",
     prioridad: "media",
+    activo: true,
   });
 
   const [drawingMode, setDrawingMode] = useState(false);
@@ -1002,6 +1003,7 @@ export const usePolylineRoute = ({
       geometria: null,
       descripcion: "",
       prioridad: "media",
+      activo: true,
     });
 
     setDrawingMode(false);
@@ -1081,6 +1083,7 @@ export const usePolylineRoute = ({
         geometria: route.geometria || null,
         descripcion: route.descripcion || "",
         prioridad: route.prioridad || "media",
+        activo: route.activo !== undefined ? route.activo : true,
       });
 
       if (route.geometria?.coordinates?.length >= 2) {

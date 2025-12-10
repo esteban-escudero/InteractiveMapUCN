@@ -125,16 +125,22 @@ export const useRouteHandlers = (
       console.log("🔄 Actualizando ruta existente...");
       await updateRoute(mapState.editingRoute.id, routeData);
       showUINotification("Ruta actualizada correctamente", "success");
+
+      // Si estamos EDITANDO, volver a la lista de rutas
+      mapState.setShowRouteList(true);
     } else {
       console.log("🆕 Creando nueva ruta...");
       await createRoute(routeData);
       showUINotification("Ruta creada correctamente", "success");
+
+      // Si estamos CREANDO (nueva ruta), mostrar el mapa (no abrir lista)
+      // Solo cerramos los formularios y listo
+      mapState.setShowRouteList(false);
     }
 
     console.log("RUTA GUARDADA EXITOSAMENTE");
     mapState.setEditingRoute(null);
     mapState.setShowRouteForm(false);
-    mapState.setShowRouteList(true);
     await loadRoutes();
   };
 
