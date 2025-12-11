@@ -1,0 +1,249 @@
+.building-map-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+  backdrop-filter: blur(2px);
+}
+
+.building-map-modal-content {
+  background-color: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  /* Fixed height can be good or variable */
+  height: 80vh;
+  /* Force a consistent height so overlay works well */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+  overflow: hidden;
+  /* Ensure overlay stays inside */
+}
+
+.building-map-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.building-map-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.building-map-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #95a5a6;
+  /* Softer gray initially */
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  /* Prevent squishing */
+  min-height: 36px;
+  padding: 0;
+  /* Important: remove default button padding */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Bouncy transition */
+}
+
+.building-map-close-btn .material-icons {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  /* Match height explicitly */
+  margin: 0;
+  display: block;
+  /* Removes inline spacing quirks */
+  text-align: center;
+}
+
+.building-map-close-btn:hover {
+  background-color: #e74c3c;
+  /* Red background */
+  color: white;
+  transform: rotate(90deg);
+  /* Rotate button */
+  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.building-map-modal-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  /* align-items: center; */
+  background-color: #fcfcfc;
+  position: relative;
+  /* Critical for overlay */
+}
+
+.map-list-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.map-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #555;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.map-grid-item:hover {
+  border-color: #3498db;
+  color: #3498db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(52, 152, 219, 0.15);
+}
+
+/* New Overlay Styles */
+.map-overlay-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.close-map-overlay-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: white;
+  /* Clean white background */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  /* Remove default button padding */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  color: #7f8c8d;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.close-map-overlay-btn .material-icons {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  margin: 0;
+  display: block;
+  text-align: center;
+}
+
+.close-map-overlay-btn:hover {
+  background-color: #e74c3c;
+  color: white;
+  transform: rotate(90deg);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+.map-overlay-title {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #34495e;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.floor-plan-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  /* border-radius: 8px; */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

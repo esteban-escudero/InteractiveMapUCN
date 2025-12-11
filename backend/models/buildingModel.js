@@ -16,19 +16,17 @@ const buildingModel = {
           COALESCE(
             json_agg(
               json_build_object(
-                'id', s.id_sala,
-                'nombre_sala', s.nombre_sala,
-                'piso', s.piso,
                 'tipo_sala', s.tipo_sala,
                 'accesible_silla_ruedas', s.accesible_silla_ruedas,
                 'id_edificio', s.id_edificio
               ) ORDER BY s.piso, s.nombre_sala
             ) FILTER (WHERE s.id_sala IS NOT NULL),
             '[]'
-          ) as salas
+          ) as salas,
+          e.planos
         FROM edificio e
         LEFT JOIN sala s ON e.id_edificio = s.id_edificio
-        GROUP BY e.id_edificio, e.nombre, e.descripcion, e.tipo, e.estado, e.ubicacion
+        GROUP BY e.id_edificio, e.nombre, e.descripcion, e.tipo, e.estado, e.ubicacion, e.planos
         ORDER BY e.id_edificio
       `;
 
@@ -42,11 +40,12 @@ const buildingModel = {
           nombre: row.nombre,
           descripcion: row.descripcion,
           tipo: row.tipo,
-          estado: row.estado, // ← ¡FALTA ESTA LÍNEA!
+          estado: row.estado,
           ubicacion: row.ubicacion_geojson
             ? JSON.parse(row.ubicacion_geojson)
             : null,
           salas: row.salas || [],
+          planos: row.planos || [],
         };
 
         // Debug: mostrar cuántas salas tiene cada edificio
@@ -77,7 +76,9 @@ const buildingModel = {
           nombre,
           descripcion,
           tipo,
+          tipo,
           estado,
+          planos,
           ST_AsGeoJSON(ubicacion) as ubicacion_geojson
         FROM edificio 
         ORDER BY id_edificio
@@ -95,6 +96,7 @@ const buildingModel = {
           ? JSON.parse(row.ubicacion_geojson)
           : null,
         salas: [],
+        planos: row.planos || [],
       }));
 
       console.log(
@@ -170,14 +172,16 @@ const buildingModel = {
           descripcion, 
           tipo,
           estado,
+          planos,
           ubicacion
-        ) VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_GeomFromGeoJSON($6), 4326))
+        ) VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_GeomFromGeoJSON($7), 4326))
         RETURNING 
           id_edificio as id,
           nombre,
           descripcion,
           tipo,
           estado,
+          planos,
           ST_AsGeoJSON(ubicacion) as ubicacion_geojson
       `;
 
@@ -187,6 +191,7 @@ const buildingModel = {
         buildingData.descripcion || "",
         buildingData.tipo || "Oficina Profesor",
         buildingData.estado || "activo",
+        JSON.stringify(buildingData.planos || []),
         JSON.stringify(buildingData.ubicacion),
       ];
 
@@ -213,6 +218,7 @@ const buildingModel = {
           ? JSON.parse(newBuilding.ubicacion_geojson)
           : null,
         salas: [],
+        planos: newBuilding.planos || [],
       };
     } catch (error) {
       await client.query("ROLLBACK");
@@ -245,8 +251,9 @@ const buildingModel = {
           nombre = $1, 
           descripcion = $2, 
           tipo = $3,
-          ubicacion = ST_SetSRID(ST_GeomFromGeoJSON($4), 4326)
-        WHERE id_edificio = $5 
+          planos = $4,
+          ubicacion = ST_SetSRID(ST_GeomFromGeoJSON($5), 4326)
+        WHERE id_edificio = $6 
         RETURNING 
           id_edificio as id,
           nombre,
@@ -259,6 +266,7 @@ const buildingModel = {
         nombre,
         descripcion || "",
         tipo || "Oficina Profesor",
+        JSON.stringify(buildingData.planos || []),
         JSON.stringify(ubicacion),
         buildingId,
       ];
@@ -284,6 +292,7 @@ const buildingModel = {
           ? JSON.parse(updatedBuilding.ubicacion_geojson)
           : null,
         salas: [], // En update no incluimos salas por simplicidad
+        planos: updatedBuilding.planos || [],
       };
     } catch (error) {
       console.error("Error en buildingModel.update:", error.message);

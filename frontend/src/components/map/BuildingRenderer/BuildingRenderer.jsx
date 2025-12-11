@@ -1,5 +1,7 @@
 // components/map/BuildingRenderer/BuildingRenderer.jsx - REFACTORIZADO
 import { useBuildingMarkers } from "./hooks/useBuildingMarkers";
+import BuildingMapModal from "./components/BuildingMapModal";
+import { useState, useEffect } from "react";
 
 /**
  * Componente para renderizar edificios en el mapa
@@ -19,9 +21,35 @@ const BuildingRenderer = ({
   // Hook que gestiona toda la lógica de markers
   useBuildingMarkers(mapInstance, isMapReady, buildings, highlightedBuildings, isAdminView);
 
-  // Este componente no renderiza nada en el DOM de React
-  // Solo gestiona las capas de Leaflet
-  return null;
+  const [selectedBuildingMap, setSelectedBuildingMap] = useState(null);
+
+  useEffect(() => {
+    const handleOpenMap = (event) => {
+      const buildingId = event.detail.id;
+      const building = buildings.find((b) => b.id === buildingId);
+      if (building && building.planos && building.planos.length > 0) {
+        setSelectedBuildingMap({
+          name: building.nombre,
+          maps: building.planos,
+        });
+      }
+    };
+
+    window.addEventListener("open-building-map", handleOpenMap);
+    return () => {
+      window.removeEventListener("open-building-map", handleOpenMap);
+    };
+  }, [buildings]);
+
+  // Este componente no renderiza nada en el DOM de React, excepto el modal
+  return (
+    <BuildingMapModal
+      isOpen={!!selectedBuildingMap}
+      onClose={() => setSelectedBuildingMap(null)}
+      buildingName={selectedBuildingMap?.name}
+      maps={selectedBuildingMap?.maps}
+    />
+  );
 };
 
 export default BuildingRenderer;

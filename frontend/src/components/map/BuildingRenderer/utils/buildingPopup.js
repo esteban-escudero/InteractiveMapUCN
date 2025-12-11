@@ -120,6 +120,37 @@ export const createBuildingPopup = (
           <div style="display: flex; flex-direction: column; gap: 10px;">
             ${highlightBadge}
             ${descriptionHTML}
+            
+            ${building.planos && building.planos.length > 0
+        ? `
+              <button 
+                onclick="window.dispatchEvent(new CustomEvent('open-building-map', { detail: { id: ${building.id} } }))"
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 8px;
+                  background-color: #3498db;
+                  color: white;
+                  border: none;
+                  padding: 8px 12px;
+                  border-radius: 6px;
+                  font-family: inherit;
+                  font-weight: 500;
+                  font-size: 13px;
+                  cursor: pointer;
+                  width: 100%;
+                  transition: background 0.2s;
+                "
+                onmouseover="this.style.backgroundColor='#2980b9'"
+                onmouseout="this.style.backgroundColor='#3498db'"
+              >
+                <span class="material-icons" style="font-size: 16px;">map</span>
+                Ver Mapa Interior
+              </button>
+            `
+        : ""
+      }
           </div>
         </div>
       `;
