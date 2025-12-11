@@ -3,37 +3,38 @@ const pool = require("../config/database");
 const buildingModel = {
   async getAll() {
     try {
-
-
       const query = `
+        WITH salas_agregadas AS (
+          SELECT 
+            id_edificio,
+            json_agg(
+              json_build_object(
+                'id', id_sala,
+                'nombre_sala', nombre_sala,
+                'piso', piso,
+                'tipo_sala', tipo_sala,
+                'accesible_silla_ruedas', accesible_silla_ruedas,
+                'id_edificio', id_edificio
+              ) ORDER BY piso, nombre_sala
+            ) as salas_json
+          FROM sala 
+          GROUP BY id_edificio
+        )
         SELECT 
           e.id_edificio as id,
           e.nombre,
           e.descripcion,
           e.tipo,
           e.estado,
+          e.planos,
           ST_AsGeoJSON(e.ubicacion) as ubicacion_geojson,
-          COALESCE(
-            json_agg(
-              json_build_object(
-                'id', s.id_sala,
-                'nombre_sala', s.nombre_sala,
-                'piso', s.piso,
-                'tipo_sala', s.tipo_sala,
-                'accesible_silla_ruedas', s.accesible_silla_ruedas,
-                'id_edificio', s.id_edificio
-              ) ORDER BY s.piso, s.nombre_sala
-            ) FILTER (WHERE s.id_sala IS NOT NULL),
-            '[]'
-          ) as salas,
-          e.planos
+          COALESCE(s.salas_json, '[]'::json) as salas
         FROM edificio e
-        LEFT JOIN sala s ON e.id_edificio = s.id_edificio
-        GROUP BY e.id_edificio, e.nombre, e.descripcion, e.tipo, e.estado, e.ubicacion, e.planos
+        LEFT JOIN salas_agregadas s ON e.id_edificio = s.id_edificio
         ORDER BY e.id_edificio
       `;
 
-
+      const result = await pool.query(query);
 
       const buildings = result.rows.map((row) => {
         const building = {
@@ -49,16 +50,16 @@ const buildingModel = {
           planos: row.planos || [],
         };
 
-
-
         return building;
       });
 
-
       return buildings;
     } catch (error) {
-      console.error("Error EN buildingModel.getAll:", error.message);
-      console.log("Intentando consulta sin JOIN de salas...");
+      console.error("CRITICAL ERROR IN buildingModel.getAll:", error);
+      console.error("SQL Error Code:", error.code);
+      console.error("SQL Error Detail:", error.detail);
+
+      console.log("⚠️ Fallando gracefully al modo sin salas...");
       return await this.getAllWithoutRooms();
     }
   },
@@ -70,7 +71,6 @@ const buildingModel = {
           id_edificio as id,
           nombre,
           descripcion,
-          tipo,
           tipo,
           estado,
           planos,
@@ -86,7 +86,7 @@ const buildingModel = {
         nombre: row.nombre,
         descripcion: row.descripcion,
         tipo: row.tipo,
-        estado: row.estado, // ← ¡FALTA ESTA LÍNEA!
+        estado: row.estado,
         ubicacion: row.ubicacion_geojson
           ? JSON.parse(row.ubicacion_geojson)
           : null,
@@ -94,10 +94,9 @@ const buildingModel = {
         planos: row.planos || [],
       }));
 
-
       return buildings;
     } catch (error) {
-      console.error("Error en fallback:", error.message);
+      console.error("Error en fallback real:", error.message);
       return [];
     }
   },
