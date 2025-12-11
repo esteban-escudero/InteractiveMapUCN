@@ -3,7 +3,7 @@ const pool = require("../config/database");
 const buildingModel = {
   async getAll() {
     try {
-      console.log("Ejecutando consulta de edificios CON SALAS...");
+
 
       const query = `
         SELECT 
@@ -16,6 +16,9 @@ const buildingModel = {
           COALESCE(
             json_agg(
               json_build_object(
+                'id', s.id_sala,
+                'nombre_sala', s.nombre_sala,
+                'piso', s.piso,
                 'tipo_sala', s.tipo_sala,
                 'accesible_silla_ruedas', s.accesible_silla_ruedas,
                 'id_edificio', s.id_edificio
@@ -30,9 +33,7 @@ const buildingModel = {
         ORDER BY e.id_edificio
       `;
 
-      console.log("Query con JOIN de salas ejecutada");
-      const result = await pool.query(query);
-      console.log(`${result.rows.length} edificios encontrados con sus salas`);
+
 
       const buildings = result.rows.map((row) => {
         const building = {
@@ -48,18 +49,12 @@ const buildingModel = {
           planos: row.planos || [],
         };
 
-        // Debug: mostrar cuántas salas tiene cada edificio
-        console.log(`"${building.nombre}": ${building.salas.length} salas`);
-        if (building.salas.length > 0) {
-          building.salas.forEach((sala) => {
-            console.log(`   ${sala.nombre_sala} (Piso ${sala.piso})`);
-          });
-        }
+
 
         return building;
       });
 
-      console.log(`${buildings.length} edificios procesados CON SALAS`);
+
       return buildings;
     } catch (error) {
       console.error("Error EN buildingModel.getAll:", error.message);
@@ -99,9 +94,7 @@ const buildingModel = {
         planos: row.planos || [],
       }));
 
-      console.log(
-        `${buildings.length} edificios cargados SIN SALAS (fallback)`
-      );
+
       return buildings;
     } catch (error) {
       console.error("Error en fallback:", error.message);
@@ -111,7 +104,7 @@ const buildingModel = {
 
   async findAvailableId() {
     try {
-      console.log("Buscando ID disponible...");
+
 
       const query = `
         WITH numbered_ids AS (

@@ -35,6 +35,9 @@ const BuildingCard = ({
             Salas Registradas: {salas.length} sala
             {salas.length !== 1 ? "s" : ""}
           </span>
+          <span className="blueprints-count">
+            Planos Registrados: {building.planos ? building.planos.length : 0}
+          </span>
         </div>
       </div>
 

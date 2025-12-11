@@ -44,7 +44,9 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
 ### Para Administradores
 - 🔐 **Sistema de Autenticación**: Login seguro con JWT
 - 🏢 **Gestión de Edificios**: CRUD completo con soporte para polígonos y puntos
+- 📊 **Estadísticas**: Visualización rápida del conteo de salas y planos registrados
 - 🚪 **Gestión de Salas**: Administración de salas por edificio con diseño de grid 3 columnas
+
 - 🛣️ **Gestión de Rutas**: Creación y edición de rutas con múltiples segmentos (polylines)
 - 👥 **Gestión de Usuarios**: Administración de cuentas de administradores
 - 📊 **Panel de Control**: Vista completa de edificios, rutas y estadísticas
@@ -346,6 +348,11 @@ Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 Para preguntas o sugerencias:
 - Email: soporte.mapa@ucn.cl
 - Web: [www.ucn.cl](https://www.ucn.cl)
+
+## 📚 Glosario
+
+Para una definición detallada de los términos técnicos utilizados en este proyecto, consulta nuestro [Glosario Técnico](GLOSSARY.md).
+
 
 ---
 

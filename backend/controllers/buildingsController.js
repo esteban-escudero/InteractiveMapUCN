@@ -4,7 +4,7 @@ const buildingModel = require("../models/buildingModel");
 const buildingsController = {
   async getAllBuildings(req, res) {
     try {
-      console.log("Solicitud para obtener todos los edificios CON SALAS...");
+
       const buildings = await buildingModel.getAll();
 
       // Verificar que las salas vienen en la respuesta
@@ -12,10 +12,9 @@ const buildingsController = {
       buildings.forEach((building) => {
         const salasCount = building.salas ? building.salas.length : 0;
         totalSalas += salasCount;
-        console.log(`"${building.nombre}": ${salasCount} salas`);
       });
 
-      console.log(`TOTAL: ${buildings.length} edificios, ${totalSalas} salas`);
+
 
       res.json({
         success: true,
@@ -36,7 +35,7 @@ const buildingsController = {
     try {
       const { nombre, descripcion, tipo, lat, lng } = req.body;
 
-      console.log("Datos recibidos para crear edificio:", req.body);
+
 
       if (!nombre || !lat || !lng) {
         return res.status(400).json({
@@ -60,7 +59,7 @@ const buildingsController = {
         ubicacion: ubicacion,
       };
 
-      console.log("Datos a guardar en BD:", buildingData);
+
 
       const newBuilding = await buildingModel.create(buildingData);
 
@@ -84,7 +83,7 @@ const buildingsController = {
       const { id } = req.params;
       const { nombre, descripcion, tipo, lat, lng } = req.body;
 
-      console.log(`Actualizando edificio ID: ${id}`, req.body);
+
 
       if (!nombre || !lat || !lng) {
         return res.status(400).json({
@@ -137,7 +136,7 @@ const buildingsController = {
     try {
       const { id } = req.params;
 
-      console.log(`Solicitando ELIMINACIÓN PERMANENTE de edificio ID: ${id}`);
+
 
       if (!id) {
         return res.status(400).json({

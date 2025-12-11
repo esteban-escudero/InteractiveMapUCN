@@ -3,7 +3,7 @@ import React from "react";
 
 const RoomItem = ({ room, isDeleting, onEditRoom, onDeleteRoom }) => {
   const handleEditClick = () => {
-    console.log("RoomItem - Editando sala:", room);
+
     onEditRoom(room);
   };
 
