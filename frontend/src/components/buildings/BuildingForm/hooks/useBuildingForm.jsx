@@ -10,10 +10,12 @@ export const useBuildingForm = ({
   building = null,
   isEditing = false,
   capturedCoordinates = null,
-  onClearCoordinates = () => {},
+  onClearCoordinates = () => { },
   onToggleCoordinateDetection = null,
+  floorImageSectionRef = null,
 }) => {
   const [formData, setFormData] = useState({
+    id: null,
     nombre: "",
     descripcion: "",
     lat: "",
@@ -65,6 +67,7 @@ export const useBuildingForm = ({
     }
 
     setFormData({
+      id: building.id || null,
       nombre: building.nombre || "",
       descripcion: building.descripcion || "",
       lat: lat.toString(),
@@ -76,6 +79,7 @@ export const useBuildingForm = ({
 
   const resetForm = () => {
     setFormData({
+      id: null,
       nombre: "",
       descripcion: "",
       lat: "",
@@ -137,7 +141,34 @@ export const useBuildingForm = ({
     const buildingData = prepareBuildingData();
 
     try {
+      console.log('[useBuildingForm] Guardando edificio...');
       await onSave(buildingData);
+      console.log('[useBuildingForm] Edificio guardado exitosamente');
+
+      // Subir imágenes pendientes si estamos editando
+      console.log('[useBuildingForm] isEditing:', isEditing);
+      console.log('[useBuildingForm] floorImageSectionRef:', floorImageSectionRef);
+      console.log('[useBuildingForm] floorImageSectionRef.current:', floorImageSectionRef?.current);
+
+      if (isEditing && floorImageSectionRef?.current) {
+        console.log('[useBuildingForm] Intentando subir imágenes pendientes...');
+        try {
+          const result = await floorImageSectionRef.current.uploadPendingImages();
+          console.log('[useBuildingForm] Resultado de subida:', result);
+          if (result.uploaded > 0) {
+            console.log(`✅ ${result.uploaded} plano(s) subido(s) exitosamente`);
+          }
+          if (result.failed > 0) {
+            console.warn(`⚠️ ${result.failed} plano(s) fallaron al subir`);
+          }
+        } catch (error) {
+          console.error("Error al subir planos:", error);
+          // No bloquear el guardado del edificio por errores en las imágenes
+        }
+      } else {
+        console.log('[useBuildingForm] No se subirán imágenes (isEditing=false o ref no disponible)');
+      }
+
       handleClearCapture();
     } catch (error) {
       console.error("Error al guardar:", error);

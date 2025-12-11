@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import "./BuildingForm.css";
 import { useBuildingForm } from "./hooks/useBuildingForm";
 import BuildingFormUI from "./components/BuildingFormUI";
@@ -10,9 +10,11 @@ const BuildingForm = ({
   building = null,
   isEditing = false,
   capturedCoordinates = null,
-  onClearCoordinates = () => {},
+  onClearCoordinates = () => { },
   onToggleCoordinateDetection = null,
 }) => {
+  const floorImageSectionRef = useRef(null);
+
   const {
     formData,
     validation,
@@ -32,6 +34,7 @@ const BuildingForm = ({
     capturedCoordinates,
     onClearCoordinates,
     onToggleCoordinateDetection,
+    floorImageSectionRef,
   });
 
   // SOLO ocultar durante captura activa, no cuando ya tenemos coordenadas
@@ -64,6 +67,7 @@ const BuildingForm = ({
       onClearCoordinates={onClearCoordinates}
       onSubmit={handleSubmit}
       onCancel={handleCancel}
+      floorImageSectionRef={floorImageSectionRef}
     />
   );
 };

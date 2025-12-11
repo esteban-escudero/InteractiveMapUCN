@@ -2,6 +2,7 @@ import React from "react";
 import BuildingDetailsSection from "./BuildingDetailsSection";
 import CoordinateSection from "./CoordinateSection";
 import TypeStatusSection from "./TypeStatusSection";
+import FloorImageSection from "./FloorImageSection";
 import FormActions from "./FormActions";
 
 const BuildingFormUI = ({
@@ -15,6 +16,7 @@ const BuildingFormUI = ({
   onClearCoordinates,
   onSubmit,
   onCancel,
+  floorImageSectionRef,
 }) => {
   return (
     <div className="building-form-overlay">
@@ -50,6 +52,14 @@ const BuildingFormUI = ({
           <TypeStatusSection
             formData={formData}
             onInputChange={onInputChange}
+          />
+
+          {/* Imágenes por piso */}
+          <FloorImageSection
+            ref={floorImageSectionRef}
+            buildingId={formData.id}
+            buildingName={formData.nombre}
+            isEditing={isEditing}
           />
 
           {/* Acciones del formulario */}

@@ -18,6 +18,9 @@ const authRoutes = require("./routes/auth");
 // ⭐ NUEVA: Ruta de gestión de usuarios
 const usersRoutes = require("./routes/users");
 
+// ⭐ NUEVA: Ruta de imágenes de edificios
+const buildingImagesRoutes = require("./routes/buildingImages");
+
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
@@ -36,6 +39,9 @@ if (config.server.env === "development") {
 app.use(bodyParser.json({ limit: config.limits.json }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Servir archivos estáticos (imágenes subidas)
+app.use("/uploads", express.static("uploads"));
+
 // Routes
 app.use("/api/buildings", buildingsRoutes);
 app.use("/api/rooms", roomsRoutes);
@@ -49,6 +55,9 @@ app.use("/api/auth", authRoutes);
 
 // ⭐ NUEVA: Ruta de gestión de usuarios
 app.use("/api/users", usersRoutes);
+
+// ⭐ NUEVA: Ruta de imágenes de edificios
+app.use("/api/building-images", buildingImagesRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
