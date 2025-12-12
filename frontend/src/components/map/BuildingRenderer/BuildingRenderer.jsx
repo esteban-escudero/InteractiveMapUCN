@@ -49,7 +49,7 @@ const BuildingRenderer = ({
       onClose={() => setSelectedBuildingMap(null)}
       buildingName={selectedBuildingMap?.name}
       maps={selectedBuildingMap?.maps}
-      apiBaseUrl={API_CONFIG.baseURL}
+      apiBaseUrl={API_CONFIG.baseURL.replace('/api', '')}
     />
   );
 };
