@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import "./BuildingMapModal.css";
 
-const BuildingMapModal = ({ isOpen, onClose, buildingName, maps = [] }) => {
+const BuildingMapModal = ({ isOpen, onClose, buildingName, maps = [], apiBaseUrl = "" }) => {
     const [selectedMapIndex, setSelectedMapIndex] = useState(null);
 
     // Reset view when modal opens
@@ -18,11 +18,21 @@ const BuildingMapModal = ({ isOpen, onClose, buildingName, maps = [] }) => {
             const match = str ? str.match(/-?\d+/) : null;
             return match ? parseInt(match[0], 10) : 0;
         };
-        return getNum(a.piso) - getNum(b.piso);
+        // Fallback if piso is number directly
+        const floorA = a.floor !== undefined ? a.floor : getNum(a.piso);
+        const floorB = b.floor !== undefined ? b.floor : getNum(b.piso);
+        return floorA - floorB;
     });
 
     const showMap = selectedMapIndex !== null;
     const selectedMap = showMap ? sortedMaps[selectedMapIndex] : null;
+
+    // Helper to get image URL
+    const getImageUrl = (map) => {
+        if (map.url) return map.url;
+        if (map.filepath) return `${apiBaseUrl}${map.filepath}`;
+        return "";
+    };
 
     return ReactDOM.createPortal(
         <div className="building-map-modal-overlay" onClick={onClose} style={{ zIndex: 99999 }}>
@@ -66,7 +76,9 @@ const BuildingMapModal = ({ isOpen, onClose, buildingName, maps = [] }) => {
                                     <span className="material-icons" style={{ fontSize: "32px", marginBottom: "8px" }}>
                                         layers
                                     </span>
-                                    <span style={{ fontWeight: 600 }}>{map.piso || `Piso ${index + 1}`}</span>
+                                    <span style={{ fontWeight: 600 }}>
+                                        {map.piso || `Piso ${map.floor !== undefined ? map.floor : index + 1}`}
+                                    </span>
                                 </button>
                             ))}
                         </div>
@@ -86,13 +98,13 @@ const BuildingMapModal = ({ isOpen, onClose, buildingName, maps = [] }) => {
                             </button>
 
                             <div className="map-overlay-title">
-                                {selectedMap.piso}
+                                {selectedMap.piso || `Piso ${selectedMap.floor}`}
                             </div>
 
                             <div className="map-container">
                                 <img
-                                    src={selectedMap.url}
-                                    alt={`${buildingName} - ${selectedMap.piso}`}
+                                    src={getImageUrl(selectedMap)}
+                                    alt={`${buildingName} - ${selectedMap.piso || selectedMap.floor}`}
                                     className="floor-plan-image"
                                 />
                             </div>

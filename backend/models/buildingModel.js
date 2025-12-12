@@ -19,6 +19,24 @@ const buildingModel = {
             ) as salas_json
           FROM sala 
           GROUP BY id_edificio
+        ),
+        planos_agregados AS (
+          SELECT 
+            id_edificio,
+            json_agg(
+              json_build_object(
+                'id', id_plano,
+                'floor', piso,
+                'piso', CONCAT('Piso ', piso),
+                'filename', imagen_plano,
+                'filepath', CONCAT('/uploads/buildings/', imagen_plano),
+                'format', formato_imagen,
+                'sizeBytes', tamaño_bytes,
+                'uploadDate', fecha_actualizacion
+              ) ORDER BY piso
+            ) as planos_json
+          FROM plano
+          GROUP BY id_edificio
         )
         SELECT 
           e.id_edificio as id,
@@ -26,11 +44,12 @@ const buildingModel = {
           e.descripcion,
           e.tipo,
           e.estado,
-          e.planos,
           ST_AsGeoJSON(e.ubicacion) as ubicacion_geojson,
-          COALESCE(s.salas_json, '[]'::json) as salas
+          COALESCE(s.salas_json, '[]'::json) as salas,
+          COALESCE(p.planos_json, '[]'::json) as planos
         FROM edificio e
         LEFT JOIN salas_agregadas s ON e.id_edificio = s.id_edificio
+        LEFT JOIN planos_agregados p ON e.id_edificio = p.id_edificio
         ORDER BY e.id_edificio
       `;
 

@@ -2,6 +2,7 @@
 import { useBuildingMarkers } from "./hooks/useBuildingMarkers";
 import BuildingMapModal from "./components/BuildingMapModal";
 import { useState, useEffect } from "react";
+import { API_CONFIG } from "../../../config/app";
 
 /**
  * Componente para renderizar edificios en el mapa
@@ -48,6 +49,7 @@ const BuildingRenderer = ({
       onClose={() => setSelectedBuildingMap(null)}
       buildingName={selectedBuildingMap?.name}
       maps={selectedBuildingMap?.maps}
+      apiBaseUrl={API_CONFIG.baseURL}
     />
   );
 };
