@@ -4,6 +4,7 @@ import CoordinateSection from "./CoordinateSection";
 import TypeStatusSection from "./TypeStatusSection";
 import FloorImageSection from "./FloorImageSection";
 import FormActions from "./FormActions";
+import UINotification from "components/ui/Notification/UINotification";
 
 const BuildingFormUI = ({
   formData,
@@ -17,6 +18,8 @@ const BuildingFormUI = ({
   onSubmit,
   onCancel,
   floorImageSectionRef,
+  notification,
+  hideNotification,
 }) => {
   return (
     <div className="building-form-overlay">
@@ -71,6 +74,14 @@ const BuildingFormUI = ({
           />
         </form>
       </div>
+
+      {notification.show && (
+        <UINotification
+          message={notification.message}
+          type={notification.type}
+          onClose={hideNotification}
+        />
+      )}
     </div>
   );
 };

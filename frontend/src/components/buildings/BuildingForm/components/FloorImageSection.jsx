@@ -73,6 +73,9 @@ const FloorImageSection = forwardRef(({ buildingId, buildingName, isEditing }, r
                 uploaded: successful,
                 failed: failed
             };
+        },
+        getPendingUploads() {
+            return Object.values(pendingUploads);
         }
     }));
 

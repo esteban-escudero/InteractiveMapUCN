@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useCoordinateCapture } from "./useCoordinateCapture";
 import { useBuildingValidation } from "./useBuildingValidation";
+import { useNotification } from "hooks/common/useNotification";
 
 export const useBuildingForm = ({
   onSave,
@@ -33,6 +34,7 @@ export const useBuildingForm = ({
     });
 
   const { validation, validateCoordinates } = useBuildingValidation();
+  const { notification, showUINotification, hideNotification } = useNotification();
 
   // Efectos de inicialización
   useEffect(() => {
@@ -172,18 +174,18 @@ export const useBuildingForm = ({
       handleClearCapture();
     } catch (error) {
       console.error("Error al guardar:", error);
-      alert("Error al guardar el edificio: " + error.message);
+      showUINotification("Error al guardar el edificio: " + error.message, "error");
     }
   };
 
   const validateForm = () => {
     if (!formData.nombre.trim()) {
-      alert("El nombre del edificio es requerido");
+      showUINotification("El nombre del edificio es requerido", "warning");
       return false;
     }
 
     if (!formData.lat || !formData.lng) {
-      alert("Las coordenadas son requeridas");
+      showUINotification("Las coordenadas son requeridas", "warning");
       return false;
     }
 
@@ -191,8 +193,23 @@ export const useBuildingForm = ({
     const lng = parseFloat(formData.lng);
 
     if (isNaN(lat) || isNaN(lng)) {
-      alert("Las coordenadas deben ser números válidos");
+      showUINotification("Las coordenadas deben ser números válidos", "warning");
       return false;
+    }
+
+    // Validar que los planos pendientes tengan piso asignado
+    if (isEditing && floorImageSectionRef?.current) {
+      const pendingUploads = floorImageSectionRef.current.getPendingUploads?.();
+      if (pendingUploads && pendingUploads.length > 0) {
+        const uploadsWithoutFloor = pendingUploads.filter(
+          upload => !upload.floor || upload.floor === ""
+        );
+
+        if (uploadsWithoutFloor.length > 0) {
+          showUINotification("Hay planos sin número de piso asignado. Por favor, asigna un piso a todos los planos antes de guardar.", "warning");
+          return false;
+        }
+      }
     }
 
     return true;
@@ -232,5 +249,7 @@ export const useBuildingForm = ({
     handleSubmit,
     handleCancel,
     isEditing,
+    notification,
+    hideNotification,
   };
 };

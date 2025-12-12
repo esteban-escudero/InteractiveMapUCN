@@ -25,6 +25,8 @@ const BuildingForm = ({
     handleSubmit,
     handleCancel,
     isEditing: editing,
+    notification,
+    hideNotification,
   } = useBuildingForm({
     onSave,
     onCancel,
@@ -68,6 +70,8 @@ const BuildingForm = ({
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       floorImageSectionRef={floorImageSectionRef}
+      notification={notification}
+      hideNotification={hideNotification}
     />
   );
 };
