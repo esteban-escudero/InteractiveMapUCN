@@ -46,7 +46,9 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
 - 🏢 **Gestión de Edificios**: CRUD completo con soporte para polígonos y puntos
 - 📊 **Estadísticas**: Visualización rápida del conteo de salas y planos registrados
 - 🚪 **Gestión de Salas**: Administración de salas por edificio con diseño de grid 3 columnas
-
+- 🖼️ **Gestión de Imágenes**: Subida y administración de planos por edificio y piso
+- 📏 **Análisis de Proximidad**: Herramientas para analizar distancias entre edificios y rutas
+- 🗺️ **Análisis Espacial**: Cálculo de rutas óptimas y análisis geoespacial avanzado
 - 🛣️ **Gestión de Rutas**: Creación y edición de rutas con múltiples segmentos (polylines)
 - 👥 **Gestión de Usuarios**: Administración de cuentas de administradores
 - 📊 **Panel de Control**: Vista completa de edificios, rutas y estadísticas
@@ -58,8 +60,10 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
 - **Node.js** + **Express**: Framework del servidor
 - **PostgreSQL**: Base de datos relacional con soporte PostGIS
 - **PostGIS**: Extensión geoespacial para PostgreSQL
+- **Turf.js**: Análisis geoespacial avanzado (distancias, rutas, proximidad)
 - **JWT**: Autenticación basada en tokens
 - **bcryptjs**: Encriptación de contraseñas
+- **Multer**: Manejo de carga de archivos (imágenes de planos)
 - **PM2**: Process manager para producción
 
 ### Frontend
@@ -207,15 +211,22 @@ InteractiveMapUCN/
 │   ├── controllers/           # Lógica de controladores
 │   │   ├── authController.js
 │   │   ├── buildingsController.js
+│   │   ├── buildingImageController.js
 │   │   ├── roomsController.js
 │   │   ├── routesController.js
+│   │   ├── routeNodesController.js
+│   │   ├── proximityController.js
+│   │   ├── spatialController.js
 │   │   └── usersController.js
 │   ├── middleware/            # Middlewares (auth, errores, etc.)
 │   ├── models/                # Modelos de datos
 │   ├── routes/                # Definición de rutas API
 │   ├── services/              # Servicios de negocio
-│   │   └── routeGraphService.js  # Algoritmo de Dijkstra
+│   │   ├── routeGraphService.js  # Algoritmo de Dijkstra
+│   │   └── proximityService.js   # Análisis de proximidad
 │   ├── utils/                 # Utilidades y helpers
+│   │   └── turfUtils.js       # Utilidades geoespaciales
+│   ├── uploads/               # Archivos subidos (imágenes)
 │   └── server.js              # Punto de entrada del servidor
 ├── frontend/                  # Aplicación React (PWA)
 │   ├── public/                # Archivos estáticos
@@ -241,8 +252,10 @@ InteractiveMapUCN/
 │       ├── services/          # Servicios API
 │       │   ├── authService.js
 │       │   ├── buildingService.js
+│       │   ├── buildingImageService.js
 │       │   ├── roomService.js
 │       │   ├── routeService.js
+│       │   ├── proximityService.js
 │       │   └── userService.js
 │       └── utils/             # Utilidades
 ├── database/                  # Scripts de base de datos
@@ -272,6 +285,12 @@ InteractiveMapUCN/
 - `PUT /api/rooms/:id` - Actualizar sala (requiere auth)
 - `DELETE /api/rooms/:id` - Eliminar sala (requiere auth)
 
+### Imágenes de Edificios
+- `POST /api/building-images/upload` - Subir imagen de plano (requiere auth)
+- `GET /api/building-images/building/:buildingId` - Obtener imágenes por edificio
+- `GET /api/building-images/building/:buildingId/floor/:floor` - Obtener imágenes por piso
+- `DELETE /api/building-images/:imageId` - Eliminar imagen (requiere auth)
+
 ### Rutas
 - `GET /api/routes` - Obtener todas las rutas
 - `GET /api/routes/:id` - Obtener ruta por ID
@@ -279,6 +298,20 @@ InteractiveMapUCN/
 - `PUT /api/routes/:id` - Actualizar ruta (requiere auth)
 - `DELETE /api/routes/:id` - Eliminar ruta (requiere auth)
 - `POST /api/routes/calculate` - Calcular ruta óptima entre dos puntos
+
+### Análisis de Proximidad
+- `GET /api/proximity/building/:buildingId/closest-route` - Obtener ruta más cercana a un edificio
+- `GET /api/proximity/building/:buildingId/routes-in-radius` - Obtener rutas dentro de un radio
+- `GET /api/proximity/route/:routeId/closest-building` - Obtener edificio más cercano a una ruta
+- `POST /api/proximity/assign-routes` - Asignar rutas a múltiples edificios
+- `GET /api/proximity/connecting/:originId/:destinationId` - Rutas que conectan dos edificios
+- `GET /api/proximity/analysis/:buildingId` - Análisis completo de proximidad
+
+### Análisis Espacial
+- `POST /api/spatial/calculate-route` - Calcular ruta óptima con algoritmo de Dijkstra
+- `POST /api/spatial/nearby-buildings` - Encontrar edificios cercanos a un punto
+- `GET /api/spatial/analyze-routes` - Analizar estadísticas de rutas existentes
+- `POST /api/spatial/validate-locations` - Validar ubicaciones masivamente
 
 ### Usuarios (Administradores)
 - `GET /api/users` - Obtener todos los administradores (requiere auth)
