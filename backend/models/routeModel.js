@@ -142,7 +142,7 @@ const routeModel = {
       `;
 
       const routeValues = [
-        routeData.nombre,
+        routeData.nombre || "Generando nombre...", // Nombre temporal
         routeData.tipo || "peatonal",
         routeData.distancia || 0,
         routeData.tiempo_estimado || 0,
@@ -151,6 +151,19 @@ const routeModel = {
 
       const routeResult = await client.query(routeQuery, routeValues);
       const newRoute = routeResult.rows[0];
+
+      // GENERAR NOMBRE AUTOMÁTICO: Ruta [Tipo] [ID]
+      // Capitalizar primera letra del tipo
+      const tipoCapitalizado = newRoute.tipo.charAt(0).toUpperCase() + newRoute.tipo.slice(1);
+      const autoName = `Ruta ${tipoCapitalizado} ${newRoute.id}`;
+
+      console.log(`Asignando nombre automático: ${autoName}`);
+
+      // Actualizar el nombre con el ID generado
+      await client.query(
+        "UPDATE ruta SET nombre_ruta = $1 WHERE id_ruta = $2",
+        [autoName, newRoute.id]
+      );
 
       await client.query("COMMIT");
 

@@ -52,10 +52,10 @@ const routesController = {
 
       console.log("Datos recibidos para crear ruta:", req.body);
 
-      if (!nombre || !geometria) {
+      if (!geometria) {
         return res.status(400).json({
           success: false,
-          message: "Nombre y geometría son campos requeridos",
+          message: "La geometría es requerida",
         });
       }
 
