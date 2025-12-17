@@ -32,11 +32,11 @@ import { ConfirmDialog, UINotification, SidePanel } from "components/ui/index.js
 import { BuildingList, BuildingForm } from "components/buildings/index.js";
 import { RouteList, RouteFormPolyline } from "components/routes/index.js";
 
-import MapIndicators from "components/map/MapIndicators/MapIndicators.jsx";
-import { MapContainer } from "components/map/Map/components/MapContainer.jsx";
-import { MapForms } from "components/map/Map/components/MapForms.jsx";
-import { MapLists } from "components/map/Map/components/MapLists.jsx";
-import { MapLayers } from "components/map/Map/components/MapLayers.jsx";
+import MapIndicators from "components/Map/MapIndicators/MapIndicators.jsx";
+import { MapContainer } from "components/Map/Map/components/MapContainer.jsx";
+import { MapForms } from "components/Map/Map/components/MapForms.jsx";
+import { MapLists } from "components/Map/Map/components/MapLists.jsx";
+import { MapLayers } from "components/Map/Map/components/MapLayers.jsx";
 
 function Map() {
   // Hooks Principales

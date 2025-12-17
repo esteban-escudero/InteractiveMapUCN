@@ -21,8 +21,8 @@ import { useUserMapHandlers } from "./hooks/useUserMapHandlers.js";
 
 // Componentes
 import { UINotification } from "components/ui/index.js";
-import BuildingRenderer from "components/map/BuildingRenderer/BuildingRenderer";
-import RouteLayer from "components/map/RouteLayer/RouteLayer";
+import BuildingRenderer from "components/Map/BuildingRenderer/BuildingRenderer";
+import RouteLayer from "components/Map/RouteLayer/RouteLayer";
 import MobileSearchBar from "./MobileSearchBar";
 import MobileInfoPanel from "./MobileInfoPanel";
 import MobileRoutePanel from "./MobileRoutePanel";

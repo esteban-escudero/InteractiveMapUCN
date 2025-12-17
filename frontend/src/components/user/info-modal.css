@@ -161,7 +161,8 @@
 
 /* Modo oscuro */
 body.dark-mode .info-modal {
-    background: #1f1f1f;
+    background: #1f1f1f !important;
+    border: 1px solid #333;
 }
 
 body.dark-mode .modal-header {
@@ -189,8 +190,14 @@ body.dark-mode .modal-content h3 {
 }
 
 body.dark-mode .modal-content p,
-body.dark-mode .modal-content li {
-    color: #b0b0b0;
+body.dark-mode .modal-content li,
+body.dark-mode .modal-content span,
+body.dark-mode .modal-content div {
+    color: #b0b0b0 !important;
+}
+
+body.dark-mode .modal-content {
+    background: #1f1f1f !important;
 }
 
 body.dark-mode .modal-content strong {
