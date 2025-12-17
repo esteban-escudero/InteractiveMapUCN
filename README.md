@@ -155,27 +155,15 @@ cd backend
 npm install
 ```
 
-Crear archivo `.env`:
+Copiar el archivo de ejemplo y configurar las variables de entorno:
 
-```env
-# Servidor
-PORT=3001
-NODE_ENV=development
-
-# Base de Datos
-DB_HOST=localhost
-DB_PORT=5433
-DB_USER=postgres
-DB_PASSWORD=admin
-DB_NAME=InteractiveMapDB
-
-# JWT
-JWT_SECRET=tu_clave_secreta_aqui
-JWT_EXPIRES_IN=7d
-
-# CORS
-CORS_ORIGIN=http://localhost:3000
+```bash
+cp .env.example .env
+# O en Windows CMD: copy .env.example .env
+# O en PowerShell: copy .env.example .env
 ```
+
+Editar el archivo `.env` con tus credenciales de base de datos.
 
 #### 4. Configurar el Frontend
 
@@ -263,6 +251,23 @@ InteractiveMapUCN/
 ├── docker-compose.yaml        # Configuración de Docker
 └── README.md                  # Este archivo
 ```
+
+## 🔧 Solución de Problemas Comunes
+
+### Error: MODULE_NOT_FOUND en Backend
+Si el backend falla al iniciar:
+1. Asegúrate de ejecutar `npm install` dentro de la carpeta `backend`.
+2. Verifica que el archivo `.env` exista.
+
+### Error: Pantalla en Blanco en Frontend
+Si el frontend no carga:
+1. Verifica que no haya conflictos de puerto (3000).
+2. Revisa la consola del navegador por errores de importación (casing incorrecto).
+
+### Problemas de Visualización (Modo Oscuro)
+Si los modales se ven blancos en modo oscuro:
+1. Limpia la caché del navegador.
+2. Asegúrate de que `info-modal.css` se esté cargando correctamente.
 
 ## 🔌 API Endpoints Principales
 

@@ -1,10 +1,7 @@
-/**
- * Componente que agrupa todas las capas del mapa - MEJORADO
- * Ahora maneja edificios destacados y rutas calculadas
- */
+
 import React from "react";
-import RouteLayer from "components/map/RouteLayer/RouteLayer.jsx";
-import BuildingRenderer from "components/map/BuildingRenderer/BuildingRenderer.jsx";
+import RouteLayer from "components/Map/RouteLayer/RouteLayer.jsx";
+import BuildingRenderer from "components/Map/BuildingRenderer/BuildingRenderer.jsx";
 import RouteNetwork from "components/routes/RouteNetwork/RouteNetwork.jsx";
 
 export const MapLayers = ({
