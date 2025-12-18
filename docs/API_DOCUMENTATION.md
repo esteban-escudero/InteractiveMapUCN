@@ -1,4 +1,4 @@
-# 🔌 Documentación de API - InteractiveMapUCN
+# Documentación de API - InteractiveMapUCN
 
 Esta documentación detalla los endpoints disponibles en la API RESTful del proyecto InteractiveMapUCN.
 
@@ -12,7 +12,7 @@ Las rutas protegidas requieren el header:
 
 ---
 
-## 🔐 Autenticación
+## Autenticación
 
 ### Registrar Administrador
 Crea una nueva cuenta de administrador.
@@ -46,7 +46,7 @@ Obtiene un token JWT válido.
 
 ---
 
-## 🏢 Edificios (Buildings)
+## Edificios (Buildings)
 
 ### Obtener Todos los Edificios
 - **Endpoint**: `GET /buildings`
@@ -56,7 +56,7 @@ Obtiene un token JWT válido.
 - **Endpoint**: `GET /buildings/:id`
 - **Parámetros**: `id` (Integer)
 
-### Crear Edificio 🔒
+### Crear Edificio
 - **Endpoint**: `POST /buildings`
 - **Headers**: `Authorization: Bearer <token>`
 - **Body**:
@@ -69,15 +69,15 @@ Obtiene un token JWT válido.
   }
   ```
 
-### Actualizar Edificio 🔒
+### Actualizar Edificio
 - **Endpoint**: `PUT /buildings/:id`
 
-### Eliminar Edificio 🔒
+### Eliminar Edificio
 - **Endpoint**: `DELETE /buildings/:id`
 
 ---
 
-## 🚪 Salas (Rooms)
+## Salas (Rooms)
 
 Gestiona las salas dentro de los edificios.
 
@@ -90,7 +90,7 @@ Gestiona las salas dentro de los edificios.
 ### Obtener Salas por Edificio
 - **Endpoint**: `GET /rooms/building/:buildingId`
 
-### Crear Sala 🔒
+### Crear Sala
 - **Endpoint**: `POST /rooms`
 - **Body**:
   ```json
@@ -105,7 +105,7 @@ Gestiona las salas dentro de los edificios.
 
 ---
 
-## 🛣️ Rutas (Routes)
+## Rutas (Routes)
 
 Gestiona los caminos y senderos del campus.
 
@@ -126,11 +126,11 @@ Calcula el camino más corto entre dos puntos usando Dijkstra.
 
 ---
 
-## 🖼️ Imágenes de Edificios (Building Images)
+## Imágenes de Edificios (Building Images)
 
-Gestiona los planos e imágenes asociados a cada edificio.
+Gestiona los planos asociados a cada edificio.
 
-### Subir Imagen 🔒
+### Subir Imagen
 - **Endpoint**: `POST /building-images/upload`
 - **Content-Type**: `multipart/form-data`
 - **Body Form Data**:
@@ -141,12 +141,12 @@ Gestiona los planos e imágenes asociados a cada edificio.
 ### Obtener Imágenes por Edificio
 - **Endpoint**: `GET /building-images/building/:buildingId`
 
-### Eliminar Imagen 🔒
+### Eliminar Imagen
 - **Endpoint**: `DELETE /building-images/:imageId`
 
 ---
 
-## 📏 Análisis de Proximidad
+## Análisis de Proximidad
 
 ### Ruta Más Cercana a Edificio
 Encuentra el punto de acceso más cercano a un edificio.
@@ -172,7 +172,7 @@ Devuelve un resumen de conectividad para un edificio.
 
 ---
 
-## 🌍 Análisis Espacial (Spatial Analysis)
+## Análisis Espacial (Spatial Analysis)
 
 ### Validar Ubicaciones
 Verifica si coordenadas masivas caen dentro de zonas válidas o edificios.

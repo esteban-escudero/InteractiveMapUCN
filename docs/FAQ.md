@@ -1,6 +1,6 @@
-# ❓ Preguntas Frecuentes (FAQ)
+# Preguntas Frecuentes (FAQ)
 
-## 👤 Generales (Usuarios)
+## Generales (Usuarios)
 
 ### ¿Necesito internet para usar el mapa?
 La primera vez que entras, sí. Después, la aplicación guarda los datos básicos y funciona **Offline** (sin internet), aunque algunas funciones como "Mi ubicación" o cargar nuevas imágenes pueden requerir conexión.
@@ -19,7 +19,7 @@ Si ves un nombre de sala incorrecto o una ruta cerrada, por favor envía un corr
 
 ---
 
-## 🔧 Técnicas (Ayuda)
+## Técnicas (Ayuda)
 
 ### ¿Qué navegadores son compatibles?
 La aplicación funciona en las últimas versiones de:

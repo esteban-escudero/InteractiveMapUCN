@@ -5,7 +5,7 @@ Este documento describe la estructura de la base de datos PostgreSQL, incluyendo
 **Motor**: PostgreSQL 15+
 **Extensión Espacial**: PostGIS 3.0+
 
-## 📊 Diagrama ER Simplificado
+## Diagrama ER Simplificado
 
 ```mermaid
 erDiagram
@@ -47,7 +47,7 @@ erDiagram
     buildings ||--o{ building_images : "has"
 ```
 
-## 📝 Definición de Tablas
+## Definición de Tablas
 
 ### `users` (Administradores)
 Almacena las credenciales de los administradores del sistema.
@@ -103,7 +103,7 @@ Imágenes de planos de planta asociadas a edificios.
 | `filepath` | VARCHAR(255) | Ruta relativa al archivo en disco |
 | `uploaded_at`| TIMESTAMP | Fecha de subida |
 
-## 🌍 Funciones PostGIS Utilizadas
+## Funciones PostGIS Utilizadas
 
 El sistema hace uso intensivo de funciones espaciales para el análisis:
 

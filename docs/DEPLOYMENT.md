@@ -1,8 +1,8 @@
-# 🚀 Guía de Despliegue - InteractiveMapUCN
+# Guía de Despliegue - InteractiveMapUCN
 
 Esta guía detalla los pasos para desplegar la aplicación en un entorno de producción (Linux/Ubuntu).
 
-## 📋 Requisitos Previos
+## Requisitos Previos
 
 - Servidor VPS (Ubuntu 20.04/22.04 LTS recomendado)
 - Dominio configurado apuntando a la IP del servidor
@@ -11,7 +11,7 @@ Esta guía detalla los pasos para desplegar la aplicación en un entorno de prod
 
 ---
 
-## 🏗️ Opción A: Despliegue con Docker (Recomendado)
+## Opción A: Despliegue con Docker (Recomendado)
 
 Esta es la forma más sencilla de levantar todo el stack.
 
@@ -40,7 +40,7 @@ docker-compose ps
 
 ---
 
-## 🛠️ Opción B: Despliegue Manual (Native)
+## Opción B: Despliegue Manual (Native)
 
 Para mayor control y rendimiento en servidores dedicados.
 
@@ -148,7 +148,7 @@ sudo apt install certbot python3-certbot-nginx
 sudo certbot --nginx -d mapa.tudominio.cl
 ```
 
-## 🔄 Procedimiento de Actualización
+## Procedimiento de Actualización
 
 Para actualizar el código en producción:
 

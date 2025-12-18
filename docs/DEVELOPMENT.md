@@ -1,8 +1,8 @@
-# 💻 Guía de Desarrollo - InteractiveMapUCN
+# Guía de Desarrollo - InteractiveMapUCN
 
 Esta guía detalla cómo configurar un entorno de desarrollo local para contribuir al proyecto.
 
-## 📋 Requisitos Previos
+## Requisitos Previos
 
 Asegúrate de tener instalado:
 - **Node.js**: v18.17.0 o superior (LTS recomendado).
@@ -14,7 +14,7 @@ Asegúrate de tener instalado:
 
 ---
 
-## ⚙️ Configuración del Entorno
+## Configuración del Entorno
 
 ### 1. Clonar Repositorio
 ```bash
@@ -53,7 +53,7 @@ npm install
 
 ---
 
-## ▶️ Ejecutar en Desarrollo
+## Ejecutar en Desarrollo
 
 Para trabajar, normalmente necesitarás 2 terminales abiertas:
 
@@ -73,7 +73,7 @@ npm start
 
 ---
 
-## 📂 Estructura de Directorios Clave
+## Estructura de Directorios Clave
 
 ```
 interactive-map-ucn/
@@ -88,7 +88,7 @@ interactive-map-ucn/
 └── docs/                  # Documentación
 ```
 
-## 📏 Estándares de Código (Linting)
+## Estándares de Código (Linting)
 
 El proyecto usa ESLint y Prettier. Antes de hacer commit, corre:
 

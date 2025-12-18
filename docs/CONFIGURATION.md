@@ -1,8 +1,8 @@
-# ⚙️ Guía de Configuración - InteractiveMapUCN
+# Guía de Configuración - InteractiveMapUCN
 
 Este documento explica en detalle todas las variables de configuración disponibles para el sistema.
 
-## 📄 Archivo `.env`
+## Archivo `.env`
 
 La aplicación utiliza la librería `dotenv` para cargar variables de entorno desde un archivo `.env` ubicado en la raíz del directorio `backend/`.
 
@@ -10,7 +10,7 @@ La aplicación utiliza la librería `dotenv` para cargar variables de entorno de
 
 ---
 
-## 🖥️ Configuración del Servidor
+## Configuración del Servidor
 
 | Variable | Tipo | Default | Descripción |
 |----------|------|---------|-------------|
@@ -19,7 +19,7 @@ La aplicación utiliza la librería `dotenv` para cargar variables de entorno de
 
 ---
 
-## 🗄️ Base de Datos (PostgreSQL)
+## Base de Datos (PostgreSQL)
 
 | Variable | Descripcion |
 |----------|-------------|
@@ -31,7 +31,7 @@ La aplicación utiliza la librería `dotenv` para cargar variables de entorno de
 
 ---
 
-## 🔒 Seguridad (JWT)
+## Seguridad (JWT)
 
 | Variable | Importancia | Descripción |
 |----------|-------------|-------------|
@@ -40,7 +40,7 @@ La aplicación utiliza la librería `dotenv` para cargar variables de entorno de
 
 ---
 
-## 🌐 Red y CORS
+## Red y CORS
 
 | Variable | Descripción |
 |----------|-------------|
@@ -48,7 +48,7 @@ La aplicación utiliza la librería `dotenv` para cargar variables de entorno de
 
 ---
 
-## 📂 Límites de Archivos
+## Límites de Archivos
 
 | Variable | Default | Descripción |
 |----------|---------|-------------|
@@ -56,7 +56,7 @@ La aplicación utiliza la librería `dotenv` para cargar variables de entorno de
 
 ---
 
-## 🚀 Configuraciones Avanzadas
+## Configuraciones Avanzadas
 
 ### PM2 (Producción)
 El archivo `ecosystem.config.js` (si existe) controla la configuración del gestor de procesos PM2.

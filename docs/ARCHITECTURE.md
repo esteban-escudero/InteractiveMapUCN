@@ -1,23 +1,23 @@
-# 🏗️ Arquitectura del Sistema - InteractiveMapUCN
+# Arquitectura del Sistema - InteractiveMapUCN
 
 Este documento describe la arquitectura técnica, las decisiones de diseño y los patrones utilizados en el desarrollo de la aplicación InteractiveMapUCN.
 
-## 🔭 Visión General
+## Visión General
 
 InteractiveMapUCN es una **Progressive Web App (PWA)** diseñada como un Sistema de Información Geográfica (SIG/GIS) ligero. La aplicación sigue una arquitectura cliente-servidor desacoplada (Headless), donde el frontend y el backend se comunican exclusivamente a través de una API RESTful.
 
 ### Diagrama de Alto Nivel
 
-```mermaid
+::: mermaid
 graph TD
-    User[Usuario / Admin] -->|HTTPS| Nginx[Nginx Reverse Proxy]
-    Nginx -->|Static Assets| Frontend[Frontend React PWA]
-    Nginx -->|/api| Backend[Backend Node.js Express]
-    Backend -->|SQL / Geo Queries| DB[(PostgreSQL + PostGIS)]
-    Backend -->|Read/Write| FS[File System (Images)]
-```
+    User["Usuario / Admin"] -->|HTTPS| Nginx["Nginx Reverse Proxy"]
+    Nginx -->|Static Assets| Frontend["Frontend React PWA"]
+    Nginx -->|/api| Backend["Backend Node.js Express"]
+    Backend -->|SQL / Geo Queries| DB[("PostgreSQL + PostGIS")]
+    Backend -->|Read/Write| FS["File System<br/>(Images)"]
+:::
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 ### Frontend (Cliente)
 - **Framework**: React 18
@@ -46,7 +46,7 @@ graph TD
   - `GEOMETRY(LineString, 4326)` para Rutas
   - `GEOMETRY(Point, 4326)` para Nodos
 
-## 🧩 Patrones de Diseño
+## Patrones de Diseño
 
 ### Backend: MVC + Capa de Servicios
 El backend implementa una arquitectura en capas para separar responsabilidades y facilitar el mantenimiento.
@@ -66,7 +66,7 @@ El frontend está estructurado en componentes funcionales reutilizables y hooks 
 2. **Custom Hooks**: Encapsulan lógica de estado y efectos (e.g., `useBuildings`, `useRouteCalculation`).
 3. **Smart/Dumb Components**: Separación entre componentes contenedores (lógica) y presentacionales (UI).
 
-## 🗺️ Análisis Geoespacial y Algoritmos
+## Análisis Geoespacial y Algoritmos
 
 ### Cálculo de Rutas (Service Layer)
 El sistema implementa un grafo ponderado dinámico para la navegación:
@@ -81,7 +81,7 @@ Se utiliza **Turf.js** y **PostGIS** en conjunto para:
 - Calcular distancias geobásicas reales.
 - Validar topología de nuevas rutas.
 
-## 🔒 Seguridad y Autenticación
+## Seguridad y Autenticación
 
 - **Autenticación**: JWT (JSON Web Tokens) con estrategia de Bearer Token.
 - **Passwords**: Hashed con `bcryptjs`.
@@ -91,7 +91,7 @@ Se utiliza **Turf.js** y **PostGIS** en conjunto para:
   - CORS configurado estrictamente.
 - **Archivos**: Validación de tipos MIME y sanitización de nombres de archivo en uploads.
 
-## 🚀 Estrategia de Despliegue
+## Estrategia de Despliegue
 
 La aplicación está contenerizada para desarrollo y utiliza `PM2` + `Nginx` para producción en servidores Linux (Ubuntu).
 

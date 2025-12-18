@@ -1,8 +1,8 @@
-# 🔧 Solución de Problemas (Troubleshooting)
+# Solución de Problemas (Troubleshooting)
 
 Guía para resolver errores comunes durante el desarrollo y despliegue de **InteractiveMapUCN**.
 
-## 🛑 Errores de Inicio (Startup)
+## Errores de Inicio (Startup)
 
 ### `Error: connect ECONNREFUSED 127.0.0.1:5432`
 **Causa**: La aplicación no puede conectarse a la base de datos.
@@ -25,7 +25,7 @@ Guía para resolver errores comunes durante el desarrollo y despliegue de **Inte
 
 ---
 
-## 🗺️ Errores de Mapa y Datos
+## Errores de Mapa y Datos
 
 ### El mapa se ve gris/blanco
 **Causa**: Problema con los tiles de Leaflet o falta de conexión a internet.
@@ -41,7 +41,7 @@ Guía para resolver errores comunes durante el desarrollo y despliegue de **Inte
 
 ---
 
-## 🐳 Errores de Docker
+## Errores de Docker
 
 ### `PostGIS extension not found`
 **Causa**: Estás usando una imagen de Postgres estándar en lugar de la versión con PostGIS.
@@ -60,7 +60,7 @@ volumes:
 
 ---
 
-## 🔒 Errores de Autenticación
+## Errores de Autenticación
 
 ### "Invalid Token" constante
 **Causa**: `JWT_SECRET` cambió en el servidor, invalidando tokens antiguos.

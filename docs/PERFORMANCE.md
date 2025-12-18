@@ -1,8 +1,8 @@
-# ⚡ Rendimiento y Optimización - InteractiveMapUCN
+# Rendimiento y Optimización - InteractiveMapUCN
 
 Este documento detalla las estrategias implementadas y recomendadas para mantener un alto rendimiento en la aplicación.
 
-## 🎯 Objetivos de Rendimiento (Benchmarks)
+## Objetivos de Rendimiento (Benchmarks)
 
 | Métrica | Objetivo (Móvil 4G) | Estado Actual |
 |---------|---------------------|---------------|
@@ -13,7 +13,7 @@ Este documento detalla las estrategias implementadas y recomendadas para mantene
 
 ---
 
-## 🚀 Optimizaciones Frontend
+## Optimizaciones Frontend
 
 ### 1. Code Splitting & Lazy Loading
 React carga los componentes pesados solo cuando se necesitan:
@@ -34,7 +34,7 @@ Usamos **Workbox** para estrategias de caché:
 
 ---
 
-## ⚙️ Optimizaciones Backend
+## Optimizaciones Backend
 
 ### 1. Índices Espaciales (GIST)
 PostGIS utiliza índices GIST (Generalized Search Tree) para consultas geoespaciales ultra-rápidas.
@@ -51,7 +51,7 @@ En producción, **PM2** ejecuta la aplicación en modo Cluster, utilizando todos
 
 ---
 
-## 📉 Recomendaciones para Desarrolladores
+## Recomendaciones para Desarrolladores
 
 1. **Imágenes**: Siempre optimiza/comprime las imágenes de planos antes de subirlas. Usa formatos modernos (WebP) si es posible.
 2. **React Renders**: Usa `React.memo` y `useCallback` en componentes de mapa que se actualizan frecuentemente (e.g., marcadores de posición GPS).

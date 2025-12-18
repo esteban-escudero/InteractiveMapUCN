@@ -1,10 +1,10 @@
-# 🤝 Guía de Contribución - InteractiveMapUCN
+# Guía de Contribución - InteractiveMapUCN
 
 ¡Gracias por tu interés en contribuir a InteractiveMapUCN!
 
 Este documento establece las pautas para contribuir al proyecto, asegurar la calidad del código y mantener un flujo de trabajo ordenado.
 
-## 🛠️ Flujo de Trabajo (Git Flow)
+## Flujo de Trabajo (Git Flow)
 
 Este proyecto utiliza una variante simplificada de Git Flow.
 
@@ -24,7 +24,7 @@ Este proyecto utiliza una variante simplificada de Git Flow.
 
 ---
 
-## 🎨 Estándares de Código
+##  Estándares de Código
 
 ### General
 - Usa inglés para variables, funciones y comentarios de código.
@@ -51,14 +51,14 @@ Usa [Conventional Commits](https://www.conventionalcommits.org/):
 
 ---
 
-## 🧪 Pruebas (Testing)
+## Pruebas (Testing)
 
 Asegúrate de que tu código no rompa funcionalidades existentes.
 
 - Si agregas una nueva funcionalidad crítica, considera agregar tests (si el proyecto tiene suite de tests configurada).
 - Verifica manualmente en navegador (Desktop y Mobile simulado).
 
-## 🐛 Reporte de Bugs
+## Reporte de Bugs
 
 Al crear un Issue para reportar un bug, por favor incluye:
 1. Pasos para reproducir.
@@ -67,6 +67,6 @@ Al crear un Issue para reportar un bug, por favor incluye:
 4. Screenshots o logs si aplica.
 5. Navegador y dispositivo usado.
 
-## 📄 Licencia
+## Licencia
 
 Al contribuir, aceptas que tu código se licencie bajo la misma licencia del proyecto (MIT).
