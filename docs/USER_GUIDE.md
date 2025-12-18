@@ -1,8 +1,8 @@
-# 🗺️ Manual de Usuario - InteractiveMapUCN
+# Manual de Usuario - InteractiveMapUCN
 
 Bienvenido al Mapa Interactivo del Campus Coquimbo de la UCN. Esta guía te ayudará a navegar y utilizar todas las funciones de la aplicación.
 
-## 🚀 Acceso Rápido
+## Acceso Rápido
 
 La aplicación es accesible desde cualquier navegador web moderno (Chrome, Safari, Firefox, Edge) en la dirección:
 `https://mapa.ucn.cl` (ejemplo)
@@ -20,7 +20,7 @@ Puedes instalar la aplicación en tu celular sin ir a la tienda de aplicaciones:
 
 ---
 
-## 🔍 Funciones Principales
+## Funciones Principales
 
 ### 1. Navegar por el Mapa
 - **Moverse**: Desliza el dedo o usa el mouse para moverte por el campus.
@@ -42,21 +42,20 @@ Para calcular el camino más corto a un destino:
    - **Mi ubicación actual**: Usa el GPS de tu dispositivo (requiere permisos).
    - **Otro punto**: Busca otro edificio como origen.
 4. Selecciona el tipo de ruta si es necesario:
-   - 🚶 **Peatonal**: Ruta estándar.
-   - ♿ **Accesible**: Evita escaleras (rampas y ascensores).
-   - 🚙 **Vehicular**: Solo caminos autorizados para autos.
+   - **Peatonal**: Ruta estándar.
+   - **Accesible**: Evita escaleras (rampas y ascensores).
 
 ### 4. Categorías de Edificios
 Los edificios están coloreados para fácil identificación:
-- 🔵 **Académico**: Salas de clases y laboratorios.
-- 🟣 **Administrativo**: Oficinas y gestión.
-- 🟡 **Biblioteca y Estudio**: Zonas silenciosas.
-- 🔴 **Alimentación**: Casino y cafeterías.
-- 🟢 **Servicios**: Baños, fotocopiadoras, salud.
+- **Académico**: Salas de clases y laboratorios.
+- **Administrativo**: Oficinas y gestión.
+- **Biblioteca y Estudio**: Zonas silenciosas.
+- **Alimentación**: Casino y cafeterías.
+- **Servicios**: Baños, fotocopiadoras, salud.
 
 ---
 
-## 🌙 Preferencias
+## Preferencias
 
 ### Modo Oscuro
 La aplicación detecta automáticamente la configuración de tu sistema. Si prefieres cambiarlo manualmente:

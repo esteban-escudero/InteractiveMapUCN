@@ -1,8 +1,8 @@
-# 🛠️ Manual de Administrador - InteractiveMapUCN
+# Manual de Administrador - InteractiveMapUCN
 
 Esta guía está destinada a los administradores encargados de gestionar la información del mapa (edificios, salas, rutas y usuarios).
 
-## 🔐 Acceso al Panel de Administración
+## Acceso al Panel de Administración
 
 Para acceder al gestor de contenidos:
 1. Ve a `Menú` > `Iniciar Sesión`.
@@ -11,7 +11,7 @@ Para acceder al gestor de contenidos:
 
 ---
 
-## 🏢 Gestión de Edificios
+## Gestión de Edificios
 
 ### Crear Nuevo Edificio
 1. En el Dashboard, selecciona **"Edificios"** > **"Nuevo"**.
@@ -26,7 +26,7 @@ Para acceder al gestor de contenidos:
 
 ### Editar Edificio
 1. Busca el edificio en la lista.
-2. Presiona el ícono de lápiz (✏️).
+2. Presiona el ícono de lápiz.
 3. Modifica los datos o ajusta el polígono en el mapa.
 4. Presiona **Actualizar**.
 
@@ -38,7 +38,7 @@ Para acceder al gestor de contenidos:
 
 ---
 
-## 🚪 Gestión de Salas
+## Gestión de Salas
 
 Puedes agregar salas individualmente a cada edificio:
 1. Selecciona un edificio de la lista.
@@ -52,7 +52,7 @@ Puedes agregar salas individualmente a cada edificio:
 
 ---
 
-## 🛣️ Gestión de Rutas
+## Gestión de Rutas
 
 Las rutas permiten que el sistema de navegación funcione.
 
@@ -69,16 +69,16 @@ Las rutas permiten que el sistema de navegación funcione.
 
 ---
 
-## 👥 Gestión de Usuarios
+## Gestión de Usuarios
 
 Acceso restringido a Super Administradores.
 
 - **Crear Admin**: `Usuarios` > `Nuevo`. Ingresa email y contraseña temporal.
-- **Eliminar Admin**: Presiona el ícono de basura (🗑️). Esta acción es irreversible.
+- **Eliminar Admin**: Presiona el ícono de basura. Esta acción es irreversible.
 
 ---
 
-## ⚠️ Solución de Problemas Comunes
+## Solución de Problemas Comunes
 
 **No puedo dibujar el polígono:**
 Asegúrate de no cruzar líneas. Los polígonos deben ser formas simples sin auto-intersecciones.

@@ -1,10 +1,10 @@
-# 🧪 Reporte de Pruebas (QA) - InteractiveMapUCN
+# Reporte de Pruebas (QA) - InteractiveMapUCN
 
 **Fecha del Reporte**: 2025-12-15
 **Versión Evaluada**: 1.0.0
 **Estado General**: ✅ APROBADO
 
-## 📊 Resumen Ejecutivo
+## Resumen Ejecutivo
 
 Se realizaron pruebas exhaustivas de funcionalidad, integración y usabilidad en la versión candidata para producción. El sistema cumple con los criterios de aceptación principales.
 
@@ -15,7 +15,7 @@ Se realizaron pruebas exhaustivas de funcionalidad, integración y usabilidad en
 
 ---
 
-## 🔍 Detalles de Pruebas
+## Detalles de Pruebas
 
 ### 1. Funcionalidad del Mapa
 | ID | Caso de Prueba | Resultado | Notas |
@@ -50,7 +50,7 @@ Se realizaron pruebas exhaustivas de funcionalidad, integración y usabilidad en
 
 ---
 
-## 🐛 Bugs Conocidos / Limitaciones
+## Bugs Conocidos / Limitaciones
 
 1. **GPS Indoor**: La precisión del GPS ("Mi Ubicación") dentro de edificios de concreto es baja. *Mitigación: Mensaje de advertencia en UI.*
 2. **Safari Mobile**: La barra de dirección del navegador a veces oculta el menú inferior en iOS 15. *Estado: Pendiente de corrección CSS.*

@@ -1,8 +1,8 @@
-# 📸 Galería de Capturas de Pantalla
+# Galería de Capturas de Pantalla
 
 Este directorio almacena las capturas de pantalla de la aplicación para documentación y referencias visuales.
 
-## 📱 Vista de Usuario
+## Vista de Usuario
 
 ### Pantalla de Inicio (Mapa)
 ![alt text](image.png)
@@ -18,7 +18,7 @@ Este directorio almacena las capturas de pantalla de la aplicación para documen
 
 ---
 
-## 🛠️ Panel de Administración
+## Panel de Administración
 
 ### Login
 ![alt text](image-4.png)

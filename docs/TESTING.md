@@ -1,8 +1,8 @@
-# 🧪 Guía de Pruebas (Testing) - InteractiveMapUCN
+# Guía de Pruebas (Testing) - InteractiveMapUCN
 
 Este documento describe la estrategia de pruebas para asegurar la calidad y estabilidad de la aplicación.
 
-## 🎯 Estrategia de Pruebas
+## Estrategia de Pruebas
 
 Actualmente, el proyecto se enfoca en tres niveles de validación:
 
@@ -12,7 +12,7 @@ Actualmente, el proyecto se enfoca en tres niveles de validación:
 
 ---
 
-## 🛠️ Herramientas
+## Herramientas
 
 - **Jest**: Framework de testing para JavaScript (Frontend/Backend).
 - **Postman**: Para pruebas manuales de endpoints de API.
@@ -20,7 +20,7 @@ Actualmente, el proyecto se enfoca en tres niveles de validación:
 
 ---
 
-## 🚦 Cómo Ejecutar Pruebas
+## Cómo Ejecutar Pruebas
 
 ### Backend (API)
 
@@ -46,7 +46,7 @@ curl http://localhost:3001/api/health
 
 ---
 
-## ✅ Lista de Verificación (QA)
+## Lista de Verificación (QA)
 
 Antes de hacer un Pull Request, verifica lo siguiente:
 
@@ -66,7 +66,7 @@ Antes de hacer un Pull Request, verifica lo siguiente:
 
 ---
 
-## 🔮 Futuras Mejoras (Roadmap)
+## Futuras Mejoras (Roadmap)
 
 - Implementar **Cypress** para pruebas E2E automatizadas.
 - Configurar **Jest + Supertest** para cobertura de API.

@@ -1,14 +1,14 @@
-# ♿ Accesibilidad e Inclusión - InteractiveMapUCN
+# Accesibilidad e Inclusión - InteractiveMapUCN
 
 Este documento detalla el cumplimiento de estándares de accesibilidad para garantizar que el aplicativo pueda ser utilizado por el mayor número de personas posible, incluyendo aquellas con discapacidades visuales o motoras.
 
-## 🎯 Estándar Objetivo: WCAG 2.1 Nivel AA
+## Estándar Objetivo: WCAG 2.1 Nivel AA
 
 El proyecto ha sido diseñado siguiendo las pautas de accesibilidad para contenido web (Web Content Accessibility Guidelines).
 
 ---
 
-## ✅ Características Implementadas
+## Características Implementadas
 
 ### 1. Navegación por Teclado
 - Toda la interfaz (menús, búsqueda, botones) es operable mediante teclado (`Tab`, `Enter`, `Esc`).
@@ -32,7 +32,7 @@ Una característica clave del proyecto es el cálculo de **Rutas Accesibles (Sil
 
 ---
 
-## 📋 Lista de Verificación de Cumplimiento
+## Lista de Verificación de Cumplimiento
 
 | Criterio | Descripción | Estado |
 |----------|-------------|--------|
@@ -45,7 +45,7 @@ Una característica clave del proyecto es el cálculo de **Rutas Accesibles (Sil
 
 ---
 
-## 🚧 Áreas de Mejora
+## Áreas de Mejora
 
 A pesar del esfuerzo, existen limitaciones conocidas:
 1. **Mapas Interactivos**: Los mapas de Leaflet son complejos para navegar solo con lector de pantalla. Se recomienda usar el buscador de texto como alternativa accesible.

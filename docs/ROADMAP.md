@@ -1,8 +1,8 @@
-# 🗺️ Roadmap del Proyecto
+# Roadmap del Proyecto
 
 Este documento describe la visión a futuro y las funcionalidades planificadas para las próximas versiones de InteractiveMapUCN.
 
-## 🔜 Próxima Versión (v1.1.0) - Q1 2026
+## Próxima Versión (v1.1.0) - Q1 2026
 
 ### Mejoras en Navegación
 - [ ] **Indicaciones Paso a Paso**: Instrucciones textuales detalladas (ej. "Gira a la derecha en 50 metros").
@@ -14,7 +14,7 @@ Este documento describe la visión a futuro y las funcionalidades planificadas p
 
 ---
 
-## 🔮 Futuro (v2.0.0) - Q3 2026
+## Futuro (v2.0.0) - Q3 2026
 
 ### Integración Académica
 - [ ] **Buscador de Horarios**: Integración con API de UCN para mostrar dónde es la próxima clase del estudiante.
@@ -30,7 +30,7 @@ Este documento describe la visión a futuro y las funcionalidades planificadas p
 
 ---
 
-## 💡 Ideas en Evaluación
+## Ideas en Evaluación
 
 - Integración con realidad aumentada (AR) para navegación interior.
 - Versión nativa (React Native) para iOS y Android.

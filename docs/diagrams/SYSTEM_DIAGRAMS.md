@@ -1,8 +1,8 @@
-# 📊 Diagramas del Sistema
+# Diagramas del Sistema
 
 Este documento contiene la representación visual de la arquitectura, flujos de datos y estructura de base de datos.
 
-## 🏗️ Arquitectura General
+## Arquitectura General
 
 ::: mermaid
 graph TD
@@ -21,7 +21,7 @@ graph TD
     API -->|Internal| Cache
 :::
 
-## 🔄 Flujo de Autenticación (JWT)
+## Flujo de Autenticación (JWT)
 
 ::: mermaid
 sequenceDiagram
@@ -46,7 +46,7 @@ sequenceDiagram
     end
 :::
 
-## 🛣️ Flujo de Cálculo de Ruta
+## Flujo de Cálculo de Ruta
 
 ::: mermaid
 flowchart LR
@@ -63,7 +63,7 @@ flowchart LR
     K --> L["Retornar GeoJSON + Meta"]
 :::
 
-## 🗄️ Modelo Relacional (ER)
+## Modelo Relacional (ER)
 
 ::: mermaid
 erDiagram

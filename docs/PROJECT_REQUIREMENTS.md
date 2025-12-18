@@ -1,4 +1,4 @@
-# 📝 Requerimientos del Proyecto - InteractiveMapUCN
+# Requerimientos del Proyecto - InteractiveMapUCN
 
 Este documento detalla los requerimientos funcionales y no funcionales que definieron el alcance del desarrollo de `InteractiveMapUCN`.
 

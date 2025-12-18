@@ -1,6 +1,6 @@
-# 👏 Créditos y Agradecimientos
+# Créditos y Agradecimientos
 
-## 👥 Equipo de Desarrollo
+## Equipo de Desarrollo
 
 **Desarrollador Principal**
 - Esteban Escudero
@@ -10,7 +10,7 @@
 
 ---
 
-## 🛠️ Tecnologías y Librerías
+## Tecnologías y Librerías
 
 Este proyecto ha sido posible gracias al increíble trabajo de la comunidad de código abierto.
 
@@ -35,13 +35,13 @@ Este proyecto ha sido posible gracias al increíble trabajo de la comunidad de c
 
 ---
 
-## 📄 Licencias de Terceros
+## Licencias de Terceros
 
 - **Iconos**: Material UI Icons (Apache 2.0).
 - **Mapas Base**: © OpenStreetMap contributors (ODbL).
 
 ---
 
-## 🎓 Agradecimientos Especiales
+## Agradecimientos Especiales
 
 A la **Universidad Católica del Norte (UCN)**, Campus Coquimbo, por proveer el contexto y la necesidad que inspiró este proyecto.
