@@ -4,14 +4,14 @@ Este documento contiene la representación visual de la arquitectura, flujos de 
 
 ## 🏗️ Arquitectura General
 
-```mermaid
+::: mermaid
 graph TD
-    Client[Usuario Web / PWA]
-    LB[Nginx Proxy / Load Balancer]
-    API[Backend API (Node.js)]
-    DB[(PostgreSQL + PostGIS)]
-    Cache[Memory Cache]
-    FS[File System (Imágenes)]
+    Client["Usuario Web / PWA"]
+    LB["Nginx Proxy / Load Balancer"]
+    API["Backend API (Node.js)"]
+    DB[("PostgreSQL + PostGIS")]
+    Cache["Memory Cache"]
+    FS["File System (Imágenes)"]
 
     Client -->|HTTPS / JSON| LB
     LB -->|Static Files| Client
@@ -19,11 +19,11 @@ graph TD
     API -->|SQL Queries| DB
     API -->|Read/Write| FS
     API -->|Internal| Cache
-```
+:::
 
 ## 🔄 Flujo de Autenticación (JWT)
 
-```mermaid
+::: mermaid
 sequenceDiagram
     participant U as Usuario (Admin)
     participant F as Frontend
@@ -44,28 +44,28 @@ sequenceDiagram
         B-->>F: Error 401
         F-->>U: Mostrar Mensaje Error
     end
-```
+:::
 
 ## 🛣️ Flujo de Cálculo de Ruta
 
-```mermaid
+::: mermaid
 flowchart LR
-    A[Inicio] --> B{Validar Datos}
+    A[Inicio] --> B{"Validar Datos"}
     B -->|Inválido| C[Error 400]
-    B -->|Válido| D[Obtener Todas las Rutas]
-    D --> E[Construir Grafo en Memoria]
-    E --> F[Filtrar por Tipo (Peatonal/Accesible)]
-    F --> G[Encontrar Nodos más Cercanos (Start/End)]
-    G --> H[Ejecutar Dijkstra]
-    H --> I{¿Camino Encontrado?}
+    B -->|Válido| D["Obtener Todas las Rutas"]
+    D --> E["Construir Grafo en Memoria"]
+    E --> F["Filtrar por Tipo<br/>Peatonal/Accesible"]
+    F --> G["Encontrar Nodos más Cercanos<br/>Start/End"]
+    G --> H["Ejecutar Dijkstra"]
+    H --> I{"¿Camino Encontrado?"}
     I -->|No| J[Error 404]
-    I -->|Si| K[Combinar Geometría (LineString)]
-    K --> L[Retornar GeoJSON + Meta]
-```
+    I -->|Sí| K["Combinar Geometría<br/>LineString"]
+    K --> L["Retornar GeoJSON + Meta"]
+:::
 
 ## 🗄️ Modelo Relacional (ER)
 
-```mermaid
+::: mermaid
 erDiagram
     USERS ||--|{ BUILDINGS : manages
     BUILDINGS ||--o{ ROOMS : contains
@@ -97,4 +97,4 @@ erDiagram
         string type
         geometry line_string
     }
-```
+:::

@@ -72,13 +72,16 @@ app.get("/api/health", (req, res) => {
 app.use(errorHandler);
 
 // Iniciar servidor
-const PORT = config.server.port;
-app.listen(PORT, () => {
-  console.log(`Servidor backend ejecutándose en http://localhost:${PORT}`);
-  console.log(`Entorno: ${config.server.env}`);
-  console.log(`Health check: http://localhost:${PORT}/api/health`);
-  console.log(`API disponible en: http://localhost:${PORT}/api`);
-  console.log(`Auth endpoints: http://localhost:${PORT}/api/auth`);
-});
+// Iniciar servidor solo si no estamos en modo de pruebas
+if (require.main === module) {
+  const PORT = config.server.port;
+  app.listen(PORT, () => {
+    console.log(`Servidor backend ejecutándose en http://localhost:${PORT}`);
+    console.log(`Entorno: ${config.server.env}`);
+    console.log(`Health check: http://localhost:${PORT}/api/health`);
+    console.log(`API disponible en: http://localhost:${PORT}/api`);
+    console.log(`Auth endpoints: http://localhost:${PORT}/api/auth`);
+  });
+}
 
 module.exports = app;

@@ -80,31 +80,24 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
 
 ## 🏗️ Arquitectura del Sistema
 
-```
-┌─────────────────────────────────────────────────────────┐
-│              USUARIOS (Campus UCN Coquimbo)              │
-│           📱 Acceden vía navegador web                   │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ↓
-┌─────────────────────────────────────────────────────────┐
-│          SERVIDOR WEB (Nginx + SSL)                      │
-├─────────────────────────────────────────────────────────┤
-│  Frontend (PWA)         │      Backend API               │
-│  - React Build          │      - Node.js + Express       │
-│  - Service Worker       │      - PM2 Process Manager     │
-│  - Leaflet Maps         │      - JWT Auth                │
-└────────────────────────┬────────────────────────────────┘
-                         │
-                         ↓
-┌─────────────────────────────────────────────────────────┐
-│       BASE DE DATOS (PostgreSQL + PostGIS)               │
-│  - Edificios (polígonos/puntos)                          │
-│  - Salas                                                 │
-│  - Rutas (polylines)                                     │
-│  - Usuarios (administradores)                            │
-└─────────────────────────────────────────────────────────┘
-```
+::: mermaid
+graph TD
+    User["Usuarios (Campus UCN Coquimbo)"] -->|Navegador Web| Nginx["SERVIDOR WEB (Nginx + SSL)"]
+    subgraph "Server Bundle (Node.js/Express)"
+        Nginx -->|Proxy| API["Backend API"]
+        Nginx -->|Static Assets| Frontend["Frontend (PWA)"]
+    end
+    API -->|SQL + PostGIS| DB[("BASE DE DATOS (PostgreSQL)")]
+    API -->|FS| Uploads["Directorio /uploads"]
+    Frontend --- Leaflet["Leaflet Maps"]
+    
+    subgraph "Database Content"
+        DB --- B[Edificios]
+        DB --- S[Salas]
+        DB --- R[Rutas]
+        DB --- U[Administradores]
+    end
+:::
 
 ## 📦 Requisitos Previos
 
@@ -117,7 +110,7 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
 ### Producción
 - **Ubuntu Server** 22.04 LTS o similar
 - **Nginx** (reverse proxy)
-- **Node.js** 18+ y **PM2**
+- **Node.js** 18+ y **pm2**
 - **PostgreSQL** 15+ con **PostGIS**
 - **Certbot** (Let's Encrypt SSL)
 
@@ -172,7 +165,23 @@ cd ../frontend
 npm install
 ```
 
-#### 5. Ejecutar en Desarrollo
+#### 5. Ejecutar Pruebas (Testing)
+
+El sistema cuenta con una infraestructura de pruebas automatizadas basada en **Jest** y **React Testing Library**.
+
+```bash
+# Backend Tests
+cd backend
+npm test
+
+# Frontend Tests
+cd frontend
+npm test -- --watchAll=false
+```
+
+Para más información, consulta la [Guía de Pruebas](docs/TESTING.md).
+
+#### 6. Ejecutar en Desarrollo
 
 **Backend:**
 ```bash

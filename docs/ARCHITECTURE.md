@@ -8,14 +8,14 @@ InteractiveMapUCN es una **Progressive Web App (PWA)** diseñada como un Sistema
 
 ### Diagrama de Alto Nivel
 
-```mermaid
+::: mermaid
 graph TD
-    User[Usuario / Admin] -->|HTTPS| Nginx[Nginx Reverse Proxy]
-    Nginx -->|Static Assets| Frontend[Frontend React PWA]
-    Nginx -->|/api| Backend[Backend Node.js Express]
-    Backend -->|SQL / Geo Queries| DB[(PostgreSQL + PostGIS)]
-    Backend -->|Read/Write| FS[File System (Images)]
-```
+    User["Usuario / Admin"] -->|HTTPS| Nginx["Nginx Reverse Proxy"]
+    Nginx -->|Static Assets| Frontend["Frontend React PWA"]
+    Nginx -->|/api| Backend["Backend Node.js Express"]
+    Backend -->|SQL / Geo Queries| DB[("PostgreSQL + PostGIS")]
+    Backend -->|Read/Write| FS["File System<br/>(Images)"]
+:::
 
 ## 🛠️ Stack Tecnológico
 

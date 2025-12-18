@@ -7,7 +7,7 @@
     "leaflet": "^1.9.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^7.9.6",
+    "react-router-dom": "^7.11.0",
     "react-scripts": "5.0.1"
   },
   "scripts": {
@@ -29,5 +29,23 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^components/(.*)$": "<rootDir>/src/components/$1",
+      "^contexts/(.*)$": "<rootDir>/src/contexts/$1",
+      "^hooks/(.*)$": "<rootDir>/src/hooks/$1",
+      "^services/(.*)$": "<rootDir>/src/services/$1",
+      "^utils/(.*)$": "<rootDir>/src/utils/$1",
+      "^assets/(.*)$": "<rootDir>/src/assets/$1",
+      "^config/(.*)$": "<rootDir>/src/config/$1",
+      "^constants/(.*)$": "<rootDir>/src/constants/$1",
+      "^styles/(.*)$": "<rootDir>/src/styles/$1"
+    }
   }
 }
