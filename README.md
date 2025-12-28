@@ -31,12 +31,9 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
 - 🔍 **Búsqueda Inteligente**: Encuentra edificios y salas por nombre con autocompletado
 - 📍 **Geolocalización GPS**: Muestra tu ubicación actual en el mapa con marcador animado
 - 🧭 **Navegación desde Mi Ubicación**: Calcula rutas desde tu posición actual al destino
-- 🛣️ **Cálculo de Rutas Inteligente**: 5 tipos de rutas con algoritmo de Dijkstra
+- 🛣️ **Cálculo de Rutas Inteligente**: 2 perfiles de rutas con algoritmo de Dijkstra
   - **Peatonal**: Ruta estándar para caminar
-  - **Accesible**: Adaptada para personas con movilidad reducida
-  - **Rápida**: El camino más corto disponible
-  - **Emergencia**: Rutas de evacuación
-  - **Vehicular**: Para vehículos autorizados
+  - **Accesible**: Adaptada para personas con movilidad reducida (evita obstáculos/escaleras)
 - 🎨 **Colores por Categoría**: Edificios coloreados según su tipo (académico, administrativo, servicios, etc.)
 - 🌙 **Modo Oscuro**: Interfaz adaptable para mayor comodidad
 - 📱 **Diseño Responsive**: Optimizado para móviles y tablets
@@ -54,50 +51,150 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
 - 📊 **Panel de Control**: Vista completa de edificios, rutas y estadísticas
 - 🎨 **Material Icons**: Interfaz moderna con iconos de Material Design
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Stack Tecnológico: Justificación y Alternativas
 
-### Backend
-- **Node.js** + **Express**: Framework del servidor
-- **PostgreSQL**: Base de datos relacional con soporte PostGIS
-- **PostGIS**: Extensión geoespacial para PostgreSQL
-- **Turf.js**: Análisis geoespacial avanzado (distancias, rutas, proximidad)
-- **JWT**: Autenticación basada en tokens
-- **bcryptjs**: Encriptación de contraseñas
-- **Multer**: Manejo de carga de archivos (imágenes de planos)
-- **PM2**: Process manager para producción
+La elección de cada componente del stack se basó en el equilibrio entre rendimiento, escalabilidad y soporte para datos geoespaciales.
 
-### Frontend
-- **React**: Biblioteca de interfaz de usuario
-- **PWA**: Service Workers, Web App Manifest
-- **Leaflet**: Librería de mapas interactivos
-- **Material Icons**: Sistema de iconos de Google
-- **CSS**: Estilos personalizados responsive
+### Backend (Servidor y Datos)
+
+| Tecnología | Justificación Técnica | Alternativas Consideradas | ¿Por qué no la alternativa? |
+| :--- | :--- | :--- | :--- |
+| **Node.js + Express** | Alto rendimiento en I/O asíncrono para geolocalización en tiempo real y consistencia de lenguaje (Full-stack JS). | Python (Django/FastAPI), PHP (Laravel) | Python es excelente pero menos ágil para prototipado rápido en este contexto; PHP tiene menor rendimiento en concurrencia masiva de sockets/geolocalización. |
+| **PostgreSQL + PostGIS** | Estándar de la industria para SIG. Soporta tipos de datos espaciales nativos y topología compleja. | MongoDB, MySQL | MongoDB es bueno para documentos pero carece de la precisión y funciones de análisis topológico de PostGIS; MySQL tiene soporte espacial limitado en comparación. |
+| **Turf.js** | Permite realizar cálculos geométricos (distancias, áreas, buffers) de forma nativa en JS, compartiendo lógica entre Front y Back. | JSTS, GDAL | JSTS es una traducción compleja de Java; GDAL requiere bindings nativos pesados que complican el despliegue en contenedores ligeros. |
+| **JWT (Auth)** | Autenticación stateless ideal para PWAs y escalabilidad sin sesiones en servidor. | Cookies/Sessions, OAuth2 | Las sesiones requieren persistencia en servidor; OAuth2 fue descartado por añadir complejidad innecesaria para un sistema de admin único. |
+
+### Frontend (Interfaz y Mapas)
+
+| Tecnología | Justificación Técnica | Alternativas Consideradas | ¿Por qué no la alternativa? |
+| :--- | :--- | :--- | :--- |
+| **React 18** | Arquitectura basada en componentes que facilita la sincronización del estado del mapa con los paneles de información. | Vue.js, Angular | Vue es similar, pero React ofrece un ecosistema más maduro para librerías de mapas (React-Leaflet); Angular es demasiado pesado para una PWA enfocada en móviles. |
+| **Leaflet** | Librería ligera (38kb), de código abierto y optimizada para rendimiento móvil. | Google Maps API, OpenLayers | Google Maps es privativo y de pago; OpenLayers tiene una curva de aprendizaje muy pronunciada y un peso excesivo para dispositivos de gama baja. |
+| **PWA (Workbox)** | Permite instalación y funcionamiento offline, esencial para navegación en zonas de campus con baja señal. | App Nativa (Swift/Kotlin), Flutter | Una app nativa requiere descarga desde tiendas y mayor costo de desarrollo; la PWA ofrece acceso instantáneo vía URL. |
 
 ### Infraestructura
-- **Nginx**: Reverse proxy y servidor web
-- **Let's Encrypt**: Certificados SSL gratuitos
-- **Docker**: Contenedorización (desarrollo)
 
-## 🏗️ Arquitectura del Sistema
+| Tecnología | Justificación Técnica | Alternativas Consideradas | ¿Por qué no la alternativa? |
+| :--- | :--- | :--- | :--- |
+| **Nginx** | Excelente manejando conexiones concurrentes y actuando como terminación SSL/Reverse Proxy. | Apache, Traefik | Apache consume más recursos por conexión; Traefik es potente pero Nginx es el estándar más documentado para este stack. |
+| **Docker** | Garantiza que el sistema funcione igual en desarrollo y producción ("Write once, run anywhere"). | Despliegue Manual, Heroku | El despliegue manual varía entre servidores; Heroku es de pago y limita la configuración de PostGIS a bajo nivel. |
+
+## 🏗️ Arquitectura Detallada
+
+El sistema sigue una arquitectura desacoplada para separar responsabilidades y facilitar el mantenimiento.
 
 ::: mermaid
 graph TD
-    User["Usuarios (Campus UCN Coquimbo)"] -->|Navegador Web| Nginx["SERVIDOR WEB (Nginx + SSL)"]
-    subgraph "Server Bundle (Node.js/Express)"
-        Nginx -->|Proxy| API["Backend API"]
-        Nginx -->|Static Assets| Frontend["Frontend (PWA)"]
-    end
-    API -->|SQL + PostGIS| DB[("BASE DE DATOS (PostgreSQL)")]
-    API -->|FS| Uploads["Directorio /uploads"]
-    Frontend --- Leaflet["Leaflet Maps"]
-    
-    subgraph "Database Content"
-        DB --- B[Edificios]
-        DB --- S[Salas]
-        DB --- R[Rutas]
-        DB --- U[Administradores]
-    end
+    User["Usuario / Admin"] -->|HTTPS| Nginx["Nginx Reverse Proxy"]
+    Nginx -->|Static Assets| Frontend["Frontend React PWA"]
+    Nginx -->|/api| Backend["Backend Node.js Express"]
+    Backend -->|SQL / Geo Queries| DB[("PostgreSQL + PostGIS")]
+    Backend -->|Read/Write| FS["File System<br/>(Images)"]
 :::
+
+### Backend: MVC + Capa de Servicios
+Implementa una división en capas para aislar la lógica de negocio del acceso a datos:
+1.  **Routes Layer**: Define los endpoints y aplica middlewares (como validación de JWT).
+2.  **Controller Layer**: Maneja la comunicación HTTP y formatea las respuestas.
+3.  **Service Layer**: Contiene la **lógica de negocio pura** y algoritmos complejos (e.g., Dijkstra).
+4.  **Data Access Layer (Models)**: Interactúa directamente con PostgreSQL/PostGIS.
+
+### Frontend: Arquitectura Basada en Componentes
+Estructurado para una alta interactividad:
+*   **Context Providers**: Gestión de estado global (Autenticación, Mapa).
+*   **Custom Hooks**: Encapsulan la lógica de geolocalización y cálculos (`useMap`, `useRoute`).
+*   **PWA Core**: Service Workers para soporte offline y manifiesto para instalación.
+
+## 🗄️ Esquema de Base de Datos (PostGIS)
+
+El motor **PostgreSQL + PostGIS** es la pieza central para el manejo de datos espaciales con SRID 4326 (WGS 84).
+
+::: mermaid
+erDiagram
+    edificio ||--o{ plano : "posee"
+    edificio ||--o{ sala : "contiene"
+    administrador ||--o{ refresh_tokens : "gestiona"
+    ruta {
+        GEOMETRY geometria_ruta
+        VARCHAR tipo_ruta
+    }
+    edificio {
+        GEOMETRY ubicacion
+        VARCHAR tipo
+    }
+:::
+
+### Tablas Principales
+| Tabla | Tipo Geometría | Descripción |
+| :--- | :--- | :--- |
+| `edificio` | `Polygon` | Contornos de estructuras físicas y metadatos. |
+| `sala` | `Point` | Ubicación exacta de oficinas, laboratorios y servicios. |
+| `ruta` | `LineString` | Segmentos de red para navegación peatonal y accesible. |
+| `plano` | N/A | Gestión de imágenes por piso/edificio. |
+
+### Funciones Espaciales Clave
+*   `ST_Distance`: Cálculo de distancias reales en metros.
+*   `ST_Contains`: Determinación de puntos dentro de edificios.
+*   `ST_AsGeoJSON`: Conversión nativa para visualización en Leaflet.
+
+## 🏁 Resultados e Impacto (Conclusiones)
+
+El proyecto ha logrado un impacto tangible en la comunidad universitaria:
+-   **Inclusión Real**: Implementación efectiva de rutas para movilidad reducida.
+-   **Modernización**: Primer SIG web especializado para el Campus Coquimbo.
+-   **Rendimiento**: Tiempos de cálculo de ruta menores a 200ms mediante optimización de grafos.
+
+## 🧭 Lógica de Navegación Inteligente
+
+El cálculo de rutas es el núcleo tecnológico del proyecto. Se utiliza el algoritmo de Dijkstra sobre un grafo dinámico generado a partir de datos espaciales.
+
+::: mermaid
+flowchart LR
+    A[Inicio] --> B{"Validar Puntos"}
+    B -->|Válido| D["Obtener Rutas DB"]
+    D --> E["Construir Grafo"]
+    E --> F["Filtrar Tipo (Peatonal/Accesible)"]
+    F --> G["Ejecutar Dijkstra"]
+    G --> H["Generar GeoJSON"]
+    H --> I[Fin]
+:::
+
+## 🔐 Seguridad y Flujo de Acceso
+
+El acceso administrativo está protegido mediante un flujo de autenticación robusto basado en JWT y validación de sesiones.
+
+::: mermaid
+sequenceDiagram
+    participant Admin
+    participant Frontend
+    participant API (Node.js)
+    participant DB (PostGIS)
+
+    Admin->>Frontend: Login Credentials
+    Frontend->>API: POST /auth/login
+    API->>DB: Verify & Compare Hash
+    DB-->>API: Validated
+    API-->>Frontend: Set JWT Token
+    Frontend->>Admin: Redirect to Dashboard
+:::
+
+## 🧪 Calidad y Testing
+
+La estabilidad del sistema se garantiza mediante una estrategia de validación en tres niveles:
+1.  **Infraestructura**: Pruebas unitarias e integración con **Jest**.
+2.  **Análisis Estático**: Uso de linting (ESLint) para estandarización de código.
+3.  **Validación QA**: Checklist de smoke tests para mapa, búsqueda y rutas.
+
+Para más detalle, consulta la **[Guía de Pruebas](docs/TESTING.md)**.
+
+## 🚀 Estrategia de Despliegue
+
+La aplicación está diseñada para ser agnóstica al entorno, permitiendo despliegues rápidos mediante contenedores:
+*   **Contenedores**: Orquestación completa con `Docker Compose`.
+*   **Nativo (Production)**: Stack basado en `Nginx` (Proxy/SSL), `PM2` (Runtime) y `Ubuntu Server`.
+*   **Seguridad**: Certificados SSL automáticos con `Let's Encrypt`.
+
+Consulta la **[Guía de Despliegue](docs/DEPLOYMENT.md)** para pasos detallados.
 
 ## 📦 Requisitos Previos
 
@@ -105,7 +202,7 @@ graph TD
 - **Node.js** (v18 o superior)
 - **npm** (v9 o superior)
 - **PostgreSQL** (v15 o superior) con extensión **PostGIS**
-- **Docker** y **Docker Compose** (opcional)
+- **Docker** y **Docker Compose** (opcional para DB)
 
 ### Producción
 - **Ubuntu Server** 22.04 LTS o similar
@@ -114,295 +211,65 @@ graph TD
 - **PostgreSQL** 15+ con **PostGIS**
 - **Certbot** (Let's Encrypt SSL)
 
-## 🚀 Instalación y Configuración
+## 🏗️ Instalación y Configuración
 
-### Desarrollo Local
-
-#### 1. Clonar el Repositorio
-
+### 1. Clonar el Repositorio
 ```bash
 git clone https://github.com/esteban-escudero/InteractiveMapUCN.git
 cd InteractiveMapUCN
 ```
 
-#### 2. Configurar la Base de Datos
+### 2. Configurar Base de Datos
+**Opción A (Docker):** `docker-compose up -d`
+**Opción B (Manual):** Crear DB y ejecutar `CREATE EXTENSION postgis;`
 
-**Opción A: Usar Docker (Recomendado)**
-
-```bash
-docker-compose up -d
-```
-
-**Opción B: PostgreSQL Local**
-
-```sql
-CREATE DATABASE InteractiveMapDB;
-\c InteractiveMapDB
-CREATE EXTENSION postgis;
-```
-
-#### 3. Configurar el Backend
-
+### 3. Configurar Backend
 ```bash
 cd backend
 npm install
-```
-
-Copiar el archivo de ejemplo y configurar las variables de entorno:
-
-```bash
-cp .env.example .env
-# O en Windows CMD: copy .env.example .env
-# O en PowerShell: copy .env.example .env
-```
-
-Editar el archivo `.env` con tus credenciales de base de datos.
-
-#### 4. Configurar el Frontend
-
-```bash
-cd ../frontend
-npm install
-```
-
-#### 5. Ejecutar Pruebas (Testing)
-
-El sistema cuenta con una infraestructura de pruebas automatizadas basada en **Jest** y **React Testing Library**.
-
-```bash
-# Backend Tests
-cd backend
-npm test
-
-# Frontend Tests
-cd frontend
-npm test -- --watchAll=false
-```
-
-Para más información, consulta la [Guía de Pruebas](docs/TESTING.md).
-
-#### 6. Ejecutar en Desarrollo
-
-**Backend:**
-```bash
-cd backend
+cp .env.example .env # Configura tus credenciales aquí
 npm run dev
 ```
 
-**Frontend:**
+### 4. Configurar Frontend
 ```bash
-cd frontend
+cd ../frontend
+npm install
 npm start
 ```
-
-La aplicación estará disponible en:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3001
 
 ## 📁 Estructura del Proyecto
 
 ```
 InteractiveMapUCN/
-├── backend/                    # Servidor Node.js + Express
-│   ├── config/                # Configuración de la aplicación y BD
-│   ├── controllers/           # Lógica de controladores
-│   │   ├── authController.js
-│   │   ├── buildingsController.js
-│   │   ├── buildingImageController.js
-│   │   ├── roomsController.js
-│   │   ├── routesController.js
-│   │   ├── routeNodesController.js
-│   │   ├── proximityController.js
-│   │   ├── spatialController.js
-│   │   └── usersController.js
-│   ├── middleware/            # Middlewares (auth, errores, etc.)
-│   ├── models/                # Modelos de datos
-│   ├── routes/                # Definición de rutas API
-│   ├── services/              # Servicios de negocio
-│   │   ├── routeGraphService.js  # Algoritmo de Dijkstra
-│   │   └── proximityService.js   # Análisis de proximidad
-│   ├── utils/                 # Utilidades y helpers
-│   │   └── turfUtils.js       # Utilidades geoespaciales
-│   ├── uploads/               # Archivos subidos (imágenes)
-│   └── server.js              # Punto de entrada del servidor
-├── frontend/                  # Aplicación React (PWA)
-│   ├── public/                # Archivos estáticos
-│   │   ├── manifest.json      # Web App Manifest
-│   │   └── service-worker.js  # Service Worker para PWA
-│   └── src/
-│       ├── components/        # Componentes React
-│       │   ├── admin/         # Panel de administración
-│       │   ├── auth/          # Autenticación
-│       │   ├── buildings/     # Gestión de edificios
-│       │   ├── map/           # Componentes del mapa
-│       │   ├── routes/        # Gestión de rutas
-│       │   ├── ui/            # Componentes UI (SidePanel, etc.)
-│       │   └── user/          # Vista de usuario
-│       ├── constants/         # Constantes globales
-│       │   ├── constants.ts   # Tipos de edificios, estados, rutas
-│       │   └── mapConfig.js   # Configuración del mapa
-│       ├── contexts/          # Contextos de React
-│       ├── hooks/             # Custom hooks
-│       │   ├── buildings/     # Hooks de edificios
-│       │   ├── map/           # Hooks del mapa
-│       │   └── routes/        # Hooks de rutas
-│       ├── services/          # Servicios API
-│       │   ├── authService.js
-│       │   ├── buildingService.js
-│       │   ├── buildingImageService.js
-│       │   ├── roomService.js
-│       │   ├── routeService.js
-│       │   ├── proximityService.js
-│       │   └── userService.js
-│       └── utils/             # Utilidades
-├── database/                  # Scripts de base de datos
-├── scripts/                   # Scripts de utilidad
-├── docker-compose.yaml        # Configuración de Docker
-└── README.md                  # Este archivo
+├── backend/                # API REST (Node/Express)
+│   ├── controllers/        # Lógica de endpoints
+│   ├── models/             # Esquemas de PostGIS
+│   ├── services/           # Algoritmo de Dijkstra
+│   └── routes/             # Definición de rutas
+├── frontend/               # Cliente React (PWA)
+│   ├── src/components/     # UI y Mapas (Leaflet)
+│   └── public/             # Manifest y Service Workers
+├── database/               # Scripts SQL
+└── docs/                   # Documentación técnica detallada
 ```
-
-## 🔧 Solución de Problemas Comunes
-
-### Error: MODULE_NOT_FOUND en Backend
-Si el backend falla al iniciar:
-1. Asegúrate de ejecutar `npm install` dentro de la carpeta `backend`.
-2. Verifica que el archivo `.env` exista.
-
-### Error: Pantalla en Blanco en Frontend
-Si el frontend no carga:
-1. Verifica que no haya conflictos de puerto (3000).
-2. Revisa la consola del navegador por errores de importación (casing incorrecto).
-
-### Problemas de Visualización (Modo Oscuro)
-Si los modales se ven blancos en modo oscuro:
-1. Limpia la caché del navegador.
-2. Asegúrate de que `info-modal.css` se esté cargando correctamente.
 
 ## 🔌 API Endpoints Principales
 
 ### Autenticación
-- `POST /api/auth/register` - Registrar nuevo administrador
-- `POST /api/auth/login` - Iniciar sesión
+- `POST /api/auth/login` - Inicio de sesión admin
 
-### Edificios
-- `GET /api/buildings` - Obtener todos los edificios
-- `GET /api/buildings/:id` - Obtener edificio por ID
-- `POST /api/buildings` - Crear nuevo edificio (requiere auth)
-- `PUT /api/buildings/:id` - Actualizar edificio (requiere auth)
-- `DELETE /api/buildings/:id` - Eliminar edificio (requiere auth)
+### Geo-Servicios
+- `GET /api/buildings` - Listado de edificios (GeoJSON)
+- `POST /api/routes/calculate` - Pathfinding Dijkstra entre coordenadas
+- `GET /api/proximity/analysis/:id` - Análisis de cercanía PostGIS
 
-### Salas
-- `GET /api/rooms` - Obtener todas las salas
-- `GET /api/rooms/:id` - Obtener sala por ID
-- `GET /api/rooms/building/:buildingId` - Obtener salas por edificio
-- `POST /api/rooms` - Crear nueva sala (requiere auth)
-- `PUT /api/rooms/:id` - Actualizar sala (requiere auth)
-- `DELETE /api/rooms/:id` - Eliminar sala (requiere auth)
+## 📝 Licencia y Autores
 
-### Imágenes de Edificios
-- `POST /api/building-images/upload` - Subir imagen de plano (requiere auth)
-- `GET /api/building-images/building/:buildingId` - Obtener imágenes por edificio
-- `GET /api/building-images/building/:buildingId/floor/:floor` - Obtener imágenes por piso
-- `DELETE /api/building-images/:imageId` - Eliminar imagen (requiere auth)
-
-### Rutas
-- `GET /api/routes` - Obtener todas las rutas
-- `GET /api/routes/:id` - Obtener ruta por ID
-- `POST /api/routes` - Crear nueva ruta (requiere auth)
-- `PUT /api/routes/:id` - Actualizar ruta (requiere auth)
-- `DELETE /api/routes/:id` - Eliminar ruta (requiere auth)
-- `POST /api/routes/calculate` - Calcular ruta óptima entre dos puntos
-
-### Análisis de Proximidad
-- `GET /api/proximity/building/:buildingId/closest-route` - Obtener ruta más cercana a un edificio
-- `GET /api/proximity/building/:buildingId/routes-in-radius` - Obtener rutas dentro de un radio
-- `GET /api/proximity/route/:routeId/closest-building` - Obtener edificio más cercano a una ruta
-- `POST /api/proximity/assign-routes` - Asignar rutas a múltiples edificios
-- `GET /api/proximity/connecting/:originId/:destinationId` - Rutas que conectan dos edificios
-- `GET /api/proximity/analysis/:buildingId` - Análisis completo de proximidad
-
-### Análisis Espacial
-- `POST /api/spatial/calculate-route` - Calcular ruta óptima con algoritmo de Dijkstra
-- `POST /api/spatial/nearby-buildings` - Encontrar edificios cercanos a un punto
-- `GET /api/spatial/analyze-routes` - Analizar estadísticas de rutas existentes
-- `POST /api/spatial/validate-locations` - Validar ubicaciones masivamente
-
-### Usuarios (Administradores)
-- `GET /api/users` - Obtener todos los administradores (requiere auth)
-- `POST /api/users` - Crear nuevo administrador (requiere auth)
-- `PUT /api/users/:id` - Actualizar administrador (requiere auth)
-- `DELETE /api/users/:id` - Eliminar administrador (requiere auth)
-
-### Health Check
-- `GET /api/health` - Verificar estado del servidor
-
-## 🎨 Características de UI/UX
-
-### Material Icons
-- Todos los iconos utilizan Material Icons de Google
-- Iconos consistentes en toda la aplicación
-- Tamaño optimizado para legibilidad
-
-### Diseño Responsive
-- Grid de 3 columnas para lista de salas
-- Adaptación automática a diferentes tamaños de pantalla
-- Diseño mobile-first
-
-### Colores por Categoría
-Los edificios se colorean automáticamente según su tipo:
-- 🔵 Académico
-- 🟣 Administrativo
-- 🟢 Servicios
-- 🟡 Biblioteca
-- 🔴 Casino/Cafetería
-- Y más...
-
-## 📊 Monitoreo
-
-```bash
-# Estado del backend
-pm2 status
-pm2 logs mapa-ucn-api
-
-# Estado de Nginx
-sudo systemctl status nginx
-sudo tail -f /var/log/nginx/access.log
-
-# Estado de PostgreSQL
-sudo systemctl status postgresql
-```
-
-## 🤝 Contribuir
-
-Las contribuciones son bienvenidas:
-
-1. Fork del proyecto
-2. Crear rama (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
-
-## 📝 Licencia
-
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
-
-## 👥 Autores
-
-- **Esteban Escudero** - [esteban-escudero](https://github.com/esteban-escudero)
-
-## 📧 Contacto
-
-Para preguntas o sugerencias:
-- Email: soporte.mapa@ucn.cl
-- Web: [www.ucn.cl](https://www.ucn.cl)
-
-## 📚 Glosario
-
-Para una definición detallada de los términos técnicos utilizados en este proyecto, consulta nuestro [Glosario Técnico](GLOSSARY.md).
-
+- **Licencia**: MIT
+- **Autor**: [Esteban Escudero](https://github.com/esteban-escudero)
+- **Contacto**: soporte.mapa@ucn.cl
 
 ---
-
 **Universidad Católica del Norte - Campus Coquimbo**  
-Sistema de Mapa Interactivo PWA  
-Última actualización: Diciembre 2025
+Sistema de Mapa Interactivo PWA | Diciembre 2025

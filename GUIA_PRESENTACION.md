@@ -54,9 +54,8 @@ Esta guía está diseñada para ayudarte a estructurar una presentación profesi
 *   **Búsqueda Inteligente**: Buscador con autocompletado para edificios y salas.
 *   **Navegación GPS**: Geolocalización en tiempo real con marcador animado.
 *   **Cálculo de Rutas**:
-    *   🚶 **Peatonal**: El camino más lógico.
-    *   ♿ **Accesible**: Evita escaleras y obstáculos (Inclusión).
-    *   ⚡ **Rápida/Emergencia**: Optimización de tiempo.
+    *   🚶 **Peatonal**: Ruta estándar y fluida para caminar.
+    *   ♿ **Accesible**: Ruta adaptada que evita escaleras y obstáculos físicos (Inclusión).
 *   **Indicación de Imagen**: Un carrusel de capturas de pantalla de la versión móvil (Phone mockups).
 
 ### 6. Panel de Administración (Gestión)
