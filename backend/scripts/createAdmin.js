@@ -39,18 +39,18 @@ async function createAdmin() {
     const result = await pool.query(query, [email, hashedPassword, nombre]);
     const admin = result.rows[0];
 
-    console.log("✅ Admin creado exitosamente:");
+    console.log("Admin creado exitosamente:");
     console.log("ID:", admin.id_admin);
     console.log("Email:", admin.email);
     console.log("Nombre:", admin.nombre);
     console.log("Activo:", admin.activo);
     console.log("Fecha:", admin.fecha_creacion);
     console.log("");
-    console.log("🔐 Credenciales:");
+    console.log("Credenciales:");
     console.log("Email:", email);
     console.log("Password:", password);
   } catch (error) {
-    console.error("❌ Error al crear admin:", error);
+    console.error("Error al crear admin:", error);
   } finally {
     await pool.end();
   }

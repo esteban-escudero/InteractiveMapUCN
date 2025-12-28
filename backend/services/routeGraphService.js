@@ -74,9 +74,9 @@ class RouteGraphService {
      * @returns {Object} {nodes, edges}
      */
     buildRouteGraph(routes, routeType) {
-        console.log(`🔨 Construyendo grafo para tipo: ${routeType}`);
+        console.log(`Construyendo grafo para tipo: ${routeType}`);
 
-        // 🔥 FILTRAR por tipo de ruta
+        // FILTRAR por tipo de ruta
         const filteredRoutes = routes.filter(r => r.tipo === routeType);
         console.log(`   Rutas filtradas: ${filteredRoutes.length} de ${routes.length}`);
 
@@ -208,7 +208,7 @@ class RouteGraphService {
                 const edge = this.getEdge(graph, current, neighbor.id);
                 if (!edge) return;
 
-                const alt = distances[current] + edge.distance; // 🔥 Sumar DISTANCIA
+                const alt = distances[current] + edge.distance; //Sumar DISTANCIA
 
                 if (alt < distances[neighbor.id]) {
                     distances[neighbor.id] = alt;
@@ -343,7 +343,7 @@ class RouteGraphService {
      * @returns {Object} {geometry, distance, estimatedTime, routeType, routesUsed}
      */
     async findOptimalRoute(origin, destination, routeType) {
-        console.log(`\n🔍 Buscando ruta óptima:`);
+        console.log(`\nBuscando ruta óptima:`);
         console.log(`   Origen: ${origin.lat}, ${origin.lng}`);
         console.log(`   Destino: ${destination.lat}, ${destination.lng}`);
         console.log(`   Tipo: ${routeType}`);

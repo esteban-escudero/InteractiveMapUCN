@@ -65,8 +65,8 @@ const RouteLayer = ({
         <span class="route-type ${route.tipo?.toLowerCase() || "default"}">
           Tipo: ${route.tipo || "No especificado"}
         </span><br/>
-        📏 Distancia: ${route.distancia || 0}m<br/>
-        ⏱️ Tiempo: ${route.tiempo_estimado || 0} min
+        Distancia: ${route.distancia || 0}m<br/>
+        Tiempo: ${route.tiempo_estimado || 0} min
     `;
 
     if (route.prioridad) {
@@ -85,8 +85,8 @@ const RouteLayer = ({
     console.log("RouteLayer - Total rutas:", routes?.length || 0);
 
     if (editingRoute) {
-      console.log("🔧 Modo edición activo - Ocultando TODAS las rutas");
-      console.log("✏️ Editando:", editingRoute.nombre, "ID:", editingRoute.id);
+      console.log("Modo edición activo - Ocultando TODAS las rutas");
+      console.log("Editando:", editingRoute.nombre, "ID:", editingRoute.id);
     }
 
     if (!routes || !Array.isArray(routes) || !mapInstance) {
@@ -103,9 +103,9 @@ const RouteLayer = ({
     routeLayerRef.current.clearLayers();
     markersLayerRef.current.clearLayers();
 
-    // ⭐ SI ESTAMOS EDITANDO, NO MOSTRAR NINGUNA RUTA
+    // SI ESTAMOS EDITANDO, NO MOSTRAR NINGUNA RUTA
     if (editingRoute) {
-      console.log("🚫 Ocultando todas las rutas durante edición");
+      console.log("Ocultando todas las rutas durante edición");
       return;
     }
 

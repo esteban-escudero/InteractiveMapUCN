@@ -50,13 +50,13 @@ app.use("/api/route-nodes", routeNodesRoutes);
 app.use("/api/spatial", spatialRoutes);
 app.use("/api/proximity", proximityRoutes);
 
-// ⭐ NUEVA: Ruta de autenticación
+// NUEVA: Ruta de autenticación
 app.use("/api/auth", authRoutes);
 
-// ⭐ NUEVA: Ruta de gestión de usuarios
+// NUEVA: Ruta de gestión de usuarios
 app.use("/api/users", usersRoutes);
 
-// ⭐ NUEVA: Ruta de imágenes de edificios
+// NUEVA: Ruta de imágenes de edificios
 app.use("/api/building-images", buildingImagesRoutes);
 
 // Health check

@@ -24,14 +24,14 @@ class UsersController {
             const pool = require('../config/database');
             const result = await pool.query(query);
 
-            console.log(`📋 ${result.rows.length} administradores encontrados`);
+            console.log(`${result.rows.length} administradores encontrados`);
 
             res.json({
                 success: true,
                 data: result.rows,
             });
         } catch (error) {
-            console.error('❌ Error obteniendo usuarios:', error);
+            console.error('Error obteniendo usuarios:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error al obtener la lista de administradores',
@@ -85,7 +85,7 @@ class UsersController {
             // Crear el nuevo administrador
             const newUser = await UserModel.create(email, password, nombre || email.split('@')[0]);
 
-            console.log(`✅ Nuevo administrador creado: ${email}`);
+            console.log(`Nuevo administrador creado: ${email}`);
 
             res.status(201).json({
                 success: true,
@@ -98,7 +98,7 @@ class UsersController {
                 },
             });
         } catch (error) {
-            console.error('❌ Error creando usuario:', error);
+            console.error('Error creando usuario:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error al crear el administrador',
@@ -167,14 +167,14 @@ class UsersController {
             // Eliminar todos los refresh tokens del usuario
             await UserModel.deleteAllRefreshTokens(id);
 
-            console.log(`🗑️ Administrador eliminado: ${result.rows[0].email}`);
+            console.log(` Administrador eliminado: ${result.rows[0].email}`);
 
             res.json({
                 success: true,
                 message: 'Administrador eliminado exitosamente',
             });
         } catch (error) {
-            console.error('❌ Error eliminando usuario:', error);
+            console.error('Error eliminando usuario:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error al eliminar el administrador',
@@ -232,14 +232,14 @@ class UsersController {
             // Eliminar todos los refresh tokens para forzar re-login
             await UserModel.deleteAllRefreshTokens(id);
 
-            console.log(`🔑 Contraseña actualizada para: ${result.rows[0].email}`);
+            console.log(`Contraseña actualizada para: ${result.rows[0].email}`);
 
             res.json({
                 success: true,
                 message: 'Contraseña actualizada exitosamente',
             });
         } catch (error) {
-            console.error('❌ Error actualizando contraseña:', error);
+            console.error('Error actualizando contraseña:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error al actualizar la contraseña',
@@ -291,7 +291,7 @@ class UsersController {
                 message: 'Estado actualizado exitosamente',
             });
         } catch (error) {
-            console.error('❌ Error actualizando estado:', error);
+            console.error('Error actualizando estado:', error);
             res.status(500).json({
                 success: false,
                 message: 'Error al actualizar el estado',

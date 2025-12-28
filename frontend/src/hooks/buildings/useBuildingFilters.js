@@ -21,7 +21,7 @@ export const useBuildingFilters = (buildings, filters, routes = []) => {
     });
 
     console.log(
-      `🔍 Filtro de categoría activo: "${filters.category}" - Resultados: ${filtered.length} de ${buildings.length} edificios`
+      `Filtro de categoría activo: "${filters.category}" - Resultados: ${filtered.length} de ${buildings.length} edificios`
     );
 
     return filtered;

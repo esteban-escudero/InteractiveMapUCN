@@ -37,7 +37,7 @@ export const useRouteUtils = (mapInstance, mapManagement) => {
             console.log("Zoom a ruta completado");
           }
         } catch (error) {
-          console.error("❌ Error haciendo zoom a ruta:", error);
+          console.error("Error haciendo zoom a ruta:", error);
         }
       }
     },

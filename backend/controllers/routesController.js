@@ -191,7 +191,7 @@ const routesController = {
     try {
       const { origin, destination, routeType } = req.body;
 
-      console.log('\n🔍 === SOLICITUD DE CÁLCULO DE RUTA ===');
+      console.log('\n=== SOLICITUD DE CÁLCULO DE RUTA ===');
       console.log('Origen:', origin);
       console.log('Destino:', destination);
       console.log('Tipo de ruta:', routeType);
@@ -231,7 +231,7 @@ const routesController = {
       const routeGraphService = require('../services/routeGraphService');
       const result = await routeGraphService.findOptimalRoute(origin, destination, routeType);
 
-      console.log('✅ Ruta calculada exitosamente');
+      console.log('Ruta calculada exitosamente');
       console.log('=====================================\n');
 
       res.json({
@@ -240,7 +240,7 @@ const routesController = {
         data: result,
       });
     } catch (error) {
-      console.error('❌ Error calculando ruta:', error.message);
+      console.error('Error calculando ruta:', error.message);
 
       // Manejar errores específicos
       if (error.message.includes('No hay rutas')) {

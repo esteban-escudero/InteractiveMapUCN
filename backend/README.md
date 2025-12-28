@@ -2,7 +2,7 @@
 
 API REST desarrollada con Express.js y PostgreSQL para gestionar edificios, salas y rutas del campus UCN.
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
 ### Instalación
 
@@ -26,7 +26,7 @@ npm run dev
 npm start
 ```
 
-## 📁 Estructura
+## Estructura
 
 ```
 backend/
@@ -42,11 +42,11 @@ backend/
 └── utils/           # Utilidades
 ```
 
-## 🔌 Endpoints
+## Endpoints
 
 Ver [README.md](../README.md) para la lista completa de endpoints.
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 - **Express.js**: Framework web
 - **PostgreSQL**: Base de datos relacional
@@ -54,17 +54,17 @@ Ver [README.md](../README.md) para la lista completa de endpoints.
 - **Turf.js**: Análisis geoespacial
 - **pg**: Cliente PostgreSQL
 
-## 📝 Variables de Entorno
+## Variables de Entorno
 
 Ver `.env.example` para la lista completa de variables.
 
-## 🧪 Testing
+## Testing
 
 ```bash
 npm test
 ```
 
-## 📚 Documentación
+## Documentación
 
 Para más información sobre la arquitectura, ver [ARCHITECTURE.md](../ARCHITECTURE.md).
 

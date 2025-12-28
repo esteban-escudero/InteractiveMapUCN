@@ -43,7 +43,7 @@ export const useRouteHandlers = (
         console.log("📐 Coordenadas a validar:", coordinates);
 
         if (coordinates.length < 2) {
-          console.log("❌ MENOS DE 2 PUNTOS - Bloqueando guardado");
+          console.log("MENOS DE 2 PUNTOS - Bloqueando guardado");
           showUINotification("La ruta debe tener al menos 2 puntos", "error");
           return;
         }
@@ -55,7 +55,7 @@ export const useRouteHandlers = (
         });
 
         if (invalidPoints.length > 0) {
-          console.log("⚠️ Puntos fuera de límites:", invalidPoints.length);
+          console.log("Puntos fuera de límites:", invalidPoints.length);
 
           showConfirm(
             "Puntos fuera de límites",
@@ -78,7 +78,7 @@ export const useRouteHandlers = (
           isValidGeometry = SpatialUtils.isValidLineString(coordinates);
           console.log("Validación SpatialUtils:", isValidGeometry);
         } catch (error) {
-          console.warn("⚠️ Error en validación SpatialUtils:", error);
+          console.warn("Error en validación SpatialUtils:", error);
           isValidGeometry = false;
         }
 
@@ -101,7 +101,7 @@ export const useRouteHandlers = (
         // Si pasa todas las validaciones, guardar directamente
         await proceedWithSave(routeData, coordinates);
       } catch (error) {
-        console.error("❌ ERROR CRÍTICO al guardar ruta:", error);
+        console.error("ERROR CRÍTICO al guardar ruta:", error);
         showUINotification(`Error al guardar ruta: ${error.message}`, "error");
       }
     },

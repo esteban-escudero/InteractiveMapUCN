@@ -158,10 +158,10 @@ export const useBuildingForm = ({
           const result = await floorImageSectionRef.current.uploadPendingImages();
           console.log('[useBuildingForm] Resultado de subida:', result);
           if (result.uploaded > 0) {
-            console.log(`✅ ${result.uploaded} plano(s) subido(s) exitosamente`);
+            console.log(`${result.uploaded} plano(s) subido(s) exitosamente`);
           }
           if (result.failed > 0) {
-            console.warn(`⚠️ ${result.failed} plano(s) fallaron al subir`);
+            console.warn(`${result.failed} plano(s) fallaron al subir`);
           }
         } catch (error) {
           console.error("Error al subir planos:", error);

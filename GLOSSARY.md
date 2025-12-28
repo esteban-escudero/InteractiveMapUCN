@@ -1,4 +1,4 @@
-# 📚 Glosario Técnico - InteractiveMapUCN
+# Glosario Técnico - InteractiveMapUCN
 
 Este documento define los términos técnicos clave utilizados en el desarrollo y arquitectura del proyecto InteractiveMapUCN.
 

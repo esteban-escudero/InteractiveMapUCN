@@ -1,22 +1,22 @@
 # Script de configuración inicial del proyecto InteractiveMapUCN (PowerShell)
 
-Write-Host "🚀 Configurando InteractiveMapUCN..." -ForegroundColor Cyan
+Write-Host "Configurando InteractiveMapUCN..." -ForegroundColor Cyan
 
 # Verificar Node.js
 try {
     $nodeVersion = node --version
-    Write-Host "✓ Node.js encontrado: $nodeVersion" -ForegroundColor Green
+    Write-Host "Node.js encontrado: $nodeVersion" -ForegroundColor Green
 } catch {
-    Write-Host "❌ Node.js no está instalado. Por favor instálalo primero." -ForegroundColor Red
+    Write-Host "Node.js no está instalado. Por favor instálalo primero." -ForegroundColor Red
     exit 1
 }
 
 # Verificar npm
 try {
     $npmVersion = npm --version
-    Write-Host "✓ npm encontrado: $npmVersion" -ForegroundColor Green
+    Write-Host "npm encontrado: $npmVersion" -ForegroundColor Green
 } catch {
-    Write-Host "❌ npm no está instalado. Por favor instálalo primero." -ForegroundColor Red
+    Write-Host "npm no está instalado. Por favor instálalo primero." -ForegroundColor Red
     exit 1
 }
 
@@ -24,10 +24,10 @@ try {
 Write-Host "`nInstalando dependencias del backend..." -ForegroundColor Yellow
 Set-Location backend
 if (-not (Test-Path .env)) {
-    Write-Host "📝 Creando archivo .env desde .env.example..." -ForegroundColor Cyan
+    Write-Host "Creando archivo .env desde .env.example..." -ForegroundColor Cyan
     if (Test-Path .env.example) {
         Copy-Item .env.example .env
-        Write-Host "✓ Archivo .env creado. Por favor configúralo con tus credenciales." -ForegroundColor Green
+        Write-Host "Archivo .env creado. Por favor configúralo con tus credenciales." -ForegroundColor Green
     } else {
         Write-Host "⚠ .env.example no encontrado. Deberás crear .env manualmente." -ForegroundColor Yellow
     }
@@ -44,7 +44,7 @@ Set-Location ..
 # Verificar Docker
 try {
     docker --version | Out-Null
-    Write-Host "`n✓ Docker encontrado" -ForegroundColor Green
+    Write-Host "`nDocker encontrado" -ForegroundColor Green
     Write-Host "Para iniciar PostgreSQL con Docker, ejecuta:" -ForegroundColor Yellow
     Write-Host "  docker-compose up -d" -ForegroundColor Cyan
 } catch {

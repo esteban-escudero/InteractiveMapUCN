@@ -75,7 +75,7 @@ export const useMapData = (
           route.tipo.toLowerCase() === mapState.filters.routeType.toLowerCase()
       );
       console.log(
-        `🔍 Mostrando todas las rutas tipo "${mapState.filters.routeType}": ${filteredRoutes.length} rutas`
+        `Mostrando todas las rutas tipo "${mapState.filters.routeType}": ${filteredRoutes.length} rutas`
       );
       return filteredRoutes;
     }

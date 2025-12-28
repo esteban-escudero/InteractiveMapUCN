@@ -16,7 +16,7 @@ export const useMapClickHandler = (
       // 🆕 IGNORAR CLICKS SI ESTAMOS DIBUJANDO RUTAS
       if (isRouteDrawing) {
         console.log(
-          "🚫 useMapClickHandler: Ignorando click (modo dibujo de ruta activo)"
+          "useMapClickHandler: Ignorando click (modo dibujo de ruta activo)"
         );
         return;
       }

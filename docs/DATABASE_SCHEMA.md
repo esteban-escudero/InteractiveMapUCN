@@ -1,4 +1,4 @@
-# 🗄️ Esquema de Base de Datos - InteractiveMapUCN
+# Esquema de Base de Datos - InteractiveMapUCN
 
 Este documento describe la estructura de la base de datos PostgreSQL, incluyendo las tablas, relaciones y uso de extensiones espaciales (PostGIS). El esquema sigue una convención de nomenclatura en español para coincidir con el modelo de datos implementado.
 

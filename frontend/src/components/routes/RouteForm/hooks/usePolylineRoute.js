@@ -339,7 +339,7 @@ export const usePolylineRoute = ({
   }, [mapInstance, removeGhostMarker]);
 
   const updateRouteData = useCallback((latLngs) => {
-    console.log("📊 Actualizando datos con", latLngs.length, "puntos");
+    console.log("Actualizando datos con", latLngs.length, "puntos");
 
     currentPointsRef.current = latLngs;
 
@@ -841,11 +841,11 @@ export const usePolylineRoute = ({
         if (!isValidDistance) {
           if (showUINotification) {
             showUINotification(
-              `⚠️ Punto demasiado cercano. Mínimo: ${minPointDistance}m`,
+              `Punto demasiado cercano. Mínimo: ${minPointDistance}m`,
               "warning"
             );
           }
-          console.warn(`❌ Punto rechazado: distancia mínima no cumplida`);
+          console.warn(`Punto rechazado: distancia mínima no cumplida`);
           return;
         }
       }
@@ -1073,7 +1073,7 @@ export const usePolylineRoute = ({
 
   useEffect(() => {
     if (isVisible && route && isEditing) {
-      console.log("📝 MODO EDICIÓN:", route.nombre);
+      console.log("MODO EDICIÓN:", route.nombre);
 
       setFormData({
         nombre: route.nombre || "",
@@ -1088,7 +1088,7 @@ export const usePolylineRoute = ({
 
       if (route.geometria?.coordinates?.length >= 2) {
         console.log(
-          "🗺️ Cargando geometría:",
+          "Cargando geometría:",
           route.geometria.coordinates.length,
           "puntos"
         );

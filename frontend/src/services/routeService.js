@@ -18,7 +18,7 @@ export const routeService = {
 
   async createRoute(routeData) {
     try {
-      console.log("🚀 ENVIANDO RUTA AL BACKEND:", routeData);
+      console.log("ENVIANDO RUTA AL BACKEND:", routeData);
       console.log(
         "PUNTOS EN GEOMETRÍA:",
         routeData.geometria?.coordinates?.length || 0
@@ -37,7 +37,7 @@ export const routeService = {
         puntos_ruta: [], // ← Las rutas polyline no usan puntos_ruta
       };
 
-      console.log("📦 DATOS ENVIADOS AL BACKEND:", routeToSave);
+      console.log("DATOS ENVIADOS AL BACKEND:", routeToSave);
 
       const response = await api.post("/routes", routeToSave);
 
@@ -48,7 +48,7 @@ export const routeService = {
         throw new Error(response.message || "Error creando ruta");
       }
     } catch (error) {
-      console.error("❌ Error creando ruta:", error);
+      console.error("Error creando ruta:", error);
       throw error;
     }
   },
@@ -102,7 +102,7 @@ export const routeService = {
    */
   async calculateRoute(origin, destination, routeType) {
     try {
-      console.log('\n🔍 Calculando ruta:');
+      console.log('\nCalculando ruta:');
       console.log('  Origen:', origin);
       console.log('  Destino:', destination);
       console.log('  Tipo:', routeType);
@@ -120,7 +120,7 @@ export const routeService = {
         throw new Error(response.message || 'Error calculando ruta');
       }
     } catch (error) {
-      console.error('❌ Error calculando ruta:', error);
+      console.error('Error calculando ruta:', error);
       throw error;
     }
   },

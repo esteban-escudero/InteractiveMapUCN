@@ -61,7 +61,7 @@ const RouteList = ({
           onSelectRoute(route);
           // ⭐ Cerrar la lista después de seleccionar
           if (onClose) {
-            console.log("🚪 Cerrando lista de rutas");
+            console.log("Cerrando lista de rutas");
             onClose();
           }
         }

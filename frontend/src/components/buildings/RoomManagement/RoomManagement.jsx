@@ -18,7 +18,7 @@ const RoomManagement = ({
   existingRooms = [],
   selectedBuilding = null,
 }) => {
-  console.log("📋 RoomManagement recibió:", {
+  console.log("RoomManagement recibió:", {
     existingRooms,
     selectedBuilding,
     existingRoomsLength: existingRooms.length,

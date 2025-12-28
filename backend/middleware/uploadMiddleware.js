@@ -6,7 +6,7 @@ const fs = require("fs");
 const uploadDir = path.join(__dirname, "..", "uploads", "buildings");
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
-    console.log("📁 Directorio de uploads creado:", uploadDir);
+    console.log("Directorio de uploads creado:", uploadDir);
 }
 
 // Configuración de almacenamiento

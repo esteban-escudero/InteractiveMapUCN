@@ -78,7 +78,7 @@ const buildingModel = {
       console.error("SQL Error Code:", error.code);
       console.error("SQL Error Detail:", error.detail);
 
-      console.log("⚠️ Fallando gracefully al modo sin salas...");
+      console.log("Fallando gracefully al modo sin salas...");
       return await this.getAllWithoutRooms();
     }
   },

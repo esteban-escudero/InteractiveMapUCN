@@ -9,7 +9,7 @@
  */
 export const findShortestPath = (graph, start, end) => {
     if (!graph[start] || !graph[end]) {
-        console.log(`❌ No hay datos para ${start} o ${end}`);
+        console.log(`No hay datos para ${start} o ${end}`);
         return null;
     }
 

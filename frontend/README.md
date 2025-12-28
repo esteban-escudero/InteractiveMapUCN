@@ -2,7 +2,7 @@
 
 Aplicación React con Leaflet para visualización y gestión del mapa interactivo del campus UCN.
 
-## 🚀 Inicio Rápido
+## Inicio Rápido
 
 ### Instalación
 
@@ -25,7 +25,7 @@ npm start
 npm run build
 ```
 
-## 📁 Estructura
+##Estructura
 
 ```
 frontend/src/
@@ -43,7 +43,7 @@ frontend/src/
 └── utils/           # Utilidades
 ```
 
-## 🗺️ Componentes Principales
+## Componentes Principales
 
 - **Map**: Componente principal del mapa
 - **BuildingForm**: Formulario de creación/edición de edificios
@@ -51,25 +51,25 @@ frontend/src/
 - **RouteForm**: Formulario de creación de rutas
 - **RouteNetwork**: Visualización de red de rutas
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 - **React**: Biblioteca UI
 - **Leaflet**: Mapas interactivos
 - **Turf.js**: Utilidades geoespaciales
 
-## 📝 Variables de Entorno
+## Variables de Entorno
 
 - `REACT_APP_API_URL`: URL del backend API
 - `REACT_APP_GEO_SERVER_URL`: URL de GeoServer
 - `REACT_APP_GEO_SERVER_WORKSPACE`: Workspace de GeoServer
 
-## 🧪 Testing
+## Testing
 
 ```bash
 npm test
 ```
 
-## 📚 Documentación
+## Documentación
 
 Para más información sobre la arquitectura, ver [ARCHITECTURE.md](../ARCHITECTURE.md).
 

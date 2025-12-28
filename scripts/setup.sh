@@ -2,7 +2,7 @@
 
 # Script de configuración inicial del proyecto InteractiveMapUCN
 
-echo "🚀 Configurando InteractiveMapUCN..."
+echo "Configurando InteractiveMapUCN..."
 
 # Colores para output
 GREEN='\033[0;32m'
@@ -11,7 +11,7 @@ NC='\033[0m' # No Color
 
 # Verificar Node.js
 if ! command -v node &> /dev/null; then
-    echo "❌ Node.js no está instalado. Por favor instálalo primero."
+    echo "Node.js no está instalado. Por favor instálalo primero."
     exit 1
 fi
 
@@ -19,7 +19,7 @@ echo -e "${GREEN}✓${NC} Node.js encontrado: $(node --version)"
 
 # Verificar npm
 if ! command -v npm &> /dev/null; then
-    echo "❌ npm no está instalado. Por favor instálalo primero."
+    echo "npm no está instalado. Por favor instálalo primero."
     exit 1
 fi
 
@@ -29,7 +29,7 @@ echo -e "${GREEN}✓${NC} npm encontrado: $(npm --version)"
 echo -e "\n${YELLOW}Instalando dependencias del backend...${NC}"
 cd backend
 if [ ! -f .env ]; then
-    echo "📝 Creando archivo .env desde .env.example..."
+    echo "Creando archivo .env desde .env.example..."
     if [ -f .env.example ]; then
         cp .env.example .env
         echo -e "${GREEN}✓${NC} Archivo .env creado. Por favor configúralo con tus credenciales."

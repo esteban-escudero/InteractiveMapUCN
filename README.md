@@ -1,8 +1,8 @@
-# 🗺️ Mapa Interactivo UCN - Campus Coquimbo
+# Mapa Interactivo UCN - Campus Coquimbo
 
 Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Campus Coquimbo, que permite la navegación y búsqueda de ubicaciones dentro del campus universitario mediante Progressive Web App (PWA).
 
-## 📋 Descripción del Proyecto
+## Descripción del Proyecto
 
 **InteractiveMapUCN** es una **Progressive Web App (PWA)** de tipo **Sistema de Información Geográfica (SIG/GIS) Web** diseñada para facilitar la orientación y navegación dentro del campus Coquimbo de la UCN. Los usuarios pueden acceder directamente desde su navegador web sin necesidad de instalación de aplicaciones nativas.
 
@@ -23,35 +23,35 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
 - Gestión administrativa de edificios, salas y rutas
 - Acceso público sin autenticación para usuarios
 
-## ✨ Características Principales
+## Características Principales
 
 ### Para Usuarios
-- 🗺️ **Mapa Interactivo**: Visualización del campus usando Leaflet con capas personalizadas
-- 📱 **PWA**: Funciona como app nativa, instalable, con soporte offline
-- 🔍 **Búsqueda Inteligente**: Encuentra edificios y salas por nombre con autocompletado
-- 📍 **Geolocalización GPS**: Muestra tu ubicación actual en el mapa con marcador animado
-- 🧭 **Navegación desde Mi Ubicación**: Calcula rutas desde tu posición actual al destino
-- 🛣️ **Cálculo de Rutas Inteligente**: 2 perfiles de rutas con algoritmo de Dijkstra
+- **Mapa Interactivo**: Visualización del campus usando Leaflet con capas personalizadas
+- **PWA**: Funciona como app nativa, instalable, con soporte offline
+- **Búsqueda Inteligente**: Encuentra edificios y salas por nombre con autocompletado
+- **Geolocalización GPS**: Muestra tu ubicación actual en el mapa con marcador animado
+-  **Navegación desde Mi Ubicación**: Calcula rutas desde tu posición actual al destino
+- **Cálculo de Rutas Inteligente**: 2 perfiles de rutas con algoritmo de Dijkstra
   - **Peatonal**: Ruta estándar para caminar
   - **Accesible**: Adaptada para personas con movilidad reducida (evita obstáculos/escaleras)
-- 🎨 **Colores por Categoría**: Edificios coloreados según su tipo (académico, administrativo, servicios, etc.)
-- 🌙 **Modo Oscuro**: Interfaz adaptable para mayor comodidad
-- 📱 **Diseño Responsive**: Optimizado para móviles y tablets
+- **Colores por Categoría**: Edificios coloreados según su tipo (académico, administrativo, servicios, etc.)
+- **Modo Oscuro**: Interfaz adaptable para mayor comodidad
+- **Diseño Responsive**: Optimizado para móviles y tablets
 
 ### Para Administradores
-- 🔐 **Sistema de Autenticación**: Login seguro con JWT
-- 🏢 **Gestión de Edificios**: CRUD completo con soporte para polígonos y puntos
-- 📊 **Estadísticas**: Visualización rápida del conteo de salas y planos registrados
-- 🚪 **Gestión de Salas**: Administración de salas por edificio con diseño de grid 3 columnas
-- 🖼️ **Gestión de Imágenes**: Subida y administración de planos por edificio y piso
-- 📏 **Análisis de Proximidad**: Herramientas para analizar distancias entre edificios y rutas
-- 🗺️ **Análisis Espacial**: Cálculo de rutas óptimas y análisis geoespacial avanzado
-- 🛣️ **Gestión de Rutas**: Creación y edición de rutas con múltiples segmentos (polylines)
-- 👥 **Gestión de Usuarios**: Administración de cuentas de administradores
-- 📊 **Panel de Control**: Vista completa de edificios, rutas y estadísticas
-- 🎨 **Material Icons**: Interfaz moderna con iconos de Material Design
+- **Sistema de Autenticación**: Login seguro con JWT
+- **Gestión de Edificios**: CRUD completo con soporte para polígonos y puntos
+- **Estadísticas**: Visualización rápida del conteo de salas y planos registrados
+- **Gestión de Salas**: Administración de salas por edificio con diseño de grid 3 columnas
+- **Gestión de Imágenes**: Subida y administración de planos por edificio y piso
+- **Análisis de Proximidad**: Herramientas para analizar distancias entre edificios y rutas
+- **Análisis Espacial**: Cálculo de rutas óptimas y análisis 🏢geoespacial avanzado
+- **Gestión de Rutas**: Creación y edición de rutas con múltiples segmentos (polylines)
+- **Gestión de Usuarios**: Administración de cuentas de administradores
+- **Panel de Control**: Vista completa de edificios, rutas y estadísticas
+- **Material Icons**: Interfaz moderna con iconos de Material Design
 
-## 🛠️ Stack Tecnológico: Justificación y Alternativas
+## Stack Tecnológico: Justificación y Alternativas
 
 La elección de cada componente del stack se basó en el equilibrio entre rendimiento, escalabilidad y soporte para datos geoespaciales.
 
@@ -105,7 +105,7 @@ Estructurado para una alta interactividad:
 *   **Custom Hooks**: Encapsulan la lógica de geolocalización y cálculos (`useMap`, `useRoute`).
 *   **PWA Core**: Service Workers para soporte offline y manifiesto para instalación.
 
-## 🗄️ Esquema de Base de Datos (PostGIS)
+## Esquema de Base de Datos (PostGIS)
 
 El motor **PostgreSQL + PostGIS** es la pieza central para el manejo de datos espaciales con SRID 4326 (WGS 84).
 
@@ -137,14 +137,14 @@ erDiagram
 *   `ST_Contains`: Determinación de puntos dentro de edificios.
 *   `ST_AsGeoJSON`: Conversión nativa para visualización en Leaflet.
 
-## 🏁 Resultados e Impacto (Conclusiones)
+##  Resultados e Impacto (Conclusiones)
 
 El proyecto ha logrado un impacto tangible en la comunidad universitaria:
 -   **Inclusión Real**: Implementación efectiva de rutas para movilidad reducida.
 -   **Modernización**: Primer SIG web especializado para el Campus Coquimbo.
 -   **Rendimiento**: Tiempos de cálculo de ruta menores a 200ms mediante optimización de grafos.
 
-## 🧭 Lógica de Navegación Inteligente
+##  Lógica de Navegación Inteligente
 
 El cálculo de rutas es el núcleo tecnológico del proyecto. Se utiliza el algoritmo de Dijkstra sobre un grafo dinámico generado a partir de datos espaciales.
 
@@ -159,7 +159,7 @@ flowchart LR
     H --> I[Fin]
 :::
 
-## 🔐 Seguridad y Flujo de Acceso
+## Seguridad y Flujo de Acceso
 
 El acceso administrativo está protegido mediante un flujo de autenticación robusto basado en JWT y validación de sesiones.
 
@@ -178,7 +178,7 @@ sequenceDiagram
     Frontend->>Admin: Redirect to Dashboard
 :::
 
-## 🧪 Calidad y Testing
+## Calidad y Testing
 
 La estabilidad del sistema se garantiza mediante una estrategia de validación en tres niveles:
 1.  **Infraestructura**: Pruebas unitarias e integración con **Jest**.
@@ -187,7 +187,7 @@ La estabilidad del sistema se garantiza mediante una estrategia de validación e
 
 Para más detalle, consulta la **[Guía de Pruebas](docs/TESTING.md)**.
 
-## 🚀 Estrategia de Despliegue
+## Estrategia de Despliegue
 
 La aplicación está diseñada para ser agnóstica al entorno, permitiendo despliegues rápidos mediante contenedores:
 *   **Contenedores**: Orquestación completa con `Docker Compose`.
@@ -196,7 +196,7 @@ La aplicación está diseñada para ser agnóstica al entorno, permitiendo despl
 
 Consulta la **[Guía de Despliegue](docs/DEPLOYMENT.md)** para pasos detallados.
 
-## 📦 Requisitos Previos
+## Requisitos Previos
 
 ### Desarrollo Local
 - **Node.js** (v18 o superior)
@@ -238,7 +238,7 @@ npm install
 npm start
 ```
 
-## 📁 Estructura del Proyecto
+##Estructura del Proyecto
 
 ```
 InteractiveMapUCN/
@@ -254,7 +254,7 @@ InteractiveMapUCN/
 └── docs/                   # Documentación técnica detallada
 ```
 
-## 🔌 API Endpoints Principales
+##  API Endpoints Principales
 
 ### Autenticación
 - `POST /api/auth/login` - Inicio de sesión admin
@@ -264,7 +264,7 @@ InteractiveMapUCN/
 - `POST /api/routes/calculate` - Pathfinding Dijkstra entre coordenadas
 - `GET /api/proximity/analysis/:id` - Análisis de cercanía PostGIS
 
-## 📝 Licencia y Autores
+## Licencia y Autores
 
 - **Licencia**: MIT
 - **Autor**: [Esteban Escudero](https://github.com/esteban-escudero)

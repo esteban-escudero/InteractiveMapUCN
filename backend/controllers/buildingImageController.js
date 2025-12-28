@@ -66,7 +66,7 @@ const buildingImageController = {
             console.log('[uploadImage] Creando registro en BD:', imageData);
             const newImage = await buildingImageModel.create(imageData);
 
-            console.log("✅ Imagen subida exitosamente:", newImage);
+            console.log("Imagen subida exitosamente:", newImage);
 
             res.status(201).json({
                 success: true,
@@ -183,7 +183,7 @@ const buildingImageController = {
 
             if (fs.existsSync(filepath)) {
                 fs.unlinkSync(filepath);
-                console.log("🗑️ Archivo eliminado:", filepath);
+                console.log("Archivo eliminado:", filepath);
             }
 
             res.status(200).json({
