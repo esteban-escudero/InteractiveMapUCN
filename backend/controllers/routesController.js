@@ -243,14 +243,9 @@ const routesController = {
       console.error('Error calculando ruta:', error.message);
 
       // Manejar errores específicos
-      if (error.message.includes('No hay rutas')) {
-        return res.status(404).json({
-          success: false,
-          message: error.message,
-        });
-      }
-
-      if (error.message.includes('No se encontró un camino')) {
+      if (error.message.includes('No hay rutas') ||
+        error.message.includes('No se encontró un camino') ||
+        error.message.includes('muy lejos')) {
         return res.status(404).json({
           success: false,
           message: error.message,

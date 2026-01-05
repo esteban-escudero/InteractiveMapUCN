@@ -56,19 +56,28 @@ function UserMapView() {
     // Notificaciones
     const { notification, showUINotification, hideNotification } = useNotification();
 
-    // Geolocalización
-    const {
-        position: userPosition,
-        error: geoError,
-        loading: geoLoading,
-        getCurrentPosition
-    } = useGeolocation();
+    // Tema (modo oscuro)
+    const { isDarkMode, toggleTheme } = useTheme();
 
     // Parámetros de URL (para QR codes)
     const { urlParams, navigateToLocation } = useURLParams();
 
-    // Tema (modo oscuro)
-    const { isDarkMode, toggleTheme } = useTheme();
+    // Activar seguimiento constante de GPS
+    const {
+        position: userPosition,
+        error: geoError,
+        loading: geoLoading,
+        getCurrentPosition,
+        watchPosition,
+        clearWatch
+    } = useGeolocation();
+
+    useEffect(() => {
+        const watchId = watchPosition();
+        return () => {
+            if (watchId) clearWatch(watchId);
+        };
+    }, [watchPosition, clearWatch]);
 
     // Inicializar mapa (hook personalizado)
     useUserMapInit(
@@ -98,6 +107,9 @@ function UserMapView() {
             geoError,
             getCurrentPosition,
             buildings,
+            urlParams,
+            setRouteOrigin,
+            setRouteDestination,
         });
 
     // Manejar parámetros de URL (QR codes)

@@ -14,6 +14,7 @@ function App() {
           <Routes>
             {/* Ruta pública - Vista de usuario móvil */}
             <Route path="/" element={<UserMapView />} />
+            <Route path="/rutas/:toParam" element={<UserMapView />} />
 
             {/* Ruta protegida - Panel de administración */}
             <Route

@@ -154,12 +154,13 @@ class RouteGraphService {
     }
 
     /**
-     * Encontrar nodo más cercano a un punto
+     * Encontrar nodo más cercano a un punto con un límite de distancia
      * @param {Array} nodes - Array de nodos
      * @param {Object} point - {lat, lng}
-     * @returns {number} ID del nodo más cercano
+     * @param {number} maxDistance - Distancia máxima permitida en metros
+     * @returns {number|null} ID del nodo más cercano o null si está muy lejos
      */
-    findClosestNode(nodes, point) {
+    findClosestNode(nodes, point, maxDistance = 30) {
         let minDistance = Infinity;
         let closestNodeId = null;
 
@@ -170,6 +171,12 @@ class RouteGraphService {
                 closestNodeId = node.id;
             }
         });
+
+        // Validar que el punto más cercano esté dentro del rango permitido
+        if (minDistance > maxDistance) {
+            console.log(`   Punto más cercano(${minDistance}m) excede el máximo permitido(${maxDistance}m)`);
+            return null;
+        }
 
         return closestNodeId;
     }
@@ -182,6 +189,9 @@ class RouteGraphService {
      * @returns {Array} Camino como array de IDs de nodos
      */
     dijkstra(graph, startNodeId, endNodeId) {
+        // Validación de nodos de entrada
+        if (startNodeId === null || endNodeId === null) return null;
+
         const distances = {};
         const previous = {};
         const unvisited = new Set();
@@ -358,9 +368,17 @@ class RouteGraphService {
             throw new Error(`No hay rutas del tipo "${routeType}" disponibles`);
         }
 
-        // 3. Encontrar nodos más cercanos
-        const startNode = this.findClosestNode(graph.nodes, origin);
-        const endNode = this.findClosestNode(graph.nodes, destination);
+        // 3. Encontrar nodos más cercanos (con límite de 30m)
+        const startNode = this.findClosestNode(graph.nodes, origin, 30);
+        const endNode = this.findClosestNode(graph.nodes, destination, 30);
+
+        if (startNode === null) {
+            throw new Error(`Tu ubicación está muy lejos de una ruta disponible. Contacte al administrador si considera que es un error.`);
+        }
+
+        if (endNode === null) {
+            throw new Error(`No hay ruta disponible para el destino seleccionado, contacte al administrador si considera que es un error.`);
+        }
 
         console.log(`   Nodo inicio: ${startNode}`);
         console.log(`   Nodo fin: ${endNode}`);
@@ -369,7 +387,7 @@ class RouteGraphService {
         const path = this.dijkstra(graph, startNode, endNode);
 
         if (!path) {
-            throw new Error('No se encontró un camino entre origen y destino');
+            throw new Error('No hay ruta disponible para el destino seleccionado, contacte al administrador si considera que es un error.');
         }
 
         console.log(`   Camino encontrado: ${path.length} nodos`);

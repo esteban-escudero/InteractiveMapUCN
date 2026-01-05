@@ -1,6 +1,6 @@
 // hooks/user/useURLParams.js
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useParams } from 'react-router-dom';
 
 /**
  * Hook para manejar parámetros de URL (para QR codes)
@@ -18,6 +18,7 @@ import { useSearchParams } from 'react-router-dom';
  */
 export const useURLParams = () => {
     const [searchParams, setSearchParams] = useSearchParams();
+    const { toParam } = useParams();
     const [urlParams, setUrlParams] = useState(null);
 
     // Extraer parámetros al montar
@@ -26,7 +27,7 @@ export const useURLParams = () => {
             building: searchParams.get('building'),
             floor: searchParams.get('floor'),
             poi: searchParams.get('poi'),
-            to: searchParams.get('to'),
+            to: searchParams.get('to') || toParam,
             from: searchParams.get('from')
         };
 
@@ -34,7 +35,7 @@ export const useURLParams = () => {
         if (Object.values(params).some(val => val !== null)) {
             setUrlParams(params);
         }
-    }, [searchParams]);
+    }, [searchParams, toParam]);
 
     /**
      * Navegar a una ubicación basada en parámetros URL
