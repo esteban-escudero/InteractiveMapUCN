@@ -99,6 +99,7 @@ export const useMapData = (
     getPrioritizedRoutes,
     routes,
     buildings,
+    isAuthenticated, // ← IMPORTANTE: Necesario para actualizar cuando cambie el estado de auth
   ]);
 
   // Diagnostico del Sistema
