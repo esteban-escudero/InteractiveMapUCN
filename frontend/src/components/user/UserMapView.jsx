@@ -147,11 +147,11 @@ function UserMapView() {
                 />
             )}
 
-            {/* Renderizar rutas en el mapa */}
-            {mapInstance && routes.length > 0 && (
+            {/* Renderizar SOLO la ruta calculada (no todas las rutas) */}
+            {mapInstance && calculatedRoute && calculatedRoute.length > 0 && (
                 <RouteLayer
                     mapInstance={mapInstance}
-                    routes={routes}
+                    routes={calculatedRoute}
                     onRouteClick={(route) => {
                         console.log("Ruta seleccionada:", route);
                     }}
