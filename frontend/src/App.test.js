@@ -3,7 +3,7 @@ import App from './App';
 
 // Mock components to avoid deep rendering and Leaflet issues
 // Using relative paths to match App.js imports exactly
-jest.mock("./components/Map/Map/Map", () => () => <div data-testid="mock-map">MockMap</div>);
+jest.mock("./components/Map", () => ({ Map: () => <div data-testid="mock-map">MockMap</div> }));
 jest.mock("./components/user/UserMapView", () => () => <div data-testid="mock-user-map">MockUserMapView</div>);
 jest.mock("./components/auth/ProtectedRoute", () => ({ children }) => <>{children}</>);
 

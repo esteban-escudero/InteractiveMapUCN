@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import Map from "./components/Map/Map/Map";
+import { Map } from "./components/Map";
 import UserMapView from "./components/user/UserMapView";
 import "./App.css";
 

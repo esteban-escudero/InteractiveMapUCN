@@ -1,7 +1,9 @@
 // src/services/api.js
 import authService from "./authService";
 
-const API_BASE_URL = "http://localhost:3001/api";
+import { API_CONFIG } from "../config/app";
+
+const API_BASE_URL = API_CONFIG.baseURL;
 
 export const api = {
   async get(endpoint, useAuth = true) {

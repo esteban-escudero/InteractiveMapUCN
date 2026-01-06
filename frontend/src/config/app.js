@@ -3,12 +3,12 @@
  */
 
 export const API_CONFIG = {
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://192.168.1.83:3001/api',
   timeout: 30000,
 };
 
 export const GEO_SERVER_CONFIG = {
-  baseUrl: process.env.REACT_APP_GEO_SERVER_URL || 'http://localhost:8080/geoserver',
+  baseUrl: process.env.REACT_APP_GEO_SERVER_URL || 'http://192.168.1.83:8080/geoserver',
   workspace: process.env.REACT_APP_GEO_SERVER_WORKSPACE || 'InteractiveMap',
   layerName: process.env.REACT_APP_GEO_SERVER_LAYER || 'edificio',
 };

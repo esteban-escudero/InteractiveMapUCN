@@ -2,6 +2,7 @@ import React, { useState, useEffect, useImperativeHandle, forwardRef } from "rea
 import FloorImageUpload from "./FloorImageUpload";
 import FloorImageList from "./FloorImageList";
 import buildingImageService from "../../../../services/buildingImageService";
+import { API_CONFIG } from "../../../../config/app";
 import "./FloorImageSection.css";
 
 const FloorImageSection = forwardRef(({ buildingId, buildingName, isEditing }, ref) => {
@@ -11,7 +12,7 @@ const FloorImageSection = forwardRef(({ buildingId, buildingName, isEditing }, r
     const [uploadForms, setUploadForms] = useState([{ id: 1 }]);
     const [pendingUploads, setPendingUploads] = useState({});
 
-    const apiBaseUrl = process.env.REACT_APP_API_URL || "http://localhost:3001";
+    const apiBaseUrl = API_CONFIG.baseURL.replace('/api', '');
 
     // Exponer método para subir imágenes pendientes
     useImperativeHandle(ref, () => ({
@@ -34,12 +35,12 @@ const FloorImageSection = forwardRef(({ buildingId, buildingName, isEditing }, r
             const results = [];
             for (const upload of uploads) {
                 try {
-                    console.log(`[FloorImageSection] ------ INICIO SUBIDA ------`);
-                    console.log(`[FloorImageSection] Archivo:`, upload.file.name);
-                    console.log(`[FloorImageSection] Piso (raw):`, upload.floor, typeof upload.floor);
+                    console.log(`[FloorImageSection]------INICIO SUBIDA------`);
+                    console.log(`[FloorImageSection] Archivo: `, upload.file.name);
+                    console.log(`[FloorImageSection] Piso(raw): `, upload.floor, typeof upload.floor);
 
                     if (parseInt(upload.floor) < 0) {
-                        console.log(`[FloorImageSection] Piso negativo detectado (permitido):`, upload.floor);
+                        console.log(`[FloorImageSection] Piso negativo detectado(permitido): `, upload.floor);
                     }
 
                     const response = await buildingImageService.uploadImage(
