@@ -45,7 +45,7 @@ function Map() {
   const [isRouteDrawingActive, setIsRouteDrawingActive] = useState(false);
 
   // Auth Context
-  const { logout } = useAuth();
+  const { logout, admin } = useAuth();
 
   // Notificaciones y confirmaciones
   const { notification, showUINotification, hideNotification } =
