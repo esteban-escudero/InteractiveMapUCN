@@ -34,7 +34,19 @@ if (config.server.env === "development") {
     })
   );
 } else {
-  app.use(cors({ origin: config.cors.origin }));
+  const whitelist = config.cors.origin ? config.cors.origin.split(',') : [];
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin || whitelist.includes(origin) || whitelist.includes('*')) {
+        callback(null, true);
+      } else {
+        callback(null, false); // No permitimos pero no arrojamos error para no romper el flujo
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
 }
 app.use(bodyParser.json({ limit: config.limits.json }));
 app.use(bodyParser.urlencoded({ extended: true }));
