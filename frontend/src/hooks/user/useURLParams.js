@@ -49,7 +49,8 @@ export const useURLParams = () => {
         if (params.building) {
             targetBuilding = buildings.find(b =>
                 b.id === params.building ||
-                b.name.toLowerCase().includes(params.building.toLowerCase())
+                b.nombre?.toLowerCase().includes(params.building.toLowerCase()) ||
+                b.name?.toLowerCase().includes(params.building.toLowerCase())
             );
         }
 
@@ -57,7 +58,8 @@ export const useURLParams = () => {
         if (params.poi && !targetBuilding) {
             targetBuilding = buildings.find(b =>
                 b.category === params.poi ||
-                b.name.toLowerCase().includes(params.poi.toLowerCase())
+                b.nombre?.toLowerCase().includes(params.poi.toLowerCase()) ||
+                b.name?.toLowerCase().includes(params.poi.toLowerCase())
             );
         }
 
@@ -79,7 +81,8 @@ export const useURLParams = () => {
         if (params.to) {
             const destination = buildings.find(b =>
                 b.id === params.to ||
-                b.name.toLowerCase().includes(params.to.toLowerCase())
+                b.nombre?.toLowerCase().includes(params.to.toLowerCase()) ||
+                b.name?.toLowerCase().includes(params.to.toLowerCase())
             );
 
             if (destination) {
