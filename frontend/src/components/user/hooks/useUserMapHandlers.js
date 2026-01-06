@@ -95,11 +95,12 @@ export const useUserMapHandlers = ({
         if (urlParams && urlParams.to && buildings && buildings.length > 0 && mapInstance && userPosition && !hasAutoRouted.current) {
             const destination = buildings.find(b =>
                 b.id === urlParams.to ||
-                b.name.toLowerCase().includes(urlParams.to.toLowerCase())
+                b.nombre?.toLowerCase().includes(urlParams.to.toLowerCase()) ||
+                b.name?.toLowerCase().includes(urlParams.to.toLowerCase())
             );
 
             if (destination) {
-                console.log("Calculando ruta automática a:", destination.name);
+                console.log("Calculando ruta automática a:", destination.nombre || destination.name);
                 hasAutoRouted.current = true;
                 setRouteOrigin("gps");
                 setRouteDestination(destination);
@@ -111,10 +112,20 @@ export const useUserMapHandlers = ({
                             lat: userPosition.latitude,
                             lng: userPosition.longitude
                         };
-                        const destCoords = destination.ubicacion.coordinates;
+
+                        // Obtener coordenadas del destino con validación
+                        let destCoords;
+                        if (destination.ubicacion?.coordinates) {
+                            destCoords = destination.ubicacion.coordinates;
+                        } else if (destination.geometry?.coordinates) {
+                            destCoords = destination.geometry.coordinates;
+                        } else {
+                            throw new Error(`El edificio ${destination.nombre || destination.name} no tiene coordenadas válidas`);
+                        }
+
                         const destinationCoords = { lat: destCoords[1], lng: destCoords[0] };
 
-                        showUINotification(`Calculando ruta automática a ${destination.name}...`, "info");
+                        showUINotification(`Calculando ruta automática a ${destination.nombre || destination.name}...`, "info");
 
                         const { routeService } = await import('../../../services/routeService');
                         const result = await routeService.calculateRoute(
@@ -134,7 +145,7 @@ export const useUserMapHandlers = ({
                                 tipo: result.routeType,
                                 routesUsed: result.routesUsed,
                             };
-                            setCalculatedRoute(calculatedRouteData);
+                            setCalculatedRoute([calculatedRouteData]);
 
                             // Dibujar ruta
                             const latLngs = result.geometry.coordinates.map(c => [c[1], c[0]]);
@@ -147,14 +158,20 @@ export const useUserMapHandlers = ({
                             }).addTo(mapInstance);
 
                             mapInstance.setView([originCoords.lat, originCoords.lng], 18);
-                            showUINotification(`Llegando a ${destination.name}`, "success");
+                            showUINotification(`Ruta a ${destination.nombre || destination.name}: ${result.distance}m`, "success");
+                        } else {
+                            showUINotification("No se pudo calcular la ruta", "warning");
                         }
                     } catch (err) {
                         console.error("Error en ruta automática:", err);
+                        showUINotification(err.message || "Error al calcular ruta automática", "error");
                     }
                 };
 
                 triggerAutoRoute();
+            } else {
+                console.warn(`No se encontró el edificio: ${urlParams.to}`);
+                showUINotification(`No se encontró el edificio "${urlParams.to}"`, "warning");
             }
         }
     }, [urlParams, buildings, mapInstance, userPosition, routeType, setCalculatedRoute, setRouteOrigin, setRouteDestination, showUINotification]);
