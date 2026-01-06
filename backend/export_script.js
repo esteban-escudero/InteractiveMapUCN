@@ -41,7 +41,7 @@ async function exportData() {
         console.log("Exportando usuarios...");
         const users = await safeQuery("SELECT * FROM administrador");
         for (const r of users.rows) {
-            sql += `INSERT INTO administrador (id_administrador, nombre_usuario, correo, contraseña, rol) VALUES (${r.id_administrador}, '${r.nombre_usuario}', '${r.correo}', '${r.contraseña}', '${r.rol}') ON CONFLICT (id_administrador) DO NOTHING;\n`;
+            sql += `INSERT INTO administrador (id_admin, email, password_hash, nombre, activo) VALUES (${r.id_admin}, '${r.email}', '${r.password_hash}', '${r.nombre.replace(/'/g, "''")}', ${r.activo}) ON CONFLICT (id_admin) DO NOTHING;\n`;
         }
 
         fs.writeFileSync('migration_data.sql', sql);

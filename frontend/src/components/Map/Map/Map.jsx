@@ -125,7 +125,8 @@ function Map() {
     routes,
     getPrioritizedRoutes,
     buildingGraphs,
-    hasData
+    hasData,
+    !!admin // ← NUEVO: Pasamos estado de autenticación
   );
 
   // Operaciones del mapa

@@ -3,7 +3,7 @@
  */
 
 export const API_CONFIG = {
-  baseURL: process.env.REACT_APP_API_URL || 'http://192.168.1.83:3001/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://mapa-ucn-api.onrender.com/api',
   timeout: 30000,
 };
 

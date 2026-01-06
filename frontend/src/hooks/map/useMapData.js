@@ -6,7 +6,8 @@ export const useMapData = (
   routes,
   getPrioritizedRoutes,
   buildingGraphs,
-  hasData
+  hasData,
+  isAuthenticated // ← NUEVO
 ) => {
   // Validación de Filtros
   const filtersValid = useMemo(() => {
@@ -80,8 +81,16 @@ export const useMapData = (
       return filteredRoutes;
     }
 
-    // 3. Sin filtros: mostrar todas las rutas
-    return routes;
+    // 3. Sin filtros:
+    // - Si es admin: mostrar todas las rutas (comportamiento original)
+    // - Si es visitante: NO mostrar nada (mapa limpio)
+    if (isAuthenticated) {
+      console.log("👑 Admin detectado: Mostrando red completa de rutas");
+      return routes;
+    }
+
+    console.log("👤 Visitante detectado: Mapa limpio (rutas ocultas por defecto)");
+    return [];
 
   }, [
     mapState.filters.origin,
