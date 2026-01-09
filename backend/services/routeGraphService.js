@@ -436,6 +436,16 @@ class RouteGraphService {
         // 5. Combinar segmentos en LineString
         const geometry = this.combinePath(optimalRoute.path, graph);
 
+        // AGREGAR CONEXIÓN VISUAL: Origen -> Primer Nodo y Último Nodo -> Destino
+        // Esto evita que la línea empiece "flotando" lejos del usuario o termine antes del edificio
+        if (geometry && geometry.coordinates) {
+            // Agregar punto exacto de origen al inicio
+            geometry.coordinates.unshift([origin.lng, origin.lat]);
+
+            // Agregar punto exacto de destino al final
+            geometry.coordinates.push([destination.lng, destination.lat]);
+        }
+
         // Usamos la distancia TOTAL (incluyendo la caminata inicial estimada)
         const distance = Math.round(minTotalCost);
         const estimatedTime = Math.max(1, Math.round(distance / 80)); // 80m/min
