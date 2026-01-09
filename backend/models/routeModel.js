@@ -157,7 +157,10 @@ const routeModel = {
         if (insertError.code === '23505' && insertError.constraint === 'ruta_pkey') {
           console.warn("Detectado error de secuencia desincronizada. Intentando reparar...");
 
-          // Sincronizar el valor de la secuencia al máximo ID actual
+          // CRÍTICO: La transacción actual está abortada por el error. Debemos hacer ROLLBACK antes de continuar.
+          await client.query("ROLLBACK");
+
+          // Sincronizar el valor de la secuencia al máximo ID actual (fuera de transacción o en una nueva implícita)
           await client.query(`
             SELECT setval(
               pg_get_serial_sequence('ruta', 'id_ruta'), 
@@ -166,7 +169,10 @@ const routeModel = {
             )
           `);
 
-          console.log("Secuencia sincronizada. Reintentando inserción...");
+          console.log("Secuencia sincronizada. Iniciando nueva transacción y reintentando inserción...");
+
+          // Iniciar NUEVA transacción para el reintento
+          await client.query("BEGIN");
           routeResult = await client.query(routeQuery, routeValues);
         } else {
           throw insertError; // Si es otro error, lanzarlo
