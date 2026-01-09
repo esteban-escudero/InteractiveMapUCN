@@ -4,9 +4,9 @@ import React from 'react';
 function AboutContent() {
     return (
         <div>
-            <h3>Mapa Interactivo UCN</h3>
+            <h3>Mapa Interactivo UCN - Coquimbo</h3>
             <p>
-                El Mapa Interactivo de la Universidad Católica del Norte es una herramienta diseñada
+                El Mapa Interactivo de la Universidad Católica del Norte (Sede Coquimbo) es una herramienta diseñada
                 para facilitar la navegación dentro del campus universitario, permitiendo a estudiantes,
                 profesores y visitantes encontrar edificios, salas y servicios de manera rápida y eficiente.
             </p>
@@ -22,9 +22,9 @@ function AboutContent() {
 
             <h3>Información del Proyecto</h3>
             <p>
-                <strong>Versión:</strong> 1.0.0<br />
+                <strong>Versión:</strong> 1.1.0<br />
                 <strong>Universidad:</strong> Universidad Católica del Norte<br />
-                <strong>Campus:</strong> Coquimbo, Chile
+                <strong>Campus:</strong> Guayacán, Coquimbo
             </p>
 
             <h3>Contacto</h3>

@@ -72,7 +72,7 @@ function HelpContent() {
             <p>Intenta buscar con diferentes términos o verifica la ortografía. Si el problema persiste, contáctanos.</p>
 
             <p><strong>¿Funciona sin conexión a internet?</strong></p>
-            <p>Necesitas conexión a internet para cargar el mapa inicialmente, pero algunas funciones pueden funcionar offline.</p>
+            <p>No, la aplicación requiere una conexión a internet activa para cargar el mapa, buscar ubicaciones y calcular rutas. No cuenta con modo offline.</p>
         </div>
     );
 }

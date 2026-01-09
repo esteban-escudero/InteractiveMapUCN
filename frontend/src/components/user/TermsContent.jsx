@@ -62,7 +62,7 @@ function TermsContent() {
             </p>
 
             <p style={{ marginTop: '24px', fontSize: '0.9rem', color: '#888' }}>
-                Última actualización: Diciembre 2025
+                Última actualización: Enero 2026
             </p>
         </div>
     );

@@ -6,7 +6,7 @@ const schemaFile = "schema_only.sql";
 const dataFile = "migration_data.sql";
 
 async function migrate() {
-    console.log("🚀 Iniciando migración de Emergencia...");
+    console.log("Iniciando migración de Emergencia...");
     const pool = new Pool({
         connectionString: remoteUrl,
         ssl: { rejectUnauthorized: false }
@@ -14,10 +14,10 @@ async function migrate() {
 
     try {
         const client = await pool.connect();
-        console.log("✅ Conexión establecida.");
+        console.log("Conexión establecida.");
 
         // 1. Asegurar Extensiones y Schema
-        console.log("🛠️  Configurando base de datos...");
+        console.log("Configurando base de datos...");
         await client.query("CREATE EXTENSION IF NOT EXISTS postgis;");
         await client.query("SET search_path TO public;");
 
@@ -26,13 +26,13 @@ async function migrate() {
 
         try {
             await client.query(schemaSql);
-            console.log("✅ Estructura base creada.");
+            console.log("Estructura base creada.");
         } catch (e) {
             // Ignorar errores si ya existe
         }
 
         // 2. Insertar Datos con path Correcto
-        console.log("📥 Insertando datos en la nube...");
+        console.log("Insertando datos en la nube...");
         await client.query("SET search_path TO public;"); // Vital para que encuentre las tablas
 
         const dataSql = fs.readFileSync(dataFile, 'utf8');
@@ -41,7 +41,7 @@ async function migrate() {
             .map(cmd => cmd.trim())
             .filter(cmd => cmd.length > 0 && !cmd.startsWith('--'));
 
-        console.log(`📦 Enviando ${dataCommands.length} paquetes de datos...`);
+        console.log(`Enviando ${dataCommands.length} paquetes de datos...`);
 
         for (let i = 0; i < dataCommands.length; i++) {
             try {
@@ -49,21 +49,21 @@ async function migrate() {
                 if (!cmd.endsWith(';')) cmd += ';';
                 await client.query(cmd);
                 if ((i + 1) % 50 === 0 || i === dataCommands.length - 1) {
-                    process.stdout.write(`\r📊 Progreso: ${i + 1}/${dataCommands.length}`);
+                    process.stdout.write(`\rProgreso: ${i + 1}/${dataCommands.length}`);
                 }
             } catch (e) {
                 if (!e.message.includes("already exists")) {
-                    console.error(`\n❌ Error en registro ${i + 1}:`, e.message);
+                    console.error(`\nError en registro ${i + 1}:`, e.message);
                 }
             }
         }
 
         client.release();
-        console.log("\n\n🎉 ¡SINCRONIZACIÓN COMPLETADA!");
+        console.log("\n\n¡SINCRONIZACIÓN COMPLETADA!");
         console.log("Todos tus edificios y rutas ya están en Render.");
         console.log("URL: https://interactive-map-ucn-ctyx.vercel.app");
     } catch (err) {
-        console.error("\n💥 Error crítico:", err.message);
+        console.error("Error crítico:", err.message);
     } finally {
         await pool.end();
     }

@@ -12,13 +12,13 @@ const routeNodesRoutes = require("./routes/routeNodes");
 const spatialRoutes = require("./routes/spatial");
 const proximityRoutes = require("./routes/proximity");
 
-// ⭐ NUEVA: Ruta de autenticación
+// Ruta de autenticación
 const authRoutes = require("./routes/auth");
 
-// ⭐ NUEVA: Ruta de gestión de usuarios
+// Ruta de gestión de usuarios
 const usersRoutes = require("./routes/users");
 
-// ⭐ NUEVA: Ruta de imágenes de edificios
+// Ruta de imágenes de edificios
 const buildingImagesRoutes = require("./routes/buildingImages");
 
 const errorHandler = require("./middleware/errorHandler");
