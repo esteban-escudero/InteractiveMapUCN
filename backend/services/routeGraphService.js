@@ -77,7 +77,14 @@ class RouteGraphService {
         console.log(`Construyendo grafo para tipo: ${routeType}`);
 
         // FILTRAR por tipo de ruta
-        const filteredRoutes = routes.filter(r => r.tipo === routeType);
+        // Si es "peatonal", permitimos TAMBIÉN "accesible" (cualquiera puede usar rampas)
+        // Si es "accesible", SOLO usamos "accesible"
+        const filteredRoutes = routes.filter(r => {
+            if (routeType === 'peatonal') {
+                return r.tipo === 'peatonal' || r.tipo === 'accesible';
+            }
+            return r.tipo === routeType;
+        });
         console.log(`   Rutas filtradas: ${filteredRoutes.length} de ${routes.length}`);
 
         if (filteredRoutes.length === 0) {

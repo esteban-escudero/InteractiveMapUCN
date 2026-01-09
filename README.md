@@ -55,6 +55,7 @@ Sistema de mapeo interactivo para la Universidad Católica del Norte (UCN) - Cam
   - **Peatonal**: Ruta estándar para caminar
   - **Accesible**: Adaptada para personas con movilidad reducida (evita obstáculos/escaleras)
 - **Colores por Categoría**: Edificios coloreados según su tipo (académico, administrativo, servicios, etc.)
+- **Navegación por URL**: Permite compartir rutas directas mediante enlaces (ej: `/rutas/G5-35`)
 - **Modo Oscuro**: Interfaz adaptable para mayor comodidad
 - **Diseño Responsive**: Optimizado para móviles y tablets
 
