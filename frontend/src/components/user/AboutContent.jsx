@@ -30,7 +30,7 @@ function AboutContent() {
             <h3>Contacto</h3>
             <p>
                 Para consultas, sugerencias o reportar problemas, puedes contactarnos a través de:<br />
-                <strong>Email:</strong> soporte.mapa@ucn.cl<br />
+                <strong>Email:</strong> @ucn.cl<br />
                 <strong>Web:</strong> <a href="https://www.ucn.cl" target="_blank" rel="noopener noreferrer">www.ucn.cl</a>
             </p>
         </div>

@@ -57,7 +57,7 @@ function TermsContent() {
             <h3>7. Contacto Legal</h3>
             <p>
                 Para consultas legales o relacionadas con estos términos:<br />
-                <strong>Email:</strong> legal@ucn.cl<br />
+                <strong>Email:</strong> @ucn.cl<br />
                 <strong>Dirección:</strong> Larrondo 1281, Coquimbo, Chile
             </p>
 
