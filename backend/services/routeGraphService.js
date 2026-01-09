@@ -161,31 +161,36 @@ class RouteGraphService {
     }
 
     /**
-     * Encontrar nodo más cercano a un punto con un límite de distancia
+     * Encontrar TODOS los nodos cercanos dentro de un radio
      * @param {Array} nodes - Array de nodos
      * @param {Object} point - {lat, lng}
      * @param {number} maxDistance - Distancia máxima permitida en metros
-     * @returns {number|null} ID del nodo más cercano o null si está muy lejos
+     * @returns {Array} Array de objetos {nodeId, distance} ordenados por cercanía
      */
-    findClosestNode(nodes, point, maxDistance = 30) {
-        let minDistance = Infinity;
-        let closestNodeId = null;
+    findNearbyNodes(nodes, point, maxDistance = 30) {
+        const candidates = [];
 
         nodes.forEach(node => {
             const distance = this.calculateDistance(node, point);
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestNodeId = node.id;
+            if (distance <= maxDistance) {
+                candidates.push({
+                    nodeId: node.id,
+                    distance: distance
+                });
             }
         });
 
-        // Validar que el punto más cercano esté dentro del rango permitido
-        if (minDistance > maxDistance) {
-            console.log(`   Punto más cercano(${minDistance}m) excede el máximo permitido(${maxDistance}m)`);
-            return null;
-        }
+        // Ordenar por distancia (los más cercanos primero)
+        return candidates.sort((a, b) => a.distance - b.distance);
+    }
 
-        return closestNodeId;
+    /**
+     * Encontrar nodo más cercano a un punto con un límite de distancia
+     * (Mantenemos este método para compatibilidad o uso simple)
+     */
+    findClosestNode(nodes, point, maxDistance = 30) {
+        const nearby = this.findNearbyNodes(nodes, point, maxDistance);
+        return nearby.length > 0 ? nearby[0].nodeId : null;
     }
 
     /**
@@ -375,39 +380,66 @@ class RouteGraphService {
             throw new Error(`No hay rutas del tipo "${routeType}" disponibles`);
         }
 
-        // 3. Encontrar nodos más cercanos (con límite de 30m)
-        const startNode = this.findClosestNode(graph.nodes, origin, 30);
-        const endNode = this.findClosestNode(graph.nodes, destination, 30);
+        // 3. Encontrar nodos cercanos para el ORIGEN (Considerar múltiples opciones)
+        // Buscamos hasta 40m para tener más opciones si el usuario está entre rutas
+        const startCandidates = this.findNearbyNodes(graph.nodes, origin, 40);
 
-        if (startNode === null) {
-            throw new Error(`Tu ubicación está muy lejos de una ruta disponible. Contacte al administrador si considera que es un error.`);
+        // Para el destino, usualmente basta con el punto de llegada más cercano exacto
+        const endNode = this.findClosestNode(graph.nodes, destination, 40);
+
+        if (startCandidates.length === 0) {
+            throw new Error(`Tu ubicación está muy lejos de una ruta disponible (${routeType}). Acércate a un camino.`);
         }
 
         if (endNode === null) {
-            throw new Error(`No hay ruta disponible para el destino seleccionado, contacte al administrador si considera que es un error.`);
+            throw new Error(`El destino no tiene acceso por ruta ${routeType}.`);
         }
 
-        console.log(`   Nodo inicio: ${startNode}`);
+        console.log(`   Candidatos de inicio encontrados: ${startCandidates.length}`);
         console.log(`   Nodo fin: ${endNode}`);
 
-        // 4. Dijkstra para encontrar camino MÁS CORTO
-        const path = this.dijkstra(graph, startNode, endNode);
+        // 4. Evaluar Dijkstra desde CADA candidato de inicio
+        // Buscamos la ruta que minimice: (Distancia GPS a Inicio) + (Distancia Ruta)
 
-        if (!path) {
-            throw new Error('No hay ruta disponible para el destino seleccionado, contacte al administrador si considera que es un error.');
+        let optimalRoute = null;
+        let minTotalCost = Infinity;
+
+        for (const candidate of startCandidates) {
+            // Camino desde este candidato hasta el destino
+            const path = this.dijkstra(graph, candidate.nodeId, endNode);
+
+            if (path) {
+                const routeDistance = this.calculateTotalDistance(path, graph);
+                // Costo total = Caminata al inicio + Trayecto en ruta
+                const totalCost = candidate.distance + routeDistance;
+
+                if (totalCost < minTotalCost) {
+                    minTotalCost = totalCost;
+                    optimalRoute = {
+                        path: path,
+                        routeDistance: routeDistance,
+                        originWalk: candidate.distance
+                    };
+                }
+            }
         }
 
-        console.log(`   Camino encontrado: ${path.length} nodos`);
+        if (!optimalRoute) {
+            throw new Error('No hay ruta disponible entre estos puntos.');
+        }
+
+        console.log(`   Ruta óptima seleccionada:`);
+        console.log(`     - Caminata a inicio: ${Math.round(optimalRoute.originWalk)}m`);
+        console.log(`     - Distancia ruta: ${Math.round(optimalRoute.routeDistance)}m`);
+        console.log(`     - Total: ${Math.round(minTotalCost)}m`);
 
         // 5. Combinar segmentos en LineString
-        const geometry = this.combinePath(path, graph);
-        const distance = this.calculateTotalDistance(path, graph);
-        const estimatedTime = Math.max(1, Math.round(distance / 80)); // 80m/min
-        const routesUsed = this.getUniqueRouteIds(path, graph);
+        const geometry = this.combinePath(optimalRoute.path, graph);
 
-        console.log(`   Distancia total: ${distance}m`);
-        console.log(`   Tiempo estimado: ${estimatedTime} min`);
-        console.log(`   Rutas usadas: ${routesUsed.join(', ')}`);
+        // Usamos la distancia TOTAL (incluyendo la caminata inicial estimada)
+        const distance = Math.round(minTotalCost);
+        const estimatedTime = Math.max(1, Math.round(distance / 80)); // 80m/min
+        const routesUsed = this.getUniqueRouteIds(optimalRoute.path, graph);
 
         return {
             geometry,
