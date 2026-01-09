@@ -149,7 +149,30 @@ const routeModel = {
         geometriaWKT,
       ];
 
-      const routeResult = await client.query(routeQuery, routeValues);
+      let routeResult;
+      try {
+        routeResult = await client.query(routeQuery, routeValues);
+      } catch (insertError) {
+        // AUTORREPARACIÓN: Si falla por clave duplicada, sincronizar secuencia y reintentar
+        if (insertError.code === '23505' && insertError.constraint === 'ruta_pkey') {
+          console.warn("Detectado error de secuencia desincronizada. Intentando reparar...");
+
+          // Sincronizar el valor de la secuencia al máximo ID actual
+          await client.query(`
+            SELECT setval(
+              pg_get_serial_sequence('ruta', 'id_ruta'), 
+              COALESCE((SELECT MAX(id_ruta) FROM ruta), 0) + 1, 
+              false
+            )
+          `);
+
+          console.log("Secuencia sincronizada. Reintentando inserción...");
+          routeResult = await client.query(routeQuery, routeValues);
+        } else {
+          throw insertError; // Si es otro error, lanzarlo
+        }
+      }
+
       const newRoute = routeResult.rows[0];
 
       // GENERAR NOMBRE AUTOMÁTICO: Ruta [Tipo] [ID]
