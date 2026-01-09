@@ -232,8 +232,8 @@ export const useUserMapHandlers = ({
                 const calculatedRouteData = {
                     origin: routeOrigin,
                     destination: routeDestination,
-                    distance: `${result.distance}m`,
-                    duration: `${result.estimatedTime} min`,
+                    distance: `${result.distance}metros`,
+                    duration: `${result.estimatedTime} minutos`,
                     path: result.geometry.coordinates,
                     geometria: result.geometry,
                     tipo: result.routeType,
