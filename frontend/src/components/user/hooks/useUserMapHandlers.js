@@ -154,7 +154,6 @@ export const useUserMapHandlers = ({
                                 weight: 6,
                                 opacity: 0.9,
                                 className: "calculated-route",
-                                dashArray: "10, 5",
                             }).addTo(mapInstance);
 
                             mapInstance.setView([originCoords.lat, originCoords.lng], 18);
@@ -271,7 +270,6 @@ export const useUserMapHandlers = ({
                         weight: 6,
                         opacity: 0.9,
                         className: "calculated-route",
-                        dashArray: "10, 5",
                     }).addTo(mapInstance);
 
                     // Ajustar vista al origen
