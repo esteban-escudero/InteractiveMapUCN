@@ -277,7 +277,7 @@ export const useUserMapHandlers = ({
                 }
 
                 showUINotification(
-                    `Ruta ${result.routeType} encontrada: ${result.distance}m, ${result.estimatedTime} min`,
+                    `Ruta ${result.routeType} encontrada: ${result.distance}metros, ${result.estimatedTime} minutos`,
                     "success"
                 );
 
