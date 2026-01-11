@@ -27,6 +27,6 @@ export const estadosEdificio = [
 ];
 
 export const tiposRuta = [
-    { value: "accesible", label: "Accesible", icon: "accessible" },
+    { value: "accesible", label: "Accesibleeeeee", icon: "accessible" },
     { value: "peatonal", label: "Peatonal", icon: "directions_walk" },
 ];
