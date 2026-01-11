@@ -22,7 +22,7 @@ function AboutContent() {
 
             <h3>Información del Proyecto</h3>
             <p>
-                <strong>Versión:</strong> 1.1.2<br />
+                <strong>Versión:</strong> 1.1.3<br />
                 <strong>Universidad:</strong> Universidad Católica del Norte<br />
                 <strong>Campus:</strong> Guayacán, Coquimbo
             </p>
