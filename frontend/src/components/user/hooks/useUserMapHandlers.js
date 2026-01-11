@@ -232,7 +232,7 @@ export const useUserMapHandlers = ({
                 const calculatedRouteData = {
                     origin: routeOrigin,
                     destination: routeDestination,
-                    distance: `${result.distance}metros`,
+                    distance: `${result.distance} metros`,
                     duration: `${result.estimatedTime} minutos`,
                     path: result.geometry.coordinates,
                     geometria: result.geometry,
@@ -277,7 +277,7 @@ export const useUserMapHandlers = ({
                 }
 
                 showUINotification(
-                    `Ruta ${result.routeType} encontrada: ${result.distance}metros, ${result.estimatedTime} minutos`,
+                    `Ruta ${result.routeType} encontrada: ${result.distance} metros, ${result.estimatedTime} minutos`,
                     "success"
                 );
 
