@@ -136,13 +136,15 @@ export const useUserMapHandlers = ({
 
                         if (result && result.geometry) {
                             const calculatedRouteData = {
-                                origin: "gps",
-                                destination: destination,
+                                id: 'auto-route',
+                                nombre: `Ruta a ${destination.nombre || destination.name}`,
                                 distance: `${result.distance} metros`,
                                 duration: `${result.estimatedTime} minutos`,
+                                distancia: result.distance,
+                                tiempo_estimado: result.estimatedTime,
                                 path: result.geometry.coordinates,
                                 geometria: result.geometry,
-                                tipo: result.routeType,
+                                tipo: result.routeType || routeType,
                                 routesUsed: result.routesUsed,
                             };
                             setCalculatedRoute([calculatedRouteData]);
@@ -230,17 +232,19 @@ export const useUserMapHandlers = ({
 
             if (result && result.geometry) {
                 const calculatedRouteData = {
-                    origin: routeOrigin,
-                    destination: routeDestination,
+                    id: 'manual-route',
+                    nombre: `Ruta de ${routeOrigin === 'gps' ? 'Mi ubicación' : (routeOrigin.nombre || 'Origen')} a ${routeDestination.nombre || 'Destino'}`,
                     distance: `${result.distance} metros`,
                     duration: `${result.estimatedTime} minutos`,
+                    distancia: result.distance,
+                    tiempo_estimado: result.estimatedTime,
                     path: result.geometry.coordinates,
                     geometria: result.geometry,
-                    tipo: result.routeType,
+                    tipo: result.routeType || routeType,
                     routesUsed: result.routesUsed,
                 };
 
-                setCalculatedRoute(calculatedRouteData);
+                setCalculatedRoute([calculatedRouteData]);
 
                 // Dibujar la ruta en el mapa
                 if (mapInstance && calculatedRouteData.path.length > 0) {

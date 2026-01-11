@@ -27,19 +27,6 @@ export const MAP_CONFIG = {
 };
 */
 
-export const MAP_CONFIG = {
-  bounds: [
-    [-30.826873, -71.265639],
-    [-30.830853, -71.259459],
-
-  ],
-  zoom: {
-    min: 19,
-    max: 19,
-    default: 19,
-  },
-};
-
 export const APP_CONFIG = {
   name: 'InteractiveMapUCN',
   version: '1.0.0',
