@@ -157,7 +157,7 @@ export const useUserMapHandlers = ({
                             }).addTo(mapInstance);
 
                             mapInstance.setView([originCoords.lat, originCoords.lng], 18);
-                            showUINotification(`Ruta a ${destination.nombre || destination.name}: ${result.distance}metros`, "success");
+                            showUINotification(`Ruta a ${destination.nombre || destination.name}: ${result.distance} metros`, "success");
                         } else {
                             showUINotification("No se pudo calcular la ruta", "warning");
                         }
