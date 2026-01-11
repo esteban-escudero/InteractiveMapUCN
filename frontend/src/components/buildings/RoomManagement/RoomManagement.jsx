@@ -48,7 +48,7 @@ const RoomManagement = ({
     onClose,
     existingRooms,
     selectedBuilding,
-    showNotification: showUINotification, // <- Pasar la función al hook
+    showNotification: showUINotification,
   });
 
   return (

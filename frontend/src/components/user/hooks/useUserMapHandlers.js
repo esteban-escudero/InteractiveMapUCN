@@ -138,8 +138,8 @@ export const useUserMapHandlers = ({
                             const calculatedRouteData = {
                                 origin: "gps",
                                 destination: destination,
-                                distance: `${result.distance}m`,
-                                duration: `${result.estimatedTime} min`,
+                                distance: `${result.distance} metros`,
+                                duration: `${result.estimatedTime} minutos`,
                                 path: result.geometry.coordinates,
                                 geometria: result.geometry,
                                 tipo: result.routeType,
@@ -157,7 +157,7 @@ export const useUserMapHandlers = ({
                             }).addTo(mapInstance);
 
                             mapInstance.setView([originCoords.lat, originCoords.lng], 18);
-                            showUINotification(`Ruta a ${destination.nombre || destination.name}: ${result.distance}m`, "success");
+                            showUINotification(`Ruta a ${destination.nombre || destination.name}: ${result.distance}metros`, "success");
                         } else {
                             showUINotification("No se pudo calcular la ruta", "warning");
                         }
@@ -220,7 +220,7 @@ export const useUserMapHandlers = ({
             const destCoords = routeDestination.ubicacion.coordinates;
             const destinationCoords = { lat: destCoords[1], lng: destCoords[0] };
 
-            // 🔥 USAR NUEVO SERVICIO DE BACKEND CON DIJKSTRA
+            // USAR NUEVO SERVICIO DE BACKEND CON DIJKSTRA
             const { routeService } = await import('../../../services/routeService');
             const result = await routeService.calculateRoute(
                 originCoords,

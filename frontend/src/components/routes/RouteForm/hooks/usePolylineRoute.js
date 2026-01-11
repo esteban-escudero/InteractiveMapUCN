@@ -864,7 +864,7 @@ export const usePolylineRoute = ({
 
         if (showUINotification) {
           showUINotification(
-            `🧲 Snap aplicado: ${Math.round(snapPoint.snapDistance)}m`,
+            `Snap aplicado: ${Math.round(snapPoint.snapDistance)}m`,
             "info"
           );
         }
