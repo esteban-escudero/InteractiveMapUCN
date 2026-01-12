@@ -15,8 +15,8 @@ export const GEO_SERVER_CONFIG = {
 
 export const MAP_CONFIG = {
   bounds: [
-    [-30.826873, -71.265639],
-    [-30.830853, -71.259459],
+    [-29.967316, -71.355622],
+    [-29.963208, -71.346738],
   ],
   zoom: {
     min: 19,
