@@ -22,9 +22,13 @@ function AboutContent() {
 
             <h3>Información del Proyecto</h3>
             <p>
-                <strong>Versión:</strong> 1.1.3<br />
+                <strong>Versión:</strong> 1.2.0<br />
                 <strong>Universidad:</strong> Universidad Católica del Norte<br />
-                <strong>Campus:</strong> Guayacán, Coquimbo
+                <strong>Campus:</strong> Guayacán, Coquimbo<br />
+                <strong>Carrera:</strong> Ingeniería Civil en Computación e Informática<br />
+                <strong>Tipo de proyecto:</strong> Capstone Project<br />
+                <strong>Sede:</strong> Coquimbo<br />
+                <strong>Desarrollado por:</strong> Esteban Escudero
             </p>
 
             <h3>Contacto</h3>

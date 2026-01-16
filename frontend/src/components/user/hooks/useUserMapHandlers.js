@@ -79,11 +79,13 @@ export const useUserMapHandlers = ({
             // Actualizar marcador visual
             renderGPSMarker(userPosition, mapInstance);
 
-            // Centrar el mapa automáticamente en la nueva posición
+            // Centrar el mapa automáticamente en la nueva posición - ELIMINADO POR SOLICITUD DE USUARIO
+            /*
             mapInstance.setView(
                 [userPosition.latitude, userPosition.longitude],
                 mapInstance.getZoom() // Mantiene el zoom actual del usuario
             );
+            */
         }
     }, [userPosition, mapInstance, renderGPSMarker]);
 
