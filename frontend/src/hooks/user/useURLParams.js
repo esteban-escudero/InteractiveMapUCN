@@ -44,26 +44,45 @@ export const useURLParams = () => {
         if (!params || !buildings || !mapInstance) return;
 
         let targetBuilding = null;
+        const searchTerm = (params.to || params.building || params.poi || "").toLowerCase().trim();
 
-        // Buscar por building ID
-        if (params.building) {
-            targetBuilding = buildings.find(b =>
-                b.id === params.building ||
-                b.nombre?.toLowerCase().includes(params.building.toLowerCase()) ||
-                b.name?.toLowerCase().includes(params.building.toLowerCase())
-            );
+        if (!searchTerm) return;
+
+        // Función de normalización para búsqueda flexible
+        const normalize = (str) => str.toLowerCase().replace(/[\s-]/g, '');
+        const normalizedSearch = normalize(searchTerm);
+
+        // 1. Intentar encontrar por edificio (ID o nombre)
+        targetBuilding = buildings.find(b => {
+            const id = b.id ? normalize(String(b.id)) : "";
+            const nombre = b.nombre ? normalize(b.nombre) : "";
+            const name = b.name ? normalize(b.name) : "";
+
+            return id === normalizedSearch ||
+                nombre.includes(normalizedSearch) ||
+                (name && name.includes(normalizedSearch));
+        });
+
+        // 2. Si no es un edificio, buscar en las salas de todos los edificios
+        if (!targetBuilding) {
+            for (const b of buildings) {
+                if (b.salas && Array.isArray(b.salas)) {
+                    const foundSala = b.salas.find(s => {
+                        const nombreSala = s.nombre_sala ? normalize(s.nombre_sala) : "";
+                        // Búsqueda exacta o contenida para salas
+                        return nombreSala === normalizedSearch || nombreSala.includes(normalizedSearch);
+                    });
+
+                    if (foundSala) {
+                        targetBuilding = b;
+                        console.log(`Sala "${foundSala.nombre_sala}" encontrada en edificio "${b.nombre}"`);
+                        break;
+                    }
+                }
+            }
         }
 
-        // Buscar por POI
-        if (params.poi && !targetBuilding) {
-            targetBuilding = buildings.find(b =>
-                b.category === params.poi ||
-                b.nombre?.toLowerCase().includes(params.poi.toLowerCase()) ||
-                b.name?.toLowerCase().includes(params.poi.toLowerCase())
-            );
-        }
-
-        // Si encontramos el edificio, navegar a él
+        // Si encontramos el edificio (directamente o por una de sus salas), navegar a él
         if (targetBuilding) {
             const coords = targetBuilding.coordinates ||
                 (targetBuilding.geometry?.coordinates ?
@@ -71,23 +90,9 @@ export const useURLParams = () => {
                     null);
 
             if (coords) {
-                mapInstance.setView(coords, 18);
+                mapInstance.setView(coords, 19); // Un poco más de zoom para salas
                 setSelectedLocation(targetBuilding);
                 setShowInfoPanel(true);
-            }
-        }
-
-        // Si hay parámetro 'to', preparar para calcular ruta
-        if (params.to) {
-            const destination = buildings.find(b =>
-                b.id === params.to ||
-                b.nombre?.toLowerCase().includes(params.to.toLowerCase()) ||
-                b.name?.toLowerCase().includes(params.to.toLowerCase())
-            );
-
-            if (destination) {
-                // Aquí se podría activar automáticamente el panel de rutas
-                console.log('Destino para ruta:', destination);
             }
         }
     }, []);
