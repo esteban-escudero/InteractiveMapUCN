@@ -1,0 +1,47 @@
+# Mapa Interactivo UCN - Override Desarrollo
+# Uso: podman compose -f compose.yaml -f compose.dev.yaml up -d
+#
+# Caracteristicas:
+# - Fallbacks para desarrollo rapido sin .env
+# - Hot reload con volumenes montados
+# - Todos los puertos expuestos para debugging
+# - Target: development en frontend
+
+services:
+  database:
+    environment:
+      POSTGRES_DB: ${DB_NAME:-InteractiveMapDB}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-InteractiveMapDB}"]
+    ports:
+      - "${DB_PORT:-5433}:5432"
+
+  backend:
+    environment:
+      NODE_ENV: development
+      DB_NAME: ${DB_NAME:-InteractiveMapDB}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-admin}
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_key}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_key}
+    volumes:
+      - ./backend:/app:Z
+      - /app/node_modules
+    command: ["node", "--watch", "server.js"]
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+
+  frontend:
+    build:
+      target: development
+    environment:
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - ./frontend:/app:Z
+      - /app/node_modules
+    command: ["npm", "start"]
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"

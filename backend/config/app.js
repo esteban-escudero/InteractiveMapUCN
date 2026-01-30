@@ -5,9 +5,9 @@
 require('dotenv').config();
 
 module.exports = {
-  // Configuración del servidor
+  // Configuracion del servidor
   server: {
-    port: process.env.PORT || 3001,
+    port: process.env.PORT || 5000,
     env: process.env.NODE_ENV || 'development',
   },
 

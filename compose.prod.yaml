@@ -1,0 +1,35 @@
+# Mapa Interactivo UCN - Override Produccion
+# Uso: podman compose -f compose.yaml -f compose.prod.yaml up -d
+#
+# Caracteristicas:
+# - Requiere .env configurado (sin fallbacks)
+# - Solo frontend expuesto al host
+# - Limites de recursos CPU/memoria
+# - Restart agresivo (always)
+# - Target: production en frontend
+
+services:
+  database:
+    restart: always
+
+  backend:
+    environment:
+      NODE_ENV: production
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+
+  frontend:
+    build:
+      target: production
+    ports:
+      - "${FRONTEND_PORT}:80"
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M

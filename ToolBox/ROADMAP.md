@@ -6,9 +6,9 @@
 
 ## Resumen de Estado
 
-| Fase | Descripción | Estado | Impacto |
+| Fase | Descripcion | Estado | Impacto |
 | ---- | ----------- | ------ | ------- |
-| — | — | — | — |
+| 1.0 | Containerizacion y separacion database | EN PROGRESO | MAJOR |
 
 ---
 
@@ -16,15 +16,9 @@
 
 ```mermaid
 flowchart TD
-    %% EJEMPLO: Descomentar y modificar según fases definidas
-    %% F1["1.0 Fase Inicial"]
-    %% F2["2.0 Fase Siguiente"]
-    %% F1 --> F2
+    F1["1.0 Containerizacion Database"]
 
-    START["Inicio del Proyecto"]
-
-    %% Estilos: Verde=Completado, Rojo=Urgente, Amarillo=Pendiente
-    style START fill:#FFD700
+    style F1 fill:#FFD700
 ```
 
 **Leyenda:** Verde = Completada | Rojo = Urgente (bloquea otras) | Amarillo = Pendiente
@@ -33,23 +27,88 @@ flowchart TD
 
 ## Próxima Acción
 
-### Pendientes (Por Prioridad de Ejecución)
+### Pendientes (Por Prioridad de Ejecucion)
 
 | # | Fase | Objetivo | Esfuerzo | Bloqueado por |
 | - | ---- | -------- | -------- | ------------- |
-| — | — | — | — | — |
+| 1 | 1.0 | Separar database y containerizar con Podman | Medio | Ninguno |
 
 ---
 
 ## Fases en Detalle
 
-> Ver `ToolBox/prompt/ACT-pln.md` para instrucciones completas de gestión de fases.
-> **Resumen:** Al completar → actualizar Estado, Commit, DoD, Fases Completadas.
-> Al agregar → numerar según prioridad, actualizar diagrama y Próxima Acción.
+> Ver `ToolBox/prompt/ACT-pln.md` para instrucciones completas de gestion de fases.
+> **Resumen:** Al completar -> actualizar Estado, Commit, DoD, Fases Completadas.
+> Al agregar -> numerar segun prioridad, actualizar diagrama y Proxima Accion.
 
 ---
 
-### Fase X.Y: [Título de la Fase]
+### Fase 1.0: Containerizacion y Separacion de Database
+
+**Objetivo:** Refactorizar topologia del proyecto separando database de backend y containerizando con Podman
+
+**Rama:** `fase-1.0-containerizacion-database`
+**Modelo:** Opus
+**Severidad:** MAJOR
+**Referencia:** daRulez.md seccion 2.2 Topologia
+**Estado:** EN PROGRESO
+**Commit:** ---
+
+**Diagnostico / Situacion:**
+
+- **Actual:** Archivos SQL mezclados en backend/, sin containerizacion
+- **Esperado:** Topologia separada con database/, Containerfiles, compose.yaml
+
+**Especificacion Tecnica:**
+
+- **Scope:**
+  - `/database/` - Nueva topologia
+  - `/backend/Containerfile` - Containerizacion backend
+  - `/frontend/Containerfile` - Containerizacion frontend
+  - `/compose.yaml` - Orquestacion base
+  - `/compose.dev.yaml` - Override desarrollo
+  - `/compose.prod.yaml` - Override produccion
+  - `/.env.example` - Variables de entorno
+
+**Criterio de Exito (DoD):**
+
+- [x] Crear topologia database/ con migrations/, seeds/, init.sql
+- [x] Mover archivos SQL de backend/ a database/
+- [x] Crear backend/Containerfile
+- [x] Crear frontend/Containerfile
+- [x] Crear compose.yaml base
+- [x] Crear compose.dev.yaml y compose.prod.yaml
+- [x] Crear .env.example
+- [x] Verificar podman compose config
+- [x] Verificar podman compose build
+
+**Entregables:**
+
+- database/init.sql
+- database/migrations/001_schema.sql
+- database/seeds/001_data.sql
+- backend/Containerfile
+- frontend/Containerfile
+- compose.yaml
+- compose.dev.yaml
+- compose.prod.yaml
+- .env.example
+
+**Tareas:**
+
+- [x] Crear estructura database/
+- [x] Mover archivos SQL existentes
+- [x] Crear Containerfiles
+- [x] Crear archivos compose
+- [x] Verificar con podman
+
+**Dependencias:** Ninguna
+
+**Referencias:** daRulez.md, STD-arch.yaml, ACT-xec.yaml
+
+---
+
+### Fase X.Y: [Titulo de la Fase]
 
 **Objetivo:** [Descripción breve del objetivo]
 

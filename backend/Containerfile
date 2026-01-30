@@ -1,0 +1,38 @@
+# Backend - Mapa Interactivo UCN
+# Node.js 20 LTS con Express
+# Multi-stage build para reducir tamaño
+
+# Etapa de build - instala dependencias con compilacion nativa
+FROM docker.io/library/node:20-alpine AS builder
+
+WORKDIR /app
+
+# Herramientas de compilacion (solo en esta etapa)
+RUN apk add --no-cache python3 make g++
+
+COPY package*.json ./
+
+RUN npm install --only=production
+
+# Etapa de produccion - imagen limpia
+FROM docker.io/library/node:20-alpine AS production
+
+WORKDIR /app
+
+# Copiar solo node_modules compilados y codigo
+COPY --from=builder /app/node_modules ./node_modules
+COPY . .
+
+# Crear directorio para uploads
+RUN mkdir -p uploads/buildings
+
+# Usuario no-root para seguridad
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs && \
+    chown -R nodejs:nodejs /app
+
+USER nodejs
+
+EXPOSE 5000
+
+CMD ["node", "server.js"]
