@@ -50,3 +50,5 @@ postgres_data/
 # Ignorar archivos temporales
 *.tmp
 *.temp
+
+#ToolBox/

@@ -1,0 +1,215 @@
+# STD-arch.rules.yaml
+# Reglas de arquitectura para validación automática
+# Consumidor: Validacion automatica
+
+# RESTRICCIONES GLOBALES
+restrictions:
+  emoticons: prohibited_everywhere  # codigo, comentarios, commits, docs
+  ai_references: prohibited_in_files  # IA, AI, asistente, Copilot, GPT, modelo
+
+# 0. Fundamentos
+values:
+  - name: seguridad_por_diseño
+    rule: modelo de seguridad no se debilita por conveniencia
+  - name: simplicidad_explícita
+    rule: claridad sobre ingenio
+  - name: modularidad_estricta
+    rule: límites claros, dependencias explícitas
+
+model:
+  type: monolito_modular
+  microservices: prohibited
+  module_autonomy: desarrollar, probar, modificar sin afectar otros
+
+vertical_slicing:
+  deny:
+    - capas técnicas transversales compartidas (excepto Shared Kernel)
+    - importar desde capas internas de otro módulo
+    - dependencias circulares entre módulos
+  require:
+    - interfaz pública mínima por módulo
+    - dependencias unidireccionales entre módulos
+
+initialization:
+  sequence:
+    - phase: bootstrap
+      does: configuración, env vars, logging básico
+    - phase: composition
+      does: instanciar concretos, conectar dependencias
+      order: [driven_adapters, use_cases, driving_adapters]
+    - phase: start
+      does: abrir puertos, escuchar requests
+
+design_principles:
+  - name: SoC
+    rule: una razón para cambiar, efectos secundarios en infrastructure
+  - name: DRY
+    rule: extraer duplicados, centralizar config, composición > duplicación
+  - name: cohesion_alta
+    rule: elementos semánticamente relacionados, agrupar por dominio
+  - name: acoplamiento_bajo
+    rule: depender de abstracciones, inyectar dependencias
+  - name: idempotencia
+    rule: mismo resultado en múltiples ejecuciones
+
+# 1. Axiomas y Definiciones
+axioms:
+  - Dependencias apuntan hacia Domain
+  - Interfaces pertenecen a quien las necesita
+  - Composition Root es único punto de instanciación
+  - Un componente recibe dependencias, nunca las crea
+
+definitions:
+  port: Interfaz que define contrato. Declarada por el núcleo.
+  adapter: Implementación concreta de un puerto. Vive en periferia.
+  driving: Dirección entrada. Exterior invoca núcleo.
+  driven: Dirección salida. Núcleo requiere exterior.
+  composition_root: Único punto que instancia y conecta concretos.
+
+layers:
+  - level: 0
+    name: domain
+    path: /domain
+    contains: [entities, value_objects, ports]
+    knows: [self]
+    
+  - level: 1
+    name: application
+    path: /application
+    contains: [use_cases, application_services]
+    knows: [domain, ports]
+    
+  - level: 2a
+    name: presentation
+    path: /presentation
+    contains: [controllers, routes, cli]
+    knows: [application]
+    
+  - level: 2b
+    name: infrastructure
+    path: /infrastructure
+    contains: [repositories, adapters, drivers]
+    knows: [domain]
+    implements: ports
+
+allow:
+  - from: presentation
+    to: application
+    reason: orquestación
+    
+  - from: application
+    to: domain
+    reason: uso de entidades y puertos
+    
+  - from: infrastructure
+    to: domain
+    reason: implementa puertos
+    
+  - from: "*.container.ts"
+    to: "*"
+    reason: es Composition Root
+    
+  - from: any_module
+    to: shared/ports
+    reason: shared kernel
+    
+  - from: any_module
+    to: shared/infrastructure
+    reason: adaptadores genéricos
+    
+  - from: any_module
+    to: shared/types
+    reason: value objects compartidos
+
+deny:
+  - from: domain
+    to: application
+    violation: contaminación ascendente
+    
+  - from: domain
+    to: infrastructure
+    violation: núcleo conoce detalles
+    
+  - from: application
+    to: infrastructure
+    violation: acoplamiento a concretos
+    
+  - from: presentation
+    to: infrastructure
+    violation: bypass horizontal
+    
+  - from: moduleA/domain
+    to: moduleB/domain
+    violation: acoplamiento cross-module
+    
+  - from: moduleA/application
+    to: moduleB/domain
+    violation: acoplamiento cross-module
+    
+  - from: moduleA/*
+    to: moduleB/infrastructure
+    violation: acoplamiento cross-module
+
+  - pattern: duplicate_interface
+    in: [shared/ports, module/domain/ports]
+    violation: DRY - fuente única de verdad
+
+locations:
+  driven_port_internal:
+    path: module/domain/ports/
+    owner: módulo que lo necesita
+    
+  driving_port:
+    path: module/application/
+    owner: módulo que lo expone
+    
+  cross_module_interface:
+    path: shared/ports/
+    owner: decisión compartida
+    
+  composition_root:
+    path: module/module.container.ts
+    pattern: "*.container.ts"
+
+shared_kernel:
+  structure:
+    - shared/ports/          # interfaces cross-module
+    - shared/types/          # value objects compartidos
+    - shared/infrastructure/ # adaptadores genéricos
+    
+  rules:
+    - shared/ports contiene interfaces, no implementaciones
+    - shared/infrastructure contiene adaptadores genéricos, no de negocio
+    - no duplicar interfaz en shared/ Y domain/ports/
+    - preferir re-export sobre duplicación
+
+cross_module_decision:
+  - condition: 1 consumidor
+    action: interfaz en ese módulo
+    
+  - condition: 2+ consumidores, mismo contrato
+    action: shared/ports/
+    
+  - condition: 2+ consumidores, diferente necesidad
+    action: ACL (cada módulo define su interfaz)
+
+injection:
+  preferred: constructor
+  optional: setter
+  
+  antipattern:
+    wrong: "private repo = new PostgresRepository()"
+    correct: "constructor(private repo: IRepository)"
+
+exceptions:
+  - pattern: "*.container.ts"
+    allows: import concretos
+    reason: Composition Root
+    
+  - pattern: "*.test.ts"
+    allows: import concretos
+    reason: contexto de prueba
+    
+  - pattern: "shared/infrastructure/*"
+    allows: uso desde cualquier módulo
+    reason: adaptadores genéricos

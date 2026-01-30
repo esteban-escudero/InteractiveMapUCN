@@ -1,0 +1,34 @@
+# PRO-fix.yaml
+# Protocolo de Correcciones Mínimas
+
+# RESTRICCIONES DE CONTENIDO
+restrictions:
+  emoticons: prohibited_everywhere  # codigo, comentarios, commits, docs
+  ai_references: prohibited_in_files  # IA, AI, asistente, Copilot, GPT, modelo
+
+applies_to:
+  - configuración
+  - sintaxis
+  - estado inconsistente
+  - anomalías internas
+
+protocol:
+  - step: aislar
+    action: crear rama fix/{descripcion} desde rama actual
+
+  - step: resolver
+    action: implementar corrección atómica
+
+  - step: validar
+    action: verificar en aislamiento
+
+  - step: converger
+    action: merge a rama de trabajo original
+
+  - step: clausurar
+    action: eliminar rama temporal
+
+restriction:
+  only: cambios que preserven invariancia
+  if_modifies: [funcionalidad, arquitectura, contratos]
+  then: escalar a ACT-pln.yaml

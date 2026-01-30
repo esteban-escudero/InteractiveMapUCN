@@ -1,0 +1,287 @@
+# STD-arch.new.yaml
+# Reglas de arquitectura para Mapa Interactivo UCN
+# Consumidor: Validacion automatica
+# Fuente: STD-arch.md
+
+# RESTRICCIONES GLOBALES
+restrictions:
+  emoticons: prohibited_everywhere
+  ai_references: prohibited_in_files
+
+# 0. Fundamentos
+values:
+  - name: seguridad_por_diseño
+    rule: modelo de seguridad no se debilita por conveniencia
+  - name: simplicidad_explicita
+    rule: claridad sobre ingenio
+  - name: modularidad_estricta
+    rule: limites claros, dependencias explicitas
+
+model:
+  type: cliente_servidor_mvc
+  pattern: MVC en backend, SPA en frontend
+
+design_principles:
+  - name: SoC
+    rule: una razon para cambiar por archivo, I/O aislado en models/services
+  - name: DRY
+    rule: extraer a utils/ o hooks/ si se repite, centralizar config
+  - name: cohesion_alta
+    rule: agrupar por dominio (buildings/, routes/) no por tipo
+  - name: acoplamiento_bajo
+    rule: controllers dependen de interfaces de Model, no al reves
+  - name: idempotencia
+    rule: misma request = mismo resultado (excepto POST)
+
+# 1. Definiciones
+definitions:
+  route: define endpoints HTTP y aplica middleware
+  controller: recibe request, valida entrada, delega logica, formatea response
+  service: orquesta logica de negocio compleja, multiples models
+  model: encapsula acceso a datos, queries, mapeo, transacciones
+  middleware: intercepta request/response para cross-cutting concerns
+  component: unidad de UI que renderiza y responde a interacciones
+  hook: encapsula logica de estado y efectos reutilizables
+  context: provee estado global a un arbol de componentes
+
+# 2. Capas Backend
+backend_layers:
+  - level: 0
+    name: entry_point
+    path: /server.js
+    does: bootstrap, composicion, inicio de servidor
+
+  - level: 1
+    name: http
+    paths: [/routes, /middleware, /controllers]
+    does: definicion endpoints, auth, validation, request handling
+
+  - level: 2
+    name: business
+    path: /services
+    does: logica compleja, orquestacion multi-model
+
+  - level: 3
+    name: data
+    paths: [/models, /config]
+    does: queries, mapeo, transacciones, pool conexiones
+
+# 3. Capas Frontend
+frontend_layers:
+  - level: 0
+    name: entry_point
+    path: /App.js
+    does: routing, providers, layout global
+
+  - level: 1
+    name: presentation
+    path: /components
+    does: UI organizada por dominio
+
+  - level: 2
+    name: state
+    paths: [/contexts, /hooks]
+    does: estado global, logica reutilizable
+
+  - level: 3
+    name: services
+    paths: [/services, /utils]
+    does: clientes API REST, funciones puras
+
+# 4. Dependencias Permitidas Backend
+allow_backend:
+  - from: routes
+    to: controllers
+    reason: conexion endpoint-handler
+
+  - from: routes
+    to: middleware
+    reason: aplicar interceptores
+
+  - from: controllers
+    to: models
+    reason: acceso a datos simple
+
+  - from: controllers
+    to: services
+    reason: delegar logica compleja
+
+  - from: services
+    to: models
+    reason: orquestar multiples models
+
+  - from: models
+    to: config
+    reason: pool de conexiones
+
+  - from: middleware
+    to: models
+    reason: auth valida usuario en BD
+
+  - from: server.js
+    to: "*"
+    reason: es entry point
+
+# 5. Dependencias Prohibidas Backend
+deny_backend:
+  - from: models
+    to: controllers
+    violation: dependencia inversa
+
+  - from: models
+    to: services
+    violation: dependencia inversa
+
+  - from: controllers
+    to: routes
+    violation: dependencia inversa
+
+  - from: routes
+    to: models
+    violation: bypass de controller
+
+# 6. Dependencias Frontend
+allow_frontend:
+  - from: components
+    to: hooks
+    reason: encapsular logica
+
+  - from: components
+    to: contexts
+    reason: estado global
+
+  - from: hooks
+    to: services
+    reason: llamadas HTTP
+
+  - from: hooks
+    to: utils
+    reason: funciones puras
+
+deny_frontend:
+  - from: components
+    to: services
+    violation: fetch directo, usar hooks
+
+  - from: components
+    to: utils
+    condition: si maneja estado
+    violation: usar hooks
+
+# 7. Organizacion por Dominio
+domains:
+  components:
+    - Map           # renderizado de mapa
+    - buildings     # gestion de edificios
+    - routes        # rutas peatonales
+    - auth          # login, logout
+    - admin         # panel administrativo
+    - user          # perfil, preferencias
+    - ui            # componentes genericos
+
+  hooks:
+    - buildings     # useBuildings, useBuilding
+    - routes        # useRoutes, useRoute
+    - map           # useMapState, useMapControls
+    - user          # useUser, usePreferences
+    - common        # useLocalStorage, useDebounce
+
+# 8. Modulos del Sistema
+modules:
+  - name: Buildings
+    backend: [buildingsController, buildingModel]
+    frontend: [buildings/, useBuildings]
+
+  - name: Rooms
+    backend: [roomsController, roomModel]
+    frontend: dentro de buildings
+
+  - name: Routes
+    backend: [routesController, routeModel]
+    frontend: [routes/, useRoutes]
+
+  - name: RouteNodes
+    backend: [routeNodesController]
+    frontend: interno
+
+  - name: Auth
+    backend: [authController, userModel]
+    frontend: [auth/, AuthContext]
+
+  - name: Users
+    backend: [usersController]
+    frontend: [admin/, user/]
+
+  - name: Spatial
+    backend: [spatialController, proximityService]
+    frontend: [utils/turfUtils]
+
+  - name: BuildingImages
+    backend: [buildingImageController]
+    frontend: dentro de buildings
+
+  - name: Map
+    backend: null
+    frontend: [Map/]
+
+# 9. Nomenclatura
+naming:
+  - type: controller
+    pattern: "[entidad]Controller.js"
+    example: buildingsController.js
+
+  - type: model
+    pattern: "[entidad]Model.js"
+    example: buildingModel.js
+
+  - type: service
+    pattern: "[entidad]Service.js"
+    example: proximityService.js
+
+  - type: hook
+    pattern: "use[Entidad].js"
+    example: useBuildings.js
+
+  - type: context
+    pattern: "[Entidad]Context.js"
+    example: AuthContext.js
+
+  - type: component
+    pattern: PascalCase/
+    example: BuildingList/
+
+# 10. Excepciones
+exceptions:
+  - pattern: server.js
+    allows: importar todas las capas
+    reason: entry point, composicion
+
+  - pattern: middleware/*
+    allows: acceder a models
+    reason: auth valida usuario en BD
+
+  - pattern: services/*
+    allows: acceder a multiples models
+    reason: orquestacion es su proposito
+
+  - pattern: "*.test.js"
+    allows: importar concretos
+    reason: contexto de prueba
+
+  - pattern: utils/*
+    allows: uso desde cualquier capa
+    reason: funciones puras sin side effects
+
+# 11. Prohibiciones Absolutas
+forbidden:
+  - action: fetch directo en Component
+    use: services/
+
+  - action: SQL directo en Controller
+    use: models/
+
+  - action: logica de negocio en Route
+    use: controllers/
+
+  - action: estado global sin Context
+    use: contexts/

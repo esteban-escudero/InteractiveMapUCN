@@ -1,0 +1,31 @@
+# ACT-trg.yaml
+# Triage: Fase vs Fix
+# Clasifica intervención requerida
+
+# RESTRICCIONES GLOBALES
+restrictions:
+  emoticons: prohibited_everywhere  # codigo, comentarios, commits, docs
+  ai_references: prohibited_in_files  # IA, AI, asistente, Copilot, GPT, modelo
+
+options:
+  A:
+    name: FASE
+    criteria:
+      - introduce capacidades
+      - modifica arquitectura
+      - altera contratos
+      - afecta persistencia
+    action: insertar en ROADMAP con versionado
+    protocol: ACT-pln.yaml
+
+  B:
+    name: FIX
+    criteria:
+      - correctivo puro
+      - invisible externamente
+      - reversible
+    examples: [typos, config, consistencia interna]
+    action: rama fix/, merge, clausura
+    protocol: PRO-fix.yaml
+
+instruction: declarar A o B con justificación breve

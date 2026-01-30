@@ -1,0 +1,61 @@
+# STD-infra.yaml
+# Estandar de Infraestructura
+
+# RESTRICCIONES GLOBALES
+restrictions:
+  emoticons: prohibited_everywhere  # codigo, comentarios, commits, docs
+  ai_references: prohibited_in_files  # IA, AI, asistente, Copilot, GPT, modelo
+
+prerequisites:
+  responsibility: usuario debe tener contenedores corriendo
+  verify_running:
+    command: podman ps --format "{{.Names}}"
+    expect: lista de contenedores activos
+  if_not_running:
+    action: informar al usuario que debe levantar contenedores
+    do_not: intentar ejecutar comandos en contenedores inexistentes
+
+discovery:
+  understand_environment:
+    - file: compose.yaml
+      purpose: configuracion base
+    - file: compose.dev.yaml
+      purpose: overrides de desarrollo
+    - file: compose.prod.yaml
+      purpose: overrides de produccion
+  get_container_names:
+    command: podman ps --format "{{.Names}}"
+  get_service_names:
+    command: podman compose config --services
+
+containerization:
+  scope: [build, run, test]
+  orchestrator: podman compose
+
+execution:
+  pattern: podman compose exec {service} {command}
+
+host:
+  allow:
+    - git
+    - podman
+    - editor
+  deny:
+    - Node.js
+    - PHP
+    - npm
+    - Composer
+    - psql
+    - any runtime
+
+integrity:
+  network: servicios via red interna del composefile
+  persistence: volumenes gestionados, no filesystem local
+  reproducibility: "podman compose up levanta entorno identico"
+
+violation:
+  condition:
+    - asumir runtimes en host
+    - ejecutar fuera de podman compose exec
+    - ejecutar comandos sin verificar contenedores activos
+  severity: CRITICAL
