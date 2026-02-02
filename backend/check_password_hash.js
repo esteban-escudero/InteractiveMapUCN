@@ -15,7 +15,7 @@ async function checkPasswordHash() {
 
         const result = await pool.query(
             'SELECT id_admin, nombre, email, password_hash FROM administrador WHERE email = $1',
-            ['adminkkk@ucn.cl']
+            ['admin@ucn.cl']
         );
 
         if (result.rows.length === 0) {

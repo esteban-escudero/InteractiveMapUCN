@@ -70,7 +70,7 @@ const LoginForm = ({ onLoginSuccess }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="admin@ucn.cl"
+              placeholder="Ingrese su email"
               disabled={loading}
               autoComplete="email"
             />
