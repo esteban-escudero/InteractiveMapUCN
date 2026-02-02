@@ -39,6 +39,7 @@ services:
     environment:
       NODE_ENV: development
       WATCHPACK_POLLING: "true"
+      DISABLE_ESLINT_PLUGIN: "true"
     volumes:
       - ./frontend:/app:Z
       - /app/node_modules
