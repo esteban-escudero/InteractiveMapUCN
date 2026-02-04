@@ -11,7 +11,7 @@ const pool = new Pool({
 
 async function checkPasswordHash() {
     try {
-        console.log('🔍 Verificando hash de contraseña en Render...\n');
+        console.log('Verificando hash de contraseña en Render...\n');
 
         const result = await pool.query(
             'SELECT id_admin, nombre, email, password_hash FROM administrador WHERE email = $1',
@@ -19,12 +19,12 @@ async function checkPasswordHash() {
         );
 
         if (result.rows.length === 0) {
-            console.log('❌ No se encontró el administrador');
+            console.log('No se encontró el administrador');
             return;
         }
 
         const admin = result.rows[0];
-        console.log('✅ Administrador encontrado:');
+        console.log('Administrador encontrado:');
         console.log('- ID:', admin.id_admin);
         console.log('- Nombre:', admin.nombre);
         console.log('- Email:', admin.email);
@@ -36,20 +36,20 @@ async function checkPasswordHash() {
         const bcrypt = require('bcryptjs');
         const testPassword = 'admin123';
 
-        console.log('\n🔐 Probando verificación de contraseña...');
+        console.log('\n Probando verificación de contraseña...');
         const isValid = await bcrypt.compare(testPassword, admin.password_hash);
         console.log('- Contraseña "admin123" es válida:', isValid);
 
         if (!isValid) {
-            console.log('\n⚠️  La contraseña no coincide. Generando nuevo hash...');
+            console.log('\n La contraseña no coincide. Generando nuevo hash...');
             const newHash = await bcrypt.hash(testPassword, 10);
             console.log('- Nuevo hash:', newHash);
-            console.log('\n📝 Para actualizar, ejecuta:');
+            console.log('\n Para actualizar, ejecuta:');
             console.log(`UPDATE administrador SET password_hash = '${newHash}' WHERE email = 'admin@ucn.cl';`);
         }
 
     } catch (error) {
-        console.error('❌ Error:', error.message);
+        console.error('Error:', error.message);
     } finally {
         await pool.end();
     }

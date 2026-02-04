@@ -4,68 +4,54 @@ Sistema de mapeo interactivo para la Universidad Catolica del Norte (UCN) - Camp
 
 ## Inicio Rapido
 
+## Inicio Rapido
+
 ### Requisitos
 
+Elige una de las siguientes opciones según tu sistema operativo:
+
+**Opción A: Docker (Recomendado para Windows/Mac)**
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Incluye Docker Compose)
+- En Windows: Asegúrate de tener WSL 2 activado.
+
+**Opción B: Podman (Recomendado para Linux)**
 - [Podman](https://podman.io/) 4.x o superior
 - [Podman Compose](https://github.com/containers/podman-compose)
 
-#### Instalar Podman Compose
-
-```bash
-# Opcion 1: pip (recomendado)
-pip3 install podman-compose
-
-# Opcion 2: Fedora
-sudo dnf install podman-compose
-
-# Opcion 3: Debian/Ubuntu
-sudo apt install podman-compose
-```
-
-#### Alternativa: Usar Docker
-
-Si ya tienes Docker instalado, tambien funciona. Debes habilitar el socket de Podman para compatibilidad:
-
-```bash
-# Habilitar socket de Podman (permite que docker-compose use Podman)
-systemctl --user enable --now podman.socket
-
-# Verificar que funciona
-podman compose version
-```
-
-Si prefieres usar Docker directamente, reemplaza `podman compose` por `docker compose` en todos los comandos.
-
 ### Instalacion
 
+1. **Clonar repositorio**
+   ```bash
+   git clone https://github.com/esteban-escudero/InteractiveMapUCN.git
+   cd InteractiveMapUCN
+   ```
+
+2. **Configurar variables de entorno**
+   ```bash
+   cp .env.example .env
+   # El archivo .env ya viene preconfigurado para desarrollo
+   ```
+
+3. **Iniciar servicios**
+
+   **Si usas Docker:**
+   ```bash
+   # Opción recomendada para desarrollo (con hot-reload y correcciones de entorno)
+   docker compose -f compose.yaml -f compose.dev.yaml up -d
+   ```
+
+   **Si usas Podman:**
+   ```bash
+   podman compose up -d
+   ```
+
+### Verificar estado
+
 ```bash
-# 1. Clonar repositorio
-git clone https://github.com/esteban-escudero/InteractiveMapUCN.git
-cd InteractiveMapUCN
+# Docker
+docker compose ps
 
-# 2. Configurar variables de entorno
-cp .env.example .env
-# Editar .env si es necesario (valores por defecto funcionan para desarrollo)
-
-# 3. Iniciar servicios
-podman compose up -d
-```
-
-**Alternativa para produccion:**
-
-```bash
-# Incluye limites de CPU/memoria y restart agresivo
-podman compose -f compose.yaml -f compose.prod.yaml up -d
-```
-
-| Modo | Comando | Uso |
-| ------ | --------- | ----- |
-| Base | `podman compose up -d` | Probar rapidamente, sin limites de recursos |
-| Produccion | `... -f compose.prod.yaml ...` | Deployment real con limites de CPU/RAM |
-| Desarrollo | `... -f compose.dev.yaml ...` | Hot reload, volumenes locales montados |
-
-```bash
-# 4. Verificar estado
+# Podman
 podman ps
 ```
 
@@ -73,27 +59,32 @@ podman ps
 
 | Servicio | URL | Descripcion |
 | ---------- | ----- | ------------- |
-| Frontend | <http://localhost:3000> | Aplicacion web |
+| Frontend | <http://localhost:3000> | Aplicacion web (Mapa) |
 | Backend | <http://localhost:5000> | API REST |
 | Database | localhost:5433 | PostgreSQL + PostGIS |
 
 ### Comandos Utiles
 
+**Para Docker:**
 ```bash
-# Desarrollo (con hot reload)
-podman compose -f compose.yaml -f compose.dev.yaml up -d
+# Ver logs en tiempo real
+docker compose logs -f
 
-# Produccion
-podman compose -f compose.yaml -f compose.prod.yaml up -d
+# Detener servicios
+docker compose down
 
+# Reiniciar todo desde cero (útil si hay errores)
+docker compose down -v
+docker compose -f compose.yaml -f compose.dev.yaml up -d --force-recreate
+```
+
+**Para Podman:**
+```bash
 # Ver logs
 podman compose logs -f
 
 # Detener servicios
 podman compose down
-
-# Detener y eliminar volumenes (reinicia base de datos)
-podman compose down -v
 ```
 
 ---
